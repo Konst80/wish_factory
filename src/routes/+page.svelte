@@ -1,19 +1,111 @@
 <script lang="ts">
-	// Temporarily simplified for testing
+	import { onMount } from 'svelte';
+	import { Card, Badge } from '$lib/components';
+
+	// Theme-System mit localStorage-Persistierung
+	let currentTheme = $state('light');
+	const themes = [
+		'light',
+		'dark',
+		'corporate',
+		'business',
+		'winter',
+		'dracula',
+		'cyberpunk',
+		'valentine',
+		'aqua'
+	];
+
+	// Theme aus localStorage laden und sofort anwenden
+	onMount(() => {
+		const savedTheme = localStorage.getItem('wish-factory-theme');
+		if (savedTheme && themes.includes(savedTheme)) {
+			currentTheme = savedTheme;
+		}
+		// Theme sofort anwenden
+		applyTheme(currentTheme);
+	});
+
+	function applyTheme(theme: string) {
+		document.documentElement.setAttribute('data-theme', theme);
+		// Force a style recalculation
+		document.documentElement.style.setProperty('color-scheme', theme === 'dark' ? 'dark' : 'light');
+	}
+
+	const setTheme = (theme: string) => {
+		currentTheme = theme;
+		// Theme sofort im DOM setzen
+		applyTheme(theme);
+		// In localStorage speichern
+		localStorage.setItem('wish-factory-theme', theme);
+		console.log(
+			'Theme changed to:',
+			theme,
+			'Current data-theme:',
+			document.documentElement.getAttribute('data-theme')
+		);
+	};
 </script>
 
 <svelte:head>
 	<title>Welcome - Wish Factory</title>
 </svelte:head>
 
+<!-- Theme Toggle -->
+<div class="fixed right-4 top-4 z-50">
+	<div class="dropdown dropdown-end">
+		<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-6 w-6"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5H9m12 0v6m0 0H9m12 0v6m0 0H9"
+				/>
+			</svg>
+		</div>
+		<ul class="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow">
+			{#each themes as theme (theme)}
+				<li>
+					<button onclick={() => setTheme(theme)} class={theme === currentTheme ? 'active' : ''}>
+						<span class="capitalize">{theme.replace('-', ' ')}</span>
+						{#if theme === currentTheme}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						{/if}
+					</button>
+				</li>
+			{/each}
+		</ul>
+	</div>
+</div>
+
 <!-- Hero Section -->
-<div class="hero from-primary/10 via-secondary/5 to-accent/10 min-h-screen bg-gradient-to-br">
+<div class="from-primary/10 via-secondary/5 to-accent/10 hero min-h-screen bg-gradient-to-br">
 	<div class="hero-content text-center">
 		<div class="max-w-4xl">
 			<!-- Main Title with Animation -->
 			<div class="mb-8">
 				<h1
-					class="from-primary to-secondary mb-6 bg-gradient-to-r bg-clip-text text-7xl font-bold text-transparent"
+					class="mb-6 animate-pulse bg-gradient-to-r from-primary to-secondary bg-clip-text text-7xl font-bold text-transparent"
 				>
 					Wish Factory
 				</h1>
@@ -21,11 +113,19 @@
 					Erstellen Sie personalisierte Wünsche mit KI-Unterstützung für jeden Anlass.
 					Professionelles Content Management mit intelligenten Workflows.
 				</p>
+				<div class="mt-4 flex justify-center gap-2">
+					<Badge text="KI-gestützt" variant="primary" />
+					<Badge text="Mehrsprachig" variant="secondary" />
+					<Badge text="Team-ready" variant="accent" />
+				</div>
 			</div>
 
 			<!-- CTA Buttons -->
 			<div class="mb-16 flex flex-col items-center justify-center gap-4 sm:flex-row">
-				<a href="/dashboard" class="btn btn-primary btn-lg gap-2 shadow-lg">
+				<a
+					href="/dashboard"
+					class="btn btn-primary btn-lg gap-2 shadow-lg transition-transform hover:scale-105"
+				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-6 w-6"
@@ -42,7 +142,10 @@
 					</svg>
 					Dashboard öffnen
 				</a>
-				<a href="/auth/login" class="btn btn-outline btn-lg gap-2">
+				<a
+					href="/auth/login"
+					class="btn btn-outline btn-lg gap-2 transition-transform hover:scale-105"
+				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-6 w-6"
@@ -63,15 +166,13 @@
 
 			<!-- Features Grid -->
 			<div class="mb-16 grid gap-6 md:grid-cols-3">
-				<div
-					class="card bg-base-100/80 border-base-300/20 border shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl"
-				>
+				<Card variant="ghost" shadow="xl" bordered={true}>
 					<div class="card-body items-center text-center">
 						<div class="avatar">
 							<div class="bg-primary/10 flex h-16 w-16 items-center justify-center rounded-full">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									class="text-primary h-8 w-8"
+									class="h-8 w-8 text-primary"
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
@@ -90,17 +191,15 @@
 							Intelligente Textgenerierung für personalisierte Glückwünsche zu jedem Anlass
 						</p>
 					</div>
-				</div>
+				</Card>
 
-				<div
-					class="card bg-base-100/80 border-base-300/20 border shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl"
-				>
+				<Card variant="ghost" shadow="xl" bordered={true}>
 					<div class="card-body items-center text-center">
 						<div class="avatar">
 							<div class="bg-secondary/10 flex h-16 w-16 items-center justify-center rounded-full">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									class="text-secondary h-8 w-8"
+									class="h-8 w-8 text-secondary"
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
@@ -119,17 +218,15 @@
 							Professionelle Freigabeprozesse mit rollenbasierten Berechtigungen
 						</p>
 					</div>
-				</div>
+				</Card>
 
-				<div
-					class="card bg-base-100/80 border-base-300/20 border shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl"
-				>
+				<Card variant="ghost" shadow="xl" bordered={true}>
 					<div class="card-body items-center text-center">
 						<div class="avatar">
 							<div class="bg-accent/10 flex h-16 w-16 items-center justify-center rounded-full">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									class="text-accent h-8 w-8"
+									class="h-8 w-8 text-accent"
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
@@ -148,12 +245,12 @@
 							Unterstützung für Deutsch und Englisch mit lokalisierten Inhalten
 						</p>
 					</div>
-				</div>
+				</Card>
 			</div>
 
 			<!-- Stats Section -->
 			<div
-				class="stats stats-vertical lg:stats-horizontal bg-base-100/80 border-base-300/20 border shadow-xl backdrop-blur-sm"
+				class="bg-base-100/80 border-base-300/20 stats stats-vertical border shadow-xl backdrop-blur-sm lg:stats-horizontal"
 			>
 				<div class="stat">
 					<div class="stat-figure text-primary">
@@ -225,60 +322,156 @@
 	</div>
 </div>
 
-<!-- Footer -->
-<footer class="footer footer-center bg-base-200 text-base-content p-10">
-	<div>
-		<div class="grid grid-flow-col gap-4">
-			<a class="link link-hover">Über uns</a>
-			<a class="link link-hover">Kontakt</a>
-			<a class="link link-hover">Jobs</a>
-			<a class="link link-hover">Presse</a>
+<!-- Features Section -->
+<section class="bg-base-200 py-20">
+	<div class="container mx-auto px-4">
+		<div class="mb-16 text-center">
+			<h2 class="mb-4 text-4xl font-bold">Warum Wish Factory?</h2>
+			<p class="text-base-content/70 mx-auto max-w-2xl text-xl">
+				Entdecken Sie die Vorteile unserer innovativen Plattform für die Erstellung personalisierter
+				Wünsche
+			</p>
 		</div>
-		<div>
-			<div class="grid grid-flow-col gap-4">
-				<a href="#" class="hover:text-primary text-2xl transition-colors">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						class="fill-current"
-					>
-						<path
-							d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"
-						></path>
-					</svg>
-				</a>
-				<a href="#" class="hover:text-primary text-2xl transition-colors">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						class="fill-current"
-					>
-						<path
-							d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"
-						></path>
-					</svg>
-				</a>
-				<a href="#" class="hover:text-primary text-2xl transition-colors">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						class="fill-current"
-					>
-						<path
-							d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"
-						></path>
-					</svg>
-				</a>
-			</div>
-		</div>
-		<div>
-			<p>Copyright © 2024 - Wish Factory. Alle Rechte vorbehalten.</p>
+
+		<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+			<Card title="Zeitersparnis" subtitle="Bis zu 80% weniger Aufwand">
+				<div class="flex items-center gap-4">
+					<div class="radial-progress text-primary" style="--value:80;" role="progressbar">80%</div>
+					<div>
+						<p class="text-base-content/70 text-sm">
+							Unsere KI erstellt in Sekunden personalisierte Wünsche, die früher Stunden gedauert
+							hätten.
+						</p>
+					</div>
+				</div>
+			</Card>
+
+			<Card title="Qualitätssicherung" subtitle="Professionelle Standards">
+				<div class="space-y-3">
+					<div class="flex items-center gap-2">
+						<div class="badge badge-success badge-sm">✓</div>
+						<span class="text-sm">Rechtschreibprüfung</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<div class="badge badge-success badge-sm">✓</div>
+						<span class="text-sm">Stil-Konsistenz</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<div class="badge badge-success badge-sm">✓</div>
+						<span class="text-sm">Freigabe-Workflow</span>
+					</div>
+				</div>
+			</Card>
+
+			<Card title="Team-Kollaboration" subtitle="Nahtlose Zusammenarbeit">
+				<div class="avatar-group -space-x-6 rtl:space-x-reverse">
+					<div class="avatar">
+						<div class="w-12">
+							<div
+								class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-content"
+							>
+								A
+							</div>
+						</div>
+					</div>
+					<div class="avatar">
+						<div class="w-12">
+							<div
+								class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-content"
+							>
+								B
+							</div>
+						</div>
+					</div>
+					<div class="avatar">
+						<div class="w-12">
+							<div
+								class="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-content"
+							>
+								C
+							</div>
+						</div>
+					</div>
+					<div class="placeholder avatar">
+						<div class="w-12 bg-neutral text-neutral-content">
+							<span class="text-xs">+99</span>
+						</div>
+					</div>
+				</div>
+				<p class="text-base-content/70 mt-4 text-sm">
+					Arbeiten Sie gemeinsam an Projekten mit rollenbasierten Berechtigungen.
+				</p>
+			</Card>
 		</div>
 	</div>
+</section>
+
+<!-- Footer -->
+<footer class="footer footer-center bg-base-300 p-10 text-base-content">
+	<nav>
+		<div class="grid grid-flow-col gap-4">
+			<a href="/about" class="link link-hover">Über uns</a>
+			<a href="/contact" class="link link-hover">Kontakt</a>
+			<a href="/jobs" class="link link-hover">Jobs</a>
+			<a href="/press" class="link link-hover">Presse</a>
+		</div>
+	</nav>
+	<nav>
+		<div class="grid grid-flow-col gap-4">
+			<a
+				href="https://twitter.com/wishfactory"
+				class="text-2xl transition-colors hover:text-primary"
+				aria-label="Twitter"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					class="fill-current"
+				>
+					<path
+						d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"
+					></path>
+				</svg>
+			</a>
+			<a
+				href="https://youtube.com/@wishfactory"
+				class="text-2xl transition-colors hover:text-primary"
+				aria-label="YouTube"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					class="fill-current"
+				>
+					<path
+						d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"
+					></path>
+				</svg>
+			</a>
+			<a
+				href="https://facebook.com/wishfactory"
+				class="text-2xl transition-colors hover:text-primary"
+				aria-label="Facebook"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					class="fill-current"
+				>
+					<path
+						d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"
+					></path>
+				</svg>
+			</a>
+		</div>
+	</nav>
+	<aside>
+		<p>Copyright © 2024 - Wish Factory. Alle Rechte vorbehalten.</p>
+	</aside>
 </footer>

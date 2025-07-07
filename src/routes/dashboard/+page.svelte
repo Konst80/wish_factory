@@ -1,183 +1,668 @@
 <script lang="ts">
-	import PageHeader from '$lib/components/ui/PageHeader.svelte';
-	import StatCard from '$lib/components/ui/StatCard.svelte';
-	import QuickActionCard from '$lib/components/ui/QuickActionCard.svelte';
+	import { onMount } from 'svelte';
 
-	// Mock data for testing
-	const mockUser = { full_name: 'Test User' };
+	// Theme-System mit localStorage-Persistierung
+	let currentTheme = $state('light');
+	const themes = [
+		'light',
+		'dark',
+		'corporate',
+		'business',
+		'winter',
+		'dracula',
+		'cyberpunk',
+		'valentine',
+		'aqua'
+	];
+
+	// Theme aus localStorage laden und sofort anwenden
+	onMount(() => {
+		const savedTheme = localStorage.getItem('wish-factory-theme');
+		if (savedTheme && themes.includes(savedTheme)) {
+			currentTheme = savedTheme;
+		}
+		// Theme sofort anwenden
+		applyTheme(currentTheme);
+	});
+
+	function applyTheme(theme: string) {
+		document.documentElement.setAttribute('data-theme', theme);
+		// Force a style recalculation
+		document.documentElement.style.setProperty('color-scheme', theme === 'dark' ? 'dark' : 'light');
+	}
+
+	const setTheme = (theme: string) => {
+		currentTheme = theme;
+		// Theme sofort im DOM setzen
+		applyTheme(theme);
+		// In localStorage speichern
+		localStorage.setItem('wish-factory-theme', theme);
+		console.log(
+			'Theme changed to:',
+			theme,
+			'Current data-theme:',
+			document.documentElement.getAttribute('data-theme')
+		);
+	};
+
+	// Mock data
+	const mockUser = { full_name: 'Max Mustermann' };
 	const isAdmin = true;
-	const isRedakteur = false;
+
+	// Notification state
+	let showWelcomeAlert = $state(true);
 </script>
 
 <svelte:head>
 	<title>Dashboard - Wish Factory</title>
 </svelte:head>
 
-<PageHeader title="Dashboard" subtitle="Willkommen zurück, {mockUser?.full_name || 'User'}!" />
-
-<!-- Role Badge -->
-<div class="mb-6">
-	{#if isAdmin}
-		<div class="badge badge-error badge-lg">Administrator</div>
-	{:else if isRedakteur}
-		<div class="badge badge-primary badge-lg">Redakteur</div>
-	{/if}
+<!-- Theme Toggle (Fixed Position) -->
+<div class="fixed right-4 top-4 z-50">
+	<div class="dropdown dropdown-end">
+		<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-6 w-6"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+				/>
+			</svg>
+		</div>
+		<ul class="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow">
+			{#each themes as theme (theme)}
+				<li>
+					<button onclick={() => setTheme(theme)} class={theme === currentTheme ? 'active' : ''}>
+						<span class="capitalize">{theme.replace('-', ' ')}</span>
+						{#if theme === currentTheme}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						{/if}
+					</button>
+				</li>
+			{/each}
+		</ul>
+	</div>
 </div>
 
-<!-- Quick Stats -->
-<div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-	<StatCard title="Meine Wünsche" value="-" description="Gesamt erstellt" color="primary">
-		{#snippet icon()}
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				class="inline-block h-8 w-8 stroke-current"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
-				></path>
-			</svg>
-		{/snippet}
-	</StatCard>
+<!-- Page Header with Breadcrumbs -->
+<div class="mb-8">
+	<div class="breadcrumbs text-sm">
+		<ul>
+			<li><a href="/" class="link link-hover">Home</a></li>
+			<li>Dashboard</li>
+		</ul>
+	</div>
 
-	<StatCard title="Zur Freigabe" value="-" description="Warten auf Genehmigung" color="secondary">
-		{#snippet icon()}
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				class="inline-block h-8 w-8 stroke-current"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-				></path>
-			</svg>
-		{/snippet}
-	</StatCard>
-
-	<StatCard title="Freigegeben" value="-" description="Veröffentlicht" color="success">
-		{#snippet icon()}
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				class="inline-block h-8 w-8 stroke-current"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-				></path>
-			</svg>
-		{/snippet}
-	</StatCard>
+	<div class="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+		<div>
+			<h1 class="text-4xl font-bold">Dashboard</h1>
+			<p class="text-base-content/70 mt-2 text-lg">
+				Willkommen zurück, {mockUser?.full_name}!
+			</p>
+		</div>
+		<div class="flex items-center gap-3">
+			<div class="badge badge-lg {isAdmin ? 'badge-error' : 'badge-primary'} gap-2">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-4 w-4"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
+				</svg>
+				{isAdmin ? 'Administrator' : 'Redakteur'}
+			</div>
+		</div>
+	</div>
 </div>
 
-<!-- Quick Actions -->
-<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-	<QuickActionCard
-		title="Neuen Wunsch erstellen"
-		description="Erstelle einen neuen Wunsch mit oder ohne KI-Unterstützung"
-		href="/dashboard/wishes/new"
-		buttonText="Erstellen"
-		buttonVariant="primary"
-	>
-		{#snippet icon()}
+<!-- Welcome Alert -->
+{#if showWelcomeAlert}
+	<div class="alert alert-success mb-8">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+			/>
+		</svg>
+		<div>
+			<h3 class="font-bold">Willkommen!</h3>
+			<div class="text-xs">
+				Ihr Dashboard wurde erfolgreich geladen. Hier finden Sie alle wichtigen Informationen auf
+				einen Blick.
+			</div>
+		</div>
+		<button class="btn btn-ghost btn-sm" onclick={() => (showWelcomeAlert = false)}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
 				fill="none"
 				viewBox="0 0 24 24"
-				class="h-6 w-6 stroke-current"
+				stroke="currentColor"
 			>
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"
-				></path>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M6 18L18 6M6 6l12 12"
+				/>
 			</svg>
-		{/snippet}
-	</QuickActionCard>
+		</button>
+	</div>
+{/if}
 
-	<QuickActionCard
-		title="Wünsche verwalten"
-		description="Alle deine Wünsche anzeigen und bearbeiten"
-		href="/dashboard/wishes"
-		buttonText="Verwalten"
-		buttonVariant="secondary"
-	>
-		{#snippet icon()}
+<!-- Statistics -->
+<div class="stats mb-8 w-full shadow">
+	<div class="stat">
+		<div class="stat-figure text-primary">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
+				class="inline-block h-8 w-8 stroke-current"
 				fill="none"
 				viewBox="0 0 24 24"
-				class="h-6 w-6 stroke-current"
 			>
 				<path
 					stroke-linecap="round"
 					stroke-linejoin="round"
 					stroke-width="2"
 					d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-				></path>
+				/>
 			</svg>
-		{/snippet}
-	</QuickActionCard>
+		</div>
+		<div class="stat-title">Meine Wünsche</div>
+		<div class="stat-value text-primary">23</div>
+		<div class="stat-desc">Gesamt erstellt</div>
+	</div>
 
-	{#if isAdmin}
-		<QuickActionCard
-			title="Benutzer verwalten"
-			description="Benutzerkonten und Rollen verwalten"
-			href="/dashboard/users"
-			buttonText="Verwalten"
-			buttonVariant="accent"
-		>
-			{#snippet icon()}
+	<div class="stat">
+		<div class="stat-figure text-warning">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="inline-block h-8 w-8 stroke-current"
+				fill="none"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		</div>
+		<div class="stat-title">Zur Freigabe</div>
+		<div class="stat-value text-warning">5</div>
+		<div class="stat-desc">↗︎ 2 neue heute</div>
+	</div>
+
+	<div class="stat">
+		<div class="stat-figure text-success">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="inline-block h-8 w-8 stroke-current"
+				fill="none"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		</div>
+		<div class="stat-title">Freigegeben</div>
+		<div class="stat-value text-success">18</div>
+		<div class="stat-desc">↗︎ 78% diese Woche</div>
+	</div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+	<!-- Quick Actions -->
+	<div class="lg:col-span-2">
+		<div class="card bg-base-100 shadow-xl">
+			<div class="card-body">
+				<div class="mb-6 flex items-center justify-between">
+					<h2 class="card-title text-2xl">Schnellzugriff</h2>
+					<div class="badge badge-neutral">{isAdmin ? '4' : '2'} Aktionen</div>
+				</div>
+
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<!-- Neuen Wunsch erstellen -->
+					<div
+						class="bg-primary/5 border-primary/20 hover:bg-primary/10 card border transition-colors"
+					>
+						<div class="card-body">
+							<h3 class="card-title text-lg">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-6 w-6"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 4v16m8-8H4"
+									/>
+								</svg>
+								Neuen Wunsch erstellen
+							</h3>
+							<p class="text-sm opacity-70">
+								Erstelle einen neuen Wunsch mit oder ohne KI-Unterstützung
+							</p>
+							<div class="card-actions mt-4 justify-end">
+								<a href="/dashboard/wishes/new" class="btn btn-primary btn-sm">Erstellen</a>
+							</div>
+						</div>
+					</div>
+
+					<!-- Wünsche verwalten -->
+					<div
+						class="bg-secondary/5 border-secondary/20 hover:bg-secondary/10 card border transition-colors"
+					>
+						<div class="card-body">
+							<h3 class="card-title text-lg">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-6 w-6"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+									/>
+								</svg>
+								Wünsche verwalten
+							</h3>
+							<p class="text-sm opacity-70">Alle deine Wünsche anzeigen und bearbeiten</p>
+							<div class="card-actions mt-4 justify-end">
+								<a href="/dashboard/wishes" class="btn btn-secondary btn-sm">Verwalten</a>
+							</div>
+						</div>
+					</div>
+
+					{#if isAdmin}
+						<!-- Benutzer verwalten -->
+						<div
+							class="bg-accent/5 border-accent/20 hover:bg-accent/10 card border transition-colors"
+						>
+							<div class="card-body">
+								<h3 class="card-title text-lg">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-6 w-6"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+										/>
+									</svg>
+									Benutzer verwalten
+								</h3>
+								<p class="text-sm opacity-70">Benutzerkonten und Rollen verwalten</p>
+								<div class="card-actions mt-4 justify-end">
+									<a href="/dashboard/users" class="btn btn-accent btn-sm">Verwalten</a>
+								</div>
+							</div>
+						</div>
+
+						<!-- Analytics -->
+						<div class="bg-info/5 border-info/20 hover:bg-info/10 card border transition-colors">
+							<div class="card-body">
+								<h3 class="card-title text-lg">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-6 w-6"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+										/>
+									</svg>
+									Analytics Dashboard
+								</h3>
+								<p class="text-sm opacity-70">Detaillierte Berichte und Statistiken</p>
+								<div class="card-actions mt-4 justify-end">
+									<a href="/dashboard/analytics" class="btn btn-info btn-sm">Anzeigen</a>
+								</div>
+							</div>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Sidebar -->
+	<div class="space-y-6">
+		<!-- Recent Activities -->
+		<div class="card bg-base-100 shadow-xl">
+			<div class="card-body">
+				<div class="mb-4 flex items-center justify-between">
+					<h3 class="card-title">Letzte Aktivitäten</h3>
+					<div class="badge badge-ghost">3</div>
+				</div>
+
+				<div class="space-y-4">
+					<div class="flex items-start gap-3">
+						<div class="badge badge-success p-3">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						</div>
+						<div class="flex-1">
+							<p class="text-sm font-medium">Neuer Wunsch erstellt</p>
+							<p class="text-xs opacity-60">Geburtstagsglückwunsch für Maria</p>
+							<p class="mt-1 text-xs opacity-40">vor 2 Stunden</p>
+						</div>
+					</div>
+
+					<div class="flex items-start gap-3">
+						<div class="badge badge-warning p-3">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+						</div>
+						<div class="flex-1">
+							<p class="text-sm font-medium">Wunsch zur Freigabe</p>
+							<p class="text-xs opacity-60">Weihnachtsgrüße 2024</p>
+							<p class="mt-1 text-xs opacity-40">vor 5 Stunden</p>
+						</div>
+					</div>
+
+					<div class="flex items-start gap-3">
+						<div class="badge badge-success p-3">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						</div>
+						<div class="flex-1">
+							<p class="text-sm font-medium">Wunsch genehmigt</p>
+							<p class="text-xs opacity-60">Hochzeitsglückwunsch</p>
+							<p class="mt-1 text-xs opacity-40">gestern</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- System Status -->
+		<div class="card bg-base-100 shadow-xl">
+			<div class="card-body">
+				<div class="mb-4 flex items-center justify-between">
+					<h3 class="card-title">System Status</h3>
+					<div class="badge badge-success gap-2">
+						<div class="h-2 w-2 animate-pulse rounded-full bg-success"></div>
+						Online
+					</div>
+				</div>
+
+				<div class="space-y-3">
+					<div class="flex items-center justify-between">
+						<span class="text-sm">KI-Service</span>
+						<div class="badge badge-success badge-sm gap-1">
+							<div class="h-1.5 w-1.5 rounded-full bg-success"></div>
+							Online
+						</div>
+					</div>
+					<div class="flex items-center justify-between">
+						<span class="text-sm">Datenbank</span>
+						<div class="badge badge-success badge-sm gap-1">
+							<div class="h-1.5 w-1.5 rounded-full bg-success"></div>
+							Online
+						</div>
+					</div>
+					<div class="flex items-center justify-between">
+						<span class="text-sm">E-Mail Service</span>
+						<div class="badge badge-success badge-sm gap-1">
+							<div class="h-1.5 w-1.5 rounded-full bg-success"></div>
+							Online
+						</div>
+					</div>
+					<div class="flex items-center justify-between">
+						<span class="text-sm">Backup System</span>
+						<div class="badge badge-info badge-sm gap-1">
+							<div class="h-1.5 w-1.5 animate-pulse rounded-full bg-info"></div>
+							Läuft
+						</div>
+					</div>
+				</div>
+
+				<div class="card-actions mt-4">
+					<a href="/dashboard/system" class="btn btn-outline btn-sm btn-block">Details anzeigen</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Additional Information -->
+<div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+	<!-- Tips & Tricks -->
+	<div class="card bg-base-100 shadow-xl">
+		<div class="card-body">
+			<h3 class="card-title mb-6">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6"
 					fill="none"
 					viewBox="0 0 24 24"
-					class="h-6 w-6 stroke-current"
+					stroke="currentColor"
 				>
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
 						stroke-width="2"
-						d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-					></path>
+						d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+					/>
 				</svg>
-			{/snippet}
-		</QuickActionCard>
-	{/if}
-</div>
+				Tipps & Tricks
+			</h3>
 
-<!-- Recent Activity -->
-<div class="mt-12">
-	<h2 class="mb-6 text-2xl font-bold">Letzte Aktivitäten</h2>
+			<div class="space-y-4">
+				<div class="flex items-start gap-4">
+					<div class="badge badge-primary badge-lg">1</div>
+					<div>
+						<h4 class="font-semibold">KI-Unterstützung nutzen</h4>
+						<p class="text-sm opacity-70">
+							Nutzen Sie unsere KI, um personalisierte Wünsche zu erstellen, die perfekt zu jedem
+							Anlass passen.
+						</p>
+					</div>
+				</div>
+
+				<div class="flex items-start gap-4">
+					<div class="badge badge-secondary badge-lg">2</div>
+					<div>
+						<h4 class="font-semibold">Workflow optimieren</h4>
+						<p class="text-sm opacity-70">
+							Arbeiten Sie effizient mit unserem Freigabeprozess und behalten Sie den Überblick über
+							alle Wünsche.
+						</p>
+					</div>
+				</div>
+
+				<div class="flex items-start gap-4">
+					<div class="badge badge-accent badge-lg">3</div>
+					<div>
+						<h4 class="font-semibold">Team-Zusammenarbeit</h4>
+						<p class="text-sm opacity-70">
+							Arbeiten Sie nahtlos mit Ihrem Team zusammen und teilen Sie Wünsche einfach.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Performance Metrics -->
 	<div class="card bg-base-100 shadow-xl">
 		<div class="card-body">
-			<div class="text-base-content/60 text-center">
-				<div class="mb-4">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						class="mx-auto h-12 w-12 opacity-50"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h4.125m3-6.75h3.875c.621 0 1.125-.504 1.125-1.125V8.25m-6.75 0V6.108c0-1.135.845-2.098 1.976-2.192z"
-						/>
-					</svg>
+			<h3 class="card-title mb-6">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+					/>
+				</svg>
+				Performance Metriken
+			</h3>
+
+			<div class="stats stats-vertical shadow-none">
+				<div class="stat px-0">
+					<div class="stat-figure text-success">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="inline-block h-6 w-6 stroke-current"
+							fill="none"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					</div>
+					<div class="stat-title text-sm">Erstellungszeit</div>
+					<div class="stat-value text-lg text-success">2min</div>
+					<div class="stat-desc">↓ 80% schneller mit KI</div>
 				</div>
-				<p class="text-lg font-medium">Noch keine Aktivitäten vorhanden</p>
-				<p class="mt-2 text-sm">Erstelle deinen ersten Wunsch, um hier Aktivitäten zu sehen.</p>
+
+				<div class="stat px-0">
+					<div class="stat-figure text-success">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="inline-block h-6 w-6 stroke-current"
+							fill="none"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					</div>
+					<div class="stat-title text-sm">Zufriedenheit</div>
+					<div class="stat-value text-lg text-success">98%</div>
+					<div class="stat-desc">↑ 12% mehr Engagement</div>
+				</div>
+
+				<div class="stat px-0">
+					<div class="stat-figure text-primary">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="inline-block h-6 w-6 stroke-current"
+							fill="none"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					</div>
+					<div class="stat-title text-sm">Freigaberate</div>
+					<div class="stat-value text-lg text-primary">89%</div>
+					<div class="stat-desc">↑ 5% vs. letzte Woche</div>
+				</div>
 			</div>
 		</div>
 	</div>

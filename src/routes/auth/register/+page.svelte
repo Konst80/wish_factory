@@ -45,8 +45,8 @@
 	<title>Registrierung - Wish Factory</title>
 </svelte:head>
 
-<div class="bg-base-200 flex min-h-screen items-center justify-center">
-	<div class="card bg-base-100 w-96 shadow-xl">
+<div class="flex min-h-screen items-center justify-center bg-base-200">
+	<div class="card w-96 bg-base-100 shadow-xl">
 		<div class="card-body">
 			<h1 class="card-title mb-6 text-center text-2xl font-bold">Registrierung</h1>
 
@@ -68,7 +68,7 @@
 						<input
 							id="fullName"
 							type="text"
-							class="input input-bordered"
+							class="input-bordered input"
 							bind:value={fullName}
 							required
 							disabled={loading}
@@ -82,7 +82,7 @@
 						<input
 							id="email"
 							type="email"
-							class="input input-bordered"
+							class="input-bordered input"
 							bind:value={email}
 							required
 							disabled={loading}
@@ -96,7 +96,7 @@
 						<input
 							id="password"
 							type="password"
-							class="input input-bordered"
+							class="input-bordered input"
 							bind:value={password}
 							required
 							disabled={loading}
@@ -110,7 +110,7 @@
 						<input
 							id="confirmPassword"
 							type="password"
-							class="input input-bordered"
+							class="input-bordered input"
 							bind:value={confirmPassword}
 							required
 							disabled={loading}

@@ -32,12 +32,19 @@
 
 	<!-- Sidebar -->
 	<div class="drawer-side z-40">
-		<label
-			for="drawer-toggle"
+		<div
 			class="drawer-overlay"
+			role="button"
+			tabindex="0"
 			onclick={closeSidebar}
-			onkeydown={(e) => e.key === 'Enter' && closeSidebar()}
-		></label>
+			onkeydown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					closeSidebar();
+				}
+			}}
+			aria-label="Sidebar schließen"
+		></div>
 		<DashboardSidebar />
 	</div>
 </div>

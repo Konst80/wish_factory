@@ -55,12 +55,12 @@
 	};
 </script>
 
-<aside class="bg-base-200 text-base-content min-h-full w-80">
+<aside class="min-h-full w-80 bg-base-200 text-base-content">
 	<!-- Sidebar header -->
-	<div class="border-base-300 border-b p-4">
+	<div class="border-b border-base-300 p-4">
 		<div class="flex items-center gap-3">
-			<div class="avatar placeholder">
-				<div class="bg-primary text-primary-content w-12 rounded-full">
+			<div class="placeholder avatar">
+				<div class="w-12 rounded-full bg-primary text-primary-content">
 					<span class="text-xl">{currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
 				</div>
 			</div>
@@ -126,7 +126,7 @@
 
 			<li>
 				<button
-					class="text-error hover:bg-error hover:text-error-content flex items-center gap-3"
+					class="flex items-center gap-3 text-error hover:bg-error hover:text-error-content"
 					onclick={handleSignOut}
 				>
 					<svg

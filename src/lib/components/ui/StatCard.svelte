@@ -35,7 +35,7 @@
 	};
 </script>
 
-<div class="stat bg-base-100 rounded-lg shadow">
+<div class="stat rounded-lg bg-base-100 shadow">
 	{#if icon}
 		<div class="stat-figure {colorClasses[color]}">
 			{@render icon()}

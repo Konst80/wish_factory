@@ -14,8 +14,8 @@
 	<title>Abmelden - Wish Factory</title>
 </svelte:head>
 
-<div class="bg-base-200 flex min-h-screen items-center justify-center">
-	<div class="card bg-base-100 w-96 shadow-xl">
+<div class="flex min-h-screen items-center justify-center bg-base-200">
+	<div class="card w-96 bg-base-100 shadow-xl">
 		<div class="card-body text-center">
 			<h1 class="card-title mb-6 text-2xl font-bold">Abmelden</h1>
 			<div class="loading loading-spinner loading-lg"></div>
