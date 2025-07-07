@@ -918,239 +918,288 @@
 				<div class="flex-1 overflow-auto">
 					{#if currentStep === 1}
 						<!-- Step 1: Configuration -->
-						<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-							<!-- Basis-Einstellungen -->
-							<div class="space-y-4">
-								<div class="card bg-base-200">
-									<div class="card-body">
-										<div class="mb-4 flex items-center justify-between">
-											<h4 class="card-title">Basis-Einstellungen</h4>
-											<div class="flex gap-2">
-												<button
-													type="button"
-													class="btn btn-outline btn-xs"
-													onclick={copyFromMainForm}
-													title="Einstellungen aus Hauptformular übernehmen"
-												>
-													Übernehmen
-												</button>
-												<button
-													type="button"
-													class="btn btn-ghost btn-xs"
-													onclick={resetBatchSettings}
-													title="Alle Filter zurücksetzen"
-												>
-													Zurücksetzen
-												</button>
-											</div>
-										</div>
-
-										<div class="form-control">
-											<label class="label">
-												<span class="label-text font-medium">Anzahl Wünsche</span>
-											</label>
-											<input
-												type="range"
-												min="3"
-												max="50"
-												class="range range-primary"
-												bind:value={batchSettings.count}
-											/>
-											<div class="flex justify-between px-2 text-xs">
-												<span>3</span>
-												<span class="font-bold">{batchSettings.count}</span>
-												<span>50</span>
-											</div>
-										</div>
-
-										<div class="form-control">
-											<label class="label">
-												<span class="label-text font-medium">Stil-Variationen</span>
-											</label>
-											<div class="space-y-2">
-												{#each ['normal', 'herzlich', 'humorvoll', 'formell'] as style}
-													<label class="label cursor-pointer justify-start">
-														<input
-															type="checkbox"
-															class="checkbox checkbox-primary"
-															bind:group={batchSettings.variations}
-															value={style}
-														/>
-														<span class="label-text ml-3 capitalize">{style}</span>
-													</label>
-												{/each}
-											</div>
-										</div>
-
-										<div class="form-control">
-											<label class="label cursor-pointer">
-												<span class="label-text">Nachträgliche Versionen erstellen</span>
-												<input
-													type="checkbox"
-													class="toggle toggle-primary"
-													bind:checked={batchSettings.includeAlternatives}
-												/>
-											</label>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<!-- Filter-Optionen -->
-							<div class="space-y-4">
-								<div class="card bg-base-200">
-									<div class="card-body">
-										<h4 class="card-title">Filter-Optionen</h4>
-										<p class="mb-4 text-xs opacity-70">
-											Leer lassen = Hauptformular-Werte verwenden
-										</p>
-
-										<div class="form-control">
-											<label class="label">
-												<span class="label-text font-medium">Wunsch-Typen</span>
-											</label>
-											<div class="space-y-1">
-												{#each Object.values(WishType) as type}
-													<label class="label cursor-pointer justify-start">
-														<input
-															type="checkbox"
-															class="checkbox checkbox-primary checkbox-sm"
-															bind:group={batchSettings.types}
-															value={type}
-														/>
-														<span class="label-text ml-2 text-sm">{typeLabels[type]}</span>
-													</label>
-												{/each}
-											</div>
-										</div>
-
-										<div class="form-control">
-											<label class="label">
-												<span class="label-text font-medium">Anlässe</span>
-											</label>
-											<div class="space-y-1">
-												{#each Object.values(EventType) as eventType}
-													<label class="label cursor-pointer justify-start">
-														<input
-															type="checkbox"
-															class="checkbox checkbox-primary checkbox-sm"
-															bind:group={batchSettings.eventTypes}
-															value={eventType}
-														/>
-														<span class="label-text ml-2 text-sm">{eventTypeLabels[eventType]}</span
-														>
-													</label>
-												{/each}
-											</div>
-										</div>
-
-										<div class="form-control">
-											<label class="label">
-												<span class="label-text font-medium">Sprachen</span>
-											</label>
-											<div class="space-y-1">
-												{#each Object.values(Language) as language}
-													<label class="label cursor-pointer justify-start">
-														<input
-															type="checkbox"
-															class="checkbox checkbox-primary checkbox-sm"
-															bind:group={batchSettings.languages}
-															value={language}
-														/>
-														<span class="label-text ml-2 text-sm">{languageLabels[language]}</span>
-													</label>
-												{/each}
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<!-- Zielgruppen-Filter -->
-							<div class="space-y-4">
-								<div class="card bg-base-200">
-									<div class="card-body">
-										<h4 class="card-title">Zielgruppen-Filter</h4>
-
-										<div class="form-control">
-											<label class="label">
-												<span class="label-text font-medium">Beziehungen</span>
-											</label>
-											<div class="space-y-1">
-												{#each Object.values(Relation) as relation}
-													<label class="label cursor-pointer justify-start">
-														<input
-															type="checkbox"
-															class="checkbox checkbox-primary checkbox-sm"
-															bind:group={batchSettings.relations}
-															value={relation}
-														/>
-														<span class="label-text ml-2 text-sm">{relationLabels[relation]}</span>
-													</label>
-												{/each}
-											</div>
-										</div>
-
-										<div class="form-control">
-											<label class="label">
-												<span class="label-text font-medium">Altersgruppen</span>
-											</label>
-											<div class="space-y-1">
-												{#each Object.values(AgeGroup) as ageGroup}
-													<label class="label cursor-pointer justify-start">
-														<input
-															type="checkbox"
-															class="checkbox checkbox-primary checkbox-sm"
-															bind:group={batchSettings.ageGroups}
-															value={ageGroup}
-														/>
-														<span class="label-text ml-2 text-sm">{ageGroupLabels[ageGroup]}</span>
-													</label>
-												{/each}
-											</div>
-										</div>
-
-										<div class="form-control">
-											<label class="label" for="batchSpecificValues">
-												<span class="label-text font-medium">Spezifische Werte</span>
-											</label>
-											<input
-												id="batchSpecificValues"
-												type="text"
-												placeholder="18, 25, 30, 50 oder 10, 25, 50 Jahre"
-												class="input-bordered input input-sm w-full"
-												bind:value={batchSettings.specificValues}
-											/>
-											<label class="label">
-												<span class="label-text-alt text-xs"
-													>Alter oder Jubiläumsjahre, kommagetrennt</span
-												>
-											</label>
-										</div>
-									</div>
-								</div>
-
-								<div class="alert alert-info">
+						<div class="space-y-6">
+							<!-- Quick Actions -->
+							<div class="flex flex-wrap gap-2">
+								<button
+									type="button"
+									class="btn btn-outline btn-sm"
+									onclick={copyFromMainForm}
+									title="Einstellungen aus Hauptformular übernehmen"
+								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
-										class="h-6 w-6 shrink-0 stroke-current"
+										class="h-4 w-4"
 										fill="none"
 										viewBox="0 0 24 24"
+										stroke="currentColor"
 									>
 										<path
 											stroke-linecap="round"
 											stroke-linejoin="round"
 											stroke-width="2"
-											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+											d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
 										/>
 									</svg>
-									<div>
-										<div class="font-bold">Geschätzte Kombinationen</div>
-										<div class="text-xs">
-											{(batchSettings.types.length || 1) *
-												(batchSettings.eventTypes.length || 1) *
-												(batchSettings.languages.length || 1) *
-												batchSettings.variations.length} mögliche Varianten
+									Hauptformular übernehmen
+								</button>
+								<button
+									type="button"
+									class="btn btn-ghost btn-sm"
+									onclick={resetBatchSettings}
+									title="Alle Filter zurücksetzen"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+										/>
+									</svg>
+									Zurücksetzen
+								</button>
+							</div>
+
+							<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+								<!-- Left Column: Basic Settings -->
+								<div class="space-y-4">
+									<!-- Generation Settings -->
+									<div class="card bg-base-100 shadow-sm">
+										<div class="card-body">
+											<h4 class="card-title text-base">Generierungs-Einstellungen</h4>
+
+											<div class="form-control">
+												<label class="label">
+													<span class="label-text"
+														>Anzahl Wünsche: <strong>{batchSettings.count}</strong></span
+													>
+												</label>
+												<input
+													type="range"
+													min="3"
+													max="20"
+													class="range range-primary range-sm"
+													bind:value={batchSettings.count}
+												/>
+												<div class="flex justify-between px-2 text-xs opacity-60">
+													<span>3</span>
+													<span>20</span>
+												</div>
+											</div>
+
+											<div class="form-control">
+												<label class="label">
+													<span class="label-text">Stil-Variationen</span>
+												</label>
+												<div class="flex flex-wrap gap-2">
+													{#each ['normal', 'herzlich', 'humorvoll', 'formell'] as style}
+														<label class="cursor-pointer">
+															<input
+																type="checkbox"
+																class="checkbox checkbox-primary checkbox-sm mr-2"
+																bind:group={batchSettings.variations}
+																value={style}
+															/>
+															<span class="text-sm capitalize">{style}</span>
+														</label>
+													{/each}
+												</div>
+											</div>
+
+											<div class="form-control">
+												<label class="label cursor-pointer">
+													<span class="label-text">Nachträgliche Versionen</span>
+													<input
+														type="checkbox"
+														class="toggle toggle-primary"
+														bind:checked={batchSettings.includeAlternatives}
+													/>
+												</label>
+											</div>
+										</div>
+									</div>
+
+									<!-- Content Filters -->
+									<div class="card bg-base-100 shadow-sm">
+										<div class="card-body">
+											<h4 class="card-title text-base">Inhalts-Filter</h4>
+											<p class="mb-4 text-xs opacity-70">
+												Leer lassen = Werte aus Hauptformular verwenden
+											</p>
+
+											<div class="space-y-3">
+												<!-- Type Filter -->
+												<div class="form-control">
+													<label class="label pb-1">
+														<span class="label-text text-sm font-medium">Wunsch-Typen</span>
+													</label>
+													<div class="flex gap-3">
+														{#each Object.values(WishType) as type}
+															<label class="flex cursor-pointer items-center">
+																<input
+																	type="checkbox"
+																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	bind:group={batchSettings.types}
+																	value={type}
+																/>
+																<span class="text-sm">{typeLabels[type]}</span>
+															</label>
+														{/each}
+													</div>
+												</div>
+
+												<!-- Event Type Filter -->
+												<div class="form-control">
+													<label class="label pb-1">
+														<span class="label-text text-sm font-medium">Anlässe</span>
+													</label>
+													<div class="flex gap-3">
+														{#each Object.values(EventType) as eventType}
+															<label class="flex cursor-pointer items-center">
+																<input
+																	type="checkbox"
+																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	bind:group={batchSettings.eventTypes}
+																	value={eventType}
+																/>
+																<span class="text-sm">{eventTypeLabels[eventType]}</span>
+															</label>
+														{/each}
+													</div>
+												</div>
+
+												<!-- Language Filter -->
+												<div class="form-control">
+													<label class="label pb-1">
+														<span class="label-text text-sm font-medium">Sprachen</span>
+													</label>
+													<div class="flex gap-3">
+														{#each Object.values(Language) as language}
+															<label class="flex cursor-pointer items-center">
+																<input
+																	type="checkbox"
+																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	bind:group={batchSettings.languages}
+																	value={language}
+																/>
+																<span class="text-sm">{languageLabels[language]}</span>
+															</label>
+														{/each}
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Right Column: Target Groups -->
+								<div class="space-y-4">
+									<!-- Target Groups -->
+									<div class="card bg-base-100 shadow-sm">
+										<div class="card-body">
+											<h4 class="card-title text-base">Zielgruppen</h4>
+
+											<div class="space-y-3">
+												<!-- Relations -->
+												<div class="form-control">
+													<label class="label pb-1">
+														<span class="label-text text-sm font-medium">Beziehungen</span>
+													</label>
+													<div class="flex flex-wrap gap-2">
+														{#each Object.values(Relation) as relation}
+															<label class="flex cursor-pointer items-center">
+																<input
+																	type="checkbox"
+																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	bind:group={batchSettings.relations}
+																	value={relation}
+																/>
+																<span class="text-sm">{relationLabels[relation]}</span>
+															</label>
+														{/each}
+													</div>
+												</div>
+
+												<!-- Age Groups -->
+												<div class="form-control">
+													<label class="label pb-1">
+														<span class="label-text text-sm font-medium">Altersgruppen</span>
+													</label>
+													<div class="flex flex-wrap gap-2">
+														{#each Object.values(AgeGroup) as ageGroup}
+															<label class="flex cursor-pointer items-center">
+																<input
+																	type="checkbox"
+																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	bind:group={batchSettings.ageGroups}
+																	value={ageGroup}
+																/>
+																<span class="text-sm">{ageGroupLabels[ageGroup]}</span>
+															</label>
+														{/each}
+													</div>
+												</div>
+
+												<!-- Specific Values -->
+												<div class="form-control">
+													<label class="label pb-1" for="batchSpecificValues">
+														<span class="label-text text-sm font-medium">Spezifische Werte</span>
+													</label>
+													<input
+														id="batchSpecificValues"
+														type="text"
+														placeholder="z.B. 18, 25, 30, 50"
+														class="input-bordered input input-sm w-full"
+														bind:value={batchSettings.specificValues}
+													/>
+													<label class="label pt-1">
+														<span class="label-text-alt text-xs">
+															Alter oder Jubiläumsjahre, kommagetrennt
+														</span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Preview Stats -->
+									<div class="bg-primary/5 border-primary/20 card border">
+										<div class="card-body py-4">
+											<h5 class="mb-2 text-sm font-medium">Generierungs-Vorschau</h5>
+											<div class="grid grid-cols-2 gap-4 text-sm">
+												<div>
+													<span class="text-xs opacity-70">Stile:</span>
+													<div class="font-medium">{batchSettings.variations.length}</div>
+												</div>
+												<div>
+													<span class="text-xs opacity-70">Typen:</span>
+													<div class="font-medium">{batchSettings.types.length || 1}</div>
+												</div>
+												<div>
+													<span class="text-xs opacity-70">Anlässe:</span>
+													<div class="font-medium">{batchSettings.eventTypes.length || 1}</div>
+												</div>
+												<div>
+													<span class="text-xs opacity-70">Sprachen:</span>
+													<div class="font-medium">{batchSettings.languages.length || 1}</div>
+												</div>
+											</div>
+											<div class="border-primary/20 mt-3 border-t pt-3">
+												<span class="text-xs opacity-70">Kombinationen:</span>
+												<div class="font-bold text-primary">
+													{(batchSettings.types.length || 1) *
+														(batchSettings.eventTypes.length || 1) *
+														(batchSettings.languages.length || 1) *
+														batchSettings.variations.length}
+												</div>
+											</div>
 										</div>
 									</div>
 								</div>
