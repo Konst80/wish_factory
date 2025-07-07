@@ -8,7 +8,13 @@ export default {
 	theme: {
 		extend: {}
 	},
-	plugins: [daisyui, forms, typography],
+	plugins: [
+		daisyui, 
+		forms({
+			strategy: 'class',
+		}), 
+		typography
+	],
 	daisyui: {
 		themes: [
 			'light',
