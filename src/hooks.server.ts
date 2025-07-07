@@ -1,8 +1,6 @@
 import { sequence } from '@sveltejs/kit/hooks';
 import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
-import { createSupabaseServerClientFromSvelteKit } from '$lib/supabase';
-import { redirect } from '@sveltejs/kit';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -14,42 +12,14 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 	});
 
 const handleAuth: Handle = async ({ event, resolve }) => {
-	event.locals.supabase = createSupabaseServerClientFromSvelteKit(event.cookies);
+	// Temporarily disable Supabase for UI testing
+	// event.locals.supabase = createSupabaseServerClientFromSvelteKit(event.cookies);
 
 	event.locals.safeGetSession = async () => {
-		const {
-			data: { session }
-		} = await event.locals.supabase.auth.getSession();
-		if (!session) {
-			return { session: null, user: null };
-		}
-
-		const {
-			data: { user },
-			error
-		} = await event.locals.supabase.auth.getUser();
-		if (error) {
-			return { session: null, user: null };
-		}
-
-		return { session, user };
+		return { session: null, user: null };
 	};
 
-	const { session } = await event.locals.safeGetSession();
-
-	if (event.url.pathname.startsWith('/auth')) {
-		if (session) {
-			throw redirect(303, '/dashboard');
-		}
-		return resolve(event);
-	}
-
-	if (event.url.pathname.startsWith('/dashboard')) {
-		if (!session) {
-			throw redirect(303, '/auth/login');
-		}
-	}
-
+	// Skip all auth logic for now
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
 			return name === 'content-range';

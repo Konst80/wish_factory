@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { auth } from '$lib/stores/auth';
-	import { isAuthLoading } from '$lib/stores/auth';
 	import '../app.css';
 
 	let { children } = $props();
 
+	// Temporarily disable auth for testing
 	onMount(() => {
-		auth.initialize();
+		console.log('Layout mounted');
 	});
 </script>
 
@@ -17,11 +16,5 @@
 </svelte:head>
 
 <main class="bg-base-100 min-h-screen">
-	{#if $isAuthLoading}
-		<div class="flex min-h-screen items-center justify-center">
-			<div class="loading loading-spinner loading-lg"></div>
-		</div>
-	{:else}
-		{@render children()}
-	{/if}
+	{@render children()}
 </main>

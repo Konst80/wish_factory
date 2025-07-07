@@ -1,6 +1,5 @@
 import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
-import { onAuthStateChange, getCurrentUser, getCurrentSession, getUserProfile } from '../auth';
 import type { User, Session } from '@supabase/supabase-js';
 import type { UserProfile } from '../types/User';
 
@@ -17,7 +16,7 @@ function createAuthStore() {
 		user: null,
 		session: null,
 		profile: null,
-		loading: true,
+		loading: false, // Start with false for testing
 		error: null
 	});
 
@@ -26,58 +25,21 @@ function createAuthStore() {
 	const initialize = async () => {
 		if (!browser) return;
 
-		try {
-			update((state) => ({ ...state, loading: true }));
-
-			const [user, session] = await Promise.all([getCurrentUser(), getCurrentSession()]);
-
-			if (user && session) {
-				const profile = await getUserProfile(user.id);
-				set({
-					user,
-					session,
-					profile,
-					loading: false,
-					error: null
-				});
-			} else {
-				set({
-					user: null,
-					session: null,
-					profile: null,
-					loading: false,
-					error: null
-				});
-			}
-
-			authSubscription = onAuthStateChange(async (event, session) => {
-				if (event === 'SIGNED_IN' && session) {
-					const profile = await getUserProfile(session.user.id);
-					set({
-						user: session.user,
-						session,
-						profile,
-						loading: false,
-						error: null
-					});
-				} else if (event === 'SIGNED_OUT') {
-					set({
-						user: null,
-						session: null,
-						profile: null,
-						loading: false,
-						error: null
-					});
-				}
-			});
-		} catch (error) {
-			console.error('Auth initialization error:', error);
-			update((state) => ({
-				...state,
-				loading: false,
-				error: error instanceof Error ? error.message : 'Authentication error'
-			}));
-		}
+		// Temporarily use mock data for UI testing
+		set({
+			user: { id: 'mock-user-id', email: 'test@example.com' } as User,
+			session: { user: { id: 'mock-user-id' } } as Session,
+			profile: {
+				id: 'mock-user-id',
+				email: 'test@example.com',
+				full_name: 'Test User',
+				role: 'Administrator',
+				created_at: new Date().toISOString(),
+				updated_at: new Date().toISOString()
+			},
+			loading: false,
+			error: null
+		});
 	};
 
 	const setLoading = (loading: boolean) => {
