@@ -60,7 +60,7 @@
 <!-- Theme Toggle (Fixed Position) -->
 <div class="fixed right-4 top-4 z-50">
 	<div class="dropdown dropdown-end">
-		<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+		<div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Theme wechseln">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				class="h-6 w-6"
@@ -165,7 +165,11 @@
 				einen Blick.
 			</div>
 		</div>
-		<button class="btn btn-ghost btn-sm" onclick={() => (showWelcomeAlert = false)}>
+		<button
+			class="btn btn-ghost btn-sm"
+			onclick={() => (showWelcomeAlert = false)}
+			aria-label="Willkommensnachricht schließen"
+		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				class="h-4 w-4"
@@ -288,7 +292,14 @@
 								Erstelle einen neuen Wunsch mit oder ohne KI-Unterstützung
 							</p>
 							<div class="card-actions mt-4 justify-end">
-								<a href="/dashboard/wishes/new" class="btn btn-primary btn-sm">Erstellen</a>
+								<a
+									href="/dashboard/wishes/new"
+									class="btn btn-primary btn-sm"
+									data-sveltekit-preload-data="hover"
+									data-sveltekit-preload-code="hover"
+								>
+									Erstellen
+								</a>
 							</div>
 						</div>
 					</div>

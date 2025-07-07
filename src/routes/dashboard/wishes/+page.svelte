@@ -451,6 +451,7 @@
 									? clearSelection
 									: selectAllWishes}
 								checked={selectedWishes.length === data.wishes.length && data.wishes.length > 0}
+								aria-label="Alle Wünsche auswählen"
 							/>
 						</label>
 					</th>
@@ -473,6 +474,7 @@
 									class="checkbox"
 									checked={selectedWishes.includes(wish.id)}
 									onchange={() => toggleWishSelection(wish.id)}
+									aria-label="Wunsch {wish.id} auswählen"
 								/>
 							</label>
 						</td>
