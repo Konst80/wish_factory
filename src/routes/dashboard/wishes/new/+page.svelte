@@ -37,12 +37,49 @@
 	// UI state
 	let isSubmitting = $state(false);
 	let showPreview = $state(false);
-	let showAIGenerator = $state(false);
+	let showAIBatchCreator = $state(false);
 	let isGenerating = $state(false);
 	let generationError = $state('');
-	let wishCount = $state(3);
 	let wishStyle = $state('normal');
-	let additionalInstructions = $state('');
+
+	// AI Batch Creation State
+	type GeneratedWish = {
+		id: string;
+		type: WishType;
+		eventType: EventType;
+		relations: Relation[];
+		ageGroups: AgeGroup[];
+		specificValues: string;
+		text: string;
+		belated: string;
+		language: Language;
+		status: WishStatus;
+		metadata: {
+			style: string;
+			generated: boolean;
+			timestamp: string;
+		};
+	};
+
+	let batchMode = $state('single'); // 'single' | 'batch'
+	let batchSettings = $state({
+		count: 5,
+		variations: ['normal', 'herzlich', 'humorvoll'],
+		includeAlternatives: true,
+		// Optionale Filter - wenn leer, werden die Hauptformular-Werte verwendet
+		types: [] as string[], // WishType[]
+		eventTypes: [] as string[], // EventType[]
+		languages: [] as string[], // Language[]
+		relations: [] as string[], // Relation[]
+		ageGroups: [] as string[], // AgeGroup[]
+		specificValues: '', // Spezifische Alter oder Hochzeitstage
+		// Legacy-Optionen für Kompatibilität
+		generateForAllAgeGroups: false,
+		generateForAllRelations: false
+	});
+	let generatedWishes = $state<GeneratedWish[]>([]);
+	let selectedGeneratedWishes = $state<string[]>([]);
+	let currentStep = $state(1); // 1: Configure, 2: Generate, 3: Review, 4: Save
 
 	// Validation state
 	let errors = $state(form?.errors || {});
@@ -123,24 +160,247 @@
 			// Dies ist nur ein Mock für die UI
 			await new Promise((resolve) => setTimeout(resolve, 1500));
 
-			// Beispieltext generieren basierend auf den ausgewählten Optionen
-			const exampleTexts = [
-				'Alles Liebe zum Geburtstag, [Name]! Mögest du einen wundervollen Tag mit deinen Liebsten verbringen.',
-				'Herzlichen Glückwunsch zum Geburtstag, [Name]! 🎉',
-				'Zum Geburtstag alles Gute, [Name]! Bleib so wie du bist!'
-			];
+			// Generate text based on current form settings
+			const eventTypeText = eventTypeLabels[formData.eventType as EventType] || 'Anlass';
+			const isHumorous = wishStyle === 'humorvoll';
+			const isFormal = wishStyle === 'formell';
+			const isHeartfelt = wishStyle === 'herzlich';
 
-			// Setze den ersten generierten Text als Vorschlag
-			formData.text = exampleTexts[0];
+			let generatedText = '';
+			let generatedBelated = '';
 
-			// Schließe den Dialog nach erfolgreicher Generierung
-			showAIGenerator = false;
+			if (isFormal) {
+				generatedText = `Zum ${eventTypeText} möchte ich Ihnen, [Name], meine herzlichsten Glückwünsche aussprechen. Möge dieser besondere Tag voller Freude und Erfolg für Sie sein.`;
+				generatedBelated = `Sehr geehrte/r [Name], auch wenn meine Glückwünsche etwas verspätet sind, möchte ich Ihnen nachträglich alles Gute zum ${eventTypeText} wünschen.`;
+			} else if (isHumorous) {
+				generatedText = `Happy ${eventTypeText}, [Name]! 🎉 Hoffentlich ist dein Tag genauso toll wie du! Lass es krachen und vergiss nicht: Kalorien zählen heute nicht! 😄`;
+				generatedBelated = `[Name], sorry dass ich zu spät dran bin! 😅 Aber hey, gute Wünsche haben kein Verfallsdatum - alles Gute nachträglich zum ${eventTypeText}! 🎂`;
+			} else if (isHeartfelt) {
+				generatedText = `Von Herzen alles Gute zum ${eventTypeText}, liebe/r [Name]! Du bedeutest mir so viel und ich wünsche dir, dass all deine Träume in Erfüllung gehen. Möge dein Tag voller Liebe und Freude sein.`;
+				generatedBelated = `Mein/e liebe/r [Name], auch wenn ich etwas spät dran bin - von ganzem Herzen alles Gute zum ${eventTypeText}! Du verdienst all das Glück der Welt.`;
+			} else {
+				generatedText = `Alles Liebe zum ${eventTypeText}, [Name]! Mögest du einen wundervollen Tag mit deinen Liebsten verbringen und viele schöne Momente erleben.`;
+				generatedBelated = `Liebe/r [Name], auch wenn ich etwas spät dran bin - alles Gute zum ${eventTypeText}! Ich hoffe, du hattest einen fantastischen Tag.`;
+			}
+
+			// Set generated texts
+			formData.text = generatedText;
+			formData.belated = generatedBelated;
 		} catch (error) {
 			console.error('Fehler bei der KI-Generierung:', error);
 			generationError = 'Fehler bei der Generierung. Bitte versuche es später erneut.';
 		} finally {
 			isGenerating = false;
 		}
+	}
+
+	async function generateBatchWishes() {
+		isGenerating = true;
+		generationError = '';
+		currentStep = 2;
+
+		try {
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+
+			// Determine which values to use for generation - batch settings override main form
+			const typesToGenerate =
+				batchSettings.types.length > 0 ? batchSettings.types : [formData.type];
+			const eventTypesToGenerate =
+				batchSettings.eventTypes.length > 0 ? batchSettings.eventTypes : [formData.eventType];
+			const languagesToGenerate =
+				batchSettings.languages.length > 0 ? batchSettings.languages : [formData.language];
+			const relationsToGenerate =
+				batchSettings.relations.length > 0 ? batchSettings.relations : formData.relations;
+			const ageGroupsToGenerate =
+				batchSettings.ageGroups.length > 0 ? batchSettings.ageGroups : formData.ageGroups;
+			const specificValuesToUse = batchSettings.specificValues || formData.specificValues;
+
+			// Templates organized by event type and style
+			const templates: Record<string, Record<string, string[]>> = {
+				birthday: {
+					normal: [
+						'Alles Liebe zum Geburtstag, [Name]! Mögest du einen wundervollen Tag verbringen.',
+						'Herzlichen Glückwunsch zum Geburtstag, liebe/r [Name]!',
+						'Zum Geburtstag wünsche ich dir alles Gute, [Name]!'
+					],
+					herzlich: [
+						'Von Herzen alles Gute zum Geburtstag, liebe/r [Name]! Du bedeutest mir so viel.',
+						'Mein/e liebe/r [Name], zum Geburtstag sende ich dir die herzlichsten Grüße.',
+						'Für dich, [Name], zum Geburtstag: Möge dein Tag voller Freude und Liebe sein!'
+					],
+					humorvoll: [
+						'Happy Birthday, [Name]! 🎉 Hoffentlich ist dein Tag genauso toll wie du!',
+						'[Name], zum Geburtstag: Bleib so verrückt wie du bist! 😄',
+						'Alles Gute, [Name]! Zum Geburtstag wünsche ich dir Kuchen, Geschenke und keine Kalorien! 🎂'
+					],
+					formell: [
+						'Zum Geburtstag möchte ich Ihnen, [Name], meine herzlichsten Glückwünsche aussprechen.',
+						'Sehr geehrte/r [Name], ich gratuliere Ihnen herzlich zum Geburtstag.',
+						'Im Namen aller Kollegen gratuliere ich Ihnen, [Name], zum Geburtstag.'
+					]
+				},
+				anniversary: {
+					normal: [
+						'Herzlichen Glückwunsch zum Jubiläum, [Name]! Ein besonderer Meilenstein.',
+						'Zum Jubiläum alles Gute, liebe/r [Name]!',
+						'[Name], herzliche Glückwünsche zu diesem besonderen Anlass!'
+					],
+					herzlich: [
+						'Von Herzen gratuliere ich dir zum Jubiläum, [Name]! Du hast so viel erreicht.',
+						'Liebe/r [Name], zum Jubiläum wünsche ich dir weiterhin viel Erfolg und Freude.',
+						'Dein Jubiläum, [Name], ist ein Grund zu feiern - du bist etwas Besonderes!'
+					],
+					humorvoll: [
+						'Jubiläum, [Name]! 🎊 Du wirst ja richtig alt... äh, erfahren! 😉',
+						'[Name], zum Jubiläum: Du sammelst Jahre wie andere Briefmarken! 📮',
+						'Herzlichen Glückwunsch, [Name]! Das Jubiläum zeigt: Du bist schon lange toll! 🏆'
+					],
+					formell: [
+						'Zum Jubiläum gratuliere ich Ihnen, [Name], zu Ihren herausragenden Leistungen.',
+						'Sehr geehrte/r [Name], zu Ihrem Jubiläum übermittle ich die besten Glückwünsche.',
+						'[Name], Ihr Jubiläum ist ein Zeichen für Beständigkeit und Erfolg.'
+					]
+				},
+				custom: {
+					normal: [
+						'Alles Gute zu diesem besonderen Anlass, [Name]!',
+						'Herzlichen Glückwunsch, liebe/r [Name]!',
+						'[Name], ich wünsche dir alles Gute für diesen wichtigen Tag!'
+					],
+					herzlich: [
+						'Von Herzen alles Gute, [Name]! Dieser Tag gehört dir.',
+						'Liebe/r [Name], möge dieser besondere Tag voller Glück sein.',
+						'Für dich, [Name], die herzlichsten Glückwünsche zu diesem Anlass!'
+					],
+					humorvoll: [
+						'Hey [Name]! 🎉 Heute ist dein Tag - mach was draus!',
+						'[Name], heute darfst du im Mittelpunkt stehen! 🌟',
+						'Glückwunsch, [Name]! Heute ist ein guter Tag für gute Laune! 😊'
+					],
+					formell: [
+						'Zu diesem besonderen Anlass gratuliere ich Ihnen, [Name], herzlich.',
+						'Sehr geehrte/r [Name], ich wünsche Ihnen alles Gute.',
+						'[Name], meine besten Glückwünsche zu diesem wichtigen Ereignis.'
+					]
+				}
+			};
+
+			generatedWishes = [];
+			let idCounter = 1;
+
+			// Generate combinations for all selected options
+			for (const type of typesToGenerate) {
+				for (const eventType of eventTypesToGenerate) {
+					for (const language of languagesToGenerate) {
+						for (const variation of batchSettings.variations) {
+							const eventKey = eventType.toLowerCase();
+							const eventTemplates = templates[eventKey] || templates.custom;
+							const texts = eventTemplates[variation] || eventTemplates.normal;
+
+							if (generatedWishes.length >= batchSettings.count) break;
+
+							const text = texts[idCounter % texts.length];
+							const belated = batchSettings.includeAlternatives
+								? `Liebe/r [Name], auch wenn ich etwas spät dran bin - ${text.toLowerCase().replace(/^[a-z]/, (match) => match.toUpperCase())}`
+								: '';
+
+							generatedWishes.push({
+								id: `generated-${idCounter++}`,
+								type: type as WishType,
+								eventType: eventType as EventType,
+								relations: relationsToGenerate as Relation[],
+								ageGroups: ageGroupsToGenerate as AgeGroup[],
+								specificValues: specificValuesToUse,
+								text,
+								belated,
+								language: language as Language,
+								status: formData.status as WishStatus,
+								metadata: {
+									style: variation,
+									generated: true,
+									timestamp: new Date().toISOString()
+								}
+							});
+						}
+						if (generatedWishes.length >= batchSettings.count) break;
+					}
+					if (generatedWishes.length >= batchSettings.count) break;
+				}
+				if (generatedWishes.length >= batchSettings.count) break;
+			}
+
+			// Limit to requested count
+			generatedWishes = generatedWishes.slice(0, batchSettings.count);
+			selectedGeneratedWishes = generatedWishes.map((w) => w.id);
+			currentStep = 3;
+		} catch (error) {
+			console.error('Fehler bei der Batch-Generierung:', error);
+			generationError = 'Fehler bei der Batch-Generierung. Bitte versuche es später erneut.';
+			currentStep = 1;
+		} finally {
+			isGenerating = false;
+		}
+	}
+
+	function toggleWishSelection(wishId: string) {
+		if (selectedGeneratedWishes.includes(wishId)) {
+			selectedGeneratedWishes = selectedGeneratedWishes.filter((id) => id !== wishId);
+		} else {
+			selectedGeneratedWishes = [...selectedGeneratedWishes, wishId];
+		}
+	}
+
+	function selectAllGenerated() {
+		selectedGeneratedWishes = generatedWishes.map((w) => w.id);
+	}
+
+	function deselectAllGenerated() {
+		selectedGeneratedWishes = [];
+	}
+
+	async function saveBatchWishes() {
+		isSubmitting = true;
+		try {
+			const wishesToSave = generatedWishes.filter((w) => selectedGeneratedWishes.includes(w.id));
+			// Here would be the actual API call to save multiple wishes
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+
+			// Redirect to wishes list or show success message
+			window.location.href = '/dashboard/wishes?created=' + wishesToSave.length;
+		} catch (error) {
+			console.error('Fehler beim Speichern:', error);
+		} finally {
+			isSubmitting = false;
+		}
+	}
+
+	function resetBatchCreator() {
+		currentStep = 1;
+		generatedWishes = [];
+		selectedGeneratedWishes = [];
+		generationError = '';
+		showAIBatchCreator = false;
+	}
+
+	function resetBatchSettings() {
+		batchSettings.types = [];
+		batchSettings.eventTypes = [];
+		batchSettings.languages = [];
+		batchSettings.relations = [];
+		batchSettings.ageGroups = [];
+		batchSettings.specificValues = '';
+		batchSettings.variations = ['normal'];
+		batchSettings.count = 5;
+		batchSettings.includeAlternatives = true;
+	}
+
+	function copyFromMainForm() {
+		batchSettings.types = [formData.type];
+		batchSettings.eventTypes = [formData.eventType];
+		batchSettings.languages = [formData.language];
+		batchSettings.relations = [...formData.relations];
+		batchSettings.ageGroups = [...formData.ageGroups];
+		batchSettings.specificValues = formData.specificValues;
 	}
 </script>
 
@@ -174,7 +434,11 @@
 			>
 				{showPreview ? 'Bearbeiten' : 'Vorschau'}
 			</button>
-			<button type="button" class="btn btn-primary btn-sm" onclick={() => (showAIGenerator = true)}>
+			<button
+				type="button"
+				class="btn btn-primary btn-sm"
+				onclick={() => (showAIBatchCreator = true)}
+			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="mr-1 h-4 w-4"
@@ -186,10 +450,10 @@
 						stroke-linecap="round"
 						stroke-linejoin="round"
 						stroke-width="2"
-						d="M13 10V3L4 14h7v7l9-11h-7z"
+						d="M19 11H5m14-7H3a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zM9 7h6m-6 4h6"
 					/>
 				</svg>
-				Mit KI generieren
+				Batch-Erstellung
 			</button>
 		</div>
 	</div>
@@ -428,22 +692,67 @@
 						{/if}
 					</div>
 
+					<!-- Stil-Auswahl für KI-Generierung -->
+					<div class="form-control mt-6">
+						<label class="label">
+							<span class="label-text font-medium">KI-Stil für Generierung</span>
+							<span class="label-text-alt">Beeinflusst die automatische Textgenerierung</span>
+						</label>
+						<select class="select-bordered select w-full" bind:value={wishStyle}>
+							<option value="normal">Normal - Klassische, freundliche Wünsche</option>
+							<option value="herzlich">Herzlich - Warme, emotionale Wünsche</option>
+							<option value="humorvoll">Humorvoll - Lustige, lockere Wünsche</option>
+							<option value="formell">Formell - Höfliche, professionelle Wünsche</option>
+						</select>
+					</div>
+
 					<!-- Haupttext -->
 					<div class="form-control mt-6">
 						<label class="label" for="text">
 							<span class="label-text font-medium">Wunsch-Text *</span>
 							<span class="label-text-alt">{formData.text.length}/1000</span>
 						</label>
-						<textarea
-							id="text"
-							name="text"
-							rows="6"
-							placeholder="Liebe/r [Name], zu deinem [Anlass] wünsche ich dir..."
-							class="textarea-bordered textarea w-full"
-							class:textarea-error={errors.text}
-							bind:value={formData.text}
-							required
-						></textarea>
+						<div class="relative">
+							<textarea
+								id="text"
+								name="text"
+								rows="6"
+								placeholder="Liebe/r [Name], zu deinem [Anlass] wünsche ich dir..."
+								class="textarea-bordered textarea w-full pr-24"
+								class:textarea-error={errors.text}
+								bind:value={formData.text}
+								required
+							></textarea>
+							<button
+								type="button"
+								class="btn btn-primary btn-sm absolute right-2 top-2"
+								onclick={generateWithAI}
+								disabled={isGenerating ||
+									!formData.eventType ||
+									formData.relations.length === 0 ||
+									formData.ageGroups.length === 0}
+								title="Text mit KI basierend auf aktuellen Einstellungen generieren"
+							>
+								{#if isGenerating}
+									<span class="loading loading-spinner loading-sm"></span>
+								{:else}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 10V3L4 14h7v7l9-11h-7z"
+										/>
+									</svg>
+								{/if}
+							</button>
+						</div>
 						<label class="label">
 							<span class="label-text-alt">
 								Verwenden Sie Platzhalter wie [Name], [Anlass], [Alter] für dynamische Inhalte
@@ -462,16 +771,47 @@
 							<span class="label-text font-medium">Nachträglicher Text *</span>
 							<span class="label-text-alt">{formData.belated.length}/1000</span>
 						</label>
-						<textarea
-							id="belated"
-							name="belated"
-							rows="4"
-							placeholder="Liebe/r [Name], auch wenn ich zu spät dran bin..."
-							class="textarea-bordered textarea w-full"
-							class:textarea-error={errors.belated}
-							bind:value={formData.belated}
-							required
-						></textarea>
+						<div class="relative">
+							<textarea
+								id="belated"
+								name="belated"
+								rows="4"
+								placeholder="Liebe/r [Name], auch wenn ich zu spät dran bin..."
+								class="textarea-bordered textarea w-full pr-24"
+								class:textarea-error={errors.belated}
+								bind:value={formData.belated}
+								required
+							></textarea>
+							<button
+								type="button"
+								class="btn btn-secondary btn-sm absolute right-2 top-2"
+								onclick={generateWithAI}
+								disabled={isGenerating ||
+									!formData.eventType ||
+									formData.relations.length === 0 ||
+									formData.ageGroups.length === 0}
+								title="Nachträglichen Text mit KI generieren"
+							>
+								{#if isGenerating}
+									<span class="loading loading-spinner loading-sm"></span>
+								{:else}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 10V3L4 14h7v7l9-11h-7z"
+										/>
+									</svg>
+								{/if}
+							</button>
+						</div>
 						<label class="label">
 							<span class="label-text-alt">
 								Text für verspätete Glückwünsche mit Platzhaltern
@@ -519,90 +859,509 @@
 			</div>
 		</div>
 
-		<!-- KI Generator Dialog -->
-		<div class="modal {showAIGenerator ? 'modal-open' : ''}">
-			<div class="modal-box max-w-3xl">
-				<h3 class="mb-4 text-lg font-bold">Wunsch mit KI generieren</h3>
+		<!-- Generation Error Alert -->
+		{#if generationError}
+			<div class="alert alert-error mt-4">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
+				</svg>
+				<span>{generationError}</span>
+				<button
+					type="button"
+					class="btn btn-ghost btn-sm ml-auto"
+					onclick={() => (generationError = '')}
+				>
+					×
+				</button>
+			</div>
+		{/if}
 
-				<div class="space-y-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Anzahl der Wünsche</span>
-						</label>
-						<input
-							type="number"
-							min="1"
-							max="5"
-							class="input-bordered input w-20"
-							bind:value={wishCount}
-						/>
+		<!-- AI Batch Creator Modal -->
+		<div class="modal {showAIBatchCreator ? 'modal-open' : ''}">
+			<div class="modal-box flex h-[90vh] max-w-6xl flex-col">
+				<div class="mb-6 flex items-center justify-between">
+					<h3 class="flex items-center gap-2 text-xl font-bold">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6 text-primary"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 11H5m14-7H3a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zM9 7h6m-6 4h6"
+							/>
+						</svg>
+						Batch-Erstellung mit KI
+					</h3>
+					<div class="steps steps-horizontal">
+						<div class="step {currentStep >= 1 ? 'step-primary' : ''}">Konfiguration</div>
+						<div class="step {currentStep >= 2 ? 'step-primary' : ''}">Generierung</div>
+						<div class="step {currentStep >= 3 ? 'step-primary' : ''}">Auswahl</div>
+						<div class="step {currentStep >= 4 ? 'step-primary' : ''}">Speichern</div>
 					</div>
+				</div>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Stil</span>
-						</label>
-						<select class="select-bordered select w-full" bind:value={wishStyle}>
-							<option value="normal">Normal</option>
-							<option value="humorvoll">Humorvoll</option>
-							<option value="formell">Formell</option>
-							<option value="herzlich">Herzlich</option>
-						</select>
+				<div class="flex-1 overflow-auto">
+					{#if currentStep === 1}
+						<!-- Step 1: Configuration -->
+						<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+							<!-- Basis-Einstellungen -->
+							<div class="space-y-4">
+								<div class="card bg-base-200">
+									<div class="card-body">
+										<div class="mb-4 flex items-center justify-between">
+											<h4 class="card-title">Basis-Einstellungen</h4>
+											<div class="flex gap-2">
+												<button
+													type="button"
+													class="btn btn-outline btn-xs"
+													onclick={copyFromMainForm}
+													title="Einstellungen aus Hauptformular übernehmen"
+												>
+													Übernehmen
+												</button>
+												<button
+													type="button"
+													class="btn btn-ghost btn-xs"
+													onclick={resetBatchSettings}
+													title="Alle Filter zurücksetzen"
+												>
+													Zurücksetzen
+												</button>
+											</div>
+										</div>
+
+										<div class="form-control">
+											<label class="label">
+												<span class="label-text font-medium">Anzahl Wünsche</span>
+											</label>
+											<input
+												type="range"
+												min="3"
+												max="50"
+												class="range range-primary"
+												bind:value={batchSettings.count}
+											/>
+											<div class="flex justify-between px-2 text-xs">
+												<span>3</span>
+												<span class="font-bold">{batchSettings.count}</span>
+												<span>50</span>
+											</div>
+										</div>
+
+										<div class="form-control">
+											<label class="label">
+												<span class="label-text font-medium">Stil-Variationen</span>
+											</label>
+											<div class="space-y-2">
+												{#each ['normal', 'herzlich', 'humorvoll', 'formell'] as style}
+													<label class="label cursor-pointer justify-start">
+														<input
+															type="checkbox"
+															class="checkbox checkbox-primary"
+															bind:group={batchSettings.variations}
+															value={style}
+														/>
+														<span class="label-text ml-3 capitalize">{style}</span>
+													</label>
+												{/each}
+											</div>
+										</div>
+
+										<div class="form-control">
+											<label class="label cursor-pointer">
+												<span class="label-text">Nachträgliche Versionen erstellen</span>
+												<input
+													type="checkbox"
+													class="toggle toggle-primary"
+													bind:checked={batchSettings.includeAlternatives}
+												/>
+											</label>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Filter-Optionen -->
+							<div class="space-y-4">
+								<div class="card bg-base-200">
+									<div class="card-body">
+										<h4 class="card-title">Filter-Optionen</h4>
+										<p class="mb-4 text-xs opacity-70">
+											Leer lassen = Hauptformular-Werte verwenden
+										</p>
+
+										<div class="form-control">
+											<label class="label">
+												<span class="label-text font-medium">Wunsch-Typen</span>
+											</label>
+											<div class="space-y-1">
+												{#each Object.values(WishType) as type}
+													<label class="label cursor-pointer justify-start">
+														<input
+															type="checkbox"
+															class="checkbox checkbox-primary checkbox-sm"
+															bind:group={batchSettings.types}
+															value={type}
+														/>
+														<span class="label-text ml-2 text-sm">{typeLabels[type]}</span>
+													</label>
+												{/each}
+											</div>
+										</div>
+
+										<div class="form-control">
+											<label class="label">
+												<span class="label-text font-medium">Anlässe</span>
+											</label>
+											<div class="space-y-1">
+												{#each Object.values(EventType) as eventType}
+													<label class="label cursor-pointer justify-start">
+														<input
+															type="checkbox"
+															class="checkbox checkbox-primary checkbox-sm"
+															bind:group={batchSettings.eventTypes}
+															value={eventType}
+														/>
+														<span class="label-text ml-2 text-sm">{eventTypeLabels[eventType]}</span
+														>
+													</label>
+												{/each}
+											</div>
+										</div>
+
+										<div class="form-control">
+											<label class="label">
+												<span class="label-text font-medium">Sprachen</span>
+											</label>
+											<div class="space-y-1">
+												{#each Object.values(Language) as language}
+													<label class="label cursor-pointer justify-start">
+														<input
+															type="checkbox"
+															class="checkbox checkbox-primary checkbox-sm"
+															bind:group={batchSettings.languages}
+															value={language}
+														/>
+														<span class="label-text ml-2 text-sm">{languageLabels[language]}</span>
+													</label>
+												{/each}
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Zielgruppen-Filter -->
+							<div class="space-y-4">
+								<div class="card bg-base-200">
+									<div class="card-body">
+										<h4 class="card-title">Zielgruppen-Filter</h4>
+
+										<div class="form-control">
+											<label class="label">
+												<span class="label-text font-medium">Beziehungen</span>
+											</label>
+											<div class="space-y-1">
+												{#each Object.values(Relation) as relation}
+													<label class="label cursor-pointer justify-start">
+														<input
+															type="checkbox"
+															class="checkbox checkbox-primary checkbox-sm"
+															bind:group={batchSettings.relations}
+															value={relation}
+														/>
+														<span class="label-text ml-2 text-sm">{relationLabels[relation]}</span>
+													</label>
+												{/each}
+											</div>
+										</div>
+
+										<div class="form-control">
+											<label class="label">
+												<span class="label-text font-medium">Altersgruppen</span>
+											</label>
+											<div class="space-y-1">
+												{#each Object.values(AgeGroup) as ageGroup}
+													<label class="label cursor-pointer justify-start">
+														<input
+															type="checkbox"
+															class="checkbox checkbox-primary checkbox-sm"
+															bind:group={batchSettings.ageGroups}
+															value={ageGroup}
+														/>
+														<span class="label-text ml-2 text-sm">{ageGroupLabels[ageGroup]}</span>
+													</label>
+												{/each}
+											</div>
+										</div>
+
+										<div class="form-control">
+											<label class="label" for="batchSpecificValues">
+												<span class="label-text font-medium">Spezifische Werte</span>
+											</label>
+											<input
+												id="batchSpecificValues"
+												type="text"
+												placeholder="18, 25, 30, 50 oder 10, 25, 50 Jahre"
+												class="input-bordered input input-sm w-full"
+												bind:value={batchSettings.specificValues}
+											/>
+											<label class="label">
+												<span class="label-text-alt text-xs"
+													>Alter oder Jubiläumsjahre, kommagetrennt</span
+												>
+											</label>
+										</div>
+									</div>
+								</div>
+
+								<div class="alert alert-info">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-6 w-6 shrink-0 stroke-current"
+										fill="none"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+									<div>
+										<div class="font-bold">Geschätzte Kombinationen</div>
+										<div class="text-xs">
+											{(batchSettings.types.length || 1) *
+												(batchSettings.eventTypes.length || 1) *
+												(batchSettings.languages.length || 1) *
+												batchSettings.variations.length} mögliche Varianten
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					{:else if currentStep === 2}
+						<!-- Step 2: Generation in Progress -->
+						<div class="flex h-64 flex-col items-center justify-center space-y-6">
+							<div class="loading loading-spinner loading-lg text-primary"></div>
+							<div class="text-center">
+								<h4 class="text-lg font-bold">Wünsche werden generiert...</h4>
+								<p class="text-sm opacity-70">
+									KI generiert Wünsche basierend auf Ihren Filterkriterien.
+								</p>
+							</div>
+							<div class="stats stats-vertical shadow lg:stats-horizontal">
+								<div class="stat-sm stat">
+									<div class="stat-title">Anzahl</div>
+									<div class="stat-value text-primary">{batchSettings.count}</div>
+								</div>
+								<div class="stat-sm stat">
+									<div class="stat-title">Stile</div>
+									<div class="stat-value text-secondary">{batchSettings.variations.length}</div>
+								</div>
+								<div class="stat-sm stat">
+									<div class="stat-title">Typen</div>
+									<div class="stat-value text-accent">{batchSettings.types.length || 1}</div>
+								</div>
+								<div class="stat-sm stat">
+									<div class="stat-title">Anlässe</div>
+									<div class="stat-value text-info">{batchSettings.eventTypes.length || 1}</div>
+								</div>
+								<div class="stat-sm stat">
+									<div class="stat-title">Sprachen</div>
+									<div class="stat-value text-warning">{batchSettings.languages.length || 1}</div>
+								</div>
+							</div>
+						</div>
+					{:else if currentStep === 3}
+						<!-- Step 3: Review Generated Wishes -->
+						<div class="space-y-4">
+							<div class="flex items-center justify-between">
+								<h4 class="text-lg font-bold">Generierte Wünsche ({generatedWishes.length})</h4>
+								<div class="flex gap-2">
+									<div class="badge badge-outline">
+										{selectedGeneratedWishes.length} ausgewählt
+									</div>
+									<button class="btn btn-outline btn-xs" onclick={selectAllGenerated}>
+										Alle auswählen
+									</button>
+									<button class="btn btn-outline btn-xs" onclick={deselectAllGenerated}>
+										Alle abwählen
+									</button>
+								</div>
+							</div>
+
+							<div class="grid max-h-96 grid-cols-1 gap-4 overflow-y-auto lg:grid-cols-2">
+								{#each generatedWishes as wish (wish.id)}
+									<div
+										class="card border {selectedGeneratedWishes.includes(wish.id)
+											? 'bg-primary/5 border-primary'
+											: 'border-base-300'}"
+									>
+										<div class="card-body p-4">
+											<div class="mb-2 flex items-start justify-between">
+												<div class="flex items-center gap-2">
+													<input
+														type="checkbox"
+														class="checkbox checkbox-primary checkbox-sm"
+														checked={selectedGeneratedWishes.includes(wish.id)}
+														onchange={() => toggleWishSelection(wish.id)}
+													/>
+													<div
+														class="badge badge-{wish.metadata.style === 'humorvoll'
+															? 'warning'
+															: wish.metadata.style === 'herzlich'
+																? 'success'
+																: wish.metadata.style === 'formell'
+																	? 'info'
+																	: 'neutral'} badge-sm"
+													>
+														{wish.metadata.style}
+													</div>
+												</div>
+												<div class="flex gap-1">
+													<div class="badge badge-outline badge-xs">
+														{wish.type === WishType.FUNNY ? 'Lustig' : 'Normal'}
+													</div>
+													<div class="badge badge-ghost badge-xs">
+														{eventTypeLabels[wish.eventType]}
+													</div>
+													<div class="badge badge-ghost badge-xs">
+														{languageLabels[wish.language]}
+													</div>
+												</div>
+											</div>
+
+											<!-- Target Info -->
+											<div class="mb-2 flex flex-wrap gap-1">
+												{#each wish.relations as relation}
+													<span class="badge badge-neutral badge-xs"
+														>{relationLabels[relation]}</span
+													>
+												{/each}
+												{#each wish.ageGroups as ageGroup}
+													<span class="badge badge-accent badge-xs">{ageGroupLabels[ageGroup]}</span
+													>
+												{/each}
+												{#if wish.specificValues}
+													<span class="badge badge-info badge-xs">{wish.specificValues}</span>
+												{/if}
+											</div>
+
+											<div class="mt-2">
+												<p class="line-clamp-3 text-sm font-medium">{wish.text}</p>
+												{#if wish.belated}
+													<p class="mt-2 line-clamp-2 text-xs opacity-70">
+														<strong>Nachträglich:</strong>
+														{wish.belated}
+													</p>
+												{/if}
+											</div>
+										</div>
+									</div>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
+
+				{#if generationError}
+					<div class="alert alert-error mt-4">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6 shrink-0 stroke-current"
+							fill="none"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+						<span>{generationError}</span>
 					</div>
+				{/if}
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Zusätzliche Anweisungen</span>
-						</label>
-						<textarea
-							class="textarea-bordered textarea h-24"
-							placeholder="Zusätzliche Hinweise für die KI (optional)"
-							bind:value={additionalInstructions}
-						></textarea>
-					</div>
+				<div class="modal-action">
+					<button
+						type="button"
+						class="btn btn-ghost"
+						onclick={resetBatchCreator}
+						disabled={isGenerating || isSubmitting}
+					>
+						Abbrechen
+					</button>
 
-					{#if generationError}
-						<div class="alert alert-error mt-4">
+					{#if currentStep === 1}
+						<button
+							type="button"
+							class="btn btn-primary"
+							onclick={generateBatchWishes}
+							disabled={batchSettings.variations.length === 0}
+						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
-								class="h-6 w-6 shrink-0 stroke-current"
+								class="h-4 w-4"
 								fill="none"
 								viewBox="0 0 24 24"
+								stroke="currentColor"
 							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
 									stroke-width="2"
-									d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+									d="M13 10V3L4 14h7v7l9-11h-7z"
 								/>
 							</svg>
-							<span>{generationError}</span>
-						</div>
-					{/if}
-
-					<div class="modal-action">
-						<button
-							type="button"
-							class="btn btn-ghost"
-							onclick={() => (showAIGenerator = false)}
-							disabled={isGenerating}
-						>
-							Abbrechen
+							Generierung starten
 						</button>
+					{:else if currentStep === 3}
 						<button
 							type="button"
-							class="btn btn-primary"
-							onclick={generateWithAI}
-							disabled={isGenerating}
+							class="btn btn-success"
+							onclick={saveBatchWishes}
+							disabled={selectedGeneratedWishes.length === 0 || isSubmitting}
 						>
-							{#if isGenerating}
-								<span class="loading loading-spinner"></span>
-								Generiere...
+							{#if isSubmitting}
+								<span class="loading loading-spinner loading-sm"></span>
+								Speichere...
 							{:else}
-								Generieren
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+									/>
+								</svg>
+								{selectedGeneratedWishes.length} Wünsche speichern
 							{/if}
 						</button>
-					</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -682,6 +1441,12 @@
 							<li><code>[Alter]</code> - Lebensalter</li>
 							<li><code>[Zahl]</code> - Spezifischer Wert</li>
 						</ul>
+					</div>
+					<div>
+						<h4 class="font-medium">🤖 KI-Generierung:</h4>
+						<p class="text-xs opacity-70">
+							Klicken Sie auf die KI-Buttons in den Textfeldern für automatische Generierung.
+						</p>
 					</div>
 					<div>
 						<h4 class="font-medium">🎯 Zielgruppen:</h4>
