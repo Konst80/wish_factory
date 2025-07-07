@@ -38,12 +38,10 @@
 	<div class="flex-none">
 		<div class="dropdown dropdown-end">
 			<div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-				<div
-					class="flex w-10 items-center justify-center rounded-full bg-primary text-primary-content"
-				>
-					<span class="text-sm font-semibold">
-						{currentUserProfile?.full_name?.charAt(0) || 'U'}
-					</span>
+				<div class="placeholder avatar">
+					<div class="w-10 rounded-full bg-primary text-primary-content">
+						<span class="text-sm">{currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
+					</div>
 				</div>
 			</div>
 			<ul class="menu dropdown-content z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow">

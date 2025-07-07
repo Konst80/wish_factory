@@ -59,9 +59,13 @@
 	<!-- Sidebar header -->
 	<div class="border-b border-base-300 p-4">
 		<div class="flex items-center gap-3">
-			<div class="placeholder avatar">
+			<div class="avatar">
 				<div class="w-12 rounded-full bg-primary text-primary-content">
-					<span class="text-xl">{currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
+					<div class="flex h-12 items-center justify-center">
+						<span class="text-lg font-medium"
+							>{currentUserProfile?.full_name?.charAt(0) || 'U'}</span
+						>
+					</div>
 				</div>
 			</div>
 			<div class="min-w-0 flex-1">
