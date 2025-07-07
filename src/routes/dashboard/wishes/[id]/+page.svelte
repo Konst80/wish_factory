@@ -1,8 +1,17 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { WishType, EventType, WishStatus, Relation, AgeGroup } from '$lib/types/Wish';
 	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	type FormResponse = {
+		success?: boolean;
+		message?: string;
+	} | null;
+
+	let { data, form }: { data: PageData; form: FormResponse } = $props();
+
+	let isUpdatingStatus = $state(false);
+	let showDeleteModal = $state(false);
 
 	// Status badge styles
 	const statusStyles: Record<WishStatus, string> = {
@@ -60,6 +69,44 @@
 		navigator.clipboard.writeText(text);
 		// TODO: Add toast notification
 	}
+
+	// Get available status transitions based on current status and user role
+	function getAvailableStatusTransitions() {
+		const currentStatus = data.wish.status;
+		const userRole = data.profile?.role;
+		const transitions: { status: WishStatus; label: string; style: string }[] = [];
+
+		if (currentStatus === WishStatus.ENTWURF) {
+			transitions.push({
+				status: WishStatus.ZUR_FREIGABE,
+				label: 'Zur Freigabe senden',
+				style: 'btn-info'
+			});
+		}
+
+		if (currentStatus === WishStatus.ZUR_FREIGABE && userRole === 'Administrator') {
+			transitions.push({
+				status: WishStatus.FREIGEGEBEN,
+				label: 'Freigeben',
+				style: 'btn-success'
+			});
+			transitions.push({
+				status: WishStatus.ENTWURF,
+				label: 'Zur Überarbeitung zurück',
+				style: 'btn-warning'
+			});
+		}
+
+		if (currentStatus === WishStatus.FREIGEGEBEN && userRole === 'Administrator') {
+			transitions.push({
+				status: WishStatus.ARCHIVIERT,
+				label: 'Archivieren',
+				style: 'btn-neutral'
+			});
+		}
+
+		return transitions;
+	}
 </script>
 
 <svelte:head>
@@ -84,6 +131,30 @@
 			</p>
 		</div>
 		<div class="flex gap-2">
+			<!-- Status Workflow Buttons -->
+			{#each getAvailableStatusTransitions() as transition}
+				<form
+					method="POST"
+					action="?/updateStatus"
+					use:enhance={() => {
+						isUpdatingStatus = true;
+						return async ({ update }) => {
+							await update();
+							isUpdatingStatus = false;
+						};
+					}}
+				>
+					<input type="hidden" name="status" value={transition.status} />
+					<button type="submit" class="btn {transition.style} btn-sm" disabled={isUpdatingStatus}>
+						{#if isUpdatingStatus}
+							<span class="loading loading-spinner loading-sm"></span>
+						{:else}
+							{transition.label}
+						{/if}
+					</button>
+				</form>
+			{/each}
+
 			<a href="/dashboard/wishes/{data.wish.id}/edit" class="btn btn-primary btn-sm">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -101,6 +172,27 @@
 				</svg>
 				Bearbeiten
 			</a>
+
+			<!-- Delete Button (Admins only) -->
+			{#if data.profile?.role === 'Administrator'}
+				<button type="button" class="btn btn-error btn-sm" onclick={() => (showDeleteModal = true)}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+						/>
+					</svg>
+					Löschen
+				</button>
+			{/if}
 		</div>
 	</div>
 </div>
@@ -401,6 +493,30 @@
 						JSON exportieren
 					</button>
 
+					<!-- Delete Button (Admin only) -->
+					{#if data.profile?.role === 'Administrator'}
+						<button
+							class="btn btn-error btn-sm w-full justify-start"
+							onclick={() => (showDeleteModal = true)}
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+								/>
+							</svg>
+							Löschen
+						</button>
+					{/if}
+
 					<a href="/dashboard/wishes" class="btn btn-ghost btn-sm w-full justify-start">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -423,3 +539,74 @@
 		</div>
 	</div>
 </div>
+
+<!-- Success/Error Messages -->
+{#if form?.success}
+	<div class="alert alert-success mt-6">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+			/>
+		</svg>
+		<span>{form.message}</span>
+	</div>
+{:else if form?.message}
+	<div class="alert alert-error mt-6">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+			/>
+		</svg>
+		<span>{form.message}</span>
+	</div>
+{/if}
+
+<!-- Delete Confirmation Modal -->
+{#if showDeleteModal}
+	<div class="modal-open modal">
+		<div class="modal-box">
+			<h3 class="mb-4 text-lg font-bold">Wunsch löschen</h3>
+			<p class="mb-4">
+				Möchten Sie den Wunsch "{data.wish.id}" wirklich unwiderruflich löschen?
+			</p>
+			<div class="alert alert-warning">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+					/>
+				</svg>
+				<span>Diese Aktion kann nicht rückgängig gemacht werden!</span>
+			</div>
+			<div class="modal-action">
+				<button class="btn btn-ghost" onclick={() => (showDeleteModal = false)}> Abbrechen </button>
+				<form method="POST" action="?/delete" use:enhance>
+					<button type="submit" class="btn btn-error"> Endgültig löschen </button>
+				</form>
+			</div>
+		</div>
+	</div>
+{/if}

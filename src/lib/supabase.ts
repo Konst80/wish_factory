@@ -28,7 +28,7 @@ export const createSupabaseServerClient = (cookies: {
 
 interface SvelteKitCookies {
 	getAll(): Array<{ name: string; value: string }>;
-	set(name: string, value: string, options?: Record<string, unknown>): void;
+	set(name: string, value: string, options: Record<string, unknown> & { path: string }): void;
 }
 
 export const createSupabaseServerClientFromSvelteKit = (cookies: SvelteKitCookies) => {

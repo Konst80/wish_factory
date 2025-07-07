@@ -68,12 +68,8 @@ CREATE TABLE IF NOT EXISTS wishes (
     CONSTRAINT text_length CHECK (length(text) >= 10 AND length(text) <= 1000),
     CONSTRAINT belated_length CHECK (length(belated) >= 10 AND length(belated) <= 1000),
     CONSTRAINT relations_not_empty CHECK (array_length(relations, 1) > 0),
-    CONSTRAINT age_groups_not_empty CHECK (array_length(age_groups, 1) > 0),
-    CONSTRAINT positive_specific_values CHECK (
-        specific_values IS NULL OR 
-        array_length(specific_values, 1) IS NULL OR
-        NOT EXISTS (SELECT 1 FROM unnest(specific_values) AS val WHERE val <= 0)
-    )
+    CONSTRAINT age_groups_not_empty CHECK (array_length(age_groups, 1) > 0)
+    -- positive_specific_values will be validated by trigger
 );
 
 -- Indexes für Performance
@@ -319,6 +315,7 @@ CREATE OR REPLACE FUNCTION validate_wish_status_change()
 RETURNS TRIGGER AS $$
 DECLARE
     user_role user_role;
+    val INTEGER;
 BEGIN
     -- Hole die Benutzerrolle
     SELECT p.role INTO user_role
@@ -333,6 +330,16 @@ BEGIN
         END IF;
     END IF;
     
+    -- Validiere specific_values (positive Zahlen)
+    IF NEW.specific_values IS NOT NULL AND array_length(NEW.specific_values, 1) > 0 THEN
+        FOREACH val IN ARRAY NEW.specific_values
+        LOOP
+            IF val <= 0 THEN
+                RAISE EXCEPTION 'specific_values müssen positive Zahlen sein. Gefunden: %', val;
+            END IF;
+        END LOOP;
+    END IF;
+    
     -- Setze updated_at
     NEW.updated_at = CURRENT_TIMESTAMP;
     
@@ -341,7 +348,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE TRIGGER validate_wish_status_trigger
-    BEFORE UPDATE ON wishes
+    BEFORE INSERT OR UPDATE ON wishes
     FOR EACH ROW
     EXECUTE FUNCTION validate_wish_status_change();
 

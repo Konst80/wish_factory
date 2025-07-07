@@ -35,10 +35,10 @@
 	let selectedStatus = $state('');
 	let showAddUserModal = $state(false);
 	let showDeleteModal = $state(false);
-	let selectedUser = $state<any>(null);
+	let selectedUser = $state<(typeof users)[0] | null>(null);
 
 	const roles = ['Administrator', 'Redakteur'];
-	const statuses = ['active', 'inactive'];
+	// const statuses = ['active', 'inactive']; // Unused for now
 
 	const roleStyles: Record<string, string> = {
 		Administrator: 'badge-error',
@@ -81,7 +81,7 @@
 		});
 	}
 
-	function openDeleteModal(user: any) {
+	function openDeleteModal(user: (typeof users)[0]) {
 		selectedUser = user;
 		showDeleteModal = true;
 	}

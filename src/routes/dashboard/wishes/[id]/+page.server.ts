@@ -1,5 +1,6 @@
-import { error, redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types.js';
+import { error, fail, redirect } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types.js';
+import { WishStatus } from '$lib/types/Wish';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	// Benutzer-Session prüfen
@@ -39,8 +40,135 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		createdBy: wish.created_by
 	};
 
+	// Get user profile for role-based actions
+	const { data: profiles } = await locals.supabase
+		.from('profiles')
+		.select('*')
+		.eq('id', session.user.id);
+
+	const profile = profiles && profiles.length > 0 ? profiles[0] : null;
+
 	return {
 		wish: wishData,
-		user: session.user
+		user: session.user,
+		profile: profile || null
 	};
+};
+
+export const actions: Actions = {
+	updateStatus: async ({ params, request, locals }) => {
+		const { session } = await locals.safeGetSession();
+		if (!session?.user) {
+			throw redirect(302, '/auth/login');
+		}
+
+		const formData = await request.formData();
+		const newStatus = formData.get('status') as WishStatus;
+		const wishId = params.id;
+
+		if (!newStatus || !Object.values(WishStatus).includes(newStatus)) {
+			return fail(400, { message: 'Ungültiger Status' });
+		}
+
+		try {
+			// Get user profile to check permissions
+			const { data: profile } = await locals.supabase
+				.from('profiles')
+				.select('role')
+				.eq('id', session.user.id)
+				.single();
+
+			if (!profile) {
+				return fail(403, { message: 'Benutzer-Profil nicht gefunden' });
+			}
+
+			// Get current wish status
+			const { data: currentWish } = await locals.supabase
+				.from('wishes')
+				.select('status')
+				.eq('id', wishId)
+				.single();
+
+			if (!currentWish) {
+				return fail(404, { message: 'Wunsch nicht gefunden' });
+			}
+
+			// Validate status transition using database function
+			const { data: isValidTransition, error: validationError } = await locals.supabase.rpc(
+				'validate_status_transition',
+				{
+					current_status: currentWish.status,
+					new_status: newStatus,
+					user_role: profile.role
+				}
+			);
+
+			if (validationError) {
+				console.error('Error validating status transition:', validationError);
+				return fail(500, { message: 'Fehler bei der Status-Validierung' });
+			}
+
+			if (!isValidTransition) {
+				return fail(400, {
+					message: `Status-Übergang von "${currentWish.status}" zu "${newStatus}" ist nicht erlaubt`
+				});
+			}
+
+			// Update the wish status
+			const { error: updateError } = await locals.supabase
+				.from('wishes')
+				.update({ status: newStatus })
+				.eq('id', wishId);
+
+			if (updateError) {
+				console.error('Error updating wish status:', updateError);
+				return fail(500, { message: 'Fehler beim Aktualisieren des Status' });
+			}
+
+			return { success: true, message: `Status erfolgreich auf "${newStatus}" geändert` };
+		} catch (err) {
+			console.error('Error in updateStatus action:', err);
+			return fail(500, { message: 'Unbekannter Fehler beim Status-Update' });
+		}
+	},
+
+	delete: async ({ params, locals }) => {
+		const { session } = await locals.safeGetSession();
+		if (!session?.user) {
+			throw redirect(302, '/auth/login');
+		}
+
+		const wishId = params.id;
+
+		try {
+			// Get user profile to check permissions
+			const { data: profile } = await locals.supabase
+				.from('profiles')
+				.select('role')
+				.eq('id', session.user.id)
+				.single();
+
+			if (!profile || profile.role !== 'Administrator') {
+				return fail(403, { message: 'Nur Administratoren können Wünsche löschen' });
+			}
+
+			// Delete the wish
+			const { error: deleteError } = await locals.supabase.from('wishes').delete().eq('id', wishId);
+
+			if (deleteError) {
+				console.error('Error deleting wish:', deleteError);
+				return fail(500, { message: 'Fehler beim Löschen des Wunsches' });
+			}
+
+			throw redirect(302, '/dashboard/wishes?deleted=true');
+		} catch (err) {
+			// Check if it's a redirect (which is expected)
+			if (err && typeof err === 'object' && 'status' in err && err.status === 302) {
+				// This is the expected redirect, let it through
+				throw err;
+			}
+			console.error('Error in delete action:', err);
+			return fail(500, { message: 'Unbekannter Fehler beim Löschen' });
+		}
+	}
 };

@@ -9,10 +9,10 @@ export default {
 		extend: {}
 	},
 	plugins: [
-		daisyui, 
+		daisyui,
 		forms({
-			strategy: 'class',
-		}), 
+			strategy: 'class'
+		}),
 		typography
 	],
 	daisyui: {

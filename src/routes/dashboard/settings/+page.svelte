@@ -1,40 +1,23 @@
 <script lang="ts">
-	// Settings state
-	let settings = $state({
-		profile: {
-			fullName: 'Max Mustermann',
-			email: 'max@example.com',
-			language: 'de',
-			timezone: 'Europe/Berlin',
-			avatarUrl: ''
-		},
-		notifications: {
-			emailNotifications: true,
-			pushNotifications: false,
-			newWishAlerts: true,
-			approvalRequests: true,
-			systemUpdates: false,
-			weeklyReport: true
-		},
-		preferences: {
-			theme: 'light',
-			dashboardLayout: 'grid',
-			defaultLanguage: 'de',
-			wishesPerPage: 25,
-			autoSave: true,
-			confirmBeforeDelete: true
-		},
-		system: {
-			apiAccess: true,
-			exportFormat: 'json',
-			backupFrequency: 'daily',
-			dataRetention: 365
-		}
-	});
+	import { enhance } from '$app/forms';
+	import type { PageData } from './$types';
+
+	let { data, form }: { data: PageData; form: any } = $props();
 
 	let activeTab = $state('profile');
 	let showSuccessMessage = $state(false);
 	let showPasswordModal = $state(false);
+	let isSubmitting = $state(false);
+
+	// Show success message when form succeeds
+	$effect(() => {
+		if (form?.success) {
+			showSuccessMessage = true;
+			setTimeout(() => {
+				showSuccessMessage = false;
+			}, 3000);
+		}
+	});
 
 	const tabs = [
 		{
@@ -90,14 +73,6 @@
 		{ value: 'monthly', label: 'Monatlich' }
 	];
 
-	function saveSettings() {
-		// Simulate saving settings
-		showSuccessMessage = true;
-		setTimeout(() => {
-			showSuccessMessage = false;
-		}, 3000);
-	}
-
 	function resetSettings() {
 		if (confirm('Möchten Sie alle Einstellungen auf die Standardwerte zurücksetzen?')) {
 			location.reload();
@@ -105,7 +80,7 @@
 	}
 
 	function exportSettings() {
-		const dataStr = JSON.stringify(settings, null, 2);
+		const dataStr = JSON.stringify(data.settings, null, 2);
 		const dataBlob = new Blob([dataStr], { type: 'application/json' });
 		const url = URL.createObjectURL(dataBlob);
 		const link = document.createElement('a');
@@ -137,7 +112,7 @@
 					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 				/>
 			</svg>
-			<span>Einstellungen erfolgreich gespeichert!</span>
+			<span>{form?.message || 'Einstellungen erfolgreich gespeichert!'}</span>
 		</div>
 	</div>
 {/if}
@@ -219,145 +194,205 @@
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">Profil-Einstellungen</h2>
-					<div class="space-y-4">
-						<div class="form-control">
-							<label class="label" for="fullName">
-								<span class="label-text">Vollständiger Name</span>
-							</label>
-							<input
-								id="fullName"
-								type="text"
-								placeholder="Ihr vollständiger Name"
-								class="input-bordered input w-full"
-								bind:value={settings.profile.fullName}
-							/>
-						</div>
+					<form 
+						method="POST" 
+						action="?/updateProfile"
+						use:enhance={() => {
+							isSubmitting = true;
+							return async ({ update }) => {
+								await update();
+								isSubmitting = false;
+							};
+						}}
+					>
+						<div class="space-y-4">
+							<div class="form-control">
+								<label class="label" for="fullName">
+									<span class="label-text">Vollständiger Name</span>
+								</label>
+								<input
+									id="fullName"
+									name="fullName"
+									type="text"
+									placeholder="Ihr vollständiger Name"
+									class="input-bordered input w-full"
+									value={data.settings.profile.fullName}
+									required
+								/>
+							</div>
 
-						<div class="form-control">
-							<label class="label" for="email">
-								<span class="label-text">E-Mail-Adresse</span>
-							</label>
-							<input
-								id="email"
-								type="email"
-								placeholder="ihre@email.com"
-								class="input-bordered input w-full"
-								bind:value={settings.profile.email}
-							/>
-						</div>
+							<div class="form-control">
+								<label class="label" for="email">
+									<span class="label-text">E-Mail-Adresse</span>
+								</label>
+								<input
+									id="email"
+									type="email"
+									placeholder="ihre@email.com"
+									class="input-bordered input w-full"
+									value={data.settings.profile.email}
+									disabled
+								/>
+								<label class="label">
+									<span class="label-text-alt">E-Mail kann nicht geändert werden</span>
+								</label>
+							</div>
 
-						<div class="form-control">
-							<label class="label" for="language">
-								<span class="label-text">Sprache</span>
-							</label>
-							<select
-								id="language"
-								class="select-bordered select w-full"
-								bind:value={settings.profile.language}
-							>
-								{#each languages as lang}
-									<option value={lang.value}>{lang.label}</option>
-								{/each}
-							</select>
-						</div>
+							<div class="form-control">
+								<label class="label" for="language">
+									<span class="label-text">Sprache</span>
+								</label>
+								<select
+									id="language"
+									name="language"
+									class="select-bordered select w-full"
+									value={data.settings.profile.language}
+								>
+									{#each languages as lang}
+										<option value={lang.value}>{lang.label}</option>
+									{/each}
+								</select>
+							</div>
 
-						<div class="form-control">
-							<label class="label" for="timezone">
-								<span class="label-text">Zeitzone</span>
-							</label>
-							<select
-								id="timezone"
-								class="select-bordered select w-full"
-								bind:value={settings.profile.timezone}
-							>
-								{#each timezones as tz}
-									<option value={tz.value}>{tz.label}</option>
-								{/each}
-							</select>
-						</div>
+							<div class="form-control">
+								<label class="label" for="timezone">
+									<span class="label-text">Zeitzone</span>
+								</label>
+								<select
+									id="timezone"
+									name="timezone"
+									class="select-bordered select w-full"
+									value={data.settings.profile.timezone}
+								>
+									{#each timezones as tz}
+										<option value={tz.value}>{tz.label}</option>
+									{/each}
+								</select>
+							</div>
 
-						<div class="form-control">
-							<label class="label">
-								<span class="label-text">Passwort</span>
-							</label>
-							<button class="btn btn-outline" onclick={() => (showPasswordModal = true)}>
-								Passwort ändern
-							</button>
+							<div class="form-control">
+								<label class="label">
+									<span class="label-text">Passwort</span>
+								</label>
+								<button type="button" class="btn btn-outline" onclick={() => (showPasswordModal = true)}>
+									Passwort ändern
+								</button>
+							</div>
+
+							<div class="card-actions justify-end">
+								<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+									{#if isSubmitting}
+										<span class="loading loading-spinner loading-sm"></span>
+										Speichern...
+									{:else}
+										Profil speichern
+									{/if}
+								</button>
+							</div>
 						</div>
-					</div>
+					</form>
 				</div>
 			</div>
 		{:else if activeTab === 'notifications'}
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">Benachrichtigungen</h2>
-					<div class="space-y-4">
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<span class="label-text">E-Mail-Benachrichtigungen</span>
-								<input
-									type="checkbox"
-									class="toggle toggle-primary"
-									bind:checked={settings.notifications.emailNotifications}
-								/>
-							</label>
-						</div>
+					<form 
+						method="POST" 
+						action="?/updateNotifications"
+						use:enhance={() => {
+							isSubmitting = true;
+							return async ({ update }) => {
+								await update();
+								isSubmitting = false;
+							};
+						}}
+					>
+						<div class="space-y-4">
+							<div class="form-control">
+								<label class="label cursor-pointer">
+									<span class="label-text">E-Mail-Benachrichtigungen</span>
+									<input
+										type="checkbox"
+										name="emailNotifications"
+										class="toggle toggle-primary"
+										checked={data.settings.notifications.emailNotifications}
+									/>
+								</label>
+							</div>
 
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<span class="label-text">Push-Benachrichtigungen</span>
-								<input
-									type="checkbox"
-									class="toggle toggle-primary"
-									bind:checked={settings.notifications.pushNotifications}
-								/>
-							</label>
-						</div>
+							<div class="form-control">
+								<label class="label cursor-pointer">
+									<span class="label-text">Push-Benachrichtigungen</span>
+									<input
+										type="checkbox"
+										name="pushNotifications"
+										class="toggle toggle-primary"
+										checked={data.settings.notifications.pushNotifications}
+									/>
+								</label>
+							</div>
 
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<span class="label-text">Neue Wunsch-Benachrichtigungen</span>
-								<input
-									type="checkbox"
-									class="toggle toggle-primary"
-									bind:checked={settings.notifications.newWishAlerts}
-								/>
-							</label>
-						</div>
+							<div class="form-control">
+								<label class="label cursor-pointer">
+									<span class="label-text">Neue Wunsch-Benachrichtigungen</span>
+									<input
+										type="checkbox"
+										name="newWishAlerts"
+										class="toggle toggle-primary"
+										checked={data.settings.notifications.newWishAlerts}
+									/>
+								</label>
+							</div>
 
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<span class="label-text">Freigabe-Anfragen</span>
-								<input
-									type="checkbox"
-									class="toggle toggle-primary"
-									bind:checked={settings.notifications.approvalRequests}
-								/>
-							</label>
-						</div>
+							<div class="form-control">
+								<label class="label cursor-pointer">
+									<span class="label-text">Freigabe-Anfragen</span>
+									<input
+										type="checkbox"
+										name="approvalRequests"
+										class="toggle toggle-primary"
+										checked={data.settings.notifications.approvalRequests}
+									/>
+								</label>
+							</div>
 
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<span class="label-text">System-Updates</span>
-								<input
-									type="checkbox"
-									class="toggle toggle-primary"
-									bind:checked={settings.notifications.systemUpdates}
-								/>
-							</label>
-						</div>
+							<div class="form-control">
+								<label class="label cursor-pointer">
+									<span class="label-text">System-Updates</span>
+									<input
+										type="checkbox"
+										name="systemUpdates"
+										class="toggle toggle-primary"
+										checked={data.settings.notifications.systemUpdates}
+									/>
+								</label>
+							</div>
 
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<span class="label-text">Wöchentlicher Bericht</span>
-								<input
-									type="checkbox"
-									class="toggle toggle-primary"
-									bind:checked={settings.notifications.weeklyReport}
-								/>
-							</label>
+							<div class="form-control">
+								<label class="label cursor-pointer">
+									<span class="label-text">Wöchentlicher Bericht</span>
+									<input
+										type="checkbox"
+										name="weeklyReport"
+										class="toggle toggle-primary"
+										checked={data.settings.notifications.weeklyReport}
+									/>
+								</label>
+							</div>
+
+							<div class="card-actions justify-end">
+								<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+									{#if isSubmitting}
+										<span class="loading loading-spinner loading-sm"></span>
+										Speichern...
+									{:else}
+										Benachrichtigungen speichern
+									{/if}
+								</button>
+							</div>
 						</div>
-					</div>
+					</form>
 				</div>
 			</div>
 		{:else if activeTab === 'preferences'}

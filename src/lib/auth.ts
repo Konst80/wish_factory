@@ -90,6 +90,15 @@ export async function getCurrentSession(): Promise<Session | null> {
 		return null;
 	}
 
+	// Use getUser() for secure validation, then get session
+	const {
+		data: { user },
+		error
+	} = await supabase.auth.getUser();
+	if (error || !user) {
+		return null;
+	}
+
 	const { data } = await supabase.auth.getSession();
 	return data.session;
 }
@@ -99,14 +108,14 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 		return null;
 	}
 
-	const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+	const { data: profiles, error } = await supabase.from('profiles').select('*').eq('id', userId);
 
 	if (error) {
 		console.error('Error fetching user profile:', error);
 		return null;
 	}
 
-	return data;
+	return profiles && profiles.length > 0 ? profiles[0] : null;
 }
 
 export async function updateUserProfile(

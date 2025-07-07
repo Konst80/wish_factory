@@ -1,28 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { signInWithEmail } from '$lib/auth';
+	import { auth, isAuthLoading, authError } from '$lib/stores/auth';
 
-	let email = '';
-	let password = '';
-	let loading = false;
-	let error = '';
+	let email = 'admin@example.com';
+	let password = 'Konst';
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
-		loading = true;
-		error = '';
 
-		try {
-			const result = await signInWithEmail(email, password);
-			if (result.error) {
-				error = result.error.message;
-			} else {
-				goto('/dashboard');
-			}
-		} catch (err) {
-			error = err instanceof Error ? err.message : 'An error occurred';
-		} finally {
-			loading = false;
+		const result = await auth.signIn(email, password);
+		if (result && !result.error) {
+			goto('/dashboard');
 		}
 	};
 </script>
@@ -47,7 +35,7 @@
 						class="input-bordered input"
 						bind:value={email}
 						required
-						disabled={loading}
+						disabled={$isAuthLoading}
 					/>
 				</div>
 
@@ -61,19 +49,19 @@
 						class="input-bordered input"
 						bind:value={password}
 						required
-						disabled={loading}
+						disabled={$isAuthLoading}
 					/>
 				</div>
 
-				{#if error}
+				{#if $authError}
 					<div class="alert alert-error">
-						<span>{error}</span>
+						<span>{$authError}</span>
 					</div>
 				{/if}
 
 				<div class="form-control mt-6">
-					<button type="submit" class="btn btn-primary" disabled={loading}>
-						{#if loading}
+					<button type="submit" class="btn btn-primary" disabled={$isAuthLoading}>
+						{#if $isAuthLoading}
 							<span class="loading loading-spinner loading-sm"></span>
 						{:else}
 							Anmelden

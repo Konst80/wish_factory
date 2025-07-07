@@ -61,7 +61,7 @@
 		};
 	};
 
-	let batchMode = $state('single'); // 'single' | 'batch'
+	// let batchMode = $state('single'); // 'single' | 'batch' - unused for now
 	let batchSettings = $state({
 		count: 5,
 		variations: ['normal', 'herzlich', 'humorvoll'],

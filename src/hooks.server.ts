@@ -1,6 +1,7 @@
 import { sequence } from '@sveltejs/kit/hooks';
 import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
+import { createSupabaseServerClientFromSvelteKit } from '$lib/supabase';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -12,14 +13,32 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 	});
 
 const handleAuth: Handle = async ({ event, resolve }) => {
-	// Temporarily disable Supabase for UI testing
-	// event.locals.supabase = createSupabaseServerClientFromSvelteKit(event.cookies);
+	event.locals.supabase = createSupabaseServerClientFromSvelteKit(event.cookies);
 
 	event.locals.safeGetSession = async () => {
-		return { session: null, user: null };
+		try {
+			// Use getUser() for secure authentication
+			const {
+				data: { user },
+				error
+			} = await event.locals.supabase.auth.getUser();
+			if (error) {
+				console.error('Error getting user:', error);
+				return { session: null, user: null };
+			}
+
+			// If we have a user, get the session for completeness
+			const {
+				data: { session }
+			} = await event.locals.supabase.auth.getSession();
+
+			return { session, user };
+		} catch (err) {
+			console.error('Error in safeGetSession:', err);
+			return { session: null, user: null };
+		}
 	};
 
-	// Skip all auth logic for now
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
 			return name === 'content-range';

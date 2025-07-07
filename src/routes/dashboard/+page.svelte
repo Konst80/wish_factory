@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 
 	// Theme-System mit localStorage-Persistierung
 	let currentTheme = $state('light');
@@ -45,12 +48,36 @@
 		);
 	};
 
-	// Mock data
-	const mockUser = { full_name: 'Max Mustermann' };
-	const isAdmin = true;
-
 	// Notification state
 	let showWelcomeAlert = $state(true);
+
+	// Helper function to format relative time
+	function formatRelativeTime(dateStr: string) {
+		const date = new Date(dateStr);
+		const now = new Date();
+		const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+
+		if (diffInHours < 1) return 'vor wenigen Minuten';
+		if (diffInHours < 24) return `vor ${diffInHours} Stunden`;
+		if (diffInHours < 48) return 'gestern';
+		return `vor ${Math.floor(diffInHours / 24)} Tagen`;
+	}
+
+	// Helper function to get status badge class
+	function getStatusBadgeClass(status: string) {
+		switch (status) {
+			case 'Entwurf':
+				return 'badge-warning';
+			case 'Zur Freigabe':
+				return 'badge-info';
+			case 'Freigegeben':
+				return 'badge-success';
+			case 'Archiviert':
+				return 'badge-neutral';
+			default:
+				return 'badge-ghost';
+		}
+	}
 </script>
 
 <svelte:head>
@@ -117,11 +144,11 @@
 		<div>
 			<h1 class="text-4xl font-bold">Dashboard</h1>
 			<p class="text-base-content/70 mt-2 text-lg">
-				Willkommen zurück, {mockUser?.full_name}!
+				Willkommen zurück, {data.user.name}!
 			</p>
 		</div>
 		<div class="flex items-center gap-3">
-			<div class="badge badge-lg {isAdmin ? 'badge-error' : 'badge-primary'} gap-2">
+			<div class="badge badge-lg {data.user.isAdmin ? 'badge-error' : 'badge-primary'} gap-2">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-4 w-4"
@@ -136,7 +163,7 @@
 						d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 					/>
 				</svg>
-				{isAdmin ? 'Administrator' : 'Redakteur'}
+				{data.user.isAdmin ? 'Administrator' : 'Redakteur'}
 			</div>
 		</div>
 	</div>
@@ -207,7 +234,7 @@
 			</svg>
 		</div>
 		<div class="stat-title">Meine Wünsche</div>
-		<div class="stat-value text-primary">23</div>
+		<div class="stat-value text-primary">{data.stats.userWishes}</div>
 		<div class="stat-desc">Gesamt erstellt</div>
 	</div>
 
@@ -228,8 +255,14 @@
 			</svg>
 		</div>
 		<div class="stat-title">Zur Freigabe</div>
-		<div class="stat-value text-warning">5</div>
-		<div class="stat-desc">↗︎ 2 neue heute</div>
+		<div class="stat-value text-warning">{data.stats.pendingWishes}</div>
+		<div class="stat-desc">
+			{#if data.stats.todayWishes > 0}
+				↗︎ {data.stats.todayWishes} neue heute
+			{:else}
+				Warten auf Genehmigung
+			{/if}
+		</div>
 	</div>
 
 	<div class="stat">
@@ -249,8 +282,14 @@
 			</svg>
 		</div>
 		<div class="stat-title">Freigegeben</div>
-		<div class="stat-value text-success">18</div>
-		<div class="stat-desc">↗︎ 78% diese Woche</div>
+		<div class="stat-value text-success">{data.stats.approvedWishes}</div>
+		<div class="stat-desc">
+			{#if data.stats.totalWishes > 0}
+				↗︎ {Math.round((data.stats.approvedWishes / data.stats.totalWishes) * 100)}% Freigaberate
+			{:else}
+				Bereit zur Nutzung
+			{/if}
+		</div>
 	</div>
 </div>
 
@@ -262,7 +301,7 @@
 			<div class="card-body">
 				<div class="mb-6 flex items-center justify-between">
 					<h2 class="card-title text-2xl">Schnellzugriff</h2>
-					<div class="badge badge-neutral">{isAdmin ? '4' : '2'} Aktionen</div>
+					<div class="badge badge-neutral">{data.user.isAdmin ? '4' : '2'} Aktionen</div>
 				</div>
 
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -333,7 +372,7 @@
 						</div>
 					</div>
 
-					{#if isAdmin}
+					{#if data.user.isAdmin}
 						<!-- Benutzer verwalten -->
 						<div
 							class="bg-accent/5 border-accent/20 hover:bg-accent/10 card border transition-colors"
@@ -402,15 +441,67 @@
 			<div class="card-body">
 				<div class="mb-4 flex items-center justify-between">
 					<h3 class="card-title">Letzte Aktivitäten</h3>
-					<div class="badge badge-ghost">3</div>
+					<div class="badge badge-ghost">{data.recentActivities.length}</div>
 				</div>
 
 				<div class="space-y-4">
-					<div class="flex items-start gap-3">
-						<div class="badge badge-success p-3">
+					{#each data.recentActivities as activity}
+						<div class="flex items-start gap-3">
+							<div class="badge {getStatusBadgeClass(activity.status)} p-3">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									{#if activity.status === 'Freigegeben'}
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M5 13l4 4L19 7"
+										/>
+									{:else if activity.status === 'Zur Freigabe'}
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									{:else}
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+										/>
+									{/if}
+								</svg>
+							</div>
+							<div class="flex-1">
+								<p class="text-sm font-medium">
+									{#if activity.status === 'Entwurf'}
+										Neuer Wunsch erstellt
+									{:else if activity.status === 'Zur Freigabe'}
+										Wunsch zur Freigabe
+									{:else if activity.status === 'Freigegeben'}
+										Wunsch genehmigt
+									{:else}
+										Wunsch bearbeitet
+									{/if}
+								</p>
+								<p class="text-xs opacity-60">{activity.title}</p>
+								<p class="mt-1 text-xs opacity-40">
+									{formatRelativeTime(activity.createdAt)} • von {activity.createdBy}
+								</p>
+							</div>
+						</div>
+					{:else}
+						<div class="text-center py-8">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
-								class="h-4 w-4"
+								class="h-12 w-12 mx-auto opacity-30"
 								fill="none"
 								viewBox="0 0 24 24"
 								stroke="currentColor"
@@ -419,64 +510,12 @@
 									stroke-linecap="round"
 									stroke-linejoin="round"
 									stroke-width="2"
-									d="M5 13l4 4L19 7"
+									d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 0 012 2"
 								/>
 							</svg>
+							<p class="text-sm opacity-70 mt-2">Noch keine Aktivitäten</p>
 						</div>
-						<div class="flex-1">
-							<p class="text-sm font-medium">Neuer Wunsch erstellt</p>
-							<p class="text-xs opacity-60">Geburtstagsglückwunsch für Maria</p>
-							<p class="mt-1 text-xs opacity-40">vor 2 Stunden</p>
-						</div>
-					</div>
-
-					<div class="flex items-start gap-3">
-						<div class="badge badge-warning p-3">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-4 w-4"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
-							</svg>
-						</div>
-						<div class="flex-1">
-							<p class="text-sm font-medium">Wunsch zur Freigabe</p>
-							<p class="text-xs opacity-60">Weihnachtsgrüße 2024</p>
-							<p class="mt-1 text-xs opacity-40">vor 5 Stunden</p>
-						</div>
-					</div>
-
-					<div class="flex items-start gap-3">
-						<div class="badge badge-success p-3">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-4 w-4"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M5 13l4 4L19 7"
-								/>
-							</svg>
-						</div>
-						<div class="flex-1">
-							<p class="text-sm font-medium">Wunsch genehmigt</p>
-							<p class="text-xs opacity-60">Hochzeitsglückwunsch</p>
-							<p class="mt-1 text-xs opacity-40">gestern</p>
-						</div>
-					</div>
+					{/each}
 				</div>
 			</div>
 		</div>

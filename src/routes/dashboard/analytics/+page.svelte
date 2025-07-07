@@ -1,47 +1,18 @@
 <script lang="ts">
-	// Mock analytics data
-	const analyticsData = {
-		overview: {
-			totalWishes: 156,
-			totalUsers: 12,
-			totalPublished: 142,
-			averageRating: 4.7
-		},
-		wishesOverTime: [
-			{ month: 'Jan', count: 8 },
-			{ month: 'Feb', count: 12 },
-			{ month: 'Mar', count: 15 },
-			{ month: 'Apr', count: 20 },
-			{ month: 'Mai', count: 25 },
-			{ month: 'Jun', count: 30 },
-			{ month: 'Jul', count: 35 }
-		],
-		userActivity: [
-			{ user: 'Max Mustermann', wishes: 45, published: 42 },
-			{ user: 'Anna Schmidt', wishes: 38, published: 35 },
-			{ user: 'Peter Müller', wishes: 32, published: 28 },
-			{ user: 'Lisa Weber', wishes: 25, published: 22 },
-			{ user: 'Tom Klein', wishes: 16, published: 15 }
-		],
-		categoryDistribution: [
-			{ category: 'Geburtstag', count: 68, percentage: 43.6 },
-			{ category: 'Jubiläum', count: 52, percentage: 33.3 },
-			{ category: 'Individuell', count: 36, percentage: 23.1 }
-		],
-		languageDistribution: [
-			{ language: 'Deutsch', count: 124, percentage: 79.5 },
-			{ language: 'English', count: 32, percentage: 20.5 }
-		],
-		statusDistribution: [
-			{ status: 'Freigegeben', count: 89, percentage: 57.1 },
-			{ status: 'Zur Freigabe', count: 35, percentage: 22.4 },
-			{ status: 'Entwurf', count: 24, percentage: 15.4 },
-			{ status: 'Archiviert', count: 8, percentage: 5.1 }
-		]
-	};
+	import { goto } from '$app/navigation';
+	import type { PageData } from './$types';
 
-	let selectedTimeRange = $state('last-7-days');
+	let { data }: { data: PageData } = $props();
+
+	let selectedTimeRange = $state(data.timeRange || 'last-30-days');
 	let selectedMetric = $state('wishes');
+
+	// Update URL when time range changes
+	function updateTimeRange() {
+		const params = new URLSearchParams();
+		params.set('timeRange', selectedTimeRange);
+		goto(`?${params.toString()}`, { replaceState: true });
+	}
 
 	const timeRanges = [
 		{ value: 'last-7-days', label: 'Letzte 7 Tage' },
@@ -70,7 +41,7 @@
 	};
 
 	function exportData() {
-		const dataStr = JSON.stringify(analyticsData, null, 2);
+		const dataStr = JSON.stringify(data, null, 2);
 		const dataBlob = new Blob([dataStr], { type: 'application/json' });
 		const url = URL.createObjectURL(dataBlob);
 		const link = document.createElement('a');
@@ -122,7 +93,12 @@
 		<label class="label" for="timeRange">
 			<span class="label-text">Zeitraum</span>
 		</label>
-		<select id="timeRange" class="select-bordered select w-full" bind:value={selectedTimeRange}>
+		<select
+			id="timeRange"
+			class="select-bordered select w-full"
+			bind:value={selectedTimeRange}
+			onchange={updateTimeRange}
+		>
 			{#each timeRanges as range}
 				<option value={range.value}>{range.label}</option>
 			{/each}
@@ -160,8 +136,8 @@
 			</svg>
 		</div>
 		<div class="stat-title">Gesamt Wünsche</div>
-		<div class="stat-value text-primary">{analyticsData.overview.totalWishes}</div>
-		<div class="stat-desc">↗︎ 12% mehr als letzten Monat</div>
+		<div class="stat-value text-primary">{data.overview.totalWishes}</div>
+		<div class="stat-desc">Alle erstellten Wünsche</div>
 	</div>
 
 	<div class="stat">
@@ -181,8 +157,8 @@
 			</svg>
 		</div>
 		<div class="stat-title">Aktive Benutzer</div>
-		<div class="stat-value text-secondary">{analyticsData.overview.totalUsers}</div>
-		<div class="stat-desc">↗︎ 2 neue diese Woche</div>
+		<div class="stat-value text-secondary">{data.overview.totalUsers}</div>
+		<div class="stat-desc">Registrierte Benutzer</div>
 	</div>
 
 	<div class="stat">
@@ -202,8 +178,12 @@
 			</svg>
 		</div>
 		<div class="stat-title">Veröffentlicht</div>
-		<div class="stat-value text-success">{analyticsData.overview.totalPublished}</div>
-		<div class="stat-desc">91% Erfolgsquote</div>
+		<div class="stat-value text-success">{data.overview.totalPublished}</div>
+		<div class="stat-desc">
+			{data.overview.totalWishes > 0
+				? Math.round((data.overview.totalPublished / data.overview.totalWishes) * 100)
+				: 0}% Erfolgsquote
+		</div>
 	</div>
 
 	<div class="stat">
@@ -223,7 +203,7 @@
 			</svg>
 		</div>
 		<div class="stat-title">Durchschnittliche Bewertung</div>
-		<div class="stat-value text-warning">{analyticsData.overview.averageRating}</div>
+		<div class="stat-value text-warning">{data.overview.averageRating}</div>
 		<div class="stat-desc">von 5 Sternen</div>
 	</div>
 </div>
@@ -237,13 +217,15 @@
 			<div class="h-64 w-full">
 				<!-- Simple bar chart representation -->
 				<div class="flex h-full items-end justify-around gap-2">
-					{#each analyticsData.wishesOverTime as data (data.month)}
+					{#each data.wishesOverTime as monthData (monthData.month)}
+						{@const maxCount = Math.max(...data.wishesOverTime.map((d) => d.count)) || 1}
 						<div class="flex flex-col items-center">
 							<div
 								class="w-8 rounded-t bg-primary"
-								style="height: {(data.count / 35) * 100}%"
+								style="height: {Math.max((monthData.count / maxCount) * 100, 5)}%"
 							></div>
-							<span class="mt-2 text-xs">{data.month}</span>
+							<span class="mt-2 text-xs">{monthData.month}</span>
+							<span class="text-xs opacity-60">{monthData.count}</span>
 						</div>
 					{/each}
 				</div>
@@ -256,7 +238,7 @@
 		<div class="card-body">
 			<h2 class="card-title">Kategorieverteilung</h2>
 			<div class="space-y-3">
-				{#each analyticsData.categoryDistribution as category}
+				{#each data.categoryDistribution as category}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3">
 							<div class="h-4 w-4 rounded {categoryColors[category.category]}"></div>
@@ -293,16 +275,20 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each analyticsData.userActivity as user}
+						{#each data.userActivity as user}
 							<tr>
 								<td class="font-medium">{user.user}</td>
 								<td>{user.wishes}</td>
 								<td>{user.published}</td>
 								<td>
 									<div class="text-sm">
-										{Math.round((user.published / user.wishes) * 100)}%
+										{user.wishes > 0 ? Math.round((user.published / user.wishes) * 100) : 0}%
 									</div>
 								</td>
+							</tr>
+						{:else}
+							<tr>
+								<td colspan="4" class="text-center opacity-70">Keine Benutzerdaten verfügbar</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -316,7 +302,7 @@
 		<div class="card-body">
 			<h2 class="card-title">Status-Verteilung</h2>
 			<div class="space-y-3">
-				{#each analyticsData.statusDistribution as status}
+				{#each data.statusDistribution as status}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3">
 							<div class="h-4 w-4 rounded {statusColors[status.status]}"></div>
@@ -344,7 +330,7 @@
 	<div class="card-body">
 		<h2 class="card-title">Sprachverteilung</h2>
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-			{#each analyticsData.languageDistribution as lang}
+			{#each data.languageDistribution as lang}
 				<div class="flex items-center justify-between rounded-lg border p-4">
 					<div class="flex items-center gap-3">
 						<div

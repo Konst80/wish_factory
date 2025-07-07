@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import { WishStatus, EventType, Relation, AgeGroup } from '$lib/types/Wish';
 	import type { PageData } from './$types';
 
@@ -18,6 +19,7 @@
 	let selectedWishes = $state<string[]>([]);
 	let showDeleteModal = $state(false);
 	let showExportModal = $state(false);
+	let isDeleting = $state(false);
 
 	// Status badge styles
 	const statusStyles: Record<WishStatus, string> = {
@@ -169,6 +171,63 @@
 		</div>
 	</div>
 </div>
+
+<!-- Success Messages -->
+{#if data.deleted}
+	<div class="alert alert-success mb-6">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+			/>
+		</svg>
+		<div>
+			<h3 class="font-bold">
+				{data.deletedCount > 1
+					? `${data.deletedCount} Wünsche erfolgreich gelöscht`
+					: 'Wunsch erfolgreich gelöscht'}
+			</h3>
+			<div class="text-xs">
+				{data.deletedCount > 1
+					? 'Die Wünsche wurden unwiderruflich aus der Datenbank entfernt.'
+					: 'Der Wunsch wurde unwiderruflich aus der Datenbank entfernt.'}
+			</div>
+		</div>
+		<button
+			class="btn btn-ghost btn-sm btn-circle"
+			onclick={() => {
+				const url = new URL(window.location.href);
+				url.searchParams.delete('deleted');
+				url.searchParams.delete('count');
+				goto(url.pathname + url.search, { replaceState: true });
+			}}
+			title="Nachricht schließen"
+			aria-label="Erfolgsmeldung schließen"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M6 18L18 6M6 6l12 12"
+				/>
+			</svg>
+		</button>
+	</div>
+{/if}
 
 <!-- Statistics -->
 <div class="stats mb-6 w-full shadow">
@@ -422,15 +481,20 @@
 		</svg>
 		<div>
 			<h3 class="font-bold">{selectedWishes.length} Wünsche ausgewählt</h3>
-			<div class="text-xs">Sie können die ausgewählten Wünsche exportieren oder löschen.</div>
+			<div class="text-xs">
+				Sie können die ausgewählten Wünsche exportieren{#if data.profile?.role === 'Administrator'}
+					oder löschen{/if}.
+			</div>
 		</div>
 		<div class="flex gap-2">
 			<button class="btn btn-outline btn-sm" onclick={() => (showExportModal = true)}>
 				Exportieren
 			</button>
-			<button class="btn btn-error btn-sm" onclick={() => (showDeleteModal = true)}>
-				Löschen
-			</button>
+			{#if data.profile?.role === 'Administrator'}
+				<button class="btn btn-error btn-sm" onclick={() => (showDeleteModal = true)}>
+					Löschen
+				</button>
+			{/if}
 			<button class="btn btn-ghost btn-sm" onclick={clearSelection}> Auswahl aufheben </button>
 		</div>
 	</div>
@@ -678,7 +742,32 @@
 			</div>
 			<div class="modal-action">
 				<button class="btn btn-ghost" onclick={() => (showDeleteModal = false)}>Abbrechen</button>
-				<button class="btn btn-error">Löschen</button>
+				<form
+					method="POST"
+					action="?/bulkDelete"
+					style="display: inline;"
+					use:enhance={() => {
+						isDeleting = true;
+						return async ({ update }) => {
+							await update();
+							isDeleting = false;
+							showDeleteModal = false;
+							clearSelection();
+						};
+					}}
+				>
+					{#each selectedWishes as wishId}
+						<input type="hidden" name="wishIds" value={wishId} />
+					{/each}
+					<button type="submit" class="btn btn-error" disabled={isDeleting}>
+						{#if isDeleting}
+							<span class="loading loading-spinner loading-sm"></span>
+							Lösche...
+						{:else}
+							Löschen
+						{/if}
+					</button>
+				</form>
 			</div>
 		</div>
 	</div>

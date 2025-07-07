@@ -2,6 +2,7 @@ import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { User, Session } from '@supabase/supabase-js';
 import type { UserProfile } from '../types/User';
+import { supabase } from '../supabase';
 
 export interface AuthStore {
 	user: User | null;
@@ -16,30 +17,117 @@ function createAuthStore() {
 		user: null,
 		session: null,
 		profile: null,
-		loading: false, // Start with false for testing
+		loading: true,
 		error: null
 	});
 
 	let authSubscription: { data: { subscription: { unsubscribe: () => void } } } | null = null;
 
 	const initialize = async () => {
-		if (!browser) return;
+		if (!browser || !supabase) return;
 
-		// Temporarily use mock data for UI testing
-		set({
-			user: { id: 'mock-user-id', email: 'test@example.com' } as User,
-			session: { user: { id: 'mock-user-id' } } as Session,
-			profile: {
-				id: 'mock-user-id',
-				email: 'test@example.com',
-				full_name: 'Test User',
-				role: 'Administrator',
-				created_at: new Date().toISOString(),
-				updated_at: new Date().toISOString()
-			},
-			loading: false,
-			error: null
-		});
+		try {
+			update((state) => ({ ...state, loading: true }));
+
+			// Get initial user (secure method)
+			const {
+				data: { user },
+				error
+			} = await supabase.auth.getUser();
+			if (error) {
+				console.error('Error getting user:', error);
+				update((state) => ({ ...state, error: error.message, loading: false }));
+				return;
+			}
+
+			// Set up auth state listener
+			const {
+				data: { subscription }
+			} = supabase.auth.onAuthStateChange(async (event, session) => {
+				if (session?.user) {
+					// Validate user with getUser() for security
+					const {
+						data: { user: validatedUser },
+						error: userError
+					} = await supabase!.auth.getUser();
+					if (userError || !validatedUser) {
+						console.error('User validation failed:', userError);
+						set({
+							user: null,
+							session: null,
+							profile: null,
+							loading: false,
+							error: null
+						});
+						return;
+					}
+					await loadUserProfile(validatedUser);
+				} else {
+					set({
+						user: null,
+						session: null,
+						profile: null,
+						loading: false,
+						error: null
+					});
+				}
+			});
+
+			authSubscription = { data: { subscription } };
+
+			// Load initial profile if user exists
+			if (user) {
+				await loadUserProfile(user);
+			} else {
+				update((state) => ({ ...state, loading: false }));
+			}
+		} catch (err) {
+			console.error('Error initializing auth:', err);
+			update((state) => ({
+				...state,
+				error: err instanceof Error ? err.message : 'Unknown error',
+				loading: false
+			}));
+		}
+	};
+
+	const loadUserProfile = async (user: User) => {
+		try {
+			const { data: profiles, error } = await supabase!
+				.from('profiles')
+				.select('*')
+				.eq('id', user.id);
+
+			if (error) {
+				console.error('Error loading profile:', error);
+				update((state) => ({ ...state, error: error.message }));
+				return;
+			}
+
+			const profile = profiles && profiles.length > 0 ? profiles[0] : null;
+
+			if (!profile) {
+				console.error('No profile found for user:', user.id);
+				update((state) => ({ ...state, error: 'Profile not found' }));
+				return;
+			}
+
+			update((state) => ({
+				...state,
+				user,
+				session: { user } as Session,
+				profile,
+				loading: false,
+				error: null
+			}));
+		} catch (err) {
+			console.error('Error loading profile:', err);
+			update((state) => ({
+				...state,
+				error: err instanceof Error ? err.message : 'Unknown error',
+				loading: false
+			}));
+		}
 	};
 
 	const setLoading = (loading: boolean) => {
@@ -52,6 +140,48 @@ function createAuthStore() {
 
 	const updateProfile = (profile: UserProfile) => {
 		update((state) => ({ ...state, profile }));
+	};
+
+	const signIn = async (email: string, password: string) => {
+		if (!supabase) return { error: 'Supabase not initialized' };
+
+		try {
+			setLoading(true);
+			setError(null);
+
+			const { data, error } = await supabase.auth.signInWithPassword({
+				email,
+				password
+			});
+
+			if (error) {
+				setError(error.message);
+				setLoading(false);
+				return { error: error.message };
+			}
+
+			// Profile will be loaded automatically by the auth state listener
+			return { data };
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+			setError(errorMessage);
+			setLoading(false);
+			return { error: errorMessage };
+		}
+	};
+
+	const signOut = async () => {
+		if (!supabase) return;
+
+		try {
+			setLoading(true);
+			await supabase.auth.signOut();
+			// State will be cleared automatically by the auth state listener
+		} catch (err) {
+			console.error('Error signing out:', err);
+			setError(err instanceof Error ? err.message : 'Unknown error');
+			setLoading(false);
+		}
 	};
 
 	const destroy = () => {
@@ -67,6 +197,8 @@ function createAuthStore() {
 		setLoading,
 		setError,
 		updateProfile,
+		signIn,
+		signOut,
 		destroy
 	};
 }

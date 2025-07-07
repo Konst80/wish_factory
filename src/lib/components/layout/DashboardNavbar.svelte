@@ -1,9 +1,5 @@
 <script lang="ts">
-	// Mock data for testing
-	const currentUserProfile = {
-		full_name: 'Test User',
-		email: 'test@example.com'
-	};
+	import { currentUserProfile } from '$lib/stores/auth';
 
 	let { onMenuToggle }: { onMenuToggle?: () => void } = $props();
 
@@ -40,13 +36,13 @@
 			<div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
 				<div class="placeholder avatar">
 					<div class="w-10 rounded-full bg-primary text-primary-content">
-						<span class="text-sm">{currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
+						<span class="text-sm">{$currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
 					</div>
 				</div>
 			</div>
 			<ul class="menu dropdown-content z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow">
 				<li class="menu-title">
-					<span>{currentUserProfile?.full_name || 'User'}</span>
+					<span>{$currentUserProfile?.full_name || 'User'}</span>
 				</li>
 				<li><a href="/dashboard/profile">Profil bearbeiten</a></li>
 				<li><a href="/dashboard/settings">Einstellungen</a></li>

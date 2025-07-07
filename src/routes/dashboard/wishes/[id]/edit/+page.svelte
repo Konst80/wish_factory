@@ -29,8 +29,8 @@
 	let additionalInstructions = $state('');
 	let showDeleteModal = $state(false);
 
-	// Validation state
-	let errors = $state({});
+	// Validation state (currently unused but kept for future validation)
+	// let errors = $state({});
 
 	// Form submission
 	let formElement: HTMLFormElement;

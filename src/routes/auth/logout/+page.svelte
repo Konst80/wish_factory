@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { auth } from '$lib/stores/auth';
 
-	onMount(() => {
-		const form = document.getElementById('logout-form') as HTMLFormElement;
-		if (form) {
-			form.requestSubmit();
-		}
+	onMount(async () => {
+		await auth.signOut();
+		goto('/auth/login');
 	});
 </script>
 
@@ -21,9 +20,7 @@
 			<div class="loading loading-spinner loading-lg"></div>
 			<p class="mt-4">Sie werden abgemeldet...</p>
 
-			<form id="logout-form" method="POST" use:enhance class="hidden">
-				<button type="submit">Abmelden</button>
-			</form>
+			<!-- Hidden form removed since we're using client-side logout -->
 		</div>
 	</div>
 </div>

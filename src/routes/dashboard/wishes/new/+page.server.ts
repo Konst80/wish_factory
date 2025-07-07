@@ -3,21 +3,14 @@ import { createWishSchema, WishStatus } from '$lib/types/Wish.js';
 import type { Actions, PageServerLoad } from './$types.js';
 import { z } from 'zod';
 
-export const load: PageServerLoad = async () => {
-	// Für die Entwicklungsphase: Dummy-User zurückgeben
-	// Später durch echte Authentifizierung ersetzen
-	const dummyUser = {
-		id: 'dev-user-123',
-		email: 'dev@example.com',
-		user_metadata: {
-			full_name: 'Entwickler',
-			avatar_url: ''
-		}
-	};
+export const load: PageServerLoad = async ({ locals }) => {
+	const { session } = await locals.safeGetSession();
 
-	return {
-		user: dummyUser
-	};
+	if (!session) {
+		throw redirect(302, '/auth/login');
+	}
+
+	return {};
 };
 
 export const actions: Actions = {
@@ -72,36 +65,19 @@ export const actions: Actions = {
 		try {
 			const validatedData = createWishSchema.parse(wishData);
 
-			// Eindeutige ID generieren
-			const language_code = validatedData.language;
+			// Generate wish ID using database function
+			const { data: wishId, error: idError } = await locals.supabase.rpc('generate_wish_id', {
+				wish_language: validatedData.language
+			});
 
-			// Nächste verfügbare Nummer für die Sprache ermitteln
-			const { data: existingWishes, error: countError } = await locals.supabase
-				.from('wishes')
-				.select('id')
-				.like('id', `wish_external_${language_code}_%`)
-				.order('id', { ascending: false })
-				.limit(1);
-
-			if (countError) {
-				console.error('Error counting wishes:', countError);
+			if (idError) {
+				console.error('Error generating wish ID:', idError);
 				return fail(500, {
-					message: 'Fehler beim Erstellen der Wunsch-ID',
+					message: 'Fehler beim Generieren der Wunsch-ID: ' + idError.message,
 					errors: {},
 					values: wishData
 				});
 			}
-
-			let nextNumber = 1;
-			if (existingWishes && existingWishes.length > 0) {
-				const lastId = existingWishes[0].id;
-				const match = lastId.match(/wish_external_[a-z]+_(\d+)$/);
-				if (match) {
-					nextNumber = parseInt(match[1]) + 1;
-				}
-			}
-
-			const wishId = `wish_external_${language_code}_${nextNumber.toString().padStart(3, '0')}`;
 
 			// Wunsch in Datenbank speichern
 			const { error: insertError } = await locals.supabase.from('wishes').insert({
@@ -121,7 +97,7 @@ export const actions: Actions = {
 			if (insertError) {
 				console.error('Error inserting wish:', insertError);
 				return fail(500, {
-					message: 'Fehler beim Speichern des Wunsches',
+					message: 'Fehler beim Speichern des Wunsches: ' + insertError.message,
 					errors: {},
 					values: wishData
 				});
@@ -130,6 +106,12 @@ export const actions: Actions = {
 			// Weiterleitung zur Wunsch-Übersicht oder Detail-Ansicht
 			throw redirect(303, `/dashboard/wishes/${wishId}`);
 		} catch (error) {
+			// Check if it's a redirect (which is expected)
+			if (error && typeof error === 'object' && 'status' in error && error.status === 303) {
+				// This is the expected redirect, let it through
+				throw error;
+			}
+
 			if (error instanceof z.ZodError) {
 				// Validierungsfehler
 				const errors: Record<string, string> = {};
