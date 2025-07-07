@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { Database } from '$lib/types/database.types';
 	import DashboardSidebar from './DashboardSidebar.svelte';
 	import DashboardNavbar from './DashboardNavbar.svelte';
 
-	let { children }: { children: Snippet } = $props();
+	type Profile = Database['public']['Tables']['profiles']['Row'];
+
+	let { children, profile }: { children: Snippet; profile: Profile | null } = $props();
 
 	let sidebarOpen = $state(false);
 
@@ -45,6 +48,6 @@
 			}}
 			aria-label="Sidebar schließen"
 		></div>
-		<DashboardSidebar />
+		<DashboardSidebar {profile} />
 	</div>
 </div>

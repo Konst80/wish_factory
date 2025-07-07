@@ -1,41 +1,41 @@
 <script lang="ts">
-	// Mock data for users
-	const users = [
-		{
-			id: '1',
-			full_name: 'Max Mustermann',
-			email: 'max@example.com',
-			role: 'Administrator',
-			status: 'active',
-			createdAt: new Date('2024-01-15'),
-			lastLogin: new Date('2024-07-06')
-		},
-		{
-			id: '2',
-			full_name: 'Anna Schmidt',
-			email: 'anna@example.com',
-			role: 'Redakteur',
-			status: 'active',
-			createdAt: new Date('2024-02-20'),
-			lastLogin: new Date('2024-07-05')
-		},
-		{
-			id: '3',
-			full_name: 'Peter Müller',
-			email: 'peter@example.com',
-			role: 'Redakteur',
-			status: 'inactive',
-			createdAt: new Date('2024-03-10'),
-			lastLogin: new Date('2024-06-15')
-		}
-	];
+	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import type { PageData, ActionData } from './$types';
 
-	let searchTerm = $state('');
-	let selectedRole = $state('');
-	let selectedStatus = $state('');
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	let searchTerm = $state(data.filters.search || '');
+	let selectedRole = $state(data.filters.role || '');
+	let selectedStatus = $state(data.filters.status || '');
 	let showAddUserModal = $state(false);
+	let showEditUserModal = $state(false);
 	let showDeleteModal = $state(false);
-	let selectedUser = $state<(typeof users)[0] | null>(null);
+	let selectedUser = $state<(typeof data.users)[0] | null>(null);
+
+	// Form data for new/edit user
+	let userForm = $state({
+		fullName: '',
+		email: '',
+		role: 'Redakteur',
+		password: ''
+	});
+
+	// Update URL when filters change
+	function updateFilters() {
+		const params = new URLSearchParams();
+		if (searchTerm) params.set('search', searchTerm);
+		if (selectedRole) params.set('role', selectedRole);
+		if (selectedStatus) params.set('status', selectedStatus);
+		goto(`?${params.toString()}`, { replaceState: true });
+	}
+
+	// Debounced search
+	let searchTimeout: ReturnType<typeof setTimeout>;
+	function handleSearchInput() {
+		clearTimeout(searchTimeout);
+		searchTimeout = setTimeout(updateFilters, 500);
+	}
 
 	const roles = ['Administrator', 'Redakteur'];
 	// const statuses = ['active', 'inactive']; // Unused for now
@@ -68,20 +68,16 @@
 		});
 	}
 
-	function filteredUsers() {
-		return users.filter((user) => {
-			const matchesSearch =
-				!searchTerm ||
-				user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				user.email.toLowerCase().includes(searchTerm.toLowerCase());
-			const matchesRole = !selectedRole || user.role === selectedRole;
-			const matchesStatus = !selectedStatus || user.status === selectedStatus;
-
-			return matchesSearch && matchesRole && matchesStatus;
-		});
+	function openEditModal(user: (typeof data.users)[0]) {
+		selectedUser = user;
+		userForm.fullName = user.full_name;
+		userForm.email = user.email;
+		userForm.role = user.role;
+		userForm.password = '';
+		showEditUserModal = true;
 	}
 
-	function openDeleteModal(user: (typeof users)[0]) {
+	function openDeleteModal(user: (typeof data.users)[0]) {
 		selectedUser = user;
 		showDeleteModal = true;
 	}
@@ -89,6 +85,17 @@
 	function closeDeleteModal() {
 		selectedUser = null;
 		showDeleteModal = false;
+	}
+
+	function closeEditModal() {
+		selectedUser = null;
+		showEditUserModal = false;
+		userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
+	}
+
+	function openAddModal() {
+		userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
+		showAddUserModal = true;
 	}
 </script>
 
@@ -106,7 +113,7 @@
 			</p>
 		</div>
 		<div class="flex gap-2">
-			<button class="btn btn-primary" onclick={() => (showAddUserModal = true)}>
+			<button class="btn btn-primary" onclick={openAddModal}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-4 w-4"
@@ -146,7 +153,7 @@
 			</svg>
 		</div>
 		<div class="stat-title">Gesamt</div>
-		<div class="stat-value text-primary">{users.length}</div>
+		<div class="stat-value text-primary">{data.stats.total}</div>
 		<div class="stat-desc">Registrierte Benutzer</div>
 	</div>
 
@@ -167,7 +174,7 @@
 			</svg>
 		</div>
 		<div class="stat-title">Aktiv</div>
-		<div class="stat-value text-success">{users.filter((u) => u.status === 'active').length}</div>
+		<div class="stat-value text-success">{data.stats.active}</div>
 		<div class="stat-desc">Online Benutzer</div>
 	</div>
 
@@ -189,7 +196,7 @@
 		</div>
 		<div class="stat-title">Administratoren</div>
 		<div class="stat-value text-error">
-			{users.filter((u) => u.role === 'Administrator').length}
+			{data.stats.administrators}
 		</div>
 		<div class="stat-desc">Mit Admin-Rechten</div>
 	</div>
@@ -209,6 +216,7 @@
 					placeholder="Name oder E-Mail suchen..."
 					class="input-bordered input w-full"
 					bind:value={searchTerm}
+					oninput={handleSearchInput}
 				/>
 			</div>
 
@@ -216,7 +224,12 @@
 				<label class="label" for="role">
 					<span class="label-text">Rolle</span>
 				</label>
-				<select id="role" class="select-bordered select w-full" bind:value={selectedRole}>
+				<select
+					id="role"
+					class="select-bordered select w-full"
+					bind:value={selectedRole}
+					onchange={updateFilters}
+				>
 					<option value="">Alle Rollen</option>
 					{#each roles as role}
 						<option value={role}>{role}</option>
@@ -228,7 +241,12 @@
 				<label class="label" for="status">
 					<span class="label-text">Status</span>
 				</label>
-				<select id="status" class="select-bordered select w-full" bind:value={selectedStatus}>
+				<select
+					id="status"
+					class="select-bordered select w-full"
+					bind:value={selectedStatus}
+					onchange={updateFilters}
+				>
 					<option value="">Alle Status</option>
 					<option value="active">Aktiv</option>
 					<option value="inactive">Inaktiv</option>
@@ -253,7 +271,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each filteredUsers() as user (user.id)}
+				{#each data.users as user (user.id)}
 					<tr class="hover">
 						<td>
 							<div class="flex items-center gap-3">
@@ -288,6 +306,7 @@
 									class="btn btn-ghost btn-xs"
 									title="Bearbeiten"
 									aria-label="Benutzer bearbeiten"
+									onclick={() => openEditModal(user)}
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -366,16 +385,25 @@
 	<div class="modal-open modal">
 		<div class="modal-box">
 			<h3 class="mb-4 text-lg font-bold">Neuen Benutzer hinzufügen</h3>
-			<form class="space-y-4">
+
+			{#if form?.message}
+				<div class="alert {form.success ? 'alert-success' : 'alert-error'} mb-4">
+					<span>{form.message}</span>
+				</div>
+			{/if}
+
+			<form method="POST" action="?/createUser" use:enhance class="space-y-4">
 				<div class="form-control">
 					<label class="label" for="newUserName">
 						<span class="label-text">Name</span>
 					</label>
 					<input
 						id="newUserName"
+						name="fullName"
 						type="text"
 						placeholder="Vollständiger Name"
 						class="input-bordered input w-full"
+						bind:value={userForm.fullName}
 						required
 					/>
 				</div>
@@ -385,9 +413,11 @@
 					</label>
 					<input
 						id="newUserEmail"
+						name="email"
 						type="email"
 						placeholder="benutzer@example.com"
 						class="input-bordered input w-full"
+						bind:value={userForm.email}
 						required
 					/>
 				</div>
@@ -395,8 +425,13 @@
 					<label class="label" for="newUserRole">
 						<span class="label-text">Rolle</span>
 					</label>
-					<select id="newUserRole" class="select-bordered select w-full" required>
-						<option value="">Rolle auswählen</option>
+					<select
+						id="newUserRole"
+						name="role"
+						class="select-bordered select w-full"
+						bind:value={userForm.role}
+						required
+					>
 						{#each roles as role}
 							<option value={role}>{role}</option>
 						{/each}
@@ -408,19 +443,21 @@
 					</label>
 					<input
 						id="newUserPassword"
+						name="password"
 						type="password"
 						placeholder="Passwort"
 						class="input-bordered input w-full"
+						bind:value={userForm.password}
 						required
 					/>
 				</div>
+				<div class="modal-action">
+					<button type="button" class="btn btn-ghost" onclick={() => (showAddUserModal = false)}>
+						Abbrechen
+					</button>
+					<button type="submit" class="btn btn-primary">Benutzer erstellen</button>
+				</div>
 			</form>
-			<div class="modal-action">
-				<button class="btn btn-ghost" onclick={() => (showAddUserModal = false)}>
-					Abbrechen
-				</button>
-				<button class="btn btn-primary">Benutzer erstellen</button>
-			</div>
 		</div>
 	</div>
 {/if}
@@ -449,10 +486,84 @@
 				</svg>
 				<span>Diese Aktion kann nicht rückgängig gemacht werden!</span>
 			</div>
-			<div class="modal-action">
-				<button class="btn btn-ghost" onclick={closeDeleteModal}>Abbrechen</button>
-				<button class="btn btn-error" onclick={closeDeleteModal}>Löschen</button>
-			</div>
+			<form method="POST" action="?/deleteUser" use:enhance>
+				<input type="hidden" name="userId" value={selectedUser.id} />
+				<div class="modal-action">
+					<button type="button" class="btn btn-ghost" onclick={closeDeleteModal}>Abbrechen</button>
+					<button type="submit" class="btn btn-error">Löschen</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+
+<!-- Edit User Modal -->
+{#if showEditUserModal && selectedUser}
+	<div class="modal-open modal">
+		<div class="modal-box">
+			<h3 class="mb-4 text-lg font-bold">Benutzer bearbeiten</h3>
+
+			{#if form?.message}
+				<div class="alert {form.success ? 'alert-success' : 'alert-error'} mb-4">
+					<span>{form.message}</span>
+				</div>
+			{/if}
+
+			<form method="POST" action="?/updateRole" use:enhance class="space-y-4">
+				<input type="hidden" name="userId" value={selectedUser.id} />
+
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text">Name</span>
+					</label>
+					<input
+						type="text"
+						class="input-bordered input w-full"
+						value={selectedUser.full_name}
+						disabled
+					/>
+					<label class="label">
+						<span class="label-text-alt">Name kann derzeit nicht geändert werden</span>
+					</label>
+				</div>
+
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text">E-Mail</span>
+					</label>
+					<input
+						type="email"
+						class="input-bordered input w-full"
+						value={selectedUser.email}
+						disabled
+					/>
+					<label class="label">
+						<span class="label-text-alt">E-Mail kann derzeit nicht geändert werden</span>
+					</label>
+				</div>
+
+				<div class="form-control">
+					<label class="label" for="editUserRole">
+						<span class="label-text">Rolle</span>
+					</label>
+					<select
+						id="editUserRole"
+						name="role"
+						class="select-bordered select w-full"
+						bind:value={userForm.role}
+						required
+					>
+						{#each roles as role}
+							<option value={role}>{role}</option>
+						{/each}
+					</select>
+				</div>
+
+				<div class="modal-action">
+					<button type="button" class="btn btn-ghost" onclick={closeEditModal}> Abbrechen </button>
+					<button type="submit" class="btn btn-primary">Rolle aktualisieren</button>
+				</div>
+			</form>
 		</div>
 	</div>
 {/if}

@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import type { Database } from '$lib/types/database.types';
 
-	// Mock data for testing
-	const currentUserProfile = {
-		full_name: 'Test User',
-		email: 'test@example.com'
-	};
-	const isAdmin = true;
+	type Profile = Database['public']['Tables']['profiles']['Row'];
+
+	let { profile }: { profile: Profile | null } = $props();
+
+	// Use profile data from database with $derived
+	const currentUserProfile = $derived({
+		full_name: profile?.full_name || 'User',
+		email: profile?.email || ''
+	});
+	const isAdmin = $derived(profile?.role === 'Administrator');
 
 	interface MenuItem {
 		href: string;
@@ -45,7 +50,7 @@
 		}
 	];
 
-	let visibleMenuItems = menuItems.filter((item) => !item.adminOnly || isAdmin);
+	const visibleMenuItems = $derived(menuItems.filter((item) => !item.adminOnly || isAdmin));
 
 	function isActiveRoute(href: string): boolean {
 		if (href === '/dashboard') {
@@ -55,8 +60,7 @@
 	}
 
 	const handleSignOut = async () => {
-		console.log('Sign out clicked');
-		// Temporarily disabled
+		window.location.href = '/auth/logout';
 	};
 </script>
 
