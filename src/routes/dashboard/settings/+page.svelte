@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: any } = $props();
@@ -205,8 +206,11 @@
 						action="?/updateProfile"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ update }) => {
+							return async ({ update, result }) => {
 								await update();
+								if (result.type === 'success') {
+									await invalidateAll();
+								}
 								isSubmitting = false;
 							};
 						}}
@@ -308,8 +312,11 @@
 						action="?/updateNotifications"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ update }) => {
+							return async ({ update, result }) => {
 								await update();
+								if (result.type === 'success') {
+									await invalidateAll();
+								}
 								isSubmitting = false;
 							};
 						}}
@@ -410,8 +417,11 @@
 						action="?/updatePreferences"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ update }) => {
+							return async ({ update, result }) => {
 								await update();
+								if (result.type === 'success') {
+									await invalidateAll();
+								}
 								isSubmitting = false;
 							};
 						}}
@@ -511,8 +521,11 @@
 						action="?/updateSystem"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ update }) => {
+							return async ({ update, result }) => {
 								await update();
+								if (result.type === 'success') {
+									await invalidateAll();
+								}
 								isSubmitting = false;
 							};
 						}}
