@@ -4,34 +4,13 @@ import type { UserRole as UserRoleType } from '../types/User';
 import { UserRole, ROLE_PERMISSIONS, type Permission } from '../types/User';
 
 /**
- * Generiert eine eindeutige Wish-ID im Format: wish_external_{sprache}_{laufende_nummer}
- * @param language - Sprache (de oder en)
- * @param lastNumber - Die letzte verwendete Nummer für diese Sprache
- * @returns Neue Wish-ID
+ * Validiert ob ein String eine gültige UUID ist
+ * @param id - Zu prüfende ID
+ * @returns true wenn es eine gültige UUID ist
  */
-export function generateWishId(language: Language, lastNumber: number = 0): string {
-	const nextNumber = lastNumber + 1;
-	return `wish_external_${language}_${nextNumber}`;
-}
-
-/**
- * Extrahiert die Nummer aus einer Wish-ID
- * @param wishId - Wish-ID im Format wish_external_{sprache}_{nummer}
- * @returns Die Nummer oder null wenn Format ungültig
- */
-export function extractNumberFromWishId(wishId: string): number | null {
-	const match = wishId.match(/^wish_external_(de|en)_(\d+)$/);
-	return match ? parseInt(match[2], 10) : null;
-}
-
-/**
- * Extrahiert die Sprache aus einer Wish-ID
- * @param wishId - Wish-ID im Format wish_external_{sprache}_{nummer}
- * @returns Die Sprache oder null wenn Format ungültig
- */
-export function extractLanguageFromWishId(wishId: string): Language | null {
-	const match = wishId.match(/^wish_external_(de|en)_(\d+)$/);
-	return match ? (match[1] as Language) : null;
+export function isValidUUID(id: string): boolean {
+	const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+	return uuidRegex.test(id);
 }
 
 /**

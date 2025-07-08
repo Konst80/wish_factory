@@ -78,8 +78,18 @@
 	const themes = [
 		{ value: 'light', label: 'Hell' },
 		{ value: 'dark', label: 'Dunkel' },
+		{ value: 'winter', label: 'Winter' },
 		{ value: 'corporate', label: 'Corporate' },
-		{ value: 'business', label: 'Business' }
+		{ value: 'cyberpunk', label: 'Cyberpunk' },
+		{ value: 'business', label: 'Business' },
+		{ value: 'emerald', label: 'Emerald' },
+		{ value: 'luxury', label: 'Luxury' },
+		{ value: 'dracula', label: 'Dracula' },
+		{ value: 'nord', label: 'Nord' },
+		{ value: 'sunset', label: 'Sunset' },
+		{ value: 'autumn', label: 'Autumn' },
+		{ value: 'valentine', label: 'Valentine' },
+		{ value: 'aqua', label: 'Aqua' }
 	];
 
 	const exportFormats = [
@@ -686,12 +696,25 @@
 						action="?/updateAI"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ result, update }) => {
+							return async ({ result }) => {
 								isSubmitting = false;
 								if (result.type === 'success') {
 									await invalidateAll();
+									currentMessage = 'KI-Einstellungen erfolgreich gespeichert!';
+									showSuccessMessage = true;
+									showErrorMessage = false;
+									setTimeout(() => {
+										showSuccessMessage = false;
+									}, 3000);
+								} else if (result.type === 'failure') {
+									currentMessage =
+										(result.data?.message as string) || 'Fehler beim Speichern der KI-Einstellungen';
+									showErrorMessage = true;
+									showSuccessMessage = false;
+									setTimeout(() => {
+										showErrorMessage = false;
+									}, 5000);
 								}
-								update();
 							};
 						}}
 					>
@@ -753,6 +776,8 @@
 										>
 										<option value="openai/gpt-4o">🧠 GPT-4o (OpenAI)</option>
 										<option value="openai/gpt-4o-mini">💡 GPT-4o Mini (Kompakt)</option>
+										<option value="google/gemini-pro-1.5">💎 Gemini Pro 1.5 (Google)</option>
+										<option value="deepseek/deepseek-chat">🔥 DeepSeek Chat</option>
 									</select>
 								</div>
 							</div>

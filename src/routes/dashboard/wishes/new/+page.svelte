@@ -40,10 +40,6 @@
 	let showAIBatchCreator = $state(false);
 	let isGenerating = $state(false);
 	let generationError = $state('');
-	let wishStyle = $state('normal');
-	let aiServiceStatus = $state<'unknown' | 'healthy' | 'unhealthy' | 'checking'>('unknown');
-	let showAIStatus = $state(false);
-	let aiServiceDetails = $state('');
 
 	// AI Batch Creation State
 	type GeneratedWish = {
@@ -99,12 +95,8 @@
 		}
 	}
 
-	function handleAgeGroupChange(ageGroup: string, checked: boolean) {
-		if (checked) {
-			formData.ageGroups = [...formData.ageGroups, ageGroup];
-		} else {
-			formData.ageGroups = formData.ageGroups.filter((a: string) => a !== ageGroup);
-		}
+	function handleAgeGroupChange(ageGroup: string) {
+		formData.ageGroups = [ageGroup];
 	}
 
 	function validateSpecificValues(value: string): boolean {
@@ -119,7 +111,8 @@
 	// German translations for display
 	const typeLabels = {
 		[WishType.NORMAL]: 'Normal',
-		[WishType.FUNNY]: 'Lustig'
+		[WishType.HERZLICH]: 'Herzlich',
+		[WishType.HUMORVOLL]: 'Humorvoll'
 	};
 
 	const eventTypeLabels = {
@@ -154,26 +147,6 @@
 		[Language.EN]: 'English'
 	};
 
-	async function checkAIService() {
-		aiServiceStatus = 'checking';
-		try {
-			const response = await fetch('/api/ai/generate', {
-				method: 'GET'
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				aiServiceStatus = data.status === 'healthy' ? 'healthy' : 'unhealthy';
-				aiServiceDetails = data.details || '';
-			} else {
-				aiServiceStatus = 'unhealthy';
-			}
-		} catch (error) {
-			console.error('Health check failed:', error);
-			aiServiceStatus = 'unhealthy';
-		}
-	}
-
 	async function generateWithAI() {
 		isGenerating = true;
 		generationError = '';
@@ -185,7 +158,7 @@
 			relations: formData.relations,
 			ageGroups: formData.ageGroups,
 			specificValues: formData.specificValues,
-			style: wishStyle
+			style: formData.type
 		});
 
 		try {
@@ -218,7 +191,7 @@
 								.map((v) => parseInt(v.trim()))
 								.filter((v) => !isNaN(v))
 						: [],
-					style: wishStyle,
+					style: formData.type,
 					count: 1
 				})
 			});
@@ -680,24 +653,10 @@
 								</label>
 							{/if}
 						</div>
-
-						<!-- Status -->
-						<div class="form-control">
-							<label class="label" for="status">
-								<span class="label-text font-medium">Status</span>
-							</label>
-							<select
-								id="status"
-								name="status"
-								class="select-bordered select w-full"
-								bind:value={formData.status}
-							>
-								{#each Object.values(WishStatus) as status (status)}
-									<option value={status}>{statusLabels[status]}</option>
-								{/each}
-							</select>
-						</div>
 					</div>
+
+					<!-- Hidden Status Field - Always "Entwurf" for new wishes -->
+					<input type="hidden" name="status" value="Entwurf" />
 
 					<!-- Beziehungen -->
 					<div class="form-control mt-6">
@@ -731,20 +690,20 @@
 					<!-- Altersgruppen -->
 					<div class="form-control mt-6">
 						<label class="label">
-							<span class="label-text font-medium">Ziel-Altersgruppen *</span>
-							<span class="label-text-alt">Mindestens eine auswählen</span>
+							<span class="label-text font-medium">Ziel-Altersgruppe *</span>
+							<span class="label-text-alt">Eine Auswahl treffen</span>
 						</label>
 						<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
 							{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
 								<label class="label cursor-pointer justify-start">
 									<input
-										type="checkbox"
+										type="radio"
 										name="ageGroups"
 										value={ageGroup}
-										class="checkbox checkbox-primary"
-										class:checkbox-error={errors.ageGroups}
+										class="radio radio-primary"
+										class:radio-error={errors.ageGroups}
 										checked={formData.ageGroups.includes(ageGroup)}
-										onchange={(e) => handleAgeGroupChange(ageGroup, e.currentTarget.checked)}
+										onchange={() => handleAgeGroupChange(ageGroup)}
 									/>
 									<span class="label-text ml-3">{ageGroupLabels[ageGroup]}</span>
 								</label>
@@ -784,87 +743,6 @@
 								>
 							</label>
 						{/if}
-					</div>
-
-					<!-- Stil-Auswahl für KI-Generierung -->
-					<div class="form-control mt-6">
-						<div class="flex items-center justify-between">
-							<label class="label">
-								<span class="label-text font-medium">KI-Stil für Generierung</span>
-								<span class="label-text-alt">Beeinflusst die automatische Textgenerierung</span>
-							</label>
-							<div class="flex items-center gap-2">
-								<!-- KI-Service Status -->
-								<div class="tooltip" data-tip="KI-Service Status prüfen">
-									<button
-										type="button"
-										class="btn btn-ghost btn-xs"
-										onclick={() => {
-											checkAIService();
-											showAIStatus = !showAIStatus;
-										}}
-									>
-										{#if aiServiceStatus === 'checking'}
-											<span class="loading loading-spinner loading-xs"></span>
-										{:else if aiServiceStatus === 'healthy'}
-											<div class="badge badge-success badge-xs">✓</div>
-										{:else if aiServiceStatus === 'unhealthy'}
-											<div class="badge badge-error badge-xs">✗</div>
-										{:else}
-											<div class="badge badge-ghost badge-xs">?</div>
-										{/if}
-										KI-Status
-									</button>
-								</div>
-							</div>
-						</div>
-
-						{#if showAIStatus}
-							<div
-								class="alert mt-2"
-								class:alert-success={aiServiceStatus === 'healthy'}
-								class:alert-error={aiServiceStatus === 'unhealthy'}
-								class:alert-info={aiServiceStatus === 'unknown'}
-							>
-								<div class="flex-1">
-									{#if aiServiceStatus === 'healthy'}
-										<h4 class="font-bold">✅ KI-Service verfügbar</h4>
-										<div class="text-sm">{aiServiceDetails}</div>
-									{:else if aiServiceStatus === 'unhealthy'}
-										<h4 class="font-bold">❌ KI-Service nicht verfügbar</h4>
-										<div class="text-sm">
-											Mögliche Ursachen:
-											<ul class="mt-1 list-inside list-disc">
-												<li>{aiServiceDetails}</li>
-											</ul>
-											<div class="mt-2">
-												<strong>Lösung:</strong> Prüfen Sie die <code>.env</code> Datei und stellen
-												Sie sicher, dass <code>OPENROUTER_API_KEY</code> gesetzt ist.
-											</div>
-										</div>
-									{:else}
-										<h4 class="font-bold">❓ KI-Service Status unbekannt</h4>
-										<div class="text-sm">
-											Klicken Sie auf "KI-Status" um die Verfügbarkeit zu prüfen.
-										</div>
-									{/if}
-								</div>
-								<button
-									type="button"
-									class="btn btn-ghost btn-sm ml-auto"
-									onclick={() => (showAIStatus = false)}
-								>
-									×
-								</button>
-							</div>
-						{/if}
-
-						<select class="select-bordered select w-full" bind:value={wishStyle}>
-							<option value="normal">Normal - Klassische, freundliche Wünsche</option>
-							<option value="herzlich">Herzlich - Warme, emotionale Wünsche</option>
-							<option value="humorvoll">Humorvoll - Lustige, lockere Wünsche</option>
-							<option value="formell">Formell - Höfliche, professionelle Wünsche</option>
-						</select>
 					</div>
 
 					<!-- Haupttext -->
@@ -1447,7 +1325,7 @@
 												</div>
 												<div class="flex gap-1">
 													<div class="badge badge-outline badge-xs">
-														{wish.type === WishType.FUNNY ? 'Lustig' : 'Normal'}
+														{typeLabels[wish.type]}
 													</div>
 													<div class="badge badge-ghost badge-xs">
 														{eventTypeLabels[wish.eventType]}

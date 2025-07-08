@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Database } from '$lib/types/database.types';
+	import type { Database } from '$lib/types/supabase';
 
 	type Profile = Database['public']['Tables']['profiles']['Row'];
 

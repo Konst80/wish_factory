@@ -65,34 +65,23 @@ export const actions: Actions = {
 		try {
 			const validatedData = createWishSchema.parse(wishData);
 
-			// Generate wish ID using database function
-			const { data: wishId, error: idError } = await locals.supabase.rpc('generate_wish_id', {
-				wish_language: validatedData.language
-			});
-
-			if (idError) {
-				console.error('Error generating wish ID:', idError);
-				return fail(500, {
-					message: 'Fehler beim Generieren der Wunsch-ID: ' + idError.message,
-					errors: {},
-					values: wishData
-				});
-			}
-
-			// Wunsch in Datenbank speichern
-			const { error: insertError } = await locals.supabase.from('wishes').insert({
-				id: wishId,
-				type: validatedData.type,
-				event_type: validatedData.eventType,
-				relations: validatedData.relations,
-				age_groups: validatedData.ageGroups,
-				specific_values: validatedData.specificValues,
-				text: validatedData.text,
-				belated: validatedData.belated,
-				status: validatedData.status,
-				language: validatedData.language,
-				created_by: validatedData.createdBy
-			});
+			// Wunsch in Datenbank speichern (ID wird automatisch als UUID generiert)
+			const { data: createdWish, error: insertError } = await locals.supabase
+				.from('wishes')
+				.insert({
+					type: validatedData.type,
+					event_type: validatedData.eventType,
+					relations: validatedData.relations,
+					age_groups: validatedData.ageGroups,
+					specific_values: validatedData.specificValues,
+					text: validatedData.text,
+					belated: validatedData.belated,
+					status: validatedData.status,
+					language: validatedData.language,
+					created_by: validatedData.createdBy
+				})
+				.select('id')
+				.single();
 
 			if (insertError) {
 				console.error('Error inserting wish:', insertError);
@@ -103,8 +92,8 @@ export const actions: Actions = {
 				});
 			}
 
-			// Weiterleitung zur Wunsch-Übersicht oder Detail-Ansicht
-			throw redirect(303, `/dashboard/wishes/${wishId}`);
+			// Weiterleitung zur Wunsch-Detail-Ansicht mit der neuen UUID
+			throw redirect(303, `/dashboard/wishes/${createdWish.id}`);
 		} catch (error) {
 			// Check if it's a redirect (which is expected)
 			if (error && typeof error === 'object' && 'status' in error && error.status === 303) {

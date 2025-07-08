@@ -26,7 +26,7 @@
 		Entwurf: 'badge-warning',
 		'Zur Freigabe': 'badge-info',
 		Freigegeben: 'badge-success',
-		Archiviert: 'badge-neutral'
+		Archiviert: 'badge-ghost'
 	};
 
 	// Event type icons
@@ -76,15 +76,22 @@
 		selectedWishes = [];
 	}
 
-	function formatDate(date: Date | string) {
+	function formatDate(date: Date | string | null) {
+		if (!date) {
+			return { date: 'Unbekannt', time: '' };
+		}
 		const dateObj = typeof date === 'string' ? new Date(date) : date;
-		return dateObj.toLocaleDateString('de-DE', {
-			day: '2-digit',
-			month: '2-digit',
-			year: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
-		});
+		return {
+			date: dateObj.toLocaleDateString('de-DE', {
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric'
+			}),
+			time: dateObj.toLocaleTimeString('de-DE', {
+				hour: '2-digit',
+				minute: '2-digit'
+			})
+		};
 	}
 
 	function truncateText(text: string, maxLength: number = 100) {
@@ -503,14 +510,14 @@
 <!-- Wishes Table -->
 <div class="card bg-base-100 shadow-xl">
 	<div class="overflow-x-auto">
-		<table class="table-zebra table w-full">
+		<table class="table w-full">
 			<thead>
-				<tr>
-					<th>
+				<tr class="border-base-300 border-b">
+					<th class="w-12 px-3 py-4">
 						<label>
 							<input
 								type="checkbox"
-								class="checkbox"
+								class="checkbox checkbox-sm"
 								onchange={selectedWishes.length === data.wishes.length
 									? clearSelection
 									: selectAllWishes}
@@ -519,89 +526,90 @@
 							/>
 						</label>
 					</th>
-					<th>Anlass</th>
-					<th>Text</th>
-					<th>Status</th>
-					<th>Sprache</th>
-					<th>Erstellt</th>
-					<th>Ersteller</th>
-					<th>Aktionen</th>
+					<th class="px-3 py-4 text-left text-sm font-semibold">Anlass</th>
+					<th class="min-w-80 px-3 py-4 text-left text-sm font-semibold">Text</th>
+					<th class="px-3 py-4 text-left text-sm font-semibold">Status</th>
+					<th class="w-16 px-3 py-4 text-center text-sm font-semibold">Lang</th>
+					<th class="px-3 py-4 text-left text-sm font-semibold">Erstellt</th>
+					<th class="px-3 py-4 text-left text-sm font-semibold">Von</th>
+					<th class="w-20 px-3 py-4 text-center text-sm font-semibold">Aktionen</th>
 				</tr>
 			</thead>
 			<tbody>
 				{#each data.wishes as wish (wish.id)}
-					<tr class="hover">
-						<td>
+					<tr class="hover:bg-base-50 border-base-200/50 border-b transition-colors">
+						<td class="px-3 py-3">
 							<label>
 								<input
 									type="checkbox"
-									class="checkbox"
+									class="checkbox checkbox-sm"
 									checked={selectedWishes.includes(wish.id)}
 									onchange={() => toggleWishSelection(wish.id)}
 									aria-label="Wunsch {wish.id} auswählen"
 								/>
 							</label>
 						</td>
-						<td>
-							<div class="flex items-center gap-2">
-								<span class="text-lg">
-									{eventTypeIcons[wish.eventType]}
-								</span>
-								<div>
-									<div class="font-medium capitalize">
-										{wish.eventType}
-									</div>
-									{#if wish.specificValues && wish.specificValues.length > 0}
-										<div class="text-xs opacity-70">
-											Werte: {wish.specificValues.join(', ')}
-										</div>
-									{/if}
-								</div>
-							</div>
+						<td class="px-3 py-3 text-center">
+							<span
+								class="text-2xl"
+								title="{wish.eventType === 'birthday'
+									? 'Geburtstag'
+									: wish.eventType === 'anniversary'
+										? 'Jubiläum'
+										: 'Benutzerdefiniert'}{wish.specificValues && wish.specificValues.length > 0
+									? ' - ' + wish.specificValues.join(', ')
+									: ''}"
+							>
+								{eventTypeIcons[wish.eventType]}
+							</span>
 						</td>
-						<td>
-							<div class="max-w-xs">
-								<div class="font-medium">
-									{truncateText(wish.text, 80)}
+						<td class="px-3 py-3">
+							<div class="max-w-md">
+								<div class="text-base-content text-sm leading-relaxed font-medium">
+									{truncateText(wish.text, 120)}
 								</div>
 								{#if wish.belated && wish.belated.length > 0}
-									<div class="mt-1 text-xs opacity-70">
-										Nachträglich: {truncateText(wish.belated, 50)}
+									<div class="text-base-content/60 mt-1.5 text-xs italic">
+										<span class="text-warning">•</span> Nachträglich: {truncateText(
+											wish.belated,
+											60
+										)}
 									</div>
 								{/if}
 							</div>
 						</td>
-						<td>
-							<div class="badge {statusStyles[wish.status]} badge-sm whitespace-nowrap">
+						<td class="px-3 py-3">
+							<div class="badge {statusStyles[wish.status]} badge-sm font-medium whitespace-nowrap">
 								{wish.status}
 							</div>
 						</td>
-						<td>
-							<div class="font-mono text-sm uppercase">
-								{wish.language}
+						<td class="px-3 py-3 text-center">
+							<div class="badge badge-outline badge-sm font-mono font-bold">
+								{wish.language.toUpperCase()}
 							</div>
 						</td>
-						<td>
-							<div class="text-sm">
-								{formatDate(wish.createdAt)}
+						<td class="px-3 py-3">
+							<div class="text-base-content/70 text-xs">
+								<div class="font-medium">{formatDate(wish.createdAt).date}</div>
+								<div class="text-base-content/50">{formatDate(wish.createdAt).time}</div>
 							</div>
 						</td>
-						<td>
-							<div class="text-sm">
+						<td class="px-3 py-3">
+							<div class="text-base-content/70 text-xs font-medium">
 								{wish.createdBy || 'Unbekannt'}
 							</div>
 						</td>
-						<td>
-							<div class="flex gap-1">
+						<td class="px-3 py-3">
+							<div class="flex justify-center gap-1">
 								<a
 									href="/dashboard/wishes/{wish.id}"
-									class="btn btn-ghost btn-xs"
+									class="btn btn-ghost text-primary hover:bg-primary/10"
 									title="Anzeigen"
 									aria-label="Wunsch anzeigen"
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
+										class="h-5 w-5"
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke="currentColor"
@@ -622,13 +630,13 @@
 								</a>
 								<a
 									href="/dashboard/wishes/{wish.id}/edit"
-									class="btn btn-ghost btn-xs"
+									class="btn btn-ghost text-secondary hover:bg-secondary/10"
 									title="Bearbeiten"
 									aria-label="Wunsch bearbeiten"
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
+										class="h-5 w-5"
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke="currentColor"
@@ -646,7 +654,7 @@
 					</tr>
 				{:else}
 					<tr>
-						<td colspan="8" class="text-center py-8">
+						<td colspan="8" class="text-center py-12">
 							<div class="flex flex-col items-center gap-4">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"

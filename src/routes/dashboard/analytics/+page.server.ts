@@ -153,6 +153,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
 
 			const monthWishes = allWishes.filter((wish) => {
+				if (!wish.created_at) return false;
 				const wishDate = new Date(wish.created_at);
 				return wishDate >= monthStart && wishDate <= monthEnd;
 			});

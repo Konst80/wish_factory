@@ -83,7 +83,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			// For now, mark users as active if they were created recently (within 30 days)
 			const now = new Date();
 			const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-			const createdAt = new Date(profile.created_at);
+			const createdAt = profile.created_at ? new Date(profile.created_at) : new Date(0);
 			const isActive = createdAt > thirtyDaysAgo;
 
 			return {
@@ -103,7 +103,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			// For now, mark users as active if they were created recently (within 30 days)
 			const now = new Date();
 			const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-			const createdAt = new Date(profile.created_at);
+			const createdAt = profile.created_at ? new Date(profile.created_at) : new Date(0);
 			const isActive = createdAt > thirtyDaysAgo;
 
 			return {

@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-	generateWishId,
-	extractNumberFromWishId,
-	extractLanguageFromWishId,
+	isValidUUID,
 	isValidStatusTransition,
 	hasPermission,
 	canEditWish,
@@ -15,45 +13,16 @@ import { WishStatus, Language } from '../types/Wish';
 import { Permissions } from '../types/User';
 
 describe('wishUtils', () => {
-	describe('generateWishId', () => {
-		it('should generate correct ID format for German', () => {
-			const id = generateWishId('de', 0);
-			expect(id).toBe('wish_external_de_1');
+	describe('isValidUUID', () => {
+		it('should validate correct UUIDs', () => {
+			expect(isValidUUID('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
+			expect(isValidUUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')).toBe(true);
 		});
 
-		it('should generate correct ID format for English', () => {
-			const id = generateWishId('en', 5);
-			expect(id).toBe('wish_external_en_6');
-		});
-
-		it('should handle default lastNumber', () => {
-			const id = generateWishId('de');
-			expect(id).toBe('wish_external_de_1');
-		});
-	});
-
-	describe('extractNumberFromWishId', () => {
-		it('should extract number from valid ID', () => {
-			expect(extractNumberFromWishId('wish_external_de_123')).toBe(123);
-			expect(extractNumberFromWishId('wish_external_en_456')).toBe(456);
-		});
-
-		it('should return null for invalid ID format', () => {
-			expect(extractNumberFromWishId('invalid_id')).toBeNull();
-			expect(extractNumberFromWishId('wish_external_123')).toBeNull();
-			expect(extractNumberFromWishId('wish_external_fr_123')).toBeNull();
-		});
-	});
-
-	describe('extractLanguageFromWishId', () => {
-		it('should extract language from valid ID', () => {
-			expect(extractLanguageFromWishId('wish_external_de_123')).toBe('de');
-			expect(extractLanguageFromWishId('wish_external_en_456')).toBe('en');
-		});
-
-		it('should return null for invalid ID format', () => {
-			expect(extractLanguageFromWishId('invalid_id')).toBeNull();
-			expect(extractLanguageFromWishId('wish_external_fr_123')).toBeNull();
+		it('should reject invalid UUIDs', () => {
+			expect(isValidUUID('invalid-uuid')).toBe(false);
+			expect(isValidUUID('550e8400-e29b-41d4-a716')).toBe(false);
+			expect(isValidUUID('wish_external_de_123')).toBe(false);
 		});
 	});
 

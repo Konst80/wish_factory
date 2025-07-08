@@ -3,7 +3,8 @@ import { z } from 'zod';
 // Enums für Wish-Typen basierend auf FRS
 export const WishType = {
 	NORMAL: 'normal',
-	FUNNY: 'funny'
+	HERZLICH: 'herzlich',
+	HUMORVOLL: 'humorvoll'
 } as const;
 
 export const EventType = {
@@ -48,7 +49,7 @@ export type AgeGroup = (typeof AgeGroup)[keyof typeof AgeGroup];
 
 // Wish Interface basierend auf FRS Spezifikation
 export interface Wish {
-	/** Eindeutiger, systemgenerierter Identifikator. Format: wish_external_{sprache}_{laufende_nummer} */
+	/** Eindeutiger, systemgenerierter UUID Identifikator */
 	id: string;
 
 	/** Art des Wunsches */
@@ -89,7 +90,7 @@ export interface Wish {
 }
 
 // Zod Validation Schemas
-export const wishTypeSchema = z.enum(['normal', 'funny']);
+export const wishTypeSchema = z.enum(['normal', 'herzlich', 'humorvoll']);
 export const eventTypeSchema = z.enum(['birthday', 'anniversary', 'custom']);
 export const wishStatusSchema = z.enum(['Entwurf', 'Zur Freigabe', 'Freigegeben', 'Archiviert']);
 export const languageSchema = z.enum(['de', 'en']);
@@ -98,9 +99,7 @@ export const ageGroupSchema = z.enum(['all', 'young', 'middle', 'senior']);
 
 // Validation Schema für komplette Wish-Objekte
 export const wishSchema = z.object({
-	id: z
-		.string()
-		.regex(/^wish_external_(de|en)_\d+$/, 'ID muss Format wish_external_{sprache}_{nummer} haben'),
+	id: z.string().uuid('ID muss eine gültige UUID sein'),
 	type: wishTypeSchema,
 	eventType: eventTypeSchema,
 	relations: z.array(relationSchema).min(1, 'Mindestens eine Relation muss ausgewählt sein'),

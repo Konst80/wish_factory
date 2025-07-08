@@ -422,7 +422,7 @@
 						// Reload page data to show new user
 						await invalidateAll();
 					} else if (result.type === 'failure') {
-						showGlobalMessage('error', result.data?.message || 'Fehler beim Erstellen des Benutzers');
+						showGlobalMessage('error', (result.data?.message as string) || 'Fehler beim Erstellen des Benutzers');
 					}
 				};
 			}} class="space-y-4">
@@ -529,7 +529,7 @@
 						// Reload page data to remove deleted user
 						await invalidateAll();
 					} else if (result.type === 'failure') {
-						showGlobalMessage('error', result.data?.message || 'Fehler beim Löschen des Benutzers');
+						showGlobalMessage('error', (result.data?.message as string) || 'Fehler beim Löschen des Benutzers');
 					}
 				};
 			}}>
@@ -560,7 +560,7 @@
 						// Reload page data to show updated user
 						await invalidateAll();
 					} else if (result.type === 'failure') {
-						showGlobalMessage('error', result.data?.message || 'Fehler beim Aktualisieren der Rolle');
+						showGlobalMessage('error', (result.data?.message as string) || 'Fehler beim Aktualisieren der Rolle');
 					}
 				};
 			}} class="space-y-4">

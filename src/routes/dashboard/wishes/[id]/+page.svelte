@@ -31,7 +31,8 @@
 	// German translations for display
 	const typeLabels = {
 		[WishType.NORMAL]: 'Normal',
-		[WishType.FUNNY]: 'Lustig'
+		[WishType.HERZLICH]: 'Herzlich',
+		[WishType.HUMORVOLL]: 'Humorvoll'
 	};
 
 	const eventTypeLabels = {

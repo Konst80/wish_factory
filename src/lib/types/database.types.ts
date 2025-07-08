@@ -7,7 +7,7 @@ export interface Database {
 			wishes: {
 				Row: {
 					id: string;
-					type: 'normal' | 'funny';
+					type: 'normal' | 'herzlich' | 'humorvoll';
 					event_type: 'birthday' | 'anniversary' | 'custom';
 					relations: string[];
 					age_groups: string[];
@@ -22,7 +22,7 @@ export interface Database {
 				};
 				Insert: {
 					id?: string;
-					type: 'normal' | 'funny';
+					type: 'normal' | 'herzlich' | 'humorvoll';
 					event_type: 'birthday' | 'anniversary' | 'custom';
 					relations: string[];
 					age_groups: string[];
@@ -37,7 +37,7 @@ export interface Database {
 				};
 				Update: {
 					id?: string;
-					type?: 'normal' | 'funny';
+					type?: 'normal' | 'herzlich' | 'humorvoll';
 					event_type?: 'birthday' | 'anniversary' | 'custom';
 					relations?: string[];
 					age_groups?: string[];
@@ -85,7 +85,7 @@ export interface Database {
 			[_ in never]: never;
 		};
 		Enums: {
-			wish_type: 'normal' | 'funny';
+			wish_type: 'normal' | 'herzlich' | 'humorvoll';
 			event_type: 'birthday' | 'anniversary' | 'custom';
 			wish_status: 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert';
 			language: 'de' | 'en';

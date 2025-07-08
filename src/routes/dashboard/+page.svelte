@@ -99,7 +99,8 @@
 	let showWelcomeAlert = $state(true);
 
 	// Helper function to format relative time
-	function formatRelativeTime(dateStr: string) {
+	function formatRelativeTime(dateStr: string | null) {
+		if (!dateStr) return 'unbekannt';
 		const date = new Date(dateStr);
 		const now = new Date();
 		const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));

@@ -265,6 +265,16 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					exportFormat: defaultSettings.export_format,
 					backupFrequency: defaultSettings.backup_frequency,
 					dataRetention: defaultSettings.data_retention
+				},
+				ai: {
+					promptSystem: defaultSettings.ai_prompt_system,
+					promptTemplate: defaultSettings.ai_prompt_template,
+					model: defaultSettings.ai_model,
+					temperature: defaultSettings.ai_temperature,
+					maxTokens: defaultSettings.ai_max_tokens,
+					topP: defaultSettings.ai_top_p,
+					frequencyPenalty: defaultSettings.ai_frequency_penalty,
+					presencePenalty: defaultSettings.ai_presence_penalty
 				}
 			}
 		};

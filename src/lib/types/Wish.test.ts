@@ -17,7 +17,8 @@ describe('Wish Types and Schemas', () => {
 	describe('Type Guards', () => {
 		it('should validate wish types correctly', () => {
 			expect(isValidWishType('normal')).toBe(true);
-			expect(isValidWishType('funny')).toBe(true);
+			expect(isValidWishType('herzlich')).toBe(true);
+			expect(isValidWishType('humorvoll')).toBe(true);
 			expect(isValidWishType('invalid')).toBe(false);
 		});
 
@@ -45,7 +46,7 @@ describe('Wish Types and Schemas', () => {
 
 	describe('Wish Schema Validation', () => {
 		const validWishData = {
-			id: 'wish_external_de_123',
+			id: '123e4567-e89b-12d3-a456-426614174000',
 			type: 'normal' as const,
 			eventType: 'birthday' as const,
 			relations: ['friend'],
@@ -145,7 +146,7 @@ describe('Wish Types and Schemas', () => {
 	describe('Update Wish Schema', () => {
 		it('should allow partial updates with required ID', () => {
 			const updateData = {
-				id: 'wish_external_de_123',
+				id: '123e4567-e89b-12d3-a456-426614174000',
 				text: 'Updated wish text for [Name].'
 			};
 
@@ -166,7 +167,8 @@ describe('Wish Types and Schemas', () => {
 	describe('Constants', () => {
 		it('should have correct WishType values', () => {
 			expect(WishType.NORMAL).toBe('normal');
-			expect(WishType.FUNNY).toBe('funny');
+			expect(WishType.HERZLICH).toBe('herzlich');
+			expect(WishType.HUMORVOLL).toBe('humorvoll');
 		});
 
 		it('should have correct EventType values', () => {

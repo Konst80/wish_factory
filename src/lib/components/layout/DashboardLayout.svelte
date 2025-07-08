@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { Database } from '$lib/types/database.types';
+	import type { Database } from '$lib/types/supabase';
 	import DashboardSidebar from './DashboardSidebar.svelte';
 	import DashboardNavbar from './DashboardNavbar.svelte';
 

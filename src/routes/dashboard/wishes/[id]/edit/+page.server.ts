@@ -51,8 +51,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		belated: wish.belated,
 		status: wish.status,
 		language: wish.language,
-		createdAt: new Date(wish.created_at),
-		updatedAt: new Date(wish.updated_at),
+		createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),
+		updatedAt: wish.updated_at ? new Date(wish.updated_at) : new Date(),
 		createdBy: wish.created_by
 	};
 

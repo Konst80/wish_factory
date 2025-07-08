@@ -35,8 +35,9 @@ export interface UserProfile {
 	email: string;
 	full_name: string;
 	role: UserRole;
-	created_at: string;
-	updated_at: string;
+	avatar_url?: string | null;
+	created_at: string | null;
+	updated_at: string | null;
 }
 
 // Zod Schemas
@@ -59,8 +60,9 @@ export const userProfileSchema = z.object({
 	email: z.string().email(),
 	full_name: z.string().min(2).max(100),
 	role: userRoleSchema.default('Redakteur'),
-	created_at: z.string(),
-	updated_at: z.string()
+	avatar_url: z.string().nullable().optional(),
+	created_at: z.string().nullable(),
+	updated_at: z.string().nullable()
 });
 
 // Schema für das Erstellen neuer User Profiles

@@ -36,7 +36,7 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 
 		// Recent activity (wishes created today)
 		const todayWishes =
-			allWishes?.filter((w) => new Date(w.created_at) >= startOfToday).length || 0;
+			allWishes?.filter((w) => w.created_at && new Date(w.created_at) >= startOfToday).length || 0;
 
 		// Get recent wishes for activity feed
 		const { data: recentWishes } = await locals.supabase

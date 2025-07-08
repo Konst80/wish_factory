@@ -25,7 +25,6 @@
 	let isGenerating = $state(false);
 	let generationError = $state('');
 	let wishCount = $state(3);
-	let wishStyle = $state('normal');
 	let additionalInstructions = $state('');
 	let showDeleteModal = $state(false);
 
@@ -64,7 +63,8 @@
 	// German translations for display
 	const typeLabels = {
 		[WishType.NORMAL]: 'Normal',
-		[WishType.FUNNY]: 'Lustig'
+		[WishType.HERZLICH]: 'Herzlich',
+		[WishType.HUMORVOLL]: 'Humorvoll'
 	};
 
 	const eventTypeLabels = {
@@ -122,7 +122,7 @@
 								.map((v) => parseInt(v.trim()))
 								.filter((v) => !isNaN(v))
 						: [],
-					style: wishStyle,
+					style: formData.type,
 					count: wishCount,
 					additionalInstructions
 				})
@@ -585,17 +585,6 @@
 						/>
 					</div>
 
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Stil</span>
-						</label>
-						<select class="select-bordered select w-full" bind:value={wishStyle}>
-							<option value="normal">Normal</option>
-							<option value="humorvoll">Humorvoll</option>
-							<option value="formell">Formell</option>
-							<option value="herzlich">Herzlich</option>
-						</select>
-					</div>
 
 					<div class="form-control">
 						<label class="label">

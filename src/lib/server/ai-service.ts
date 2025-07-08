@@ -77,7 +77,7 @@ class OpenRouterAIService {
 				},
 				body: JSON.stringify({
 					model,
-					// Fallback-Modelle für bessere Verfügbarkeit
+					// Fallback-Modelle für bessere Verfügbarkeit (max 3 erlaubt)
 					models: ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'openai/gpt-4o-mini'],
 					route: 'fallback',
 					// Strukturierte JSON-Ausgabe erzwingen
@@ -529,13 +529,13 @@ Generate both a regular text and a belated text for each wish.
 			});
 
 			if (!response.ok) {
-				return ['anthropic/claude-3.5-sonnet'];
+				return ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'openai/gpt-4o-mini'];
 			}
 
 			const data = await response.json();
-			return data.data?.map((model: { id: string }) => model.id) || ['anthropic/claude-3.5-sonnet'];
+			return data.data?.map((model: { id: string }) => model.id) || ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'openai/gpt-4o-mini'];
 		} catch {
-			return ['anthropic/claude-3.5-sonnet'];
+			return ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'openai/gpt-4o-mini'];
 		}
 	}
 }
