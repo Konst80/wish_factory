@@ -47,10 +47,32 @@
 		// Apply theme immediately
 		document.documentElement.setAttribute('data-theme', theme);
 
+		// Debug: Log current CSS variables
+		console.log('Theme changed to:', theme);
+		console.log(
+			'Current data-theme attribute:',
+			document.documentElement.getAttribute('data-theme')
+		);
+
+		// Log some key CSS variables to verify theme loading
+		const computedStyle = getComputedStyle(document.documentElement);
+		console.log('CSS Variables after theme change:');
+		console.log('--color-scheme:', computedStyle.getPropertyValue('--color-scheme'));
+		console.log('--p (primary):', computedStyle.getPropertyValue('--p'));
+		console.log('--b1 (base-100):', computedStyle.getPropertyValue('--b1'));
+		console.log('--bc (base-content):', computedStyle.getPropertyValue('--bc'));
+
 		// Update database by submitting to settings endpoint
 		try {
 			const formData = new FormData();
 			formData.append('theme', theme);
+
+			// Add current user settings to avoid overriding them
+			formData.append('dashboardLayout', data.settings?.dashboard_layout || 'grid');
+			formData.append('defaultLanguage', data.settings?.language || 'de');
+			formData.append('wishesPerPage', String(data.settings?.wishes_per_page || 25));
+			formData.append('autoSave', data.settings?.auto_save ? 'on' : 'off');
+			formData.append('confirmBeforeDelete', data.settings?.confirm_before_delete ? 'on' : 'off');
 
 			const response = await fetch('/dashboard/settings?/updatePreferences', {
 				method: 'POST',

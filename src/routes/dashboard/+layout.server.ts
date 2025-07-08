@@ -25,6 +25,13 @@ export const load: LayoutServerLoad = async ({ locals, parent }) => {
 		throw redirect(302, '/auth/login');
 	}
 
+	// Get user settings
+	const { data: settings } = await locals.supabase
+		.from('user_settings')
+		.select('*')
+		.eq('user_id', user.id)
+		.single();
+
 	// Get dashboard stats
 	const { data: wishStats } = await locals.supabase
 		.from('wishes')
@@ -48,6 +55,7 @@ export const load: LayoutServerLoad = async ({ locals, parent }) => {
 			avatar_url: profile.avatar_url
 		},
 		profile,
+		settings,
 		stats,
 		userTheme // Pass theme to dashboard pages
 	};
