@@ -29,14 +29,16 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		// First, get ALL profiles for statistics (unfiltered)
 		const { data: allProfiles, error: allProfilesError } = await locals.supabase
 			.from('profiles')
-			.select(`
+			.select(
+				`
 				id,
 				email,
 				full_name,
 				role,
 				created_at,
 				updated_at
-			`)
+			`
+			)
 			.order('created_at', { ascending: false });
 
 		if (allProfilesError) {
@@ -45,9 +47,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}
 
 		// Then, build the query for filtered profiles
-		let query = locals.supabase
-			.from('profiles')
-			.select(`
+		let query = locals.supabase.from('profiles').select(`
 				id,
 				email,
 				full_name,
@@ -74,19 +74,19 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}
 
 		// Transform ALL profiles for statistics calculation
-		const allUsersForStats = (allProfiles || []).map(profile => {
+		const allUsersForStats = (allProfiles || []).map((profile) => {
 			// For now, mark users as active if they were created recently (within 30 days)
 			const now = new Date();
 			const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 			const createdAt = new Date(profile.created_at);
 			const isActive = createdAt > thirtyDaysAgo;
-			
+
 			return {
 				id: profile.id,
 				full_name: profile.full_name,
 				email: profile.email,
 				role: profile.role,
-				status: isActive ? 'active' : 'inactive' as const,
+				status: isActive ? 'active' : ('inactive' as const),
 				createdAt: createdAt,
 				lastLogin: createdAt, // Placeholder - use creation date as fallback
 				emailConfirmed: true // Placeholder
@@ -94,19 +94,19 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		});
 
 		// Transform the filtered data for display
-		const filteredUsers = (profiles || []).map(profile => {
+		const filteredUsers = (profiles || []).map((profile) => {
 			// For now, mark users as active if they were created recently (within 30 days)
 			const now = new Date();
 			const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 			const createdAt = new Date(profile.created_at);
 			const isActive = createdAt > thirtyDaysAgo;
-			
+
 			return {
 				id: profile.id,
 				full_name: profile.full_name,
 				email: profile.email,
 				role: profile.role,
-				status: isActive ? 'active' : 'inactive' as const,
+				status: isActive ? 'active' : ('inactive' as const),
 				createdAt: createdAt,
 				lastLogin: createdAt, // Placeholder - use creation date as fallback
 				emailConfirmed: true // Placeholder
@@ -114,16 +114,17 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		});
 
 		// Apply status filter to the already filtered users if specified
-		const finalUsers = selectedStatus === 'active' || selectedStatus === 'inactive'
-			? filteredUsers.filter(user => user.status === selectedStatus)
-			: filteredUsers;
+		const finalUsers =
+			selectedStatus === 'active' || selectedStatus === 'inactive'
+				? filteredUsers.filter((user) => user.status === selectedStatus)
+				: filteredUsers;
 
 		// Calculate statistics from ALL users (unfiltered)
 		const stats = {
 			total: allUsersForStats.length,
-			active: allUsersForStats.filter(u => u.status === 'active').length,
-			administrators: allUsersForStats.filter(u => u.role === 'Administrator').length,
-			redakteure: allUsersForStats.filter(u => u.role === 'Redakteur').length
+			active: allUsersForStats.filter((u) => u.status === 'active').length,
+			administrators: allUsersForStats.filter((u) => u.role === 'Administrator').length,
+			redakteure: allUsersForStats.filter((u) => u.role === 'Redakteur').length
 		};
 
 		return {
@@ -135,7 +136,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				status: selectedStatus
 			}
 		};
-
 	} catch (err) {
 		console.error('Error loading users:', err);
 		throw error(500, 'Fehler beim Laden der Benutzerdaten');
@@ -176,8 +176,9 @@ export const actions: Actions = {
 				.eq('role', 'Administrator');
 
 			if (count && count <= 1) {
-				return fail(400, { 
-					message: 'Sie können sich nicht selbst die Administrator-Rolle entziehen, wenn Sie der einzige Administrator sind' 
+				return fail(400, {
+					message:
+						'Sie können sich nicht selbst die Administrator-Rolle entziehen, wenn Sie der einzige Administrator sind'
 				});
 			}
 		}
@@ -227,8 +228,8 @@ export const actions: Actions = {
 				.eq('role', 'Administrator');
 
 			if (count && count <= 1) {
-				return fail(400, { 
-					message: 'Sie können sich nicht selbst löschen, wenn Sie der einzige Administrator sind' 
+				return fail(400, {
+					message: 'Sie können sich nicht selbst löschen, wenn Sie der einzige Administrator sind'
 				});
 			}
 		}
@@ -240,8 +241,8 @@ export const actions: Actions = {
 			.eq('created_by', userId);
 
 		if (wishCount && wishCount > 0) {
-			return fail(400, { 
-				message: `Benutzer kann nicht gelöscht werden, da er ${wishCount} Wünsche erstellt hat. Archivieren Sie den Benutzer stattdessen.` 
+			return fail(400, {
+				message: `Benutzer kann nicht gelöscht werden, da er ${wishCount} Wünsche erstellt hat. Archivieren Sie den Benutzer stattdessen.`
 			});
 		}
 
@@ -319,4 +320,4 @@ export const actions: Actions = {
 
 		return { success: true, message: 'Benutzer erfolgreich erstellt' };
 	}
-}; 
+};

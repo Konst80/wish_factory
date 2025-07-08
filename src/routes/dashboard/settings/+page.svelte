@@ -7,16 +7,27 @@
 
 	let activeTab = $state('profile');
 	let showSuccessMessage = $state(false);
+	let showErrorMessage = $state(false);
+	let currentMessage = $state('');
 	let showPasswordModal = $state(false);
 	let isSubmitting = $state(false);
 
-	// Show success message when form succeeds
+	// Show form result messages
 	$effect(() => {
 		if (form?.success) {
+			currentMessage = form.message || 'Einstellungen erfolgreich gespeichert!';
 			showSuccessMessage = true;
+			showErrorMessage = false;
 			setTimeout(() => {
 				showSuccessMessage = false;
 			}, 3000);
+		} else if (form?.message) {
+			currentMessage = form.message;
+			showErrorMessage = true;
+			showSuccessMessage = false;
+			setTimeout(() => {
+				showErrorMessage = false;
+			}, 5000);
 		}
 	});
 
@@ -119,7 +130,29 @@
 					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 				/>
 			</svg>
-			<span>{form?.message || 'Einstellungen erfolgreich gespeichert!'}</span>
+			<span>{currentMessage}</span>
+		</div>
+	</div>
+{/if}
+
+<!-- Error Message -->
+{#if showErrorMessage}
+	<div class="toast toast-end toast-top">
+		<div class="alert alert-error">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-6 w-6 shrink-0 stroke-current"
+				fill="none"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+			<span>{currentMessage}</span>
 		</div>
 	</div>
 {/if}
@@ -201,15 +234,27 @@
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">Profil-Einstellungen</h2>
-					<form 
-						method="POST" 
+					<form
+						method="POST"
 						action="?/updateProfile"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ update, result }) => {
-								await update();
+							return async ({ result }) => {
 								if (result.type === 'success') {
 									await invalidateAll();
+									currentMessage = (result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
+									showSuccessMessage = true;
+									showErrorMessage = false;
+									setTimeout(() => {
+										showSuccessMessage = false;
+									}, 3000);
+								} else if (result.type === 'failure') {
+									currentMessage = (result.data?.message as string) || 'Ein Fehler ist aufgetreten';
+									showErrorMessage = true;
+									showSuccessMessage = false;
+									setTimeout(() => {
+										showErrorMessage = false;
+									}, 5000);
 								}
 								isSubmitting = false;
 							};
@@ -284,7 +329,11 @@
 								<label class="label">
 									<span class="label-text">Passwort</span>
 								</label>
-								<button type="button" class="btn btn-outline" onclick={() => (showPasswordModal = true)}>
+								<button
+									type="button"
+									class="btn btn-outline"
+									onclick={() => (showPasswordModal = true)}
+								>
 									Passwort ändern
 								</button>
 							</div>
@@ -307,15 +356,27 @@
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">Benachrichtigungen</h2>
-					<form 
-						method="POST" 
+					<form
+						method="POST"
 						action="?/updateNotifications"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ update, result }) => {
-								await update();
+							return async ({ result }) => {
 								if (result.type === 'success') {
 									await invalidateAll();
+									currentMessage = (result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
+									showSuccessMessage = true;
+									showErrorMessage = false;
+									setTimeout(() => {
+										showSuccessMessage = false;
+									}, 3000);
+								} else if (result.type === 'failure') {
+									currentMessage = (result.data?.message as string) || 'Ein Fehler ist aufgetreten';
+									showErrorMessage = true;
+									showSuccessMessage = false;
+									setTimeout(() => {
+										showErrorMessage = false;
+									}, 5000);
 								}
 								isSubmitting = false;
 							};
@@ -412,15 +473,27 @@
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">Benutzer-Einstellungen</h2>
-					<form 
-						method="POST" 
+					<form
+						method="POST"
 						action="?/updatePreferences"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ update, result }) => {
-								await update();
+							return async ({ result }) => {
 								if (result.type === 'success') {
 									await invalidateAll();
+									currentMessage = (result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
+									showSuccessMessage = true;
+									showErrorMessage = false;
+									setTimeout(() => {
+										showSuccessMessage = false;
+									}, 3000);
+								} else if (result.type === 'failure') {
+									currentMessage = (result.data?.message as string) || 'Ein Fehler ist aufgetreten';
+									showErrorMessage = true;
+									showSuccessMessage = false;
+									setTimeout(() => {
+										showErrorMessage = false;
+									}, 5000);
 								}
 								isSubmitting = false;
 							};
@@ -516,15 +589,27 @@
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">System-Einstellungen</h2>
-					<form 
-						method="POST" 
+					<form
+						method="POST"
 						action="?/updateSystem"
 						use:enhance={() => {
 							isSubmitting = true;
-							return async ({ update, result }) => {
-								await update();
+							return async ({ result }) => {
 								if (result.type === 'success') {
 									await invalidateAll();
+									currentMessage = (result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
+									showSuccessMessage = true;
+									showErrorMessage = false;
+									setTimeout(() => {
+										showSuccessMessage = false;
+									}, 3000);
+								} else if (result.type === 'failure') {
+									currentMessage = (result.data?.message as string) || 'Ein Fehler ist aufgetreten';
+									showErrorMessage = true;
+									showSuccessMessage = false;
+									setTimeout(() => {
+										showErrorMessage = false;
+									}, 5000);
 								}
 								isSubmitting = false;
 							};

@@ -23,7 +23,10 @@ const defaultSettings = {
 };
 
 export const load: PageServerLoad = async ({ locals, parent }) => {
-	const { data: { user }, error: userError } = await locals.supabase.auth.getUser();
+	const {
+		data: { user },
+		error: userError
+	} = await locals.supabase.auth.getUser();
 
 	if (userError || !user) {
 		throw redirect(302, '/auth/login');
@@ -100,7 +103,8 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					defaultLanguage: settings?.language || defaultSettings.language,
 					wishesPerPage: settings?.wishes_per_page || defaultSettings.wishes_per_page,
 					autoSave: settings?.auto_save ?? defaultSettings.auto_save,
-					confirmBeforeDelete: settings?.confirm_before_delete ?? defaultSettings.confirm_before_delete
+					confirmBeforeDelete:
+						settings?.confirm_before_delete ?? defaultSettings.confirm_before_delete
 				},
 				system: {
 					apiAccess: settings?.api_access ?? defaultSettings.api_access,
@@ -110,10 +114,9 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 				}
 			}
 		};
-
 	} catch (error) {
 		console.error('Error loading user settings:', error);
-		
+
 		// Try to create default settings record for user
 		try {
 			const { data: newSettings, error: insertError } = await locals.supabase
@@ -186,7 +189,10 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 
 export const actions: Actions = {
 	updateProfile: async ({ request, locals }) => {
-		const { data: { user }, error: userError } = await locals.supabase.auth.getUser();
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
 		if (userError || !user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
@@ -220,12 +226,10 @@ export const actions: Actions = {
 
 			if (!existingSettings) {
 				// Create default settings first
-				await locals.supabase
-					.from('user_settings')
-					.insert({
-						user_id: user.id,
-						...defaultSettings
-					});
+				await locals.supabase.from('user_settings').insert({
+					user_id: user.id,
+					...defaultSettings
+				});
 			}
 
 			// Update only the profile-related fields
@@ -244,7 +248,6 @@ export const actions: Actions = {
 			}
 
 			return { success: true, message: 'Profil erfolgreich aktualisiert' };
-
 		} catch (error) {
 			console.error('Unexpected error updating profile:', error);
 			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
@@ -252,13 +255,16 @@ export const actions: Actions = {
 	},
 
 	updateNotifications: async ({ request, locals }) => {
-		const { data: { user }, error: userError } = await locals.supabase.auth.getUser();
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
 		if (userError || !user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
 		const formData = await request.formData();
-		
+
 		try {
 			// First ensure user has settings record
 			const { data: existingSettings } = await locals.supabase
@@ -269,12 +275,10 @@ export const actions: Actions = {
 
 			if (!existingSettings) {
 				// Create default settings first
-				await locals.supabase
-					.from('user_settings')
-					.insert({
-						user_id: user.id,
-						...defaultSettings
-					});
+				await locals.supabase.from('user_settings').insert({
+					user_id: user.id,
+					...defaultSettings
+				});
 			}
 
 			// Update only the notification fields
@@ -297,7 +301,6 @@ export const actions: Actions = {
 			}
 
 			return { success: true, message: 'Benachrichtigungseinstellungen erfolgreich aktualisiert' };
-
 		} catch (error) {
 			console.error('Unexpected error updating notifications:', error);
 			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
@@ -305,13 +308,16 @@ export const actions: Actions = {
 	},
 
 	updatePreferences: async ({ request, locals }) => {
-		const { data: { user }, error: userError } = await locals.supabase.auth.getUser();
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
 		if (userError || !user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
 		const formData = await request.formData();
-		
+
 		try {
 			// First ensure user has settings record
 			const { data: existingSettings } = await locals.supabase
@@ -322,12 +328,10 @@ export const actions: Actions = {
 
 			if (!existingSettings) {
 				// Create default settings first
-				await locals.supabase
-					.from('user_settings')
-					.insert({
-						user_id: user.id,
-						...defaultSettings
-					});
+				await locals.supabase.from('user_settings').insert({
+					user_id: user.id,
+					...defaultSettings
+				});
 			}
 
 			// Update only the preference fields
@@ -350,7 +354,6 @@ export const actions: Actions = {
 			}
 
 			return { success: true, message: 'Einstellungen erfolgreich aktualisiert' };
-
 		} catch (error) {
 			console.error('Unexpected error updating preferences:', error);
 			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
@@ -358,7 +361,10 @@ export const actions: Actions = {
 	},
 
 	updateSystem: async ({ request, locals }) => {
-		const { data: { user }, error: userError } = await locals.supabase.auth.getUser();
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
 		if (userError || !user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
@@ -370,14 +376,14 @@ export const actions: Actions = {
 			.eq('id', user.id);
 
 		const profile = profiles && profiles.length > 0 ? profiles[0] : null;
-		
+
 		// Only administrators can change system settings
 		if (!profile || profile.role !== 'Administrator') {
 			return fail(403, { message: 'Keine Berechtigung für System-Einstellungen' });
 		}
 
 		const formData = await request.formData();
-		
+
 		try {
 			// First ensure user has settings record
 			const { data: existingSettings } = await locals.supabase
@@ -388,12 +394,10 @@ export const actions: Actions = {
 
 			if (!existingSettings) {
 				// Create default settings first
-				await locals.supabase
-					.from('user_settings')
-					.insert({
-						user_id: user.id,
-						...defaultSettings
-					});
+				await locals.supabase.from('user_settings').insert({
+					user_id: user.id,
+					...defaultSettings
+				});
 			}
 
 			// Update only the system fields
@@ -414,7 +418,6 @@ export const actions: Actions = {
 			}
 
 			return { success: true, message: 'System-Einstellungen erfolgreich aktualisiert' };
-
 		} catch (error) {
 			console.error('Unexpected error updating system settings:', error);
 			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });

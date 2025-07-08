@@ -44,8 +44,6 @@ export const createSupabaseServerClientFromSvelteKit = (cookies: SvelteKitCookie
 	});
 };
 
-
-
 export const supabase = isBrowser()
 	? createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY)
 	: null;

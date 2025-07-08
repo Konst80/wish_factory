@@ -8,11 +8,11 @@ export const createSupabaseAdminClient = () => {
 	if (!SUPABASE_SERVICE_ROLE_KEY) {
 		throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set');
 	}
-	
+
 	return createServerClient<Database>(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 		cookies: {
 			getAll: () => [],
 			setAll: () => {}
 		}
 	});
-}; 
+};
