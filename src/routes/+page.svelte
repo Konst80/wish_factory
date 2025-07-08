@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Card, Badge } from '$lib/components';
 
-	// Theme-System mit localStorage-Persistierung
+	// Simple theme system for homepage (no persistence needed)
 	let currentTheme = $state('light');
 	const themes = [
 		'light',
@@ -16,13 +16,10 @@
 		'aqua'
 	];
 
-	// Theme aus localStorage laden und sofort anwenden
+	// Initialize theme (use light as default for homepage)
 	onMount(() => {
-		const savedTheme = localStorage.getItem('wish-factory-theme');
-		if (savedTheme && themes.includes(savedTheme)) {
-			currentTheme = savedTheme;
-		}
-		// Theme sofort anwenden
+		// Start with light theme for homepage
+		currentTheme = 'light';
 		applyTheme(currentTheme);
 	});
 
@@ -36,8 +33,6 @@
 		currentTheme = theme;
 		// Theme sofort im DOM setzen
 		applyTheme(theme);
-		// In localStorage speichern
-		localStorage.setItem('wish-factory-theme', theme);
 		console.log(
 			'Theme changed to:',
 			theme,

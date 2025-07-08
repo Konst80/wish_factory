@@ -4,8 +4,8 @@
 
 	let { data }: { data: PageData } = $props();
 
-	// Theme-System mit localStorage-Persistierung
-	let currentTheme = $state('light');
+	// Theme-System - now uses database theme as source of truth
+	let currentTheme = $state(data.userTheme || 'light');
 	const themes = [
 		'light',
 		'dark',
@@ -18,34 +18,59 @@
 		'aqua'
 	];
 
-	// Theme aus localStorage laden und sofort anwenden
+	// Initialize theme from layout data and listen for changes
 	onMount(() => {
-		const savedTheme = localStorage.getItem('wish-factory-theme');
-		if (savedTheme && themes.includes(savedTheme)) {
-			currentTheme = savedTheme;
+		// Set initial theme from database
+		if (data.userTheme) {
+			currentTheme = data.userTheme;
 		}
-		// Theme sofort anwenden
-		applyTheme(currentTheme);
+
+		// Listen for theme change events from settings page
+		const handleThemeChange = (event: CustomEvent) => {
+			const newTheme = event.detail.theme;
+			currentTheme = newTheme;
+			console.log('Dashboard: Theme updated via event:', newTheme);
+		};
+
+		// Add global event listener for theme changes
+		window.addEventListener('themeChanged', handleThemeChange as EventListener);
+
+		return () => {
+			window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+		};
 	});
 
-	function applyTheme(theme: string) {
-		document.documentElement.setAttribute('data-theme', theme);
-		// Force a style recalculation
-		document.documentElement.style.setProperty('color-scheme', theme === 'dark' ? 'dark' : 'light');
-	}
-
-	const setTheme = (theme: string) => {
+	// Update theme and save to database via form submission
+	const setTheme = async (theme: string) => {
 		currentTheme = theme;
-		// Theme sofort im DOM setzen
-		applyTheme(theme);
-		// In localStorage speichern
-		localStorage.setItem('wish-factory-theme', theme);
-		console.log(
-			'Theme changed to:',
-			theme,
-			'Current data-theme:',
-			document.documentElement.getAttribute('data-theme')
-		);
+
+		// Apply theme immediately
+		document.documentElement.setAttribute('data-theme', theme);
+
+		// Update database by submitting to settings endpoint
+		try {
+			const formData = new FormData();
+			formData.append('theme', theme);
+
+			const response = await fetch('/dashboard/settings?/updatePreferences', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (response.ok) {
+				console.log('Theme saved to database:', theme);
+				// Dispatch event to notify other components
+				window.dispatchEvent(
+					new CustomEvent('themeChanged', {
+						detail: { theme }
+					})
+				);
+			} else {
+				console.error('Failed to save theme to database');
+			}
+		} catch (error) {
+			console.error('Error saving theme:', error);
+		}
 	};
 
 	// Notification state

@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 	}
 
 	// Get parent layout data (includes profile)
-	const { profile } = await parent();
+	const { profile, userTheme } = await parent();
 
 	try {
 		// Get all wishes statistics
@@ -62,6 +62,13 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 			createdBy: wish.profiles?.full_name || 'Unbekannt'
 		}));
 
+		// Get activity data (wishes created over time)
+		const { data: wishActivity } = await locals.supabase
+			.from('wishes')
+			.select('created_at')
+			.eq('author_id', session.user.id)
+			.gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+
 		return {
 			stats: {
 				totalWishes,
@@ -74,7 +81,10 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 			user: {
 				name: profile?.full_name || session.user.email || 'Benutzer',
 				isAdmin: profile?.role === 'Administrator'
-			}
+			},
+			userTheme,
+			recentWishes: recentWishes || [],
+			wishActivity: wishActivity || []
 		};
 	} catch (error) {
 		console.error('Error loading dashboard data:', error);
@@ -92,7 +102,10 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 			user: {
 				name: profile?.full_name || session.user.email || 'Benutzer',
 				isAdmin: profile?.role === 'Administrator'
-			}
+			},
+			userTheme,
+			recentWishes: [],
+			wishActivity: []
 		};
 	}
 };

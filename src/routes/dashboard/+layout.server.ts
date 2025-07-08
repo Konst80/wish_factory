@@ -1,28 +1,54 @@
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals }) => {
-	const { session, user } = await locals.safeGetSession();
+export const load: LayoutServerLoad = async ({ locals, parent }) => {
+	const {
+		data: { user },
+		error: userError
+	} = await locals.supabase.auth.getUser();
 
-	if (!session) {
+	if (userError || !user) {
 		throw redirect(302, '/auth/login');
 	}
 
-	// Get user profile
-	const { data: profiles, error: profileError } = user
-		? await locals.supabase.from('profiles').select('*').eq('id', user.id)
-		: { data: null, error: null };
+	// Get theme from parent layout
+	const { userTheme } = await parent();
 
-	// Take the first profile if multiple exist, or null if none
-	const profile = profiles && profiles.length > 0 ? profiles[0] : null;
+	// Get user profile and stats
+	const { data: profile } = await locals.supabase
+		.from('profiles')
+		.select('*')
+		.eq('id', user.id)
+		.single();
 
-	// Log any profile errors for debugging
-	if (profileError) {
-		console.error('Profile fetch error:', profileError);
+	if (!profile) {
+		throw redirect(302, '/auth/login');
 	}
 
+	// Get dashboard stats
+	const { data: wishStats } = await locals.supabase
+		.from('wishes')
+		.select('id, status, created_at')
+		.eq('author_id', user.id);
+
+	const stats = {
+		total: wishStats?.length || 0,
+		drafts: wishStats?.filter((w) => w.status === 'Entwurf').length || 0,
+		pending: wishStats?.filter((w) => w.status === 'Zur Freigabe').length || 0,
+		published: wishStats?.filter((w) => w.status === 'Freigegeben').length || 0
+	};
+
 	return {
-		session,
-		profile
+		user: {
+			id: user.id,
+			email: user.email,
+			name: profile.full_name,
+			role: profile.role,
+			isAdmin: profile.role === 'Administrator',
+			avatar_url: profile.avatar_url
+		},
+		profile,
+		stats,
+		userTheme // Pass theme to dashboard pages
 	};
 };

@@ -242,7 +242,8 @@
 							return async ({ result }) => {
 								if (result.type === 'success') {
 									await invalidateAll();
-									currentMessage = (result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
+									currentMessage =
+										(result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
 									showSuccessMessage = true;
 									showErrorMessage = false;
 									setTimeout(() => {
@@ -364,7 +365,8 @@
 							return async ({ result }) => {
 								if (result.type === 'success') {
 									await invalidateAll();
-									currentMessage = (result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
+									currentMessage =
+										(result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
 									showSuccessMessage = true;
 									showErrorMessage = false;
 									setTimeout(() => {
@@ -481,9 +483,29 @@
 							return async ({ result }) => {
 								if (result.type === 'success') {
 									await invalidateAll();
-									currentMessage = (result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
+									currentMessage =
+										(result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
 									showSuccessMessage = true;
 									showErrorMessage = false;
+
+									// Dispatch theme change event if theme was updated
+									if (typeof window !== 'undefined') {
+										const form = document.querySelector(
+											'form[action="?/updatePreferences"]'
+										) as HTMLFormElement;
+										if (form) {
+											const formData = new FormData(form);
+											const newTheme = formData.get('theme') as string;
+											if (newTheme) {
+												window.dispatchEvent(
+													new CustomEvent('themeChanged', {
+														detail: { theme: newTheme }
+													})
+												);
+											}
+										}
+									}
+
 									setTimeout(() => {
 										showSuccessMessage = false;
 									}, 3000);
@@ -597,7 +619,8 @@
 							return async ({ result }) => {
 								if (result.type === 'success') {
 									await invalidateAll();
-									currentMessage = (result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
+									currentMessage =
+										(result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!';
 									showSuccessMessage = true;
 									showErrorMessage = false;
 									setTimeout(() => {
