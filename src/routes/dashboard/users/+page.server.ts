@@ -156,8 +156,11 @@ export const actions: Actions = {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
+		// Use admin client for permission checks and updates
+		const adminClient = createSupabaseAdminClient();
+
 		// Check if current user is admin
-		const { data: currentUserProfile } = await locals.supabase
+		const { data: currentUserProfile } = await adminClient
 			.from('profiles')
 			.select('role')
 			.eq('id', user.id)
@@ -177,7 +180,7 @@ export const actions: Actions = {
 
 		// Prevent admin from removing their own admin role if they're the only admin
 		if (userId === user.id && newRole !== 'Administrator') {
-			const { count } = await locals.supabase
+			const { count } = await adminClient
 				.from('profiles')
 				.select('*', { count: 'exact', head: true })
 				.eq('role', 'Administrator');
@@ -190,7 +193,7 @@ export const actions: Actions = {
 			}
 		}
 
-		const { error: updateError } = await locals.supabase
+		const { error: updateError } = await adminClient
 			.from('profiles')
 			.update({ role: newRole, updated_at: new Date().toISOString() })
 			.eq('id', userId);

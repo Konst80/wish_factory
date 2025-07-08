@@ -59,6 +59,14 @@ class OpenRouterAIService {
 			const prompt = this.generatePrompt(params, aiSettings);
 			const model = aiSettings?.model || 'anthropic/claude-3.5-sonnet';
 
+			console.log('🔧 AI Service Parameters:', {
+				model,
+				temperature: aiSettings?.temperature ?? 0.8,
+				maxTokens: aiSettings?.maxTokens || 2000,
+				promptLength: prompt.length
+			});
+			console.log('📝 Generated Prompt:', prompt);
+
 			const response = await fetch(`${this.baseUrl}/chat/completions`, {
 				method: 'POST',
 				headers: {
@@ -102,40 +110,62 @@ class OpenRouterAIService {
 
 			if (!response.ok) {
 				const errorData = await response.text();
+				console.error('❌ OpenRouter API Error:', response.status, errorData);
 				throw new Error(`OpenRouter API error: ${response.status} - ${errorData}`);
 			}
 
 			const data = await response.json();
+			console.log('📥 OpenRouter Response:', JSON.stringify(data, null, 2));
 			const content = data.choices?.[0]?.message?.content;
 
 			if (!content) {
+				console.error('❌ No content in AI response');
 				throw new Error('No content received from AI');
 			}
+
+			console.log('📝 AI Response Content:', content);
 
 			// Parse JSON response
 			let parsedResponse;
 			try {
 				parsedResponse = JSON.parse(content);
-			} catch {
+				console.log('✅ Parsed JSON Response:', parsedResponse);
+			} catch (parseError) {
+				console.error('❌ JSON Parse Error:', parseError);
+				console.log('🔍 Attempting to extract JSON from content...');
+				
 				// Fallback: Versuche JSON aus dem Text zu extrahieren
 				const jsonMatch = content.match(/\{[\s\S]*\}/);
 				if (jsonMatch) {
-					parsedResponse = JSON.parse(jsonMatch[0]);
+					try {
+						parsedResponse = JSON.parse(jsonMatch[0]);
+						console.log('✅ Extracted JSON:', parsedResponse);
+					} catch (extractError) {
+						console.error('❌ JSON Extract Error:', extractError);
+						throw new Error('Could not parse JSON from AI response');
+					}
 				} else {
+					console.error('❌ No JSON found in content');
 					throw new Error('Could not parse JSON from AI response');
 				}
 			}
 
 			// Validiere Response-Format
 			if (!parsedResponse.wishes || !Array.isArray(parsedResponse.wishes)) {
+				console.error('❌ Invalid response format:', parsedResponse);
 				throw new Error('Invalid AI response format: missing wishes array');
 			}
 
-			return {
+			console.log('✅ Valid wishes array found:', parsedResponse.wishes.length, 'wishes');
+
+			const result = {
 				wishes: parsedResponse.wishes,
 				totalGenerated: parsedResponse.totalGenerated || parsedResponse.wishes.length,
 				error: undefined
 			};
+
+			console.log('🎉 Final AI Service Result:', result);
+			return result;
 		} catch (error) {
 			console.error('AI Service Error:', error);
 			return {
@@ -233,7 +263,7 @@ class OpenRouterAIService {
 
 Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträglichen (belated) Text.
 
-**Antwortformat (JSON):**
+**WICHTIG: Antworte EXAKT in diesem JSON-Format:**
 {
   "wishes": [
     {
