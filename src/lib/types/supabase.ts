@@ -9,6 +9,7 @@ export interface Database {
 					email: string;
 					full_name: string;
 					role: 'Redakteur' | 'Administrator';
+					avatar_url: string | null;
 					created_at: string;
 					updated_at: string;
 				};
@@ -17,6 +18,7 @@ export interface Database {
 					email: string;
 					full_name: string;
 					role?: 'Redakteur' | 'Administrator';
+					avatar_url?: string | null;
 					created_at?: string;
 					updated_at?: string;
 				};
@@ -25,6 +27,7 @@ export interface Database {
 					email?: string;
 					full_name?: string;
 					role?: 'Redakteur' | 'Administrator';
+					avatar_url?: string | null;
 					created_at?: string;
 					updated_at?: string;
 				};
@@ -90,6 +93,86 @@ export interface Database {
 						columns: ['created_by'];
 						isOneToOne: false;
 						referencedRelation: 'profiles';
+						referencedColumns: ['id'];
+					}
+				];
+			};
+			user_settings: {
+				Row: {
+					id: string;
+					user_id: string;
+					language: string;
+					timezone: string;
+					email_notifications: boolean;
+					push_notifications: boolean;
+					new_wish_alerts: boolean;
+					approval_requests: boolean;
+					system_updates: boolean;
+					weekly_report: boolean;
+					theme: string;
+					dashboard_layout: string;
+					wishes_per_page: number;
+					auto_save: boolean;
+					confirm_before_delete: boolean;
+					api_access: boolean;
+					export_format: string;
+					backup_frequency: string;
+					data_retention: number;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					user_id: string;
+					language?: string;
+					timezone?: string;
+					email_notifications?: boolean;
+					push_notifications?: boolean;
+					new_wish_alerts?: boolean;
+					approval_requests?: boolean;
+					system_updates?: boolean;
+					weekly_report?: boolean;
+					theme?: string;
+					dashboard_layout?: string;
+					wishes_per_page?: number;
+					auto_save?: boolean;
+					confirm_before_delete?: boolean;
+					api_access?: boolean;
+					export_format?: string;
+					backup_frequency?: string;
+					data_retention?: number;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					user_id?: string;
+					language?: string;
+					timezone?: string;
+					email_notifications?: boolean;
+					push_notifications?: boolean;
+					new_wish_alerts?: boolean;
+					approval_requests?: boolean;
+					system_updates?: boolean;
+					weekly_report?: boolean;
+					theme?: string;
+					dashboard_layout?: string;
+					wishes_per_page?: number;
+					auto_save?: boolean;
+					confirm_before_delete?: boolean;
+					api_access?: boolean;
+					export_format?: string;
+					backup_frequency?: string;
+					data_retention?: number;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'user_settings_user_id_fkey';
+						columns: ['user_id'];
+						isOneToOne: true;
+						referencedRelation: 'users';
 						referencedColumns: ['id'];
 					}
 				];

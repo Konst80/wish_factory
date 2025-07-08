@@ -89,6 +89,12 @@
 		link.click();
 		URL.revokeObjectURL(url);
 	}
+
+	function saveSettings() {
+		// This function handles the general save action
+		// Individual form submissions handle their own saving
+		alert('Bitte verwenden Sie die Speichern-Buttons in den jeweiligen Abschnitten.');
+	}
 </script>
 
 <svelte:head>
@@ -399,135 +405,190 @@
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">Benutzer-Einstellungen</h2>
-					<div class="space-y-4">
-						<div class="form-control">
-							<label class="label" for="theme">
-								<span class="label-text">Theme</span>
-							</label>
-							<select
-								id="theme"
-								class="select-bordered select w-full"
-								bind:value={settings.preferences.theme}
-							>
-								{#each themes as theme}
-									<option value={theme.value}>{theme.label}</option>
-								{/each}
-							</select>
-						</div>
+					<form 
+						method="POST" 
+						action="?/updatePreferences"
+						use:enhance={() => {
+							isSubmitting = true;
+							return async ({ update }) => {
+								await update();
+								isSubmitting = false;
+							};
+						}}
+					>
+						<div class="space-y-4">
+							<div class="form-control">
+								<label class="label" for="theme">
+									<span class="label-text">Theme</span>
+								</label>
+								<select
+									id="theme"
+									name="theme"
+									class="select-bordered select w-full"
+									value={data.settings.preferences.theme}
+								>
+									{#each themes as theme}
+										<option value={theme.value}>{theme.label}</option>
+									{/each}
+								</select>
+							</div>
 
-						<div class="form-control">
-							<label class="label" for="defaultLang">
-								<span class="label-text">Standard-Sprache für Wünsche</span>
-							</label>
-							<select
-								id="defaultLang"
-								class="select-bordered select w-full"
-								bind:value={settings.preferences.defaultLanguage}
-							>
-								{#each languages as lang}
-									<option value={lang.value}>{lang.label}</option>
-								{/each}
-							</select>
-						</div>
+							<div class="form-control">
+								<label class="label" for="defaultLang">
+									<span class="label-text">Standard-Sprache für Wünsche</span>
+								</label>
+								<select
+									id="defaultLang"
+									name="defaultLanguage"
+									class="select-bordered select w-full"
+									value={data.settings.preferences.defaultLanguage}
+								>
+									{#each languages as lang}
+										<option value={lang.value}>{lang.label}</option>
+									{/each}
+								</select>
+							</div>
 
-						<div class="form-control">
-							<label class="label" for="wishesPerPage">
-								<span class="label-text">Wünsche pro Seite</span>
-							</label>
-							<input
-								id="wishesPerPage"
-								type="number"
-								min="10"
-								max="100"
-								class="input-bordered input w-full"
-								bind:value={settings.preferences.wishesPerPage}
-							/>
-						</div>
-
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<span class="label-text">Automatisches Speichern</span>
+							<div class="form-control">
+								<label class="label" for="wishesPerPage">
+									<span class="label-text">Wünsche pro Seite</span>
+								</label>
 								<input
-									type="checkbox"
-									class="toggle toggle-primary"
-									bind:checked={settings.preferences.autoSave}
+									id="wishesPerPage"
+									name="wishesPerPage"
+									type="number"
+									min="10"
+									max="100"
+									class="input-bordered input w-full"
+									value={data.settings.preferences.wishesPerPage}
 								/>
-							</label>
-						</div>
+							</div>
 
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<span class="label-text">Vor Löschen bestätigen</span>
-								<input
-									type="checkbox"
-									class="toggle toggle-primary"
-									bind:checked={settings.preferences.confirmBeforeDelete}
-								/>
-							</label>
+							<div class="form-control">
+								<label class="label cursor-pointer">
+									<span class="label-text">Automatisches Speichern</span>
+									<input
+										type="checkbox"
+										name="autoSave"
+										class="toggle toggle-primary"
+										checked={data.settings.preferences.autoSave}
+									/>
+								</label>
+							</div>
+
+							<div class="form-control">
+								<label class="label cursor-pointer">
+									<span class="label-text">Vor Löschen bestätigen</span>
+									<input
+										type="checkbox"
+										name="confirmBeforeDelete"
+										class="toggle toggle-primary"
+										checked={data.settings.preferences.confirmBeforeDelete}
+									/>
+								</label>
+							</div>
+
+							<div class="card-actions justify-end">
+								<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+									{#if isSubmitting}
+										<span class="loading loading-spinner loading-sm"></span>
+										Speichern...
+									{:else}
+										Einstellungen speichern
+									{/if}
+								</button>
+							</div>
 						</div>
-					</div>
+					</form>
 				</div>
 			</div>
 		{:else if activeTab === 'system'}
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">System-Einstellungen</h2>
-					<div class="space-y-4">
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<span class="label-text">API-Zugriff aktivieren</span>
+					<form 
+						method="POST" 
+						action="?/updateSystem"
+						use:enhance={() => {
+							isSubmitting = true;
+							return async ({ update }) => {
+								await update();
+								isSubmitting = false;
+							};
+						}}
+					>
+						<div class="space-y-4">
+							<div class="form-control">
+								<label class="label cursor-pointer">
+									<span class="label-text">API-Zugriff aktivieren</span>
+									<input
+										type="checkbox"
+										name="apiAccess"
+										class="toggle toggle-primary"
+										checked={data.settings.system.apiAccess}
+									/>
+								</label>
+							</div>
+
+							<div class="form-control">
+								<label class="label" for="exportFormat">
+									<span class="label-text">Standard-Exportformat</span>
+								</label>
+								<select
+									id="exportFormat"
+									name="exportFormat"
+									class="select-bordered select w-full"
+									value={data.settings.system.exportFormat}
+								>
+									{#each exportFormats as format}
+										<option value={format.value}>{format.label}</option>
+									{/each}
+								</select>
+							</div>
+
+							<div class="form-control">
+								<label class="label" for="backupFreq">
+									<span class="label-text">Backup-Häufigkeit</span>
+								</label>
+								<select
+									id="backupFreq"
+									name="backupFrequency"
+									class="select-bordered select w-full"
+									value={data.settings.system.backupFrequency}
+								>
+									{#each backupFrequencies as freq}
+										<option value={freq.value}>{freq.label}</option>
+									{/each}
+								</select>
+							</div>
+
+							<div class="form-control">
+								<label class="label" for="dataRetention">
+									<span class="label-text">Daten-Aufbewahrung (Tage)</span>
+								</label>
 								<input
-									type="checkbox"
-									class="toggle toggle-primary"
-									bind:checked={settings.system.apiAccess}
+									id="dataRetention"
+									name="dataRetention"
+									type="number"
+									min="30"
+									max="3650"
+									class="input-bordered input w-full"
+									value={data.settings.system.dataRetention}
 								/>
-							</label>
-						</div>
+							</div>
 
-						<div class="form-control">
-							<label class="label" for="exportFormat">
-								<span class="label-text">Standard-Exportformat</span>
-							</label>
-							<select
-								id="exportFormat"
-								class="select-bordered select w-full"
-								bind:value={settings.system.exportFormat}
-							>
-								{#each exportFormats as format}
-									<option value={format.value}>{format.label}</option>
-								{/each}
-							</select>
+							<div class="card-actions justify-end">
+								<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+									{#if isSubmitting}
+										<span class="loading loading-spinner loading-sm"></span>
+										Speichern...
+									{:else}
+										System-Einstellungen speichern
+									{/if}
+								</button>
+							</div>
 						</div>
-
-						<div class="form-control">
-							<label class="label" for="backupFreq">
-								<span class="label-text">Backup-Häufigkeit</span>
-							</label>
-							<select
-								id="backupFreq"
-								class="select-bordered select w-full"
-								bind:value={settings.system.backupFrequency}
-							>
-								{#each backupFrequencies as freq}
-									<option value={freq.value}>{freq.label}</option>
-								{/each}
-							</select>
-						</div>
-
-						<div class="form-control">
-							<label class="label" for="dataRetention">
-								<span class="label-text">Daten-Aufbewahrung (Tage)</span>
-							</label>
-							<input
-								id="dataRetention"
-								type="number"
-								min="30"
-								max="3650"
-								class="input-bordered input w-full"
-								bind:value={settings.system.dataRetention}
-							/>
-						</div>
-					</div>
+					</form>
 				</div>
 			</div>
 		{/if}
@@ -541,21 +602,21 @@
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
 						<span>Sprache:</span>
-						<span class="font-medium">{settings.profile.language.toUpperCase()}</span>
+						<span class="font-medium">{data.settings.profile.language.toUpperCase()}</span>
 					</div>
 					<div class="flex justify-between">
 						<span>Theme:</span>
-						<span class="font-medium capitalize">{settings.preferences.theme}</span>
+						<span class="font-medium capitalize">{data.settings.preferences.theme}</span>
 					</div>
 					<div class="flex justify-between">
 						<span>E-Mail:</span>
 						<span class="font-medium"
-							>{settings.notifications.emailNotifications ? 'An' : 'Aus'}</span
+							>{data.settings.notifications.emailNotifications ? 'An' : 'Aus'}</span
 						>
 					</div>
 					<div class="flex justify-between">
 						<span>API:</span>
-						<span class="font-medium">{settings.system.apiAccess ? 'Aktiv' : 'Inaktiv'}</span>
+						<span class="font-medium">{data.settings.system.apiAccess ? 'Aktiv' : 'Inaktiv'}</span>
 					</div>
 				</div>
 			</div>

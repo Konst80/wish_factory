@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+import { createSupabaseAdminClient } from '$lib/server/supabase-admin';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const { session } = await locals.safeGetSession();
@@ -245,7 +246,8 @@ export const actions: Actions = {
 		}
 
 		// Delete user (this will cascade to profile due to FK constraint)
-		const { error: deleteError } = await locals.supabase.auth.admin.deleteUser(userId);
+		const adminClient = createSupabaseAdminClient();
+		const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId);
 
 		if (deleteError) {
 			console.error('Error deleting user:', deleteError);
@@ -287,7 +289,8 @@ export const actions: Actions = {
 		}
 
 		// Create user using Supabase Auth Admin API
-		const { data: newUser, error: createError } = await locals.supabase.auth.admin.createUser({
+		const adminClient = createSupabaseAdminClient();
+		const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
 			email,
 			password,
 			email_confirm: true,
@@ -303,7 +306,7 @@ export const actions: Actions = {
 
 		// Update profile with correct role (the trigger creates it as Redakteur by default)
 		if (newUser.user && role !== 'Redakteur') {
-			const { error: updateError } = await locals.supabase
+			const { error: updateError } = await adminClient
 				.from('profiles')
 				.update({ role, full_name: fullName })
 				.eq('id', newUser.user.id);
