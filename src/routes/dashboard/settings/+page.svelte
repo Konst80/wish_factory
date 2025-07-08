@@ -47,6 +47,15 @@
 			label: 'Einstellungen',
 			icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z'
 		},
+		...(data.user.role === 'Administrator'
+			? [
+					{
+						id: 'ai',
+						label: 'KI-Einstellungen',
+						icon: 'M13 10V3L4 14h7v7l9-11h-7z'
+					}
+				]
+			: []),
 		{
 			id: 'system',
 			label: 'System',
@@ -161,7 +170,7 @@
 <div class="mb-8">
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-base-content">Einstellungen</h1>
+			<h1 class="text-base-content text-3xl font-bold">Einstellungen</h1>
 			<p class="text-base-content/70 mt-2">
 				Verwalten Sie Ihre Konto-Einstellungen und Präferenzen
 			</p>
@@ -600,6 +609,395 @@
 										Speichern...
 									{:else}
 										Einstellungen speichern
+									{/if}
+								</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		{:else if activeTab === 'ai' && data.user.role === 'Administrator'}
+			<div class="space-y-6">
+				<div class="card bg-base-100 shadow-xl">
+					<form
+						method="POST"
+						action="?/updateAI"
+						use:enhance={() => {
+							isSubmitting = true;
+							return async ({ result, update }) => {
+								isSubmitting = false;
+								if (result.type === 'success') {
+									await invalidateAll();
+								}
+								update();
+							};
+						}}
+					>
+						<div class="card-body">
+							<h3 class="card-title mb-6 text-xl">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="text-primary h-7 w-7"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M13 10V3L4 14h7v7l9-11h-7z"
+									/>
+								</svg>
+								KI-Konfiguration
+							</h3>
+
+							<!-- Model & Basic Settings Section -->
+							<div class="bg-base-200 mb-6 rounded-lg p-4">
+								<h4 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+										/>
+									</svg>
+									Grundeinstellungen
+								</h4>
+
+								<div class="form-control">
+									<label class="label" for="model">
+										<span class="label-text font-medium">AI-Modell</span>
+										<span class="label-text-alt">Wählen Sie das gewünschte Sprachmodell</span>
+									</label>
+									<select
+										id="model"
+										name="model"
+										class="select select-bordered w-full"
+										value={(data.settings as any)?.ai?.model || 'anthropic/claude-3.5-sonnet'}
+									>
+										<option value="anthropic/claude-3.5-sonnet"
+											>🏆 Claude 3.5 Sonnet (Empfohlen)</option
+										>
+										<option value="anthropic/claude-3-haiku"
+											>⚡ Claude 3 Haiku (Schnell & Günstig)</option
+										>
+										<option value="openai/gpt-4o">🧠 GPT-4o (OpenAI)</option>
+										<option value="openai/gpt-4o-mini">💡 GPT-4o Mini (Kompakt)</option>
+									</select>
+								</div>
+							</div>
+
+							<!-- Prompt Configuration Section -->
+							<div class="bg-base-200 mb-6 rounded-lg p-4">
+								<h4 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+										/>
+									</svg>
+									Prompt-Konfiguration
+								</h4>
+
+								<div class="space-y-4">
+									<div class="form-control">
+										<label class="label" for="promptSystem">
+											<span class="label-text font-medium">System-Prompt</span>
+											<span class="label-text-alt">Grundlegende Verhaltensregeln für die KI</span>
+										</label>
+										<textarea
+											id="promptSystem"
+											name="promptSystem"
+											class="textarea textarea-bordered h-20 font-mono text-sm"
+											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen..."
+											value={(data.settings as any)?.ai?.promptSystem ||
+												'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'}
+										></textarea>
+									</div>
+
+									<div class="form-control">
+										<label class="label" for="promptTemplate">
+											<span class="label-text font-medium">Haupt-Prompt-Vorlage</span>
+											<span class="label-text-alt"
+												>Template für die Wunschgenerierung (alle Sprachen)</span
+											>
+										</label>
+										<textarea
+											id="promptTemplate"
+											name="promptTemplate"
+											class="textarea textarea-bordered h-40 font-mono text-sm"
+											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen. Generiere &#123;count&#125; &#123;countText&#125; in der Sprache &#123;language&#125;..."
+											value={(data.settings as any)?.ai?.promptTemplate || ''}
+										></textarea>
+										<div class="bg-info/10 mt-2 rounded p-3">
+											<p class="mb-2 text-sm font-medium">📝 Verfügbare Platzhalter:</p>
+											<div class="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+												<code class="bg-base-100 rounded px-2 py-1">{`{count}`}</code>
+												<code class="bg-base-100 rounded px-2 py-1">{`{language}`}</code>
+												<code class="bg-base-100 rounded px-2 py-1">{`{style}`}</code>
+												<code class="bg-base-100 rounded px-2 py-1">{`{eventText}`}</code>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Advanced Parameters Section -->
+							<div class="bg-base-200 mb-6 rounded-lg p-6">
+								<div class="mb-6 flex items-center justify-between">
+									<h4 class="flex items-center gap-3 text-xl font-bold">
+										<div class="badge badge-primary badge-lg">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
+												/>
+											</svg>
+										</div>
+										Erweiterte Parameter
+									</h4>
+									<div
+										class="tooltip tooltip-left"
+										data-tip="Optimale Werte für die meisten Anwendungen"
+									>
+										<button class="btn btn-ghost btn-sm">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</button>
+									</div>
+								</div>
+
+								<div class="grid gap-8 lg:grid-cols-2">
+									<!-- Creativity Controls -->
+									<div class="space-y-6">
+										<div class="card bg-base-100 shadow-sm">
+											<div class="card-body p-4">
+												<h5 class="card-title flex items-center gap-2 text-lg">
+													🎨 Kreativitäts-Kontrolle
+												</h5>
+
+												<div class="space-y-4">
+													<div class="form-control">
+														<div class="mb-2 flex items-center justify-between">
+															<label class="label-text text-base font-semibold"
+																>🌡️ Temperature</label
+															>
+															<div class="badge badge-outline">
+																{(data.settings as any)?.ai?.temperature || 0.8}
+															</div>
+														</div>
+														<input
+															id="temperature"
+															name="temperature"
+															type="range"
+															min="0"
+															max="2"
+															step="0.1"
+															class="range range-primary"
+															value={(data.settings as any)?.ai?.temperature || 0.8}
+														/>
+														<div class="text-base-content/60 mt-1 flex justify-between text-xs">
+															<span>Deterministisch</span>
+															<span>Empfohlen: 0.7-1.0</span>
+															<span>Sehr kreativ</span>
+														</div>
+														<p class="text-base-content/70 mt-2 text-sm">
+															Steuert die Zufälligkeit der Antworten. Niedrige Werte = konsistenter,
+															hohe Werte = kreativer.
+														</p>
+													</div>
+
+													<div class="form-control">
+														<div class="mb-2 flex items-center justify-between">
+															<label class="label-text text-base font-semibold">🎯 Top P</label>
+															<div class="badge badge-outline">
+																{(data.settings as any)?.ai?.topP || 0.9}
+															</div>
+														</div>
+														<input
+															id="topP"
+															name="topP"
+															type="range"
+															min="0"
+															max="1"
+															step="0.1"
+															class="range range-secondary"
+															value={(data.settings as any)?.ai?.topP || 0.9}
+														/>
+														<div class="text-base-content/60 mt-1 flex justify-between text-xs">
+															<span>Fokussiert</span>
+															<span>Empfohlen: 0.8-0.95</span>
+															<span>Vielfältig</span>
+														</div>
+														<p class="text-base-content/70 mt-2 text-sm">
+															Nucleus Sampling - begrenzt die Wortauswahl auf die wahrscheinlichsten
+															Optionen.
+														</p>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Output Controls -->
+									<div class="space-y-6">
+										<div class="card bg-base-100 shadow-sm">
+											<div class="card-body p-4">
+												<h5 class="card-title flex items-center gap-2 text-lg">
+													⚙️ Ausgabe-Kontrolle
+												</h5>
+
+												<div class="space-y-4">
+													<div class="form-control">
+														<label class="label">
+															<span class="label-text text-base font-semibold">📏 Max Tokens</span>
+															<span class="badge badge-ghost">
+																{(data.settings as any)?.ai?.maxTokens || 2000}
+															</span>
+														</label>
+														<input
+															id="maxTokens"
+															name="maxTokens"
+															type="range"
+															min="500"
+															max="4000"
+															step="100"
+															class="range range-accent"
+															value={(data.settings as any)?.ai?.maxTokens || 2000}
+														/>
+														<div class="text-base-content/60 mt-1 flex justify-between text-xs">
+															<span>500</span>
+															<span>Empfohlen: 1500-2500</span>
+															<span>4000</span>
+														</div>
+														<p class="text-base-content/70 mt-2 text-sm">
+															Maximale Länge der generierten Antwort. ~4 Zeichen = 1 Token.
+														</p>
+													</div>
+
+													<div class="form-control">
+														<label class="label">
+															<span class="label-text text-base font-semibold"
+																>🔄 Frequency Penalty</span
+															>
+															<span class="badge badge-ghost">
+																{(data.settings as any)?.ai?.frequencyPenalty || 0.1}
+															</span>
+														</label>
+														<input
+															id="frequencyPenalty"
+															name="frequencyPenalty"
+															type="range"
+															min="-1"
+															max="1"
+															step="0.1"
+															class="range range-warning"
+															value={(data.settings as any)?.ai?.frequencyPenalty || 0.1}
+														/>
+														<div class="text-base-content/60 mt-1 flex justify-between text-xs">
+															<span>Wiederholungen</span>
+															<span>Empfohlen: 0.0-0.3</span>
+															<span>Abwechslung</span>
+														</div>
+														<p class="text-base-content/70 mt-2 text-sm">
+															Bestraft häufige Wiederholungen. Positive Werte fördern Vielfalt.
+														</p>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Quick Presets -->
+								<div class="card bg-base-100 mt-6 shadow-sm">
+									<div class="card-body p-4">
+										<h5 class="card-title mb-3 text-sm">⚡ Schnell-Einstellungen</h5>
+										<div class="flex flex-wrap gap-2">
+											<button type="button" class="btn btn-outline btn-sm">
+												🎯 Präzise (Temp: 0.3, TopP: 0.7)
+											</button>
+											<button type="button" class="btn btn-outline btn-sm">
+												⚖️ Ausgewogen (Temp: 0.8, TopP: 0.9)
+											</button>
+											<button type="button" class="btn btn-outline btn-sm">
+												🎨 Kreativ (Temp: 1.2, TopP: 0.95)
+											</button>
+											<button type="button" class="btn btn-outline btn-sm">
+												🔄 Reset Defaults
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Important Notice -->
+							<div class="alert alert-warning">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-6 w-6 shrink-0 stroke-current"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+									/>
+								</svg>
+								<div>
+									<h3 class="font-bold">⚠️ Wichtiger Hinweis</h3>
+									<div class="text-sm">
+										Änderungen wirken sich sofort auf alle neuen KI-Generierungen aus. Testen Sie
+										Ihre Einstellungen zunächst mit wenigen Wünschen.
+									</div>
+								</div>
+							</div>
+
+							<div class="card-actions mt-6 justify-end">
+								<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+									{#if isSubmitting}
+										<span class="loading loading-spinner loading-sm"></span>
+										Speichern...
+									{:else}
+										KI-Einstellungen speichern
 									{/if}
 								</button>
 							</div>

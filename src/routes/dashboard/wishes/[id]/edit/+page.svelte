@@ -38,7 +38,7 @@
 	// Helper functions
 	function handleRelationChange(relation: string, checked: boolean) {
 		if (checked) {
-			formData.relations = [...formData.relations, relation];
+			formData.relations = [...formData.relations, relation as Relation];
 		} else {
 			formData.relations = formData.relations.filter((r: string) => r !== relation);
 		}
@@ -46,7 +46,7 @@
 
 	function handleAgeGroupChange(ageGroup: string, checked: boolean) {
 		if (checked) {
-			formData.ageGroups = [...formData.ageGroups, ageGroup];
+			formData.ageGroups = [...formData.ageGroups, ageGroup as AgeGroup];
 		} else {
 			formData.ageGroups = formData.ageGroups.filter((a: string) => a !== ageGroup);
 		}
@@ -104,21 +104,51 @@
 		generationError = '';
 
 		try {
-			// Mock AI generation
-			await new Promise((resolve) => setTimeout(resolve, 1500));
+			// API-Aufruf zur echten KI-Generierung
+			const response = await fetch('/api/ai/generate', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					type: formData.type,
+					eventType: formData.eventType,
+					language: formData.language,
+					relations: formData.relations as Relation[],
+					ageGroups: formData.ageGroups as AgeGroup[],
+					specificValues: formData.specificValues
+						? formData.specificValues
+								.split(',')
+								.map((v) => parseInt(v.trim()))
+								.filter((v) => !isNaN(v))
+						: [],
+					style: wishStyle,
+					count: wishCount,
+					additionalInstructions
+				})
+			});
 
-			// Example texts based on current wish type
-			const exampleTexts = [
-				'Alles Liebe zum Geburtstag, [Name]! Mögest du einen wundervollen Tag mit deinen Liebsten verbringen.',
-				'Herzlichen Glückwunsch zum Geburtstag, [Name]! 🎉',
-				'Zum Geburtstag alles Gute, [Name]! Bleib so wie du bist!'
-			];
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.message || `API-Fehler: ${response.status}`);
+			}
 
-			formData.text = exampleTexts[0];
-			showAIGenerator = false;
+			const data = await response.json();
+
+			if (data.success && data.wishes && data.wishes.length > 0) {
+				const wish = data.wishes[0]; // Nehme den ersten generierten Wunsch
+				formData.text = wish.text;
+				formData.belated = wish.belated;
+				showAIGenerator = false;
+			} else {
+				throw new Error('Keine Wünsche generiert');
+			}
 		} catch (error) {
 			console.error('Fehler bei der KI-Generierung:', error);
-			generationError = 'Fehler bei der Generierung. Bitte versuche es später erneut.';
+			generationError =
+				error instanceof Error
+					? error.message
+					: 'Fehler bei der Generierung. Bitte versuche es später erneut.';
 		} finally {
 			isGenerating = false;
 		}
@@ -168,7 +198,7 @@
 
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-base-content">Wunsch bearbeiten</h1>
+			<h1 class="text-base-content text-3xl font-bold">Wunsch bearbeiten</h1>
 			<p class="text-base-content/70 mt-2">
 				Bearbeiten Sie den Wunsch {data.wish.id}
 			</p>
@@ -629,7 +659,7 @@
 	<div class="lg:col-span-1">
 		<!-- Preview Card -->
 		{#if showPreview && formData.text}
-			<div class="card mb-6 bg-base-100 shadow-xl">
+			<div class="card bg-base-100 mb-6 shadow-xl">
 				<div class="card-body">
 					<h3 class="card-title text-lg">
 						<svg
@@ -655,12 +685,12 @@
 						Vorschau
 					</h3>
 					<div class="divider my-2"></div>
-					<div class="mockup-window border border-base-300 bg-base-200">
+					<div class="mockup-window border-base-300 bg-base-200 border">
 						<div class="bg-base-200 px-4 py-6">
-							<h4 class="font-medium text-primary">Haupttext:</h4>
+							<h4 class="text-primary font-medium">Haupttext:</h4>
 							<p class="mb-4 text-sm">{formData.text}</p>
 							{#if formData.belated}
-								<h4 class="font-medium text-secondary">Nachträglich:</h4>
+								<h4 class="text-secondary font-medium">Nachträglich:</h4>
 								<p class="text-sm">{formData.belated}</p>
 							{/if}
 						</div>
@@ -670,7 +700,7 @@
 		{/if}
 
 		<!-- Original Wish Info -->
-		<div class="card mb-6 bg-base-100 shadow-xl">
+		<div class="card bg-base-100 mb-6 shadow-xl">
 			<div class="card-body">
 				<h3 class="card-title text-lg">
 					<svg

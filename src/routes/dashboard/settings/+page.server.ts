@@ -19,7 +19,50 @@ const defaultSettings = {
 	api_access: false,
 	export_format: 'json',
 	backup_frequency: 'daily',
-	data_retention: 365
+	data_retention: 365,
+	// AI Settings
+	ai_prompt_system: 'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.',
+	ai_prompt_template: `Du bist ein Experte für das Schreiben von Glückwünschen. Generiere {count} {countText} in der Sprache "{language}" basierend auf folgenden Kriterien:
+
+**Wichtige Regeln:**
+- Verwende IMMER geschlechtsneutrale Sprache (keine "er/sie" Annahmen)
+- Nutze die Platzhalter [Name], [Alter], [Anlass] wo sinnvoll
+- Der Stil soll "{style}" sein
+- Anlass: {eventText}
+- Beziehung: {relationTexts}
+- Zielgruppe: {ageGroupTexts}
+{specificValues}
+{additionalInstructions}
+
+**Stil-Definitionen:**
+- normal: Freundlich und herzlich, aber nicht übertrieben
+- herzlich: Emotional und warmherzig, persönlich
+- humorvoll: Lustig und spielerisch, aber respektvoll
+- formell: Höflich und professionell, respektvoll
+
+Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträglichen (belated) Text.
+
+**Antwortformat (JSON):**
+{
+  "wishes": [
+    {
+      "text": "Haupttext des Glückwunsches",
+      "belated": "Nachträglicher Text",
+      "metadata": {
+        "style": "{style}",
+        "confidence": 0.95
+      }
+    }
+  ],
+  "totalGenerated": {count}
+}`,
+
+	ai_model: 'anthropic/claude-3.5-sonnet',
+	ai_temperature: 0.8,
+	ai_max_tokens: 2000,
+	ai_top_p: 0.9,
+	ai_frequency_penalty: 0.1,
+	ai_presence_penalty: 0.1
 };
 
 export const load: PageServerLoad = async ({ locals, parent }) => {
@@ -111,6 +154,24 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					exportFormat: settings?.export_format || defaultSettings.export_format,
 					backupFrequency: settings?.backup_frequency || defaultSettings.backup_frequency,
 					dataRetention: settings?.data_retention || defaultSettings.data_retention
+				},
+				ai: {
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					promptSystem: (settings as any)?.ai_prompt_system || defaultSettings.ai_prompt_system,
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					promptTemplate: (settings as any)?.ai_prompt_template || defaultSettings.ai_prompt_template,
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					model: (settings as any)?.ai_model || defaultSettings.ai_model,
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					temperature: (settings as any)?.ai_temperature ?? defaultSettings.ai_temperature,
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					maxTokens: (settings as any)?.ai_max_tokens || defaultSettings.ai_max_tokens,
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					topP: (settings as any)?.ai_top_p ?? defaultSettings.ai_top_p,
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					frequencyPenalty: (settings as any)?.ai_frequency_penalty ?? defaultSettings.ai_frequency_penalty,
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					presencePenalty: (settings as any)?.ai_presence_penalty ?? defaultSettings.ai_presence_penalty
 				}
 			}
 		};
@@ -119,7 +180,7 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 
 		// Try to create default settings record for user
 		try {
-			const { data: newSettings, error: insertError } = await locals.supabase
+			const { error: insertError } = await locals.supabase
 				.from('user_settings')
 				.insert({
 					user_id: user.id,
@@ -131,15 +192,12 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 			if (insertError) {
 				console.error('Error creating default settings:', insertError);
 				// Use default settings object
-				const settings = defaultSettings;
 			} else {
 				// Use newly created settings
-				const settings = newSettings;
 			}
 		} catch (insertError) {
 			console.error('Failed to create default settings:', insertError);
 			// Final fallback to default settings
-			const settings = defaultSettings;
 		}
 
 		// Return basic user data with fallback settings
@@ -420,6 +478,90 @@ export const actions: Actions = {
 			return { success: true, message: 'System-Einstellungen erfolgreich aktualisiert' };
 		} catch (error) {
 			console.error('Unexpected error updating system settings:', error);
+			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
+		}
+	},
+
+	updateAI: async ({ request, locals }) => {
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
+		if (userError || !user) {
+			return fail(401, { message: 'Nicht authentifiziert' });
+		}
+
+		// Get user profile for permission checking
+		const { data: profiles } = await locals.supabase
+			.from('profiles')
+			.select('role')
+			.eq('id', user.id);
+
+		const profile = profiles && profiles.length > 0 ? profiles[0] : null;
+
+		// Only administrators can change AI settings
+		if (!profile || profile.role !== 'Administrator') {
+			return fail(403, { message: 'Keine Berechtigung für AI-Einstellungen' });
+		}
+
+		const formData = await request.formData();
+
+		try {
+			// First ensure user has settings record
+			const { data: existingSettings } = await locals.supabase
+				.from('user_settings')
+				.select('id')
+				.eq('user_id', user.id)
+				.single();
+
+			if (!existingSettings) {
+				// Create default settings first
+				await locals.supabase.from('user_settings').insert({
+					user_id: user.id,
+					...defaultSettings
+				});
+			}
+
+			// Parse numeric values
+			const temperature = parseFloat(formData.get('temperature') as string) || 0.8;
+			const maxTokens = parseInt(formData.get('maxTokens') as string) || 2000;
+			const topP = parseFloat(formData.get('topP') as string) || 0.9;
+			const frequencyPenalty = parseFloat(formData.get('frequencyPenalty') as string) || 0.1;
+			const presencePenalty = parseFloat(formData.get('presencePenalty') as string) || 0.1;
+
+			// Validate ranges
+			if (temperature < 0 || temperature > 2) {
+				return fail(400, { message: 'Temperature muss zwischen 0 und 2 liegen' });
+			}
+			if (topP <= 0 || topP > 1) {
+				return fail(400, { message: 'Top-P muss zwischen 0 und 1 liegen' });
+			}
+
+			// Update AI settings
+			const { error } = await locals.supabase
+				.from('user_settings')
+				.update({
+					ai_prompt_system: formData.get('promptSystem') as string,
+					ai_prompt_template_de: formData.get('promptTemplateDE') as string,
+					ai_prompt_template_en: formData.get('promptTemplateEN') as string,
+					ai_model: formData.get('model') as string,
+					ai_temperature: temperature,
+					ai_max_tokens: maxTokens,
+					ai_top_p: topP,
+					ai_frequency_penalty: frequencyPenalty,
+					ai_presence_penalty: presencePenalty,
+					updated_at: new Date().toISOString()
+				})
+				.eq('user_id', user.id);
+
+			if (error) {
+				console.error('Error updating AI settings:', error);
+				return fail(500, { message: 'Fehler beim Aktualisieren der AI-Einstellungen' });
+			}
+
+			return { success: true, message: 'AI-Einstellungen erfolgreich aktualisiert' };
+		} catch (error) {
+			console.error('Unexpected error updating AI settings:', error);
 			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
 		}
 	}

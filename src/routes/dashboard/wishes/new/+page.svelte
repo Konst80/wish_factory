@@ -156,39 +156,49 @@
 		generationError = '';
 
 		try {
-			// Hier wird später die tatsächliche API-Integration eingebaut
-			// Dies ist nur ein Mock für die UI
-			await new Promise((resolve) => setTimeout(resolve, 1500));
+			// API-Aufruf zur echten KI-Generierung
+			const response = await fetch('/api/ai/generate', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					type: formData.type,
+					eventType: formData.eventType,
+					language: formData.language,
+					relations: formData.relations as Relation[],
+					ageGroups: formData.ageGroups as AgeGroup[],
+					specificValues: formData.specificValues
+						? formData.specificValues
+								.split(',')
+								.map((v) => parseInt(v.trim()))
+								.filter((v) => !isNaN(v))
+						: [],
+					style: wishStyle,
+					count: 1
+				})
+			});
 
-			// Generate text based on current form settings
-			const eventTypeText = eventTypeLabels[formData.eventType as EventType] || 'Anlass';
-			const isHumorous = wishStyle === 'humorvoll';
-			const isFormal = wishStyle === 'formell';
-			const isHeartfelt = wishStyle === 'herzlich';
-
-			let generatedText = '';
-			let generatedBelated = '';
-
-			if (isFormal) {
-				generatedText = `Zum ${eventTypeText} möchte ich Ihnen, [Name], meine herzlichsten Glückwünsche aussprechen. Möge dieser besondere Tag voller Freude und Erfolg für Sie sein.`;
-				generatedBelated = `Sehr geehrte/r [Name], auch wenn meine Glückwünsche etwas verspätet sind, möchte ich Ihnen nachträglich alles Gute zum ${eventTypeText} wünschen.`;
-			} else if (isHumorous) {
-				generatedText = `Happy ${eventTypeText}, [Name]! 🎉 Hoffentlich ist dein Tag genauso toll wie du! Lass es krachen und vergiss nicht: Kalorien zählen heute nicht! 😄`;
-				generatedBelated = `[Name], sorry dass ich zu spät dran bin! 😅 Aber hey, gute Wünsche haben kein Verfallsdatum - alles Gute nachträglich zum ${eventTypeText}! 🎂`;
-			} else if (isHeartfelt) {
-				generatedText = `Von Herzen alles Gute zum ${eventTypeText}, liebe/r [Name]! Du bedeutest mir so viel und ich wünsche dir, dass all deine Träume in Erfüllung gehen. Möge dein Tag voller Liebe und Freude sein.`;
-				generatedBelated = `Mein/e liebe/r [Name], auch wenn ich etwas spät dran bin - von ganzem Herzen alles Gute zum ${eventTypeText}! Du verdienst all das Glück der Welt.`;
-			} else {
-				generatedText = `Alles Liebe zum ${eventTypeText}, [Name]! Mögest du einen wundervollen Tag mit deinen Liebsten verbringen und viele schöne Momente erleben.`;
-				generatedBelated = `Liebe/r [Name], auch wenn ich etwas spät dran bin - alles Gute zum ${eventTypeText}! Ich hoffe, du hattest einen fantastischen Tag.`;
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.message || `API-Fehler: ${response.status}`);
 			}
 
-			// Set generated texts
-			formData.text = generatedText;
-			formData.belated = generatedBelated;
+			const data = await response.json();
+
+			if (data.success && data.wishes && data.wishes.length > 0) {
+				const wish = data.wishes[0];
+				formData.text = wish.text;
+				formData.belated = wish.belated;
+			} else {
+				throw new Error('Keine Wünsche generiert');
+			}
 		} catch (error) {
 			console.error('Fehler bei der KI-Generierung:', error);
-			generationError = 'Fehler bei der Generierung. Bitte versuche es später erneut.';
+			generationError =
+				error instanceof Error
+					? error.message
+					: 'Fehler bei der Generierung. Bitte versuche es später erneut.';
 		} finally {
 			isGenerating = false;
 		}
@@ -420,7 +430,7 @@
 
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-base-content">Neuen Wunsch erstellen</h1>
+			<h1 class="text-base-content text-3xl font-bold">Neuen Wunsch erstellen</h1>
 			<p class="text-base-content/70 mt-2">
 				Erstellen Sie einen neuen Wunsch mit allen erforderlichen Informationen
 			</p>
@@ -725,7 +735,7 @@
 							></textarea>
 							<button
 								type="button"
-								class="btn btn-primary btn-sm absolute right-2 top-2"
+								class="btn btn-primary btn-sm absolute top-2 right-2"
 								onclick={generateWithAI}
 								disabled={isGenerating ||
 									!formData.eventType ||
@@ -784,7 +794,7 @@
 							></textarea>
 							<button
 								type="button"
-								class="btn btn-secondary btn-sm absolute right-2 top-2"
+								class="btn btn-secondary btn-sm absolute top-2 right-2"
 								onclick={generateWithAI}
 								disabled={isGenerating ||
 									!formData.eventType ||
@@ -893,7 +903,7 @@
 					<h3 class="flex items-center gap-2 text-xl font-bold">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6 text-primary"
+							class="text-primary h-6 w-6"
 							fill="none"
 							viewBox="0 0 24 24"
 							stroke="currentColor"
@@ -1193,7 +1203,7 @@
 											</div>
 											<div class="border-primary/20 mt-3 border-t pt-3">
 												<span class="text-xs opacity-70">Kombinationen:</span>
-												<div class="font-bold text-primary">
+												<div class="text-primary font-bold">
 													{(batchSettings.types.length || 1) *
 														(batchSettings.eventTypes.length || 1) *
 														(batchSettings.languages.length || 1) *
@@ -1215,7 +1225,7 @@
 									KI generiert Wünsche basierend auf Ihren Filterkriterien.
 								</p>
 							</div>
-							<div class="stats stats-vertical shadow lg:stats-horizontal">
+							<div class="stats stats-vertical lg:stats-horizontal shadow">
 								<div class="stat-sm stat">
 									<div class="stat-title">Anzahl</div>
 									<div class="stat-value text-primary">{batchSettings.count}</div>
@@ -1420,7 +1430,7 @@
 	<div class="lg:col-span-1">
 		<!-- Preview Card -->
 		{#if showPreview && formData.text}
-			<div class="card mb-6 bg-base-100 shadow-xl">
+			<div class="card bg-base-100 mb-6 shadow-xl">
 				<div class="card-body">
 					<h3 class="card-title text-lg">
 						<svg
@@ -1446,12 +1456,12 @@
 						Vorschau
 					</h3>
 					<div class="divider my-2"></div>
-					<div class="mockup-window border border-base-300 bg-base-200">
+					<div class="mockup-window border-base-300 bg-base-200 border">
 						<div class="bg-base-200 px-4 py-6">
-							<h4 class="font-medium text-primary">Haupttext:</h4>
+							<h4 class="text-primary font-medium">Haupttext:</h4>
 							<p class="mb-4 text-sm">{formData.text}</p>
 							{#if formData.belated}
-								<h4 class="font-medium text-secondary">Nachträglich:</h4>
+								<h4 class="text-secondary font-medium">Nachträglich:</h4>
 								<p class="text-sm">{formData.belated}</p>
 							{/if}
 						</div>
