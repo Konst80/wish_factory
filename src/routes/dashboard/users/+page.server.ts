@@ -3,9 +3,9 @@ import type { PageServerLoad, Actions } from './$types';
 import { createSupabaseAdminClient } from '$lib/server/supabase-admin';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-	const { session } = await locals.safeGetSession();
+	const { data: { user } } = await locals.supabase.auth.getUser();
 
-	if (!session?.user) {
+	if (!user) {
 		throw redirect(302, '/auth/login');
 	}
 
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const { data: currentUserProfile } = await locals.supabase
 		.from('profiles')
 		.select('role')
-		.eq('id', session.user.id)
+		.eq('id', user.id)
 		.single();
 
 	if (!currentUserProfile || currentUserProfile.role !== 'Administrator') {
@@ -144,8 +144,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 export const actions: Actions = {
 	updateRole: async ({ request, locals }) => {
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
+		const { data: { user } } = await locals.supabase.auth.getUser();
+		if (!user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
@@ -153,7 +153,7 @@ export const actions: Actions = {
 		const { data: currentUserProfile } = await locals.supabase
 			.from('profiles')
 			.select('role')
-			.eq('id', session.user.id)
+			.eq('id', user.id)
 			.single();
 
 		if (!currentUserProfile || currentUserProfile.role !== 'Administrator') {
@@ -169,7 +169,7 @@ export const actions: Actions = {
 		}
 
 		// Prevent admin from removing their own admin role if they're the only admin
-		if (userId === session.user.id && newRole !== 'Administrator') {
+		if (userId === user.id && newRole !== 'Administrator') {
 			const { count } = await locals.supabase
 				.from('profiles')
 				.select('*', { count: 'exact', head: true })
@@ -197,8 +197,8 @@ export const actions: Actions = {
 	},
 
 	deleteUser: async ({ request, locals }) => {
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
+		const { data: { user } } = await locals.supabase.auth.getUser();
+		if (!user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
@@ -206,7 +206,7 @@ export const actions: Actions = {
 		const { data: currentUserProfile } = await locals.supabase
 			.from('profiles')
 			.select('role')
-			.eq('id', session.user.id)
+			.eq('id', user.id)
 			.single();
 
 		if (!currentUserProfile || currentUserProfile.role !== 'Administrator') {
@@ -221,7 +221,7 @@ export const actions: Actions = {
 		}
 
 		// Prevent admin from deleting themselves if they're the only admin
-		if (userId === session.user.id) {
+		if (userId === user.id) {
 			const { count } = await locals.supabase
 				.from('profiles')
 				.select('*', { count: 'exact', head: true })
@@ -259,8 +259,8 @@ export const actions: Actions = {
 	},
 
 	createUser: async ({ request, locals }) => {
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
+		const { data: { user } } = await locals.supabase.auth.getUser();
+		if (!user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
@@ -268,7 +268,7 @@ export const actions: Actions = {
 		const { data: currentUserProfile } = await locals.supabase
 			.from('profiles')
 			.select('role')
-			.eq('id', session.user.id)
+			.eq('id', user.id)
 			.single();
 
 		if (!currentUserProfile || currentUserProfile.role !== 'Administrator') {
@@ -305,16 +305,24 @@ export const actions: Actions = {
 			return fail(500, { message: 'Fehler beim Erstellen des Benutzers: ' + createError.message });
 		}
 
-		// Update profile with correct role (the trigger creates it as Redakteur by default)
-		if (newUser.user && role !== 'Redakteur') {
-			const { error: updateError } = await adminClient
+		// Create profile manually since the trigger might not work properly
+		if (newUser.user) {
+			const { error: profileError } = await adminClient
 				.from('profiles')
-				.update({ role, full_name: fullName })
-				.eq('id', newUser.user.id);
+				.upsert({
+					id: newUser.user.id,
+					email: newUser.user.email || email,
+					full_name: fullName,
+					role: role as 'Administrator' | 'Redakteur',
+					created_at: new Date().toISOString(),
+					updated_at: new Date().toISOString()
+				});
 
-			if (updateError) {
-				console.error('Error updating user profile:', updateError);
-				// Don't fail here, the user was created successfully
+			if (profileError) {
+				console.error('Error creating user profile:', profileError);
+				// Clean up - delete the auth user if profile creation failed
+				await adminClient.auth.admin.deleteUser(newUser.user.id);
+				return fail(500, { message: 'Fehler beim Erstellen des Benutzerprofils: ' + profileError.message });
 			}
 		}
 
