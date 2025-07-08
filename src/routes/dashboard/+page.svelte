@@ -132,7 +132,7 @@
 </svelte:head>
 
 <!-- Theme Toggle (Fixed Position) -->
-<div class="fixed right-4 top-4 z-50">
+<div class="fixed top-4 right-4 z-50">
 	<div class="dropdown dropdown-end">
 		<div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Theme wechseln">
 			<svg
@@ -150,7 +150,7 @@
 				/>
 			</svg>
 		</div>
-		<ul class="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow">
+		<ul class="menu dropdown-content rounded-box bg-base-100 z-[1] w-52 p-2 shadow">
 			{#each themes as theme (theme)}
 				<li>
 					<button onclick={() => setTheme(theme)} class={theme === currentTheme ? 'active' : ''}>
@@ -573,7 +573,7 @@
 				<div class="mb-4 flex items-center justify-between">
 					<h3 class="card-title">System Status</h3>
 					<div class="badge badge-success gap-2">
-						<div class="h-2 w-2 animate-pulse rounded-full bg-success"></div>
+						<div class="bg-success h-2 w-2 animate-pulse rounded-full"></div>
 						Online
 					</div>
 				</div>
@@ -582,28 +582,28 @@
 					<div class="flex items-center justify-between">
 						<span class="text-sm">KI-Service</span>
 						<div class="badge badge-success badge-sm gap-1">
-							<div class="h-1.5 w-1.5 rounded-full bg-success"></div>
+							<div class="bg-success h-1.5 w-1.5 rounded-full"></div>
 							Online
 						</div>
 					</div>
 					<div class="flex items-center justify-between">
 						<span class="text-sm">Datenbank</span>
 						<div class="badge badge-success badge-sm gap-1">
-							<div class="h-1.5 w-1.5 rounded-full bg-success"></div>
+							<div class="bg-success h-1.5 w-1.5 rounded-full"></div>
 							Online
 						</div>
 					</div>
 					<div class="flex items-center justify-between">
 						<span class="text-sm">E-Mail Service</span>
 						<div class="badge badge-success badge-sm gap-1">
-							<div class="h-1.5 w-1.5 rounded-full bg-success"></div>
+							<div class="bg-success h-1.5 w-1.5 rounded-full"></div>
 							Online
 						</div>
 					</div>
 					<div class="flex items-center justify-between">
 						<span class="text-sm">Backup System</span>
 						<div class="badge badge-info badge-sm gap-1">
-							<div class="h-1.5 w-1.5 animate-pulse rounded-full bg-info"></div>
+							<div class="bg-info h-1.5 w-1.5 animate-pulse rounded-full"></div>
 							Läuft
 						</div>
 					</div>
@@ -715,7 +715,7 @@
 						</svg>
 					</div>
 					<div class="stat-title text-sm">Erstellungszeit</div>
-					<div class="stat-value text-lg text-success">2min</div>
+					<div class="stat-value text-success text-lg">2min</div>
 					<div class="stat-desc">↓ 80% schneller mit KI</div>
 				</div>
 
@@ -736,7 +736,7 @@
 						</svg>
 					</div>
 					<div class="stat-title text-sm">Zufriedenheit</div>
-					<div class="stat-value text-lg text-success">98%</div>
+					<div class="stat-value text-success text-lg">98%</div>
 					<div class="stat-desc">↑ 12% mehr Engagement</div>
 				</div>
 
@@ -757,7 +757,7 @@
 						</svg>
 					</div>
 					<div class="stat-title text-sm">Freigaberate</div>
-					<div class="stat-value text-lg text-primary">89%</div>
+					<div class="stat-value text-primary text-lg">89%</div>
 					<div class="stat-desc">↑ 5% vs. letzte Woche</div>
 				</div>
 			</div>

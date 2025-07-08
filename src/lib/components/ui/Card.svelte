@@ -43,7 +43,7 @@
 
 <div
 	class="card {variantClasses[variant]} {shadowClasses[shadow]} {bordered
-		? 'border border-base-300'
+		? 'border-base-300 border'
 		: ''} transition-all duration-300 hover:shadow-2xl"
 >
 	{#if image}

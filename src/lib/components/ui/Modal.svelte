@@ -49,7 +49,7 @@
 		>
 			{#if closable}
 				<button
-					class="btn btn-ghost btn-sm btn-circle absolute right-2 top-2"
+					class="btn btn-ghost btn-sm btn-circle absolute top-2 right-2"
 					onclick={closeModal}
 					aria-label="Schließen"
 				>

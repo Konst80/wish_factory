@@ -125,7 +125,7 @@
 
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-base-content">Wunsch-Details</h1>
+			<h1 class="text-base-content text-3xl font-bold">Wunsch-Details</h1>
 			<p class="text-base-content/70 mt-2">
 				Vollständige Ansicht des Wunsches {data.wish.id}
 			</p>
@@ -201,7 +201,7 @@
 	<!-- Main Content -->
 	<div class="lg:col-span-2">
 		<!-- Status and Meta Info -->
-		<div class="card mb-6 bg-base-100 shadow-xl">
+		<div class="card bg-base-100 mb-6 shadow-xl">
 			<div class="card-body">
 				<div class="flex items-center justify-between">
 					<h2 class="card-title">
@@ -217,7 +217,7 @@
 
 				<div class="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
 					<div>
-						<div class="text-base-content/70 text-xs font-medium uppercase tracking-wide">
+						<div class="text-base-content/70 text-xs font-medium tracking-wide uppercase">
 							Sprache
 						</div>
 						<div class="font-mono text-lg uppercase">
@@ -225,7 +225,7 @@
 						</div>
 					</div>
 					<div>
-						<div class="text-base-content/70 text-xs font-medium uppercase tracking-wide">
+						<div class="text-base-content/70 text-xs font-medium tracking-wide uppercase">
 							Erstellt
 						</div>
 						<div class="text-sm">
@@ -233,7 +233,7 @@
 						</div>
 					</div>
 					<div>
-						<div class="text-base-content/70 text-xs font-medium uppercase tracking-wide">
+						<div class="text-base-content/70 text-xs font-medium tracking-wide uppercase">
 							Aktualisiert
 						</div>
 						<div class="text-sm">
@@ -241,7 +241,7 @@
 						</div>
 					</div>
 					<div>
-						<div class="text-base-content/70 text-xs font-medium uppercase tracking-wide">ID</div>
+						<div class="text-base-content/70 text-xs font-medium tracking-wide uppercase">ID</div>
 						<div class="font-mono text-sm">
 							{data.wish.id}
 							<button
@@ -258,7 +258,7 @@
 		</div>
 
 		<!-- Main Text -->
-		<div class="card mb-6 bg-base-100 shadow-xl">
+		<div class="card bg-base-100 mb-6 shadow-xl">
 			<div class="card-body">
 				<h3 class="card-title">
 					<svg
@@ -278,8 +278,8 @@
 					Wunsch-Text
 				</h3>
 				<div class="divider my-2"></div>
-				<div class="rounded-lg bg-base-200 p-4">
-					<p class="whitespace-pre-wrap text-base leading-relaxed">
+				<div class="bg-base-200 rounded-lg p-4">
+					<p class="text-base leading-relaxed whitespace-pre-wrap">
 						{data.wish.text}
 					</p>
 				</div>
@@ -308,7 +308,7 @@
 
 		<!-- Belated Text -->
 		{#if data.wish.belated}
-			<div class="card mb-6 bg-base-100 shadow-xl">
+			<div class="card bg-base-100 mb-6 shadow-xl">
 				<div class="card-body">
 					<h3 class="card-title">
 						<svg
@@ -328,8 +328,8 @@
 						Nachträglicher Text
 					</h3>
 					<div class="divider my-2"></div>
-					<div class="bg-warning/10 rounded-lg border-l-4 border-warning p-4">
-						<p class="whitespace-pre-wrap text-base leading-relaxed">
+					<div class="bg-warning/10 border-warning rounded-lg border-l-4 p-4">
+						<p class="text-base leading-relaxed whitespace-pre-wrap">
 							{data.wish.belated}
 						</p>
 					</div>
@@ -361,7 +361,7 @@
 	<!-- Sidebar -->
 	<div class="lg:col-span-1">
 		<!-- Target Groups -->
-		<div class="card mb-6 bg-base-100 shadow-xl">
+		<div class="card bg-base-100 mb-6 shadow-xl">
 			<div class="card-body">
 				<h3 class="card-title text-lg">
 					<svg
@@ -384,7 +384,7 @@
 
 				<!-- Relations -->
 				<div class="mb-4">
-					<h4 class="text-base-content/70 mb-2 text-sm font-medium uppercase tracking-wide">
+					<h4 class="text-base-content/70 mb-2 text-sm font-medium tracking-wide uppercase">
 						Beziehungen
 					</h4>
 					<div class="flex flex-wrap gap-2">
@@ -398,7 +398,7 @@
 
 				<!-- Age Groups -->
 				<div class="mb-4">
-					<h4 class="text-base-content/70 mb-2 text-sm font-medium uppercase tracking-wide">
+					<h4 class="text-base-content/70 mb-2 text-sm font-medium tracking-wide uppercase">
 						Altersgruppen
 					</h4>
 					<div class="flex flex-wrap gap-2">
@@ -413,7 +413,7 @@
 				<!-- Specific Values -->
 				{#if data.wish.specificValues && data.wish.specificValues.length > 0}
 					<div>
-						<h4 class="text-base-content/70 mb-2 text-sm font-medium uppercase tracking-wide">
+						<h4 class="text-base-content/70 mb-2 text-sm font-medium tracking-wide uppercase">
 							Spezifische Werte
 						</h4>
 						<div class="flex flex-wrap gap-2">

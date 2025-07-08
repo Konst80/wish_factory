@@ -47,7 +47,7 @@
 </svelte:head>
 
 <!-- Theme Toggle -->
-<div class="fixed right-4 top-4 z-50">
+<div class="fixed top-4 right-4 z-50">
 	<div class="dropdown dropdown-end">
 		<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
 			<svg
@@ -65,7 +65,7 @@
 				/>
 			</svg>
 		</div>
-		<ul class="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow">
+		<ul class="menu dropdown-content rounded-box bg-base-100 z-[1] w-52 p-2 shadow">
 			{#each themes as theme (theme)}
 				<li>
 					<button onclick={() => setTheme(theme)} class={theme === currentTheme ? 'active' : ''}>
@@ -100,7 +100,7 @@
 			<!-- Main Title with Animation -->
 			<div class="mb-8">
 				<h1
-					class="mb-6 animate-pulse bg-gradient-to-r from-primary to-secondary bg-clip-text text-7xl font-bold text-transparent"
+					class="from-primary to-secondary mb-6 animate-pulse bg-gradient-to-r bg-clip-text text-7xl font-bold text-transparent"
 				>
 					Wish Factory
 				</h1>
@@ -167,7 +167,7 @@
 							<div class="bg-primary/10 flex h-16 w-16 items-center justify-center rounded-full">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									class="h-8 w-8 text-primary"
+									class="text-primary h-8 w-8"
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
@@ -194,7 +194,7 @@
 							<div class="bg-secondary/10 flex h-16 w-16 items-center justify-center rounded-full">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									class="h-8 w-8 text-secondary"
+									class="text-secondary h-8 w-8"
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
@@ -221,7 +221,7 @@
 							<div class="bg-accent/10 flex h-16 w-16 items-center justify-center rounded-full">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
-									class="h-8 w-8 text-accent"
+									class="text-accent h-8 w-8"
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
@@ -245,7 +245,7 @@
 
 			<!-- Stats Section -->
 			<div
-				class="bg-base-100/80 border-base-300/20 stats stats-vertical border shadow-xl backdrop-blur-sm lg:stats-horizontal"
+				class="bg-base-100/80 border-base-300/20 stats stats-vertical lg:stats-horizontal border shadow-xl backdrop-blur-sm"
 			>
 				<div class="stat">
 					<div class="stat-figure text-primary">
@@ -363,7 +363,7 @@
 					<div class="avatar">
 						<div class="w-12">
 							<div
-								class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-content"
+								class="bg-primary text-primary-content flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold"
 							>
 								A
 							</div>
@@ -372,7 +372,7 @@
 					<div class="avatar">
 						<div class="w-12">
 							<div
-								class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-content"
+								class="bg-secondary text-secondary-content flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold"
 							>
 								B
 							</div>
@@ -381,14 +381,14 @@
 					<div class="avatar">
 						<div class="w-12">
 							<div
-								class="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-content"
+								class="bg-accent text-accent-content flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold"
 							>
 								C
 							</div>
 						</div>
 					</div>
 					<div class="placeholder avatar">
-						<div class="w-12 bg-neutral text-neutral-content">
+						<div class="bg-neutral text-neutral-content w-12">
 							<span class="text-xs">+99</span>
 						</div>
 					</div>
@@ -402,7 +402,7 @@
 </section>
 
 <!-- Footer -->
-<footer class="footer footer-center bg-base-300 p-10 text-base-content">
+<footer class="footer footer-center bg-base-300 text-base-content p-10">
 	<nav>
 		<div class="grid grid-flow-col gap-4">
 			<a href="/about" class="link link-hover">Über uns</a>
@@ -415,7 +415,7 @@
 		<div class="grid grid-flow-col gap-4">
 			<a
 				href="https://twitter.com/wishfactory"
-				class="text-2xl transition-colors hover:text-primary"
+				class="hover:text-primary text-2xl transition-colors"
 				aria-label="Twitter"
 			>
 				<svg
@@ -432,7 +432,7 @@
 			</a>
 			<a
 				href="https://youtube.com/@wishfactory"
-				class="text-2xl transition-colors hover:text-primary"
+				class="hover:text-primary text-2xl transition-colors"
 				aria-label="YouTube"
 			>
 				<svg
@@ -449,7 +449,7 @@
 			</a>
 			<a
 				href="https://facebook.com/wishfactory"
-				class="text-2xl transition-colors hover:text-primary"
+				class="hover:text-primary text-2xl transition-colors"
 				aria-label="Facebook"
 			>
 				<svg

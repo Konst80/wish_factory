@@ -39,6 +39,6 @@
 	<meta name="description" content="AI-powered wish generator and content management system" />
 </svelte:head>
 
-<main class="min-h-screen bg-base-100">
+<main class="bg-base-100 min-h-screen">
 	{@render children()}
 </main>

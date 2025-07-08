@@ -41,6 +41,9 @@
 	let isGenerating = $state(false);
 	let generationError = $state('');
 	let wishStyle = $state('normal');
+	let aiServiceStatus = $state<'unknown' | 'healthy' | 'unhealthy' | 'checking'>('unknown');
+	let showAIStatus = $state(false);
+	let aiServiceDetails = $state('');
 
 	// AI Batch Creation State
 	type GeneratedWish = {
@@ -151,11 +154,52 @@
 		[Language.EN]: 'English'
 	};
 
+	async function checkAIService() {
+		aiServiceStatus = 'checking';
+		try {
+			const response = await fetch('/api/ai/generate', {
+				method: 'GET'
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				aiServiceStatus = data.status === 'healthy' ? 'healthy' : 'unhealthy';
+				aiServiceDetails = data.details || '';
+			} else {
+				aiServiceStatus = 'unhealthy';
+			}
+		} catch (error) {
+			console.error('Health check failed:', error);
+			aiServiceStatus = 'unhealthy';
+		}
+	}
+
 	async function generateWithAI() {
 		isGenerating = true;
 		generationError = '';
 
+		console.log('🎨 Starte KI-Generierung mit folgenden Parametern:', {
+			type: formData.type,
+			eventType: formData.eventType,
+			language: formData.language,
+			relations: formData.relations,
+			ageGroups: formData.ageGroups,
+			specificValues: formData.specificValues,
+			style: wishStyle
+		});
+
 		try {
+			// Validierung vor API-Aufruf
+			if (!formData.relations || formData.relations.length === 0) {
+				throw new Error('Bitte wählen Sie mindestens eine Beziehung aus');
+			}
+
+			if (!formData.ageGroups || formData.ageGroups.length === 0) {
+				throw new Error('Bitte wählen Sie mindestens eine Altersgruppe aus');
+			}
+
+			console.log('📡 Sende API-Request...');
+
 			// API-Aufruf zur echten KI-Generierung
 			const response = await fetch('/api/ai/generate', {
 				method: 'POST',
@@ -179,26 +223,66 @@
 				})
 			});
 
+			console.log('📥 Response Status:', response.status);
+
 			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(errorData.message || `API-Fehler: ${response.status}`);
+				let errorMessage = `API-Fehler: ${response.status}`;
+
+				try {
+					const errorData = await response.json();
+					console.error('❌ API Error Data:', errorData);
+					errorMessage = errorData.message || errorMessage;
+				} catch (jsonError) {
+					console.error('❌ Fehler beim Parsen der Error-Response:', jsonError);
+					const textError = await response.text();
+					console.error('❌ Raw Error Response:', textError);
+					errorMessage = textError || errorMessage;
+				}
+
+				throw new Error(errorMessage);
 			}
 
 			const data = await response.json();
+			console.log('✅ API Response:', data);
 
 			if (data.success && data.wishes && data.wishes.length > 0) {
 				const wish = data.wishes[0];
+				console.log('🎉 Generierter Wunsch:', wish);
 				formData.text = wish.text;
 				formData.belated = wish.belated;
+				console.log('✅ Formular aktualisiert');
 			} else {
-				throw new Error('Keine Wünsche generiert');
+				console.error('❌ Keine Wünsche in Response:', data);
+				throw new Error(data.message || 'Keine Wünsche generiert');
 			}
 		} catch (error) {
-			console.error('Fehler bei der KI-Generierung:', error);
-			generationError =
-				error instanceof Error
-					? error.message
-					: 'Fehler bei der Generierung. Bitte versuche es später erneut.';
+			console.error('❌ Fehler bei der KI-Generierung:', error);
+
+			// Detaillierte Fehlermeldungen basierend auf dem Error-Typ
+			if (error instanceof Error) {
+				if (error.message.includes('API-Schlüssel')) {
+					generationError =
+						'🔑 KI-Service nicht konfiguriert. Bitte kontaktieren Sie den Administrator.';
+				} else if (error.message.includes('Nicht authentifiziert')) {
+					generationError = '🔐 Sitzung abgelaufen. Bitte melden Sie sich erneut an.';
+				} else if (error.message.includes('Keine Berechtigung')) {
+					generationError = '🚫 Sie haben keine Berechtigung zur KI-Generierung.';
+				} else if (error.message.includes('OpenRouter API error')) {
+					generationError =
+						'🤖 KI-Service temporär nicht verfügbar. Versuchen Sie es später erneut.';
+				} else if (error.message.includes('No content received')) {
+					generationError = '📭 KI hat keine Antwort geliefert. Versuchen Sie es erneut.';
+				} else if (error.message.includes('Could not parse JSON')) {
+					generationError = '📝 Fehlerhafte KI-Antwort. Bitte versuchen Sie es erneut.';
+				} else if (error.message.includes('Invalid AI response format')) {
+					generationError = '🔧 KI-Antwort in falschem Format. Administrator benachrichtigen.';
+				} else {
+					generationError = `❌ ${error.message}`;
+				}
+			} else {
+				generationError =
+					'❓ Unbekannter Fehler bei der Generierung. Bitte versuchen Sie es später erneut.';
+			}
 		} finally {
 			isGenerating = false;
 		}
@@ -704,10 +788,77 @@
 
 					<!-- Stil-Auswahl für KI-Generierung -->
 					<div class="form-control mt-6">
-						<label class="label">
-							<span class="label-text font-medium">KI-Stil für Generierung</span>
-							<span class="label-text-alt">Beeinflusst die automatische Textgenerierung</span>
-						</label>
+						<div class="flex items-center justify-between">
+							<label class="label">
+								<span class="label-text font-medium">KI-Stil für Generierung</span>
+								<span class="label-text-alt">Beeinflusst die automatische Textgenerierung</span>
+							</label>
+							<div class="flex items-center gap-2">
+								<!-- KI-Service Status -->
+								<div class="tooltip" data-tip="KI-Service Status prüfen">
+									<button
+										type="button"
+										class="btn btn-ghost btn-xs"
+										onclick={() => {
+											checkAIService();
+											showAIStatus = !showAIStatus;
+										}}
+									>
+										{#if aiServiceStatus === 'checking'}
+											<span class="loading loading-spinner loading-xs"></span>
+										{:else if aiServiceStatus === 'healthy'}
+											<div class="badge badge-success badge-xs">✓</div>
+										{:else if aiServiceStatus === 'unhealthy'}
+											<div class="badge badge-error badge-xs">✗</div>
+										{:else}
+											<div class="badge badge-ghost badge-xs">?</div>
+										{/if}
+										KI-Status
+									</button>
+								</div>
+							</div>
+						</div>
+
+						{#if showAIStatus}
+							<div
+								class="alert mt-2"
+								class:alert-success={aiServiceStatus === 'healthy'}
+								class:alert-error={aiServiceStatus === 'unhealthy'}
+								class:alert-info={aiServiceStatus === 'unknown'}
+							>
+								<div class="flex-1">
+									{#if aiServiceStatus === 'healthy'}
+										<h4 class="font-bold">✅ KI-Service verfügbar</h4>
+										<div class="text-sm">{aiServiceDetails}</div>
+									{:else if aiServiceStatus === 'unhealthy'}
+										<h4 class="font-bold">❌ KI-Service nicht verfügbar</h4>
+										<div class="text-sm">
+											Mögliche Ursachen:
+											<ul class="mt-1 list-inside list-disc">
+												<li>{aiServiceDetails}</li>
+											</ul>
+											<div class="mt-2">
+												<strong>Lösung:</strong> Prüfen Sie die <code>.env</code> Datei und stellen
+												Sie sicher, dass <code>OPENROUTER_API_KEY</code> gesetzt ist.
+											</div>
+										</div>
+									{:else}
+										<h4 class="font-bold">❓ KI-Service Status unbekannt</h4>
+										<div class="text-sm">
+											Klicken Sie auf "KI-Status" um die Verfügbarkeit zu prüfen.
+										</div>
+									{/if}
+								</div>
+								<button
+									type="button"
+									class="btn btn-ghost btn-sm ml-auto"
+									onclick={() => (showAIStatus = false)}
+								>
+									×
+								</button>
+							</div>
+						{/if}
+
 						<select class="select-bordered select w-full" bind:value={wishStyle}>
 							<option value="normal">Normal - Klassische, freundliche Wünsche</option>
 							<option value="herzlich">Herzlich - Warme, emotionale Wünsche</option>

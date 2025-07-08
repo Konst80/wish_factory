@@ -114,7 +114,7 @@
 <div class="mb-8">
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-base-content">Wünsche verwalten</h1>
+			<h1 class="text-base-content text-3xl font-bold">Wünsche verwalten</h1>
 			<p class="text-base-content/70 mt-2">
 				Verwalten Sie alle Ihre Wünsche mit erweiterten Filter- und Suchoptionen
 			</p>
@@ -318,7 +318,7 @@
 
 <!-- Filter Panel -->
 {#if showFilters}
-	<div class="card mb-6 border-l-4 border-primary bg-base-100 shadow-xl">
+	<div class="card border-primary bg-base-100 mb-6 border-l-4 shadow-xl">
 		<div class="card-body">
 			<div class="mb-4 flex items-center justify-between">
 				<h3 class="card-title text-primary">
@@ -503,7 +503,7 @@
 <!-- Wishes Table -->
 <div class="card bg-base-100 shadow-xl">
 	<div class="overflow-x-auto">
-		<table class="table table-zebra w-full">
+		<table class="table-zebra table w-full">
 			<thead>
 				<tr>
 					<th>

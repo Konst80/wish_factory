@@ -107,7 +107,7 @@
 <div class="mb-8">
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-base-content">Benutzer verwalten</h1>
+			<h1 class="text-base-content text-3xl font-bold">Benutzer verwalten</h1>
 			<p class="text-base-content/70 mt-2">
 				Verwalten Sie Benutzerkonten, Rollen und Berechtigungen
 			</p>
@@ -203,7 +203,7 @@
 </div>
 
 <!-- Filters -->
-<div class="card mb-6 bg-base-100 shadow-xl">
+<div class="card bg-base-100 mb-6 shadow-xl">
 	<div class="card-body">
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 			<div class="form-control">
@@ -259,7 +259,7 @@
 <!-- Users Table -->
 <div class="card bg-base-100 shadow-xl">
 	<div class="overflow-x-auto">
-		<table class="table table-zebra w-full">
+		<table class="table-zebra table w-full">
 			<thead>
 				<tr>
 					<th>Benutzer</th>
@@ -276,7 +276,7 @@
 						<td>
 							<div class="flex items-center gap-3">
 								<div class="avatar">
-									<div class="w-12 rounded-full bg-primary text-primary-content">
+									<div class="bg-primary text-primary-content w-12 rounded-full">
 										<div class="flex h-12 items-center justify-center">
 											<span class="text-lg font-medium">{user.full_name.charAt(0)}</span>
 										</div>

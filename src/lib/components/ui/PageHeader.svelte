@@ -30,7 +30,7 @@
 
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-base-content">
+			<h1 class="text-base-content text-3xl font-bold">
 				{title}
 			</h1>
 			{#if subtitle}

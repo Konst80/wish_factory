@@ -60,7 +60,7 @@
 <div class="mb-8">
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-base-content">Analytics Dashboard</h1>
+			<h1 class="text-base-content text-3xl font-bold">Analytics Dashboard</h1>
 			<p class="text-base-content/70 mt-2">
 				Detaillierte Berichte und Statistiken über die Nutzung der Wish Factory
 			</p>
@@ -221,7 +221,7 @@
 						{@const maxCount = Math.max(...data.wishesOverTime.map((d) => d.count)) || 1}
 						<div class="flex flex-col items-center">
 							<div
-								class="w-8 rounded-t bg-primary"
+								class="bg-primary w-8 rounded-t"
 								style="height: {Math.max((monthData.count / maxCount) * 100, 5)}%"
 							></div>
 							<span class="mt-2 text-xs">{monthData.month}</span>
@@ -249,7 +249,7 @@
 							<div class="text-xs opacity-70">{category.percentage}%</div>
 						</div>
 					</div>
-					<div class="h-2 w-full rounded-full bg-base-200">
+					<div class="bg-base-200 h-2 w-full rounded-full">
 						<div
 							class="h-2 rounded-full {categoryColors[category.category]}"
 							style="width: {category.percentage}%"
@@ -265,7 +265,7 @@
 		<div class="card-body">
 			<h2 class="card-title">Benutzer-Aktivität</h2>
 			<div class="overflow-x-auto">
-				<table class="table table-zebra w-full">
+				<table class="table-zebra table w-full">
 					<thead>
 						<tr>
 							<th>Benutzer</th>
@@ -313,7 +313,7 @@
 							<div class="text-xs opacity-70">{status.percentage}%</div>
 						</div>
 					</div>
-					<div class="h-2 w-full rounded-full bg-base-200">
+					<div class="bg-base-200 h-2 w-full rounded-full">
 						<div
 							class="h-2 rounded-full {statusColors[status.status]}"
 							style="width: {status.percentage}%"
@@ -326,7 +326,7 @@
 </div>
 
 <!-- Language Distribution -->
-<div class="card mt-6 bg-base-100 shadow-xl">
+<div class="card bg-base-100 mt-6 shadow-xl">
 	<div class="card-body">
 		<h2 class="card-title">Sprachverteilung</h2>
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -334,7 +334,7 @@
 				<div class="flex items-center justify-between rounded-lg border p-4">
 					<div class="flex items-center gap-3">
 						<div
-							class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-content"
+							class="bg-primary text-primary-content flex h-8 w-8 items-center justify-center rounded-full"
 						>
 							<span class="text-xs font-bold">{lang.language === 'Deutsch' ? 'DE' : 'EN'}</span>
 						</div>
@@ -351,7 +351,7 @@
 </div>
 
 <!-- Performance Insights -->
-<div class="card mt-6 bg-base-100 shadow-xl">
+<div class="card bg-base-100 mt-6 shadow-xl">
 	<div class="card-body">
 		<h2 class="card-title">Performance-Insights</h2>
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">

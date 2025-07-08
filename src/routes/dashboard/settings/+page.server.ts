@@ -1,8 +1,41 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
+// Extended interface for user settings including AI fields
+interface UserSettingsWithAI {
+	user_id: string;
+	theme: string;
+	language: string;
+	timezone: string;
+	email_notifications: boolean;
+	push_notifications: boolean;
+	new_wish_alerts: boolean;
+	approval_requests: boolean;
+	system_updates: boolean;
+	weekly_report: boolean;
+	dashboard_layout: string;
+	wishes_per_page: number;
+	auto_save: boolean;
+	confirm_before_delete: boolean;
+	api_access: boolean;
+	export_format: string;
+	backup_frequency: string;
+	data_retention: number;
+	// AI Settings
+	ai_prompt_system?: string;
+	ai_prompt_template?: string;
+	ai_model?: string;
+	ai_temperature?: number;
+	ai_max_tokens?: number;
+	ai_top_p?: number;
+	ai_frequency_penalty?: number;
+	ai_presence_penalty?: number;
+	created_at?: string;
+	updated_at?: string;
+}
+
 // Default settings if none exist
-const defaultSettings = {
+const defaultSettings: Omit<UserSettingsWithAI, 'user_id' | 'created_at' | 'updated_at'> = {
 	theme: 'light',
 	language: 'de',
 	timezone: 'Europe/Berlin',
@@ -21,7 +54,8 @@ const defaultSettings = {
 	backup_frequency: 'daily',
 	data_retention: 365,
 	// AI Settings
-	ai_prompt_system: 'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.',
+	ai_prompt_system:
+		'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.',
 	ai_prompt_template: `Du bist ein Experte für das Schreiben von Glückwünschen. Generiere {count} {countText} in der Sprache "{language}" basierend auf folgenden Kriterien:
 
 **Wichtige Regeln:**
@@ -86,7 +120,7 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 			.eq('user_id', user.id)
 			.single();
 
-		let settings;
+		let settings: UserSettingsWithAI | null = null;
 
 		// If no settings exist, create default record
 		if (settingsError && settingsError.code === 'PGRST116') {
@@ -102,17 +136,17 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 			if (insertError) {
 				console.error('Error creating default settings:', insertError);
 				// Fall back to defaults if creation fails
-				settings = defaultSettings;
+				settings = { user_id: user.id, ...defaultSettings };
 			} else {
 				// Use the newly created settings
-				settings = newSettings;
+				settings = newSettings as UserSettingsWithAI;
 			}
 		} else if (settingsError) {
 			// Other database errors
 			throw settingsError;
 		} else {
 			// Use existing settings from database
-			settings = userSettings;
+			settings = userSettings as UserSettingsWithAI;
 		}
 
 		return {
@@ -156,22 +190,14 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					dataRetention: settings?.data_retention || defaultSettings.data_retention
 				},
 				ai: {
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					promptSystem: (settings as any)?.ai_prompt_system || defaultSettings.ai_prompt_system,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					promptTemplate: (settings as any)?.ai_prompt_template || defaultSettings.ai_prompt_template,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					model: (settings as any)?.ai_model || defaultSettings.ai_model,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					temperature: (settings as any)?.ai_temperature ?? defaultSettings.ai_temperature,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					maxTokens: (settings as any)?.ai_max_tokens || defaultSettings.ai_max_tokens,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					topP: (settings as any)?.ai_top_p ?? defaultSettings.ai_top_p,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					frequencyPenalty: (settings as any)?.ai_frequency_penalty ?? defaultSettings.ai_frequency_penalty,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					presencePenalty: (settings as any)?.ai_presence_penalty ?? defaultSettings.ai_presence_penalty
+					promptSystem: settings?.ai_prompt_system || defaultSettings.ai_prompt_system,
+					promptTemplate: settings?.ai_prompt_template || defaultSettings.ai_prompt_template,
+					model: settings?.ai_model || defaultSettings.ai_model,
+					temperature: settings?.ai_temperature ?? defaultSettings.ai_temperature,
+					maxTokens: settings?.ai_max_tokens || defaultSettings.ai_max_tokens,
+					topP: settings?.ai_top_p ?? defaultSettings.ai_top_p,
+					frequencyPenalty: settings?.ai_frequency_penalty ?? defaultSettings.ai_frequency_penalty,
+					presencePenalty: settings?.ai_presence_penalty ?? defaultSettings.ai_presence_penalty
 				}
 			}
 		};
@@ -542,8 +568,7 @@ export const actions: Actions = {
 				.from('user_settings')
 				.update({
 					ai_prompt_system: formData.get('promptSystem') as string,
-					ai_prompt_template_de: formData.get('promptTemplateDE') as string,
-					ai_prompt_template_en: formData.get('promptTemplateEN') as string,
+					ai_prompt_template: formData.get('promptTemplate') as string,
 					ai_model: formData.get('model') as string,
 					ai_temperature: temperature,
 					ai_max_tokens: maxTokens,

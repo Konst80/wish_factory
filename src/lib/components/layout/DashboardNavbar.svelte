@@ -35,12 +35,12 @@
 		<div class="dropdown dropdown-end">
 			<div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
 				<div class="placeholder avatar">
-					<div class="w-10 rounded-full bg-primary text-primary-content">
+					<div class="bg-primary text-primary-content w-10 rounded-full">
 						<span class="text-sm">{$currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
 					</div>
 				</div>
 			</div>
-			<ul class="menu dropdown-content z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow">
+			<ul class="menu dropdown-content rounded-box bg-base-100 z-[1] mt-3 w-52 p-2 shadow">
 				<li class="menu-title">
 					<span>{$currentUserProfile?.full_name || 'User'}</span>
 				</li>

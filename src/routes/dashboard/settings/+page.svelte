@@ -116,6 +116,68 @@
 		// Individual form submissions handle their own saving
 		alert('Bitte verwenden Sie die Speichern-Buttons in den jeweiligen Abschnitten.');
 	}
+
+	function setPreset(preset: string) {
+		const temperatureSlider = document.getElementById('temperature') as HTMLInputElement;
+		const topPSlider = document.getElementById('topP') as HTMLInputElement;
+		const maxTokensSlider = document.getElementById('maxTokens') as HTMLInputElement;
+		const frequencyPenaltySlider = document.getElementById('frequencyPenalty') as HTMLInputElement;
+
+		if (!temperatureSlider || !topPSlider || !maxTokensSlider || !frequencyPenaltySlider) return;
+
+		switch (preset) {
+			case 'precise':
+				temperatureSlider.value = '0.3';
+				topPSlider.value = '0.7';
+				maxTokensSlider.value = '1500';
+				frequencyPenaltySlider.value = '0.2';
+				break;
+			case 'balanced':
+				temperatureSlider.value = '0.8';
+				topPSlider.value = '0.9';
+				maxTokensSlider.value = '2000';
+				frequencyPenaltySlider.value = '0.1';
+				break;
+			case 'creative':
+				temperatureSlider.value = '1.2';
+				topPSlider.value = '0.95';
+				maxTokensSlider.value = '2500';
+				frequencyPenaltySlider.value = '0.0';
+				break;
+			case 'default':
+				temperatureSlider.value = '0.8';
+				topPSlider.value = '0.9';
+				maxTokensSlider.value = '2000';
+				frequencyPenaltySlider.value = '0.1';
+				break;
+		}
+
+		// Update the displayed values (badges)
+		temperatureSlider.dispatchEvent(new Event('input'));
+		topPSlider.dispatchEvent(new Event('input'));
+		maxTokensSlider.dispatchEvent(new Event('input'));
+		frequencyPenaltySlider.dispatchEvent(new Event('input'));
+	}
+
+	function insertPlaceholder(textareaId: string, placeholder: string) {
+		const textarea = document.getElementById(textareaId) as HTMLTextAreaElement;
+		if (!textarea) return;
+
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const value = textarea.value;
+
+		// Insert the placeholder at cursor position
+		const newValue = value.substring(0, start) + placeholder + value.substring(end);
+		textarea.value = newValue;
+
+		// Move cursor to end of inserted text
+		const newCursorPos = start + placeholder.length;
+		textarea.setSelectionRange(newCursorPos, newCursorPos);
+
+		// Focus the textarea
+		textarea.focus();
+	}
 </script>
 
 <svelte:head>
@@ -724,7 +786,7 @@
 										<textarea
 											id="promptSystem"
 											name="promptSystem"
-											class="textarea textarea-bordered h-20 font-mono text-sm"
+											class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen..."
 											value={(data.settings as any)?.ai?.promptSystem ||
 												'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'}
@@ -741,17 +803,92 @@
 										<textarea
 											id="promptTemplate"
 											name="promptTemplate"
-											class="textarea textarea-bordered h-40 font-mono text-sm"
+											class="textarea textarea-bordered h-40 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen. Generiere &#123;count&#125; &#123;countText&#125; in der Sprache &#123;language&#125;..."
 											value={(data.settings as any)?.ai?.promptTemplate || ''}
 										></textarea>
 										<div class="bg-info/10 mt-2 rounded p-3">
-											<p class="mb-2 text-sm font-medium">📝 Verfügbare Platzhalter:</p>
-											<div class="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
-												<code class="bg-base-100 rounded px-2 py-1">{`{count}`}</code>
-												<code class="bg-base-100 rounded px-2 py-1">{`{language}`}</code>
-												<code class="bg-base-100 rounded px-2 py-1">{`{style}`}</code>
-												<code class="bg-base-100 rounded px-2 py-1">{`{eventText}`}</code>
+											<p class="mb-3 text-sm font-medium">
+												📝 Verfügbare Platzhalter (klicken zum Einfügen):
+											</p>
+											<div class="space-y-3">
+												<div>
+													<p class="text-info mb-1 text-xs font-semibold">Grundlagen:</p>
+													<div class="grid grid-cols-2 gap-1 text-xs md:grid-cols-4">
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() => insertPlaceholder('promptTemplate', '{count}')}
+															>{`{count}`}</button
+														>
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() => insertPlaceholder('promptTemplate', '{countText}')}
+															>{`{countText}`}</button
+														>
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() => insertPlaceholder('promptTemplate', '{language}')}
+															>{`{language}`}</button
+														>
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() => insertPlaceholder('promptTemplate', '{style}')}
+															>{`{style}`}</button
+														>
+													</div>
+												</div>
+												<div>
+													<p class="text-info mb-1 text-xs font-semibold">Ereignis & Kontext:</p>
+													<div class="grid grid-cols-2 gap-1 text-xs md:grid-cols-3">
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() => insertPlaceholder('promptTemplate', '{eventText}')}
+															>{`{eventText}`}</button
+														>
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() => insertPlaceholder('promptTemplate', '{eventType}')}
+															>{`{eventType}`}</button
+														>
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() => insertPlaceholder('promptTemplate', '{relationTexts}')}
+															>{`{relationTexts}`}</button
+														>
+													</div>
+												</div>
+												<div>
+													<p class="text-info mb-1 text-xs font-semibold">Zielgruppe & Extras:</p>
+													<div class="grid grid-cols-2 gap-1 text-xs md:grid-cols-3">
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() => insertPlaceholder('promptTemplate', '{ageGroupTexts}')}
+															>{`{ageGroupTexts}`}</button
+														>
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() =>
+																insertPlaceholder('promptTemplate', '{specificValues}')}
+															>{`{specificValues}`}</button
+														>
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
+															onclick={() =>
+																insertPlaceholder('promptTemplate', '{additionalInstructions}')}
+															>{`{additionalInstructions}`}</button
+														>
+													</div>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -803,142 +940,140 @@
 									</div>
 								</div>
 
-								<div class="grid gap-8 lg:grid-cols-2">
+								<div class="space-y-8">
 									<!-- Creativity Controls -->
-									<div class="space-y-6">
-										<div class="card bg-base-100 shadow-sm">
-											<div class="card-body p-4">
-												<h5 class="card-title flex items-center gap-2 text-lg">
-													🎨 Kreativitäts-Kontrolle
-												</h5>
+									<div class="card bg-base-100 shadow-sm">
+										<div class="card-body p-6">
+											<h5 class="card-title mb-6 flex items-center gap-3 text-xl">
+												🎨 Kreativitäts-Kontrolle
+											</h5>
 
-												<div class="space-y-4">
-													<div class="form-control">
-														<div class="mb-2 flex items-center justify-between">
-															<label class="label-text text-base font-semibold"
-																>🌡️ Temperature</label
-															>
-															<div class="badge badge-outline">
-																{(data.settings as any)?.ai?.temperature || 0.8}
-															</div>
+											<div class="space-y-8">
+												<div class="form-control">
+													<div class="mb-4 flex items-center justify-between">
+														<label for="temperature" class="label-text text-lg font-semibold"
+															>🌡️ Temperature</label
+														>
+														<div class="badge badge-outline badge-lg">
+															{(data.settings as any)?.ai?.temperature || 0.8}
 														</div>
-														<input
-															id="temperature"
-															name="temperature"
-															type="range"
-															min="0"
-															max="2"
-															step="0.1"
-															class="range range-primary"
-															value={(data.settings as any)?.ai?.temperature || 0.8}
-														/>
-														<div class="text-base-content/60 mt-1 flex justify-between text-xs">
-															<span>Deterministisch</span>
-															<span>Empfohlen: 0.7-1.0</span>
-															<span>Sehr kreativ</span>
-														</div>
-														<p class="text-base-content/70 mt-2 text-sm">
-															Steuert die Zufälligkeit der Antworten. Niedrige Werte = konsistenter,
-															hohe Werte = kreativer.
-														</p>
 													</div>
+													<input
+														id="temperature"
+														name="temperature"
+														type="range"
+														min="0"
+														max="2"
+														step="0.1"
+														class="range range-primary w-full"
+														value={(data.settings as any)?.ai?.temperature || 0.8}
+													/>
+													<div class="text-base-content/60 mt-3 flex justify-between text-sm">
+														<span>Deterministisch</span>
+														<span class="font-medium">Empfohlen: 0.7-1.0</span>
+														<span>Sehr kreativ</span>
+													</div>
+													<p class="text-base-content/70 mt-4 text-base leading-relaxed">
+														Steuert die Zufälligkeit der Antworten. Niedrige Werte = konsistenter,
+														hohe Werte = kreativer.
+													</p>
+												</div>
 
-													<div class="form-control">
-														<div class="mb-2 flex items-center justify-between">
-															<label class="label-text text-base font-semibold">🎯 Top P</label>
-															<div class="badge badge-outline">
-																{(data.settings as any)?.ai?.topP || 0.9}
-															</div>
+												<div class="form-control">
+													<div class="mb-4 flex items-center justify-between">
+														<label for="topP" class="label-text text-lg font-semibold"
+															>🎯 Top P</label
+														>
+														<div class="badge badge-outline badge-lg">
+															{(data.settings as any)?.ai?.topP || 0.9}
 														</div>
-														<input
-															id="topP"
-															name="topP"
-															type="range"
-															min="0"
-															max="1"
-															step="0.1"
-															class="range range-secondary"
-															value={(data.settings as any)?.ai?.topP || 0.9}
-														/>
-														<div class="text-base-content/60 mt-1 flex justify-between text-xs">
-															<span>Fokussiert</span>
-															<span>Empfohlen: 0.8-0.95</span>
-															<span>Vielfältig</span>
-														</div>
-														<p class="text-base-content/70 mt-2 text-sm">
-															Nucleus Sampling - begrenzt die Wortauswahl auf die wahrscheinlichsten
-															Optionen.
-														</p>
 													</div>
+													<input
+														id="topP"
+														name="topP"
+														type="range"
+														min="0"
+														max="1"
+														step="0.1"
+														class="range range-secondary w-full"
+														value={(data.settings as any)?.ai?.topP || 0.9}
+													/>
+													<div class="text-base-content/60 mt-3 flex justify-between text-sm">
+														<span>Fokussiert</span>
+														<span class="font-medium">Empfohlen: 0.8-0.95</span>
+														<span>Vielfältig</span>
+													</div>
+													<p class="text-base-content/70 mt-4 text-base leading-relaxed">
+														Nucleus Sampling - begrenzt die Wortauswahl auf die wahrscheinlichsten
+														Optionen.
+													</p>
 												</div>
 											</div>
 										</div>
 									</div>
 
 									<!-- Output Controls -->
-									<div class="space-y-6">
-										<div class="card bg-base-100 shadow-sm">
-											<div class="card-body p-4">
-												<h5 class="card-title flex items-center gap-2 text-lg">
-													⚙️ Ausgabe-Kontrolle
-												</h5>
+									<div class="card bg-base-100 shadow-sm">
+										<div class="card-body p-6">
+											<h5 class="card-title mb-6 flex items-center gap-3 text-xl">
+												⚙️ Ausgabe-Kontrolle
+											</h5>
 
-												<div class="space-y-4">
-													<div class="form-control">
-														<label class="label">
-															<span class="label-text text-base font-semibold">📏 Max Tokens</span>
-															<span class="badge badge-ghost">
-																{(data.settings as any)?.ai?.maxTokens || 2000}
-															</span>
-														</label>
-														<input
-															id="maxTokens"
-															name="maxTokens"
-															type="range"
-															min="500"
-															max="4000"
-															step="100"
-															class="range range-accent"
-															value={(data.settings as any)?.ai?.maxTokens || 2000}
-														/>
-														<div class="text-base-content/60 mt-1 flex justify-between text-xs">
-															<span>500</span>
-															<span>Empfohlen: 1500-2500</span>
-															<span>4000</span>
-														</div>
-														<p class="text-base-content/70 mt-2 text-sm">
-															Maximale Länge der generierten Antwort. ~4 Zeichen = 1 Token.
-														</p>
+											<div class="space-y-8">
+												<div class="form-control">
+													<label class="label mb-4" for="maxTokens">
+														<span class="label-text text-lg font-semibold">📏 Max Tokens</span>
+														<span class="badge badge-ghost badge-lg">
+															{(data.settings as any)?.ai?.maxTokens || 2000}
+														</span>
+													</label>
+													<input
+														id="maxTokens"
+														name="maxTokens"
+														type="range"
+														min="500"
+														max="4000"
+														step="100"
+														class="range range-accent w-full"
+														value={(data.settings as any)?.ai?.maxTokens || 2000}
+													/>
+													<div class="text-base-content/60 mt-3 flex justify-between text-sm">
+														<span>500</span>
+														<span class="font-medium">Empfohlen: 1500-2500</span>
+														<span>4000</span>
 													</div>
+													<p class="text-base-content/70 mt-4 text-base leading-relaxed">
+														Maximale Länge der generierten Antwort. ~4 Zeichen = 1 Token.
+													</p>
+												</div>
 
-													<div class="form-control">
-														<label class="label">
-															<span class="label-text text-base font-semibold"
-																>🔄 Frequency Penalty</span
-															>
-															<span class="badge badge-ghost">
-																{(data.settings as any)?.ai?.frequencyPenalty || 0.1}
-															</span>
-														</label>
-														<input
-															id="frequencyPenalty"
-															name="frequencyPenalty"
-															type="range"
-															min="-1"
-															max="1"
-															step="0.1"
-															class="range range-warning"
-															value={(data.settings as any)?.ai?.frequencyPenalty || 0.1}
-														/>
-														<div class="text-base-content/60 mt-1 flex justify-between text-xs">
-															<span>Wiederholungen</span>
-															<span>Empfohlen: 0.0-0.3</span>
-															<span>Abwechslung</span>
-														</div>
-														<p class="text-base-content/70 mt-2 text-sm">
-															Bestraft häufige Wiederholungen. Positive Werte fördern Vielfalt.
-														</p>
+												<div class="form-control">
+													<label class="label mb-4" for="frequencyPenalty">
+														<span class="label-text text-lg font-semibold"
+															>🔄 Frequency Penalty</span
+														>
+														<span class="badge badge-ghost badge-lg">
+															{(data.settings as any)?.ai?.frequencyPenalty || 0.1}
+														</span>
+													</label>
+													<input
+														id="frequencyPenalty"
+														name="frequencyPenalty"
+														type="range"
+														min="-1"
+														max="1"
+														step="0.1"
+														class="range range-warning w-full"
+														value={(data.settings as any)?.ai?.frequencyPenalty || 0.1}
+													/>
+													<div class="text-base-content/60 mt-3 flex justify-between text-sm">
+														<span>Wiederholungen</span>
+														<span class="font-medium">Empfohlen: 0.0-0.3</span>
+														<span>Abwechslung</span>
 													</div>
+													<p class="text-base-content/70 mt-4 text-base leading-relaxed">
+														Bestraft häufige Wiederholungen. Positive Werte fördern Vielfalt.
+													</p>
 												</div>
 											</div>
 										</div>
@@ -950,16 +1085,32 @@
 									<div class="card-body p-4">
 										<h5 class="card-title mb-3 text-sm">⚡ Schnell-Einstellungen</h5>
 										<div class="flex flex-wrap gap-2">
-											<button type="button" class="btn btn-outline btn-sm">
+											<button
+												type="button"
+												class="btn btn-outline btn-sm"
+												onclick={() => setPreset('precise')}
+											>
 												🎯 Präzise (Temp: 0.3, TopP: 0.7)
 											</button>
-											<button type="button" class="btn btn-outline btn-sm">
+											<button
+												type="button"
+												class="btn btn-outline btn-sm"
+												onclick={() => setPreset('balanced')}
+											>
 												⚖️ Ausgewogen (Temp: 0.8, TopP: 0.9)
 											</button>
-											<button type="button" class="btn btn-outline btn-sm">
+											<button
+												type="button"
+												class="btn btn-outline btn-sm"
+												onclick={() => setPreset('creative')}
+											>
 												🎨 Kreativ (Temp: 1.2, TopP: 0.95)
 											</button>
-											<button type="button" class="btn btn-outline btn-sm">
+											<button
+												type="button"
+												class="btn btn-outline btn-sm"
+												onclick={() => setPreset('default')}
+											>
 												🔄 Reset Defaults
 											</button>
 										</div>

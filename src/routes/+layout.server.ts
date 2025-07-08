@@ -13,7 +13,7 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
 				.select('theme')
 				.eq('user_id', session.user.id)
 				.single();
-			
+
 			if (settings?.theme) {
 				userTheme = settings.theme;
 			}

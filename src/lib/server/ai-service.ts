@@ -50,7 +50,11 @@ class OpenRouterAIService {
 		this.apiKey = env.OPENROUTER_API_KEY;
 	}
 
-	async generateWishes(params: WishGenerationParams, userId?: string, aiSettings?: AISettings): Promise<AIResponse> {
+	async generateWishes(
+		params: WishGenerationParams,
+		userId?: string,
+		aiSettings?: AISettings
+	): Promise<AIResponse> {
 		try {
 			const prompt = this.generatePrompt(params, aiSettings);
 			const model = aiSettings?.model || 'anthropic/claude-3.5-sonnet';
@@ -58,7 +62,7 @@ class OpenRouterAIService {
 			const response = await fetch(`${this.baseUrl}/chat/completions`, {
 				method: 'POST',
 				headers: {
-					'Authorization': `Bearer ${this.apiKey}`,
+					Authorization: `Bearer ${this.apiKey}`,
 					'Content-Type': 'application/json',
 					'HTTP-Referer': 'https://wish-factory.local', // Für OpenRouter Tracking
 					'X-Title': 'Wish Factory CMS'
@@ -77,14 +81,16 @@ class OpenRouterAIService {
 					frequency_penalty: aiSettings?.frequencyPenalty ?? 0.1,
 					presence_penalty: aiSettings?.presencePenalty ?? 0.1,
 					// User-Tracking für OpenRouter
-					...(userId && { 
-						transforms: ["middle-out"],
-						user: userId 
+					...(userId && {
+						transforms: ['middle-out'],
+						user: userId
 					}),
 					messages: [
 						{
 							role: 'system',
-							content: aiSettings?.promptSystem || 'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'
+							content:
+								aiSettings?.promptSystem ||
+								'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'
 						},
 						{
 							role: 'user',
@@ -130,7 +136,6 @@ class OpenRouterAIService {
 				totalGenerated: parsedResponse.totalGenerated || parsedResponse.wishes.length,
 				error: undefined
 			};
-
 		} catch (error) {
 			console.error('AI Service Error:', error);
 			return {
@@ -155,7 +160,7 @@ class OpenRouterAIService {
 
 		// Verwende konfigurierbare Templates oder Fallback
 		let template = aiSettings?.promptTemplate;
-		
+
 		if (!template) {
 			// Fallback auf Default-Template (unterstützt alle Sprachen mit {language} Variable)
 			template = this.getDefaultTemplate();
@@ -163,19 +168,30 @@ class OpenRouterAIService {
 
 		// Übersetze Enums für bessere Prompts
 		const eventMap = { birthday: 'Geburtstag', anniversary: 'Jubiläum', custom: 'individuell' };
-		const relationMap = { friend: 'Freund/in', family: 'Familie', partner: 'Partner/in', colleague: 'Kollege/in' };
-		const ageGroupMap = { all: 'alle Altersgruppen', young: 'junge Menschen', middle: 'mittleres Alter', senior: 'Senioren' };
+		const relationMap = {
+			friend: 'Freund/in',
+			family: 'Familie',
+			partner: 'Partner/in',
+			colleague: 'Kollege/in'
+		};
+		const ageGroupMap = {
+			all: 'alle Altersgruppen',
+			young: 'junge Menschen',
+			middle: 'mittleres Alter',
+			senior: 'Senioren'
+		};
 
 		const eventText = eventMap[eventType] || eventType;
-		const relationTexts = relations.map(r => relationMap[r] || r).join(', ');
-		const ageGroupTexts = ageGroups.map(a => ageGroupMap[a] || a).join(', ');
-		
+		const relationTexts = relations.map((r) => relationMap[r] || r).join(', ');
+		const ageGroupTexts = ageGroups.map((a) => ageGroupMap[a] || a).join(', ');
+
 		const countText = count === 1 ? 'Glückwunsch' : 'Glückwünsche';
-		const specificValuesText = specificValues && specificValues.length > 0
-			? `\n- Spezielle Werte: ${specificValues.join(', ')}`
-			: '';
-		
-		const additionalInstructionsText = additionalInstructions 
+		const specificValuesText =
+			specificValues && specificValues.length > 0
+				? `\n- Spezielle Werte: ${specificValues.join(', ')}`
+				: '';
+
+		const additionalInstructionsText = additionalInstructions
 			? `\n- Zusätzliche Anweisungen: ${additionalInstructions}`
 			: '';
 
@@ -308,9 +324,13 @@ Generate both a regular text and a belated text for each wish.
 	}
 
 	// Einfache Funktion für einzelne Wunschgenerierung
-	async generateSingleWish(params: Omit<WishGenerationParams, 'count'>, userId?: string, aiSettings?: AISettings): Promise<GeneratedWish | null> {
+	async generateSingleWish(
+		params: Omit<WishGenerationParams, 'count'>,
+		userId?: string,
+		aiSettings?: AISettings
+	): Promise<GeneratedWish | null> {
 		const result = await this.generateWishes({ ...params, count: 1 }, userId, aiSettings);
-		
+
 		if (result.error || result.wishes.length === 0) {
 			return null;
 		}
@@ -319,14 +339,18 @@ Generate both a regular text and a belated text for each wish.
 	}
 
 	// Streaming-Version für bessere UX
-	async generateWishesStream(params: WishGenerationParams, userId?: string, aiSettings?: AISettings): Promise<ReadableStream<Uint8Array>> {
+	async generateWishesStream(
+		params: WishGenerationParams,
+		userId?: string,
+		aiSettings?: AISettings
+	): Promise<ReadableStream<Uint8Array>> {
 		const prompt = this.generatePrompt(params, aiSettings);
 		const model = aiSettings?.model || 'anthropic/claude-3.5-sonnet';
 
 		const response = await fetch(`${this.baseUrl}/chat/completions`, {
 			method: 'POST',
 			headers: {
-				'Authorization': `Bearer ${this.apiKey}`,
+				Authorization: `Bearer ${this.apiKey}`,
 				'Content-Type': 'application/json',
 				'HTTP-Referer': 'https://wish-factory.local',
 				'X-Title': 'Wish Factory CMS'
@@ -342,14 +366,16 @@ Generate both a regular text and a belated text for each wish.
 				top_p: aiSettings?.topP ?? 0.9,
 				frequency_penalty: aiSettings?.frequencyPenalty ?? 0.1,
 				presence_penalty: aiSettings?.presencePenalty ?? 0.1,
-				...(userId && { 
-					transforms: ["middle-out"],
-					user: userId 
+				...(userId && {
+					transforms: ['middle-out'],
+					user: userId
 				}),
 				messages: [
 					{
 						role: 'system',
-						content: aiSettings?.promptSystem || 'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'
+						content:
+							aiSettings?.promptSystem ||
+							'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'
 					},
 					{
 						role: 'user',
@@ -367,29 +393,96 @@ Generate both a regular text and a belated text for each wish.
 	}
 
 	// Health-Check
-	async checkHealth(): Promise<boolean> {
+	async checkHealth(): Promise<{ healthy: boolean; details: string; models?: string[] }> {
 		try {
+			if (!this.apiKey) {
+				return {
+					healthy: false,
+					details: 'API-Schlüssel nicht konfiguriert'
+				};
+			}
+
+			console.log('🔍 Prüfe OpenRouter API Verfügbarkeit...');
 			const response = await fetch(`${this.baseUrl}/models`, {
 				headers: {
-					'Authorization': `Bearer ${this.apiKey}`
+					Authorization: `Bearer ${this.apiKey}`,
+					'Content-Type': 'application/json'
 				}
 			});
-			return response.ok;
-		} catch {
-			return false;
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				console.error('❌ OpenRouter API Fehler:', response.status, errorText);
+				
+				if (response.status === 401) {
+					return {
+						healthy: false,
+						details: 'API-Schlüssel ungültig oder abgelaufen'
+					};
+				} else if (response.status === 403) {
+					return {
+						healthy: false,
+						details: 'API-Zugriff verweigert - möglicherweise Rate-Limit erreicht'
+					};
+				} else {
+					return {
+						healthy: false,
+						details: `API-Fehler: ${response.status} - ${errorText}`
+					};
+				}
+			}
+
+			const data = await response.json();
+			const availableModels = data.data?.map((model: { id: string }) => model.id) || [];
+			console.log('✅ OpenRouter API verfügbar, Modelle:', availableModels.slice(0, 3), '...');
+
+			return {
+				healthy: true,
+				details: `API verfügbar mit ${availableModels.length} Modellen`,
+				models: availableModels.slice(0, 10) // Nur die ersten 10 für die Anzeige
+			};
+		} catch (error) {
+			console.error('❌ Health-Check fehlgeschlagen:', error);
+			
+			if (error instanceof Error) {
+				if (error.message.includes('timeout')) {
+					return {
+						healthy: false,
+						details: 'Timeout beim Erreichen der API - Netzwerkprobleme'
+					};
+				} else if (error.message.includes('fetch')) {
+					return {
+						healthy: false,
+						details: 'Netzwerkfehler beim Erreichen der API'
+					};
+				} else {
+					return {
+						healthy: false,
+						details: `Unbekannter Fehler: ${error.message}`
+					};
+				}
+			}
+			
+			return {
+				healthy: false,
+				details: 'Unbekannter Fehler beim Health-Check'
+			};
 		}
 	}
 
 	// Kosten- und Usage-Tracking
-	async getCostEstimate(params: WishGenerationParams, aiSettings?: AISettings): Promise<{ estimatedCost: number; tokens: number }> {
+	async getCostEstimate(
+		params: WishGenerationParams,
+		aiSettings?: AISettings
+	): Promise<{ estimatedCost: number; tokens: number }> {
 		const prompt = this.generatePrompt(params, aiSettings);
 		// Grobe Schätzung: ~4 Zeichen = 1 Token, Claude 3.5 Sonnet: $3/1M input + $15/1M output
 		const inputTokens = Math.ceil(prompt.length / 4);
 		const outputTokens = Math.ceil(params.count! * 200); // ~200 Tokens pro Wunsch
-		
+
 		const inputCost = (inputTokens / 1000000) * 3; // $3 per 1M tokens
 		const outputCost = (outputTokens / 1000000) * 15; // $15 per 1M tokens
-		
+
 		return {
 			estimatedCost: inputCost + outputCost,
 			tokens: inputTokens + outputTokens
@@ -401,14 +494,14 @@ Generate both a regular text and a belated text for each wish.
 		try {
 			const response = await fetch(`${this.baseUrl}/models`, {
 				headers: {
-					'Authorization': `Bearer ${this.apiKey}`
+					Authorization: `Bearer ${this.apiKey}`
 				}
 			});
-			
+
 			if (!response.ok) {
 				return ['anthropic/claude-3.5-sonnet'];
 			}
-			
+
 			const data = await response.json();
 			return data.data?.map((model: { id: string }) => model.id) || ['anthropic/claude-3.5-sonnet'];
 		} catch {
@@ -418,4 +511,4 @@ Generate both a regular text and a belated text for each wish.
 }
 
 // Singleton instance
-export const aiService = new OpenRouterAIService(); 
+export const aiService = new OpenRouterAIService();

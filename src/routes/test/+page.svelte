@@ -40,9 +40,9 @@
 	<title>Theme Test - Wish Factory</title>
 </svelte:head>
 
-<div class="min-h-screen bg-base-100 p-8">
+<div class="bg-base-100 min-h-screen p-8">
 	<div class="mx-auto max-w-4xl">
-		<h1 class="mb-8 text-4xl font-bold text-base-content">DaisyUI Theme Test</h1>
+		<h1 class="text-base-content mb-8 text-4xl font-bold">DaisyUI Theme Test</h1>
 
 		<div class="mb-8">
 			<h2 class="mb-4 text-2xl font-semibold">Current Theme: {currentTheme}</h2>
@@ -97,28 +97,28 @@
 		<div class="mt-8">
 			<h2 class="mb-4 text-2xl font-semibold">Color Palette</h2>
 			<div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
-				<div class="rounded-lg bg-primary p-4 text-center text-primary-content">
+				<div class="bg-primary text-primary-content rounded-lg p-4 text-center">
 					<div class="font-bold">Primary</div>
 				</div>
-				<div class="rounded-lg bg-secondary p-4 text-center text-secondary-content">
+				<div class="bg-secondary text-secondary-content rounded-lg p-4 text-center">
 					<div class="font-bold">Secondary</div>
 				</div>
-				<div class="rounded-lg bg-accent p-4 text-center text-accent-content">
+				<div class="bg-accent text-accent-content rounded-lg p-4 text-center">
 					<div class="font-bold">Accent</div>
 				</div>
-				<div class="rounded-lg bg-neutral p-4 text-center text-neutral-content">
+				<div class="bg-neutral text-neutral-content rounded-lg p-4 text-center">
 					<div class="font-bold">Neutral</div>
 				</div>
-				<div class="rounded-lg border bg-base-100 p-4 text-center text-base-content">
+				<div class="bg-base-100 text-base-content rounded-lg border p-4 text-center">
 					<div class="font-bold">Base 100</div>
 				</div>
-				<div class="rounded-lg bg-base-200 p-4 text-center text-base-content">
+				<div class="bg-base-200 text-base-content rounded-lg p-4 text-center">
 					<div class="font-bold">Base 200</div>
 				</div>
-				<div class="rounded-lg bg-base-300 p-4 text-center text-base-content">
+				<div class="bg-base-300 text-base-content rounded-lg p-4 text-center">
 					<div class="font-bold">Base 300</div>
 				</div>
-				<div class="rounded-lg bg-info p-4 text-center text-info-content">
+				<div class="bg-info text-info-content rounded-lg p-4 text-center">
 					<div class="font-bold">Info</div>
 				</div>
 			</div>

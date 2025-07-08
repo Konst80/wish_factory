@@ -3,7 +3,9 @@ import type { PageServerLoad, Actions } from './$types';
 import { createSupabaseAdminClient } from '$lib/server/supabase-admin';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-	const { data: { user } } = await locals.supabase.auth.getUser();
+	const {
+		data: { user }
+	} = await locals.supabase.auth.getUser();
 
 	if (!user) {
 		throw redirect(302, '/auth/login');
@@ -26,8 +28,11 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const selectedRole = url.searchParams.get('role') || '';
 		const selectedStatus = url.searchParams.get('status') || '';
 
+		// Use admin client to bypass RLS for user management
+		const adminClient = createSupabaseAdminClient();
+
 		// First, get ALL profiles for statistics (unfiltered)
-		const { data: allProfiles, error: allProfilesError } = await locals.supabase
+		const { data: allProfiles, error: allProfilesError } = await adminClient
 			.from('profiles')
 			.select(
 				`
@@ -47,7 +52,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}
 
 		// Then, build the query for filtered profiles
-		let query = locals.supabase.from('profiles').select(`
+		let query = adminClient.from('profiles').select(`
 				id,
 				email,
 				full_name,
@@ -144,7 +149,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 export const actions: Actions = {
 	updateRole: async ({ request, locals }) => {
-		const { data: { user } } = await locals.supabase.auth.getUser();
+		const {
+			data: { user }
+		} = await locals.supabase.auth.getUser();
 		if (!user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
@@ -197,7 +204,9 @@ export const actions: Actions = {
 	},
 
 	deleteUser: async ({ request, locals }) => {
-		const { data: { user } } = await locals.supabase.auth.getUser();
+		const {
+			data: { user }
+		} = await locals.supabase.auth.getUser();
 		if (!user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
@@ -259,7 +268,9 @@ export const actions: Actions = {
 	},
 
 	createUser: async ({ request, locals }) => {
-		const { data: { user } } = await locals.supabase.auth.getUser();
+		const {
+			data: { user }
+		} = await locals.supabase.auth.getUser();
 		if (!user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
@@ -289,27 +300,46 @@ export const actions: Actions = {
 			return fail(400, { message: 'Ungültige Rolle' });
 		}
 
-		// Create user using Supabase Auth Admin API
-		const adminClient = createSupabaseAdminClient();
-		const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
-			email,
-			password,
-			email_confirm: true,
-			user_metadata: {
-				full_name: fullName
-			}
-		});
-
-		if (createError) {
-			console.error('Error creating user:', createError);
-			return fail(500, { message: 'Fehler beim Erstellen des Benutzers: ' + createError.message });
+		// Validate full name length (must be 2-100 characters per database constraint)
+		if (fullName.length < 2 || fullName.length > 100) {
+			return fail(400, { message: 'Name muss zwischen 2 und 100 Zeichen lang sein' });
 		}
 
-		// Create profile manually since the trigger might not work properly
-		if (newUser.user) {
-			const { error: profileError } = await adminClient
+		const adminClient = createSupabaseAdminClient();
+
+		try {
+			// Create user using Supabase Auth Admin API
+			const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+				email,
+				password,
+				email_confirm: true,
+				user_metadata: {
+					full_name: fullName
+				}
+			});
+
+			if (createError) {
+				console.error('Error creating user:', createError);
+				return fail(500, { message: 'Fehler beim Erstellen des Benutzers: ' + createError.message });
+			}
+
+			if (!newUser.user) {
+				return fail(500, { message: 'Benutzer wurde nicht erstellt' });
+			}
+
+			// Wait longer for database triggers to complete
+			await new Promise(resolve => setTimeout(resolve, 500));
+
+			// Check if profile was created by trigger
+			const { data: existingProfile } = await adminClient
 				.from('profiles')
-				.upsert({
+				.select('id')
+				.eq('id', newUser.user.id)
+				.single();
+
+			if (!existingProfile) {
+				// Trigger didn't create profile, create it manually
+				const { error: profileError } = await adminClient.from('profiles').insert({
 					id: newUser.user.id,
 					email: newUser.user.email || email,
 					full_name: fullName,
@@ -318,14 +348,37 @@ export const actions: Actions = {
 					updated_at: new Date().toISOString()
 				});
 
-			if (profileError) {
-				console.error('Error creating user profile:', profileError);
-				// Clean up - delete the auth user if profile creation failed
-				await adminClient.auth.admin.deleteUser(newUser.user.id);
-				return fail(500, { message: 'Fehler beim Erstellen des Benutzerprofils: ' + profileError.message });
-			}
-		}
+				if (profileError) {
+					console.error('Error creating user profile:', profileError);
+					// Clean up - delete the auth user if profile creation failed
+					await adminClient.auth.admin.deleteUser(newUser.user.id);
+					return fail(500, {
+						message: 'Fehler beim Erstellen des Benutzerprofils: ' + profileError.message
+					});
+				}
+			} else {
+				// Profile exists, update it with the correct role and name
+				const { error: updateError } = await adminClient
+					.from('profiles')
+					.update({
+						full_name: fullName,
+						role: role as 'Administrator' | 'Redakteur',
+						updated_at: new Date().toISOString()
+					})
+					.eq('id', newUser.user.id);
 
-		return { success: true, message: 'Benutzer erfolgreich erstellt' };
+				if (updateError) {
+					console.error('Error updating user profile:', updateError);
+					return fail(500, {
+						message: 'Fehler beim Aktualisieren des Benutzerprofils: ' + updateError.message
+					});
+				}
+			}
+
+			return { success: true, message: 'Benutzer erfolgreich erstellt' };
+		} catch (error) {
+			console.error('Unexpected error during user creation:', error);
+			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
+		}
 	}
 };
