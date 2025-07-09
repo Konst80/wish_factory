@@ -622,7 +622,7 @@ export const actions: Actions = {
 				return fail(400, { message: 'Top-P muss zwischen 0 und 1 liegen' });
 			}
 
-			// Update AI settings
+			// Update AI settings (without specific values - they have their own form)
 			const { error } = await locals.supabase
 				.from('user_settings')
 				.update({

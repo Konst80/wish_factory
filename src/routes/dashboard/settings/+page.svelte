@@ -2107,17 +2107,6 @@
 												</div>
 											</div>
 										</div>
-
-										<div class="card-actions mt-6 justify-end">
-											<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
-												{#if isSubmitting}
-													<span class="loading loading-spinner loading-sm"></span>
-													Speichern...
-												{:else}
-													Spezifische Werte speichern
-												{/if}
-											</button>
-										</div>
 									</div>
 								{/if}
 							</div>
