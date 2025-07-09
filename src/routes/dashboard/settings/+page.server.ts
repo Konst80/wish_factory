@@ -24,6 +24,9 @@ interface UserSettingsWithAI {
 	// AI Settings
 	ai_prompt_system?: string;
 	ai_prompt_template?: string;
+	ai_prompt_age_young?: string;
+	ai_prompt_age_middle?: string;
+	ai_prompt_age_senior?: string;
 	ai_model?: string;
 	ai_temperature?: number;
 	ai_max_tokens?: number;
@@ -209,6 +212,9 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 				ai: {
 					promptSystem: settings?.ai_prompt_system || defaultSettings.ai_prompt_system,
 					promptTemplate: settings?.ai_prompt_template || defaultSettings.ai_prompt_template,
+					promptAgeYoung: settings?.ai_prompt_age_young || defaultSettings.ai_prompt_age_young,
+					promptAgeMiddle: settings?.ai_prompt_age_middle || defaultSettings.ai_prompt_age_middle,
+					promptAgeSenior: settings?.ai_prompt_age_senior || defaultSettings.ai_prompt_age_senior,
 					model: settings?.ai_model || defaultSettings.ai_model,
 					temperature: settings?.ai_temperature ?? defaultSettings.ai_temperature,
 					maxTokens: settings?.ai_max_tokens || defaultSettings.ai_max_tokens,
@@ -301,6 +307,9 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 				ai: {
 					promptSystem: defaultSettings.ai_prompt_system,
 					promptTemplate: defaultSettings.ai_prompt_template,
+					promptAgeYoung: defaultSettings.ai_prompt_age_young,
+					promptAgeMiddle: defaultSettings.ai_prompt_age_middle,
+					promptAgeSenior: defaultSettings.ai_prompt_age_senior,
 					model: defaultSettings.ai_model,
 					temperature: defaultSettings.ai_temperature,
 					maxTokens: defaultSettings.ai_max_tokens,
@@ -619,6 +628,9 @@ export const actions: Actions = {
 				.update({
 					ai_prompt_system: formData.get('promptSystem') as string,
 					ai_prompt_template: formData.get('promptTemplate') as string,
+					ai_prompt_age_young: formData.get('promptAgeYoung') as string,
+					ai_prompt_age_middle: formData.get('promptAgeMiddle') as string,
+					ai_prompt_age_senior: formData.get('promptAgeSenior') as string,
 					ai_model: formData.get('model') as string,
 					ai_temperature: temperature,
 					ai_max_tokens: maxTokens,

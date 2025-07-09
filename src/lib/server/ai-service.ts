@@ -44,6 +44,9 @@ interface ResponseValidationResult {
 interface AISettings {
 	promptSystem: string;
 	promptTemplate?: string; // Optional - falls nicht gesetzt wird Default verwendet
+	promptAgeYoung?: string; // Optional - zusätzliche Anweisungen für junge Menschen
+	promptAgeMiddle?: string; // Optional - zusätzliche Anweisungen für mittlere Altersgruppe
+	promptAgeSenior?: string; // Optional - zusätzliche Anweisungen für ältere Menschen
 	model: string;
 	temperature: number;
 	maxTokens: number;
@@ -352,6 +355,27 @@ class OpenRouterAIService {
 		const relationTexts = relations.map((r) => relationMap[r] || r).join(', ');
 		const ageGroupTexts = ageGroups.map((a) => ageGroupMap[a] || a).join(', ');
 
+		// Build age group prompts based on selection
+		const ageGroupPrompts = [];
+		if (ageGroups.includes('all')) {
+			// Include all age group prompts when "all" is selected
+			if (aiSettings?.promptAgeYoung) ageGroupPrompts.push(`**Für junge Menschen:** ${aiSettings.promptAgeYoung}`);
+			if (aiSettings?.promptAgeMiddle) ageGroupPrompts.push(`**Für mittleres Alter:** ${aiSettings.promptAgeMiddle}`);
+			if (aiSettings?.promptAgeSenior) ageGroupPrompts.push(`**Für ältere Menschen:** ${aiSettings.promptAgeSenior}`);
+		} else {
+			// Include specific age group prompts
+			if (ageGroups.includes('young') && aiSettings?.promptAgeYoung) {
+				ageGroupPrompts.push(`**Für junge Menschen:** ${aiSettings.promptAgeYoung}`);
+			}
+			if (ageGroups.includes('middle') && aiSettings?.promptAgeMiddle) {
+				ageGroupPrompts.push(`**Für mittleres Alter:** ${aiSettings.promptAgeMiddle}`);
+			}
+			if (ageGroups.includes('senior') && aiSettings?.promptAgeSenior) {
+				ageGroupPrompts.push(`**Für ältere Menschen:** ${aiSettings.promptAgeSenior}`);
+			}
+		}
+		const ageGroupPromptsText = ageGroupPrompts.length > 0 ? `\n\n**Altersgruppen-spezifische Anweisungen:**\n${ageGroupPrompts.join('\n')}` : '';
+
 		const countText = count === 1 ? 'Glückwunsch' : 'Glückwünsche';
 		const specificValuesText =
 			specificValues && specificValues.length > 0
@@ -392,6 +416,9 @@ class OpenRouterAIService {
 			.replace(/\{ageGroups\}/g, ageGroups.join(', '))
 			.replace(/\{specificValues\}/g, specificValuesText)
 			.replace(/\{additionalInstructions\}/g, additionalInstructionsText);
+
+		// Age group prompts an das Ende des Templates anhängen
+		finalPrompt += ageGroupPromptsText;
 
 		// HARDCODIERTE JSON-FORMAT-ANWEISUNG - IMMER ANHÄNGEN
 		const mandatoryJsonInstructions =

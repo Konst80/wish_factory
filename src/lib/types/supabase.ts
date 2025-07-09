@@ -44,6 +44,9 @@ export type Database = {
 					ai_max_tokens: number | null;
 					ai_model: string | null;
 					ai_presence_penalty: number | null;
+					ai_prompt_age_young: string | null;
+					ai_prompt_age_middle: string | null;
+					ai_prompt_age_senior: string | null;
 					ai_prompt_system: string | null;
 					ai_prompt_template: string | null;
 					ai_temperature: number | null;
@@ -81,6 +84,9 @@ export type Database = {
 					ai_max_tokens?: number | null;
 					ai_model?: string | null;
 					ai_presence_penalty?: number | null;
+					ai_prompt_age_young?: string | null;
+					ai_prompt_age_middle?: string | null;
+					ai_prompt_age_senior?: string | null;
 					ai_prompt_system?: string | null;
 					ai_prompt_template?: string | null;
 					ai_temperature?: number | null;
@@ -118,6 +124,9 @@ export type Database = {
 					ai_max_tokens?: number | null;
 					ai_model?: string | null;
 					ai_presence_penalty?: number | null;
+					ai_prompt_age_young?: string | null;
+					ai_prompt_age_middle?: string | null;
+					ai_prompt_age_senior?: string | null;
 					ai_prompt_system?: string | null;
 					ai_prompt_template?: string | null;
 					ai_temperature?: number | null;

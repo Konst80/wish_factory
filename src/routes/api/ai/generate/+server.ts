@@ -112,7 +112,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const { data: userSettings, error: settingsError } = await locals.supabase
 			.from('user_settings')
 			.select(
-				'ai_prompt_system, ai_prompt_template, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty, specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
+				'ai_prompt_system, ai_prompt_template, ai_prompt_age_young, ai_prompt_age_middle, ai_prompt_age_senior, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty, specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
 			)
 			.eq('user_id', user.id)
 			.single();
@@ -131,6 +131,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						userSettings.ai_prompt_system ||
 						'Du bist ein Experte für das Schreiben von Glückwünschen. Du MUSST immer im exakten JSON-Format antworten, niemals als Text oder Markdown. Antworte NUR mit einem gültigen JSON-Objekt.',
 					promptTemplate: userSettings.ai_prompt_template || undefined, // null zu undefined konvertieren
+					promptAgeYoung: userSettings.ai_prompt_age_young || undefined,
+					promptAgeMiddle: userSettings.ai_prompt_age_middle || undefined,
+					promptAgeSenior: userSettings.ai_prompt_age_senior || undefined,
 					model: userSettings.ai_model || 'anthropic/claude-sonnet-4',
 					temperature: userSettings.ai_temperature ?? 0.8,
 					maxTokens: userSettings.ai_max_tokens || 2000,

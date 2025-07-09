@@ -1676,6 +1676,100 @@
 								</div>
 							</div>
 
+							<!-- Age-Specific Prompts Section -->
+							<div class="bg-base-200 mb-6 rounded-lg p-6">
+								<div class="mb-6 flex items-center justify-between">
+									<h4 class="flex items-center gap-3 text-xl font-bold">
+										<div class="badge badge-primary badge-lg">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+												/>
+											</svg>
+										</div>
+										Altersgruppen-spezifische Prompts
+									</h4>
+									<div class="badge badge-info badge-sm">Optional</div>
+								</div>
+
+								<div class="space-y-6">
+									<div class="alert alert-info">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											class="h-6 w-6 shrink-0 stroke-current"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
+										<div>
+											<p>
+												<strong>Zusätzliche Anweisungen für spezifische Altersgruppen:</strong>
+												Diese Prompts werden zusätzlich zum Hauptprompt verwendet, wenn eine
+												bestimmte Altersgruppe ausgewählt wird. Bei "Alle" werden alle drei
+												Prompts kombiniert.
+											</p>
+										</div>
+									</div>
+
+									<div class="form-control">
+										<label class="label" for="promptAgeYoung">
+											<span class="label-text font-medium">👦 Prompt für junge Menschen</span>
+											<span class="label-text-alt">Zusätzliche Anweisungen für junge Zielgruppe</span>
+										</label>
+										<textarea
+											id="promptAgeYoung"
+											name="promptAgeYoung"
+											class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+											placeholder="z.B. Verwende modernen, lockeren Ton. Nutze aktuelle Trends und Ausdrücke..."
+											value={(data.settings as any)?.ai?.promptAgeYoung || ''}
+										></textarea>
+									</div>
+
+									<div class="form-control">
+										<label class="label" for="promptAgeMiddle">
+											<span class="label-text font-medium">👨 Prompt für mittleres Alter</span>
+											<span class="label-text-alt">Zusätzliche Anweisungen für mittlere Altersgruppe</span>
+										</label>
+										<textarea
+											id="promptAgeMiddle"
+											name="promptAgeMiddle"
+											class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+											placeholder="z.B. Verwende ausgewogenen, respektvollen Ton. Berücksichtige Lebenserfahrung..."
+											value={(data.settings as any)?.ai?.promptAgeMiddle || ''}
+										></textarea>
+									</div>
+
+									<div class="form-control">
+										<label class="label" for="promptAgeSenior">
+											<span class="label-text font-medium">👴 Prompt für ältere Menschen</span>
+											<span class="label-text-alt">Zusätzliche Anweisungen für ältere Zielgruppe</span>
+										</label>
+										<textarea
+											id="promptAgeSenior"
+											name="promptAgeSenior"
+											class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+											placeholder="z.B. Verwende ehrfürchtigen, würdevollen Ton. Betone Weisheit und Erfahrung..."
+											value={(data.settings as any)?.ai?.promptAgeSenior || ''}
+										></textarea>
+									</div>
+								</div>
+							</div>
+
 							<!-- Advanced Parameters Section -->
 							<div class="bg-base-200 mb-6 rounded-lg p-6">
 								<div class="mb-6 flex items-center justify-between">
