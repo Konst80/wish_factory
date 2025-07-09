@@ -23,7 +23,7 @@
 	});
 
 	// Global status message
-	let globalMessage = $state<{type: 'success' | 'error', text: string} | null>(null);
+	let globalMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
 	// Auto-hide message after 5 seconds
 	function showGlobalMessage(type: 'success' | 'error', text: string) {
@@ -149,15 +149,30 @@
 <!-- Global Status Message -->
 {#if globalMessage}
 	<div class="alert {globalMessage.type === 'success' ? 'alert-success' : 'alert-error'} mb-6">
-		<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
 			{#if globalMessage.type === 'success'}
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
 			{:else}
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
 			{/if}
 		</svg>
 		<span>{globalMessage.text}</span>
-		<button class="btn btn-sm btn-ghost" onclick={() => globalMessage = null}>✕</button>
+		<button class="btn btn-sm btn-ghost" onclick={() => (globalMessage = null)}>✕</button>
 	</div>
 {/if}
 
@@ -413,19 +428,27 @@
 		<div class="modal-box">
 			<h3 class="mb-4 text-lg font-bold">Neuen Benutzer hinzufügen</h3>
 
-			<form method="POST" action="?/createUser" use:enhance={() => {
-				return async ({ result }) => {
-					if (result.type === 'success') {
-						showAddUserModal = false;
-						userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
-						showGlobalMessage('success', 'Benutzer erfolgreich erstellt');
-						// Reload page data to show new user
-						await invalidateAll();
-					} else if (result.type === 'failure') {
-						showGlobalMessage('error', (result.data?.message as string) || 'Fehler beim Erstellen des Benutzers');
-					}
-				};
-			}} class="space-y-4">
+			<form
+				method="POST"
+				action="?/createUser"
+				use:enhance={() => {
+					return async ({ result }) => {
+						if (result.type === 'success') {
+							showAddUserModal = false;
+							userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
+							showGlobalMessage('success', 'Benutzer erfolgreich erstellt');
+							// Reload page data to show new user
+							await invalidateAll();
+						} else if (result.type === 'failure') {
+							showGlobalMessage(
+								'error',
+								(result.data?.message as string) || 'Fehler beim Erstellen des Benutzers'
+							);
+						}
+					};
+				}}
+				class="space-y-4"
+			>
 				<div class="form-control">
 					<label class="label" for="newUserName">
 						<span class="label-text">Name</span>
@@ -519,20 +542,27 @@
 				</svg>
 				<span>Diese Aktion kann nicht rückgängig gemacht werden!</span>
 			</div>
-			<form method="POST" action="?/deleteUser" use:enhance={() => {
-				return async ({ result }) => {
-					if (result.type === 'success') {
-						const userName = selectedUser?.full_name || 'Benutzer';
-						showDeleteModal = false;
-						selectedUser = null;
-						showGlobalMessage('success', `${userName} erfolgreich gelöscht`);
-						// Reload page data to remove deleted user
-						await invalidateAll();
-					} else if (result.type === 'failure') {
-						showGlobalMessage('error', (result.data?.message as string) || 'Fehler beim Löschen des Benutzers');
-					}
-				};
-			}}>
+			<form
+				method="POST"
+				action="?/deleteUser"
+				use:enhance={() => {
+					return async ({ result }) => {
+						if (result.type === 'success') {
+							const userName = selectedUser?.full_name || 'Benutzer';
+							showDeleteModal = false;
+							selectedUser = null;
+							showGlobalMessage('success', `${userName} erfolgreich gelöscht`);
+							// Reload page data to remove deleted user
+							await invalidateAll();
+						} else if (result.type === 'failure') {
+							showGlobalMessage(
+								'error',
+								(result.data?.message as string) || 'Fehler beim Löschen des Benutzers'
+							);
+						}
+					};
+				}}
+			>
 				<input type="hidden" name="userId" value={selectedUser.id} />
 				<div class="modal-action">
 					<button type="button" class="btn btn-ghost" onclick={closeDeleteModal}>Abbrechen</button>
@@ -549,21 +579,29 @@
 		<div class="modal-box">
 			<h3 class="mb-4 text-lg font-bold">Benutzer bearbeiten</h3>
 
-			<form method="POST" action="?/updateRole" use:enhance={() => {
-				return async ({ result }) => {
-					if (result.type === 'success') {
-						showEditUserModal = false;
-						const userName = selectedUser?.full_name || 'Benutzer';
-						selectedUser = null;
-						userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
-						showGlobalMessage('success', `Rolle von ${userName} erfolgreich aktualisiert`);
-						// Reload page data to show updated user
-						await invalidateAll();
-					} else if (result.type === 'failure') {
-						showGlobalMessage('error', (result.data?.message as string) || 'Fehler beim Aktualisieren der Rolle');
-					}
-				};
-			}} class="space-y-4">
+			<form
+				method="POST"
+				action="?/updateRole"
+				use:enhance={() => {
+					return async ({ result }) => {
+						if (result.type === 'success') {
+							showEditUserModal = false;
+							const userName = selectedUser?.full_name || 'Benutzer';
+							selectedUser = null;
+							userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
+							showGlobalMessage('success', `Rolle von ${userName} erfolgreich aktualisiert`);
+							// Reload page data to show updated user
+							await invalidateAll();
+						} else if (result.type === 'failure') {
+							showGlobalMessage(
+								'error',
+								(result.data?.message as string) || 'Fehler beim Aktualisieren der Rolle'
+							);
+						}
+					};
+				}}
+				class="space-y-4"
+			>
 				<input type="hidden" name="userId" value={selectedUser.id} />
 
 				<div class="form-control">

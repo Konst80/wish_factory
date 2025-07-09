@@ -107,12 +107,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const limitedCount = Math.min(Math.max(1, count), 10); // Zwischen 1 und 10
 		console.log(`📊 Anzahl Wünsche: ${limitedCount}`);
 
-		// Lade AI-Settings aus der Datenbank
-		console.log('🔧 Lade KI-Einstellungen...');
+		// Lade AI-Settings und spezifische Werte aus der Datenbank
+		console.log('🔧 Lade KI-Einstellungen und spezifische Werte...');
 		const { data: userSettings, error: settingsError } = await locals.supabase
 			.from('user_settings')
 			.select(
-				'ai_prompt_system, ai_prompt_template, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty'
+				'ai_prompt_system, ai_prompt_template, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty, specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
 			)
 			.eq('user_id', user.id)
 			.single();
@@ -125,21 +125,51 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Erstelle AI-Settings mit benutzerdefinierten Werten oder Fallbacks
-		const aiSettings = userSettings ? {
-			promptSystem: userSettings.ai_prompt_system || 'Du bist ein Experte für das Schreiben von Glückwünschen. Du MUSST immer im exakten JSON-Format antworten, niemals als Text oder Markdown. Antworte NUR mit einem gültigen JSON-Objekt.',
-			promptTemplate: userSettings.ai_prompt_template || undefined, // null zu undefined konvertieren
-			model: userSettings.ai_model || 'anthropic/claude-sonnet-4',
-			temperature: userSettings.ai_temperature ?? 0.8,
-			maxTokens: userSettings.ai_max_tokens || 2000,
-			topP: userSettings.ai_top_p ?? 0.9,
-			frequencyPenalty: userSettings.ai_frequency_penalty ?? 0.1,
-			presencePenalty: userSettings.ai_presence_penalty ?? 0.1
-		} : undefined;
+		const aiSettings = userSettings
+			? {
+					promptSystem:
+						userSettings.ai_prompt_system ||
+						'Du bist ein Experte für das Schreiben von Glückwünschen. Du MUSST immer im exakten JSON-Format antworten, niemals als Text oder Markdown. Antworte NUR mit einem gültigen JSON-Objekt.',
+					promptTemplate: userSettings.ai_prompt_template || undefined, // null zu undefined konvertieren
+					model: userSettings.ai_model || 'anthropic/claude-sonnet-4',
+					temperature: userSettings.ai_temperature ?? 0.8,
+					maxTokens: userSettings.ai_max_tokens || 2000,
+					topP: userSettings.ai_top_p ?? 0.9,
+					frequencyPenalty: userSettings.ai_frequency_penalty ?? 0.1,
+					presencePenalty: userSettings.ai_presence_penalty ?? 0.1
+				}
+			: undefined;
+
+		// Verarbeite spezifische Werte und lade passende Beschreibung
+		let mergedSpecificValues = specificValues || [];
+		let specificValuesDescription = '';
+
+		if (userSettings && specificValues && specificValues.length > 0) {
+			// Bestimme das richtige Feld basierend auf eventType und language
+			const eventKey = eventType.toLowerCase();
+			const languageKey = language.toLowerCase();
+			const settingsKey = `specific_values_${eventKey}_${languageKey}` as keyof typeof userSettings;
+			const storedDescription = userSettings[settingsKey];
+
+			if (storedDescription && typeof storedDescription === 'string' && storedDescription.trim()) {
+				specificValuesDescription = storedDescription;
+				console.log(
+					'📝 Gespeicherte Beschreibung für spezifische Werte:',
+					storedDescription.substring(0, 100) + '...'
+				);
+				console.log('📝 Eingegeben Wert:', specificValues[0]);
+			}
+		}
+
+		console.log('📝 Finale spezifische Werte:', mergedSpecificValues);
 
 		console.log('🤖 Finale AI Settings:', aiSettings);
 		console.log(`🎯 Verwende benutzerdefiniertes Template: ${!!aiSettings?.promptTemplate}`);
 		if (aiSettings?.promptTemplate) {
-			console.log('📝 Custom Template Vorschau:', aiSettings.promptTemplate.substring(0, 150) + '...');
+			console.log(
+				'📝 Custom Template Vorschau:',
+				aiSettings.promptTemplate.substring(0, 150) + '...'
+			);
 		}
 		console.log('🤖 Starte KI-Generierung...');
 
@@ -151,10 +181,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				language,
 				relations,
 				ageGroups,
-				specificValues: specificValues || [],
+				specificValues: mergedSpecificValues,
 				style,
 				count: limitedCount,
-				additionalInstructions
+				additionalInstructions: specificValuesDescription
+					? `${additionalInstructions ? additionalInstructions + '\n\n' : ''}Spezifische Werte und Bedeutungen:\n${specificValuesDescription}`
+					: additionalInstructions
 			},
 			user.id,
 			aiSettings
@@ -182,7 +214,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Andernfalls als interner Server-Fehler behandeln
-		const errorMessage = err instanceof Error ? err.message : 'Unbekannter Fehler bei der KI-Generierung';
+		const errorMessage =
+			err instanceof Error ? err.message : 'Unbekannter Fehler bei der KI-Generierung';
 		console.error('❌ Interner Server-Fehler:', errorMessage);
 		throw error(500, `Interner Server-Fehler: ${errorMessage}`);
 	}
@@ -216,7 +249,9 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 		// Health-Check der AI-API
 		const healthResult = await aiService.checkHealth();
-		console.log(`🤖 AI-Service Health: ${healthResult.healthy ? 'gesund' : 'ungesund'} - ${healthResult.details}`);
+		console.log(
+			`🤖 AI-Service Health: ${healthResult.healthy ? 'gesund' : 'ungesund'} - ${healthResult.details}`
+		);
 
 		return json({
 			status: healthResult.healthy ? 'healthy' : 'unhealthy',

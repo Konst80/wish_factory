@@ -585,7 +585,6 @@
 						/>
 					</div>
 
-
 					<div class="form-control">
 						<label class="label">
 							<span class="label-text">Zusätzliche Anweisungen</span>

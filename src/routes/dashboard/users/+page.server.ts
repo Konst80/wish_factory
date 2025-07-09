@@ -323,7 +323,9 @@ export const actions: Actions = {
 
 			if (createError) {
 				console.error('Error creating user:', createError);
-				return fail(500, { message: 'Fehler beim Erstellen des Benutzers: ' + createError.message });
+				return fail(500, {
+					message: 'Fehler beim Erstellen des Benutzers: ' + createError.message
+				});
 			}
 
 			if (!newUser.user) {
@@ -331,7 +333,7 @@ export const actions: Actions = {
 			}
 
 			// Wait longer for database triggers to complete
-			await new Promise(resolve => setTimeout(resolve, 500));
+			await new Promise((resolve) => setTimeout(resolve, 500));
 
 			// Check if profile was created by trigger
 			const { data: existingProfile } = await adminClient

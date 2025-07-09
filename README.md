@@ -44,6 +44,7 @@ Ein webbasiertes CMS für KI-gestützte Glückwünsche.
 ## 🚀 Setup
 
 ### 1. Abhängigkeiten installieren
+
 ```bash
 npm install
 ```
@@ -63,6 +64,7 @@ OPENROUTER_API_KEY=your_openrouter_api_key_here
 ```
 
 ### 3. Datenbank Setup
+
 ```bash
 # Datenbank-Schema deployen
 npm run db:deploy
@@ -72,6 +74,7 @@ npm run setup:admin
 ```
 
 ### 4. Entwicklungsserver starten
+
 ```bash
 npm run dev
 ```
@@ -99,13 +102,14 @@ npm run dev
 
 Wenn die KI-Generierung nicht funktioniert:
 
-1. **API-Key prüfen**: 
+1. **API-Key prüfen**:
+
    ```bash
    # Health-Check ausführen
    curl http://localhost:5173/api/ai/generate
    ```
 
-2. **Logs überprüfen**: 
+2. **Logs überprüfen**:
    - Browser Developer Console für Frontend-Fehler
    - Server-Terminal für Backend-Fehler
 

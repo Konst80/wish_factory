@@ -10,7 +10,34 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(302, '/auth/login');
 	}
 
-	return {};
+	// Load user's specific values from settings
+	const { data: userSettings } = await locals.supabase
+		.from('user_settings')
+		.select(
+			'specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
+		)
+		.eq('user_id', session.user.id)
+		.single();
+
+	// Parse and organize specific values - jetzt sind es Beschreibungen statt Zahlen
+	const specificValues = {
+		birthday: {
+			de: userSettings?.specific_values_birthday_de || '',
+			en: userSettings?.specific_values_birthday_en || ''
+		},
+		anniversary: {
+			de: userSettings?.specific_values_anniversary_de || '',
+			en: userSettings?.specific_values_anniversary_en || ''
+		},
+		custom: {
+			de: userSettings?.specific_values_custom_de || '',
+			en: userSettings?.specific_values_custom_en || ''
+		}
+	};
+
+	return {
+		specificValues
+	};
 };
 
 export const actions: Actions = {
@@ -34,16 +61,16 @@ export const actions: Actions = {
 		const language = formData.get('language');
 		const status = formData.get('status') || WishStatus.ENTWURF;
 
-		// Specific Values parsen
+		// Specific Values parsen - jetzt nur noch ein einzelner Wert
 		let specificValues: number[] = [];
 		if (specificValuesStr && typeof specificValuesStr === 'string') {
 			try {
-				specificValues = specificValuesStr
-					.split(',')
-					.map((val) => parseInt(val.trim()))
-					.filter((val) => !isNaN(val) && val > 0);
+				const singleValue = parseInt(specificValuesStr.trim());
+				if (!isNaN(singleValue) && singleValue > 0) {
+					specificValues = [singleValue];
+				}
 			} catch (error) {
-				console.error('Error parsing specific values:', error);
+				console.error('Error parsing specific value:', error);
 			}
 		}
 

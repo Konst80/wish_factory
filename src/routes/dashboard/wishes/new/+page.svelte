@@ -11,7 +11,7 @@
 			eventType?: string;
 			relations?: string[];
 			ageGroups?: string[];
-			specificValues?: number[];
+			specificValues?: number;
 			text?: string;
 			belated?: string;
 			language?: string;
@@ -19,7 +19,7 @@
 		};
 	} | null;
 
-	let { form }: { form: ActionData } = $props();
+	let { form, data }: { form: ActionData; data: any } = $props();
 
 	// Form state
 	let formData = $state({
@@ -27,7 +27,7 @@
 		eventType: form?.values?.eventType || EventType.BIRTHDAY,
 		relations: form?.values?.relations || [],
 		ageGroups: form?.values?.ageGroups || [],
-		specificValues: form?.values?.specificValues?.join(', ') || '',
+		specificValues: form?.values?.specificValues || '',
 		text: form?.values?.text || '',
 		belated: form?.values?.belated || '',
 		language: form?.values?.language || Language.DE,
@@ -48,7 +48,7 @@
 		eventType: EventType;
 		relations: Relation[];
 		ageGroups: AgeGroup[];
-		specificValues: string;
+		specificValues: number;
 		text: string;
 		belated: string;
 		language: Language;
@@ -71,7 +71,7 @@
 		languages: [] as string[], // Language[]
 		relations: [] as string[], // Relation[]
 		ageGroups: [] as string[], // AgeGroup[]
-		specificValues: '', // Spezifische Alter oder Hochzeitstage
+		specificValues: 0, // Spezifische Alter oder Hochzeitstage
 		// Legacy-Optionen für Kompatibilität
 		generateForAllAgeGroups: false,
 		generateForAllRelations: false
@@ -186,10 +186,7 @@
 					relations: formData.relations as Relation[],
 					ageGroups: formData.ageGroups as AgeGroup[],
 					specificValues: formData.specificValues
-						? formData.specificValues
-								.split(',')
-								.map((v) => parseInt(v.trim()))
-								.filter((v) => !isNaN(v))
+						? [parseInt(formData.specificValues.toString())]
 						: [],
 					style: formData.type,
 					count: 1
@@ -280,7 +277,12 @@
 				batchSettings.relations.length > 0 ? batchSettings.relations : formData.relations;
 			const ageGroupsToGenerate =
 				batchSettings.ageGroups.length > 0 ? batchSettings.ageGroups : formData.ageGroups;
-			const specificValuesToUse = batchSettings.specificValues || formData.specificValues;
+			const specificValuesToUse =
+				batchSettings.specificValues > 0
+					? batchSettings.specificValues
+					: formData.specificValues
+						? parseInt(formData.specificValues.toString())
+						: 0;
 
 			// Templates organized by event type and style
 			const templates: Record<string, Record<string, string[]>> = {
@@ -455,7 +457,7 @@
 		batchSettings.languages = [];
 		batchSettings.relations = [];
 		batchSettings.ageGroups = [];
-		batchSettings.specificValues = '';
+		batchSettings.specificValues = 0;
 		batchSettings.variations = ['normal'];
 		batchSettings.count = 5;
 		batchSettings.includeAlternatives = true;
@@ -467,7 +469,10 @@
 		batchSettings.languages = [formData.language];
 		batchSettings.relations = [...formData.relations];
 		batchSettings.ageGroups = [...formData.ageGroups];
-		batchSettings.specificValues = formData.specificValues;
+		batchSettings.specificValues =
+			typeof formData.specificValues === 'string'
+				? parseInt(formData.specificValues) || 0
+				: formData.specificValues;
 	}
 </script>
 
@@ -549,18 +554,40 @@
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 	<!-- Main Form -->
 	<div class="lg:col-span-2">
-		<div class="card bg-base-100 shadow-xl border border-base-200">
+		<div class="card bg-base-100 border-base-200 border shadow-xl">
 			<div class="card-body">
-				<div class="flex items-center justify-between mb-6">
+				<div class="mb-6 flex items-center justify-between">
 					<h2 class="card-title text-xl">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="text-primary h-6 w-6"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+							/>
 						</svg>
 						Wunsch-Details
 					</h2>
 					<div class="badge badge-outline badge-lg">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="mr-1 h-4 w-4"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
 						</svg>
 						Entwurf
 					</div>
@@ -579,11 +606,27 @@
 					}}
 				>
 					<!-- Basic Settings Section -->
-					<div class="bg-base-50 rounded-lg p-6 mb-6">
-						<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+					<div class="bg-base-50 mb-6 rounded-lg p-6">
+						<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-primary h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+								/>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+								/>
 							</svg>
 							Grundeinstellungen
 						</h3>
@@ -591,9 +634,20 @@
 							<!-- Wunsch-Typ -->
 							<div class="form-control">
 								<label class="label" for="type">
-									<span class="label-text font-medium text-base flex items-center gap-2">
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+									<span class="label-text flex items-center gap-2 text-base font-medium">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+											/>
 										</svg>
 										Wunsch-Typ *
 									</span>
@@ -601,7 +655,7 @@
 								<select
 									id="type"
 									name="type"
-									class="select-bordered select w-full select-lg"
+									class="select-bordered select select-lg w-full"
 									class:select-error={errors.type}
 									bind:value={formData.type}
 									required
@@ -612,7 +666,10 @@
 								</select>
 								{#if errors.type}
 									<label class="label">
-										<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.type}</span>
+										<span
+											class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+											>{errors.type}</span
+										>
 									</label>
 								{/if}
 							</div>
@@ -620,9 +677,20 @@
 							<!-- Anlass -->
 							<div class="form-control">
 								<label class="label" for="eventType">
-									<span class="label-text font-medium text-base flex items-center gap-2">
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+									<span class="label-text flex items-center gap-2 text-base font-medium">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+											/>
 										</svg>
 										Anlass *
 									</span>
@@ -630,7 +698,7 @@
 								<select
 									id="eventType"
 									name="eventType"
-									class="select-bordered select w-full select-lg"
+									class="select-bordered select select-lg w-full"
 									class:select-error={errors.eventType}
 									bind:value={formData.eventType}
 									required
@@ -641,7 +709,10 @@
 								</select>
 								{#if errors.eventType}
 									<label class="label">
-										<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.eventType}</span>
+										<span
+											class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+											>{errors.eventType}</span
+										>
 									</label>
 								{/if}
 							</div>
@@ -649,9 +720,20 @@
 							<!-- Sprache -->
 							<div class="form-control">
 								<label class="label" for="language">
-									<span class="label-text font-medium text-base flex items-center gap-2">
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+									<span class="label-text flex items-center gap-2 text-base font-medium">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+											/>
 										</svg>
 										Sprache *
 									</span>
@@ -659,7 +741,7 @@
 								<select
 									id="language"
 									name="language"
-									class="select-bordered select w-full select-lg"
+									class="select-bordered select select-lg w-full"
 									class:select-error={errors.language}
 									bind:value={formData.language}
 									required
@@ -670,7 +752,10 @@
 								</select>
 								{#if errors.language}
 									<label class="label">
-										<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.language}</span>
+										<span
+											class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+											>{errors.language}</span
+										>
 									</label>
 								{/if}
 							</div>
@@ -681,28 +766,58 @@
 					<input type="hidden" name="status" value="Entwurf" />
 
 					<!-- Target Audience Section -->
-					<div class="bg-base-50 rounded-lg p-6 mb-6">
-						<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+					<div class="bg-base-50 mb-6 rounded-lg p-6">
+						<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-primary h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+								/>
 							</svg>
 							Zielgruppe
 						</h3>
-						
+
 						<!-- Beziehungen -->
 						<div class="form-control mb-6">
 							<label class="label">
-								<span class="label-text font-medium text-base flex items-center gap-2">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+										/>
 									</svg>
 									Beziehungen *
 								</span>
-								<span class="label-text-alt badge badge-neutral badge-sm">Mindestens eine auswählen</span>
+								<span class="label-text-alt badge badge-neutral badge-sm"
+									>Mindestens eine auswählen</span
+								>
 							</label>
 							<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
 								{#each Object.values(Relation) as relation (relation)}
-									<label class="label cursor-pointer justify-start bg-base-100 rounded-lg p-3 hover:bg-base-200 transition-colors border-2 {formData.relations.includes(relation) ? 'border-primary bg-primary/5' : 'border-base-300'}">
+									<label
+										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {formData.relations.includes(
+											relation
+										)
+											? 'border-primary bg-primary/5'
+											: 'border-base-300'}"
+									>
 										<input
 											type="checkbox"
 											name="relations"
@@ -718,7 +833,10 @@
 							</div>
 							{#if errors.relations}
 								<label class="label">
-									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.relations}</span>
+									<span
+										class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+										>{errors.relations}</span
+									>
 								</label>
 							{/if}
 						</div>
@@ -726,17 +844,35 @@
 						<!-- Altersgruppen -->
 						<div class="form-control mb-6">
 							<label class="label">
-								<span class="label-text font-medium text-base flex items-center gap-2">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+										/>
 									</svg>
 									Altersgruppe *
 								</span>
-								<span class="label-text-alt badge badge-neutral badge-sm">Eine Auswahl treffen</span>
+								<span class="label-text-alt badge badge-neutral badge-sm">Eine Auswahl treffen</span
+								>
 							</label>
 							<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
 								{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
-									<label class="label cursor-pointer justify-start bg-base-100 rounded-lg p-3 hover:bg-base-200 transition-colors border-2 {formData.ageGroups.includes(ageGroup) ? 'border-primary bg-primary/5' : 'border-base-300'}">
+									<label
+										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {formData.ageGroups.includes(
+											ageGroup
+										)
+											? 'border-primary bg-primary/5'
+											: 'border-base-300'}"
+									>
 										<input
 											type="radio"
 											name="ageGroups"
@@ -752,7 +888,10 @@
 							</div>
 							{#if errors.ageGroups}
 								<label class="label">
-									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.ageGroups}</span>
+									<span
+										class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+										>{errors.ageGroups}</span
+									>
 								</label>
 							{/if}
 						</div>
@@ -760,32 +899,41 @@
 						<!-- Spezifische Werte -->
 						<div class="form-control">
 							<label class="label" for="specificValues">
-								<span class="label-text font-medium text-base flex items-center gap-2">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+										/>
 									</svg>
 									Spezifische Werte
 								</span>
-								<span class="label-text-alt">z.B. 18, 30, 50 (durch Komma getrennt)</span>
+								<span class="label-text-alt">Einzelner Wert (z.B. 18)</span>
 							</label>
 							<input
 								id="specificValues"
 								name="specificValues"
-								type="text"
-								placeholder="18, 30, 50, 65"
-								class="input-bordered input w-full input-lg"
-								class:input-error={errors.specificValues ||
-									!validateSpecificValues(formData.specificValues)}
+								type="number"
+								min="1"
+								max="200"
+								placeholder="z.B. 18"
+								class="input-bordered input input-lg w-full"
+								class:input-error={errors.specificValues}
 								bind:value={formData.specificValues}
 							/>
 							{#if errors.specificValues}
 								<label class="label">
-									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.specificValues}</span>
-								</label>
-							{:else if formData.specificValues && !validateSpecificValues(formData.specificValues)}
-								<label class="label">
-									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
-										>Bitte nur positive Zahlen, getrennt durch Kommas</span
+									<span
+										class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+										>{errors.specificValues}</span
 									>
 								</label>
 							{/if}
@@ -793,14 +941,25 @@
 					</div>
 
 					<!-- Content Creation Section -->
-					<div class="bg-base-50 rounded-lg p-6 mb-6">
-						<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l3 3-3 3m-1 0H4.5A2.5 2.5 0 012 14.5v-3A2.5 2.5 0 014.5 9H8m0-2v4l-4-4m0 8l4-4m-4 4v-4l4 4" />
+					<div class="bg-base-50 mb-6 rounded-lg p-6">
+						<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-primary h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15.232 5.232l3.536 3.536M9 11l3 3-3 3m-1 0H4.5A2.5 2.5 0 012 14.5v-3A2.5 2.5 0 014.5 9H8m0-2v4l-4-4m0 8l4-4m-4 4v-4l4 4"
+								/>
 							</svg>
 							Wunsch-Inhalt
 						</h3>
-						
+
 						<!-- AI Generation Status -->
 						{#if isGenerating}
 							<div class="alert alert-info mb-4">
@@ -814,9 +973,20 @@
 						<!-- Haupttext -->
 						<div class="form-control mb-6">
 							<label class="label" for="text">
-								<span class="label-text font-medium text-base flex items-center gap-2">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+										/>
 									</svg>
 									Wunsch-Text *
 								</span>
@@ -831,7 +1001,7 @@
 									name="text"
 									rows="6"
 									placeholder="Liebe/r [Name], zu deinem [Anlass] wünsche ich dir..."
-									class="textarea-bordered textarea w-full pr-32 textarea-lg"
+									class="textarea-bordered textarea textarea-lg w-full pr-32"
 									class:textarea-error={errors.text}
 									bind:value={formData.text}
 									required
@@ -849,8 +1019,19 @@
 									{#if isGenerating}
 										<span class="loading loading-spinner loading-xs"></span>
 									{:else}
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M13 10V3L4 14h7v7l9-11h-7z"
+											/>
 										</svg>
 									{/if}
 									KI
@@ -858,15 +1039,29 @@
 							</div>
 							<label class="label">
 								<span class="label-text-alt flex items-center gap-2">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-3 w-3"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
 									</svg>
 									Verwenden Sie Platzhalter wie [Name], [Anlass], [Alter] für dynamische Inhalte
 								</span>
 							</label>
 							{#if errors.text}
 								<label class="label">
-									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.text}</span>
+									<span
+										class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+										>{errors.text}</span
+									>
 								</label>
 							{/if}
 						</div>
@@ -874,9 +1069,20 @@
 						<!-- Nachträglicher Text -->
 						<div class="form-control">
 							<label class="label" for="belated">
-								<span class="label-text font-medium text-base flex items-center gap-2">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
 									</svg>
 									Nachträglicher Text *
 								</span>
@@ -891,7 +1097,7 @@
 									name="belated"
 									rows="4"
 									placeholder="Liebe/r [Name], auch wenn ich zu spät dran bin..."
-									class="textarea-bordered textarea w-full pr-32 textarea-lg"
+									class="textarea-bordered textarea textarea-lg w-full pr-32"
 									class:textarea-error={errors.belated}
 									bind:value={formData.belated}
 									required
@@ -909,8 +1115,19 @@
 									{#if isGenerating}
 										<span class="loading loading-spinner loading-xs"></span>
 									{:else}
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M13 10V3L4 14h7v7l9-11h-7z"
+											/>
 										</svg>
 									{/if}
 									KI
@@ -918,32 +1135,70 @@
 							</div>
 							<label class="label">
 								<span class="label-text-alt flex items-center gap-2">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-3 w-3"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
 									</svg>
 									Text für verspätete Glückwünsche mit Platzhaltern
 								</span>
 							</label>
 							{#if errors.belated}
 								<label class="label">
-									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.belated}</span>
+									<span
+										class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+										>{errors.belated}</span
+									>
 								</label>
 							{/if}
 						</div>
 					</div>
 
 					<!-- Action Buttons -->
-					<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-base-300">
-						<div class="flex items-center gap-2 text-sm text-base-content/70">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<div
+						class="border-base-300 flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between"
+					>
+						<div class="text-base-content/70 flex items-center gap-2 text-sm">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
 							</svg>
 							<span>Entwürfe werden automatisch gespeichert</span>
 						</div>
 						<div class="flex gap-3">
 							<a href="/dashboard/wishes" class="btn btn-outline btn-lg gap-2">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M6 18L18 6M6 6l12 12"
+									/>
 								</svg>
 								Abbrechen
 							</a>
@@ -957,8 +1212,19 @@
 									<span class="loading loading-spinner loading-sm"></span>
 									Speichern...
 								{:else}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+										/>
 									</svg>
 									Wunsch erstellen
 								{/if}
@@ -971,21 +1237,38 @@
 
 		<!-- Generation Error Alert -->
 		{#if generationError}
-			<div class="alert alert-error mt-4 animate-in slide-in-from-top-2 duration-300">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+			<div class="alert alert-error animate-in slide-in-from-top-2 mt-4 duration-300">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
 				</svg>
 				<div class="flex-1">
 					<h4 class="font-medium">KI-Generierung fehlgeschlagen</h4>
 					<p class="text-sm opacity-90">{generationError}</p>
 				</div>
-				<button
-					type="button"
-					class="btn btn-ghost btn-sm"
-					onclick={() => (generationError = '')}
-				>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+				<button type="button" class="btn btn-ghost btn-sm" onclick={() => (generationError = '')}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
 					</svg>
 				</button>
 			</div>
@@ -1259,14 +1542,16 @@
 													</label>
 													<input
 														id="batchSpecificValues"
-														type="text"
-														placeholder="z.B. 18, 25, 30, 50"
+														type="number"
+														min="1"
+														max="200"
+														placeholder="z.B. 18"
 														class="input-bordered input input-sm w-full"
 														bind:value={batchSettings.specificValues}
 													/>
 													<label class="label pt-1">
 														<span class="label-text-alt text-xs">
-															Alter oder Jubiläumsjahre, kommagetrennt
+															Einzelner Wert (z.B. 18, 25, 50)
 														</span>
 													</label>
 												</div>
@@ -1525,12 +1810,28 @@
 	<div class="lg:col-span-1">
 		<!-- Preview Card -->
 		{#if showPreview && formData.text}
-			<div class="card bg-base-100 mb-6 shadow-xl border border-base-200">
+			<div class="card bg-base-100 border-base-200 mb-6 border shadow-xl">
 				<div class="card-body">
 					<h3 class="card-title text-lg">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="text-primary h-5 w-5"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+							/>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+							/>
 						</svg>
 						Vorschau
 					</h3>
@@ -1539,7 +1840,7 @@
 						<div class="bg-base-200 px-4 py-6">
 							<div class="space-y-4">
 								<div>
-									<div class="flex items-center gap-2 mb-2">
+									<div class="mb-2 flex items-center gap-2">
 										<div class="badge badge-primary badge-sm">Haupttext</div>
 										<div class="badge badge-outline badge-sm">{formData.text.length} Zeichen</div>
 									</div>
@@ -1548,9 +1849,11 @@
 								{#if formData.belated}
 									<div class="divider my-2"></div>
 									<div>
-										<div class="flex items-center gap-2 mb-2">
+										<div class="mb-2 flex items-center gap-2">
 											<div class="badge badge-secondary badge-sm">Nachträglich</div>
-											<div class="badge badge-outline badge-sm">{formData.belated.length} Zeichen</div>
+											<div class="badge badge-outline badge-sm">
+												{formData.belated.length} Zeichen
+											</div>
 										</div>
 										<p class="text-sm leading-relaxed">{formData.belated}</p>
 									</div>
@@ -1563,59 +1866,104 @@
 		{/if}
 
 		<!-- Help Card -->
-		<div class="card bg-base-100 shadow-xl border border-base-200">
+		<div class="card bg-base-100 border-base-200 border shadow-xl">
 			<div class="card-body">
 				<h3 class="card-title text-lg">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="text-primary h-5 w-5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					Hilfe & Tipps
 				</h3>
 				<div class="divider my-2"></div>
 				<div class="space-y-4 text-sm">
 					<div class="bg-base-50 rounded-lg p-3">
-						<h4 class="font-medium flex items-center gap-2 mb-2">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+						<h4 class="mb-2 flex items-center gap-2 font-medium">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+								/>
 							</svg>
 							Platzhalter verwenden
 						</h4>
 						<div class="grid grid-cols-2 gap-2 text-xs">
 							<div class="flex items-center gap-1">
-								<code class="bg-base-200 px-1 rounded">[Name]</code>
+								<code class="bg-base-200 rounded px-1">[Name]</code>
 								<span class="opacity-70">Name der Person</span>
 							</div>
 							<div class="flex items-center gap-1">
-								<code class="bg-base-200 px-1 rounded">[Anlass]</code>
+								<code class="bg-base-200 rounded px-1">[Anlass]</code>
 								<span class="opacity-70">Grund der Feier</span>
 							</div>
 							<div class="flex items-center gap-1">
-								<code class="bg-base-200 px-1 rounded">[Alter]</code>
+								<code class="bg-base-200 rounded px-1">[Alter]</code>
 								<span class="opacity-70">Lebensalter</span>
 							</div>
 							<div class="flex items-center gap-1">
-								<code class="bg-base-200 px-1 rounded">[Zahl]</code>
+								<code class="bg-base-200 rounded px-1">[Zahl]</code>
 								<span class="opacity-70">Spezifischer Wert</span>
 							</div>
 						</div>
 					</div>
-					
+
 					<div class="bg-primary/5 rounded-lg p-3">
-						<h4 class="font-medium flex items-center gap-2 mb-2">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+						<h4 class="mb-2 flex items-center gap-2 font-medium">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M13 10V3L4 14h7v7l9-11h-7z"
+								/>
 							</svg>
 							KI-Unterstützung
 						</h4>
 						<p class="text-xs opacity-70">
-							Nutzen Sie die KI-Buttons für automatische Textgenerierung basierend auf Ihren Einstellungen.
+							Nutzen Sie die KI-Buttons für automatische Textgenerierung basierend auf Ihren
+							Einstellungen.
 						</p>
 					</div>
-					
+
 					<div class="bg-secondary/5 rounded-lg p-3">
-						<h4 class="font-medium flex items-center gap-2 mb-2">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+						<h4 class="mb-2 flex items-center gap-2 font-medium">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+								/>
 							</svg>
 							Zielgruppen-Tipp
 						</h4>
@@ -1623,11 +1971,22 @@
 							Präzise Zielgruppen-Auswahl erhöht die Relevanz und Wirkung Ihrer Wünsche.
 						</p>
 					</div>
-					
+
 					<div class="bg-accent/5 rounded-lg p-3">
-						<h4 class="font-medium flex items-center gap-2 mb-2">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+						<h4 class="mb-2 flex items-center gap-2 font-medium">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
 							</svg>
 							Status-Übersicht
 						</h4>

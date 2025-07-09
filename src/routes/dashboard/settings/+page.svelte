@@ -188,6 +188,57 @@
 		// Focus the textarea
 		textarea.focus();
 	}
+
+	// Generate specific values using AI
+	async function generateSpecificValues(eventType: string, language: string) {
+		try {
+			console.log(`🤖 Generating specific values for ${eventType} (${language})`);
+
+			const response = await fetch('/api/ai/suggest-values', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					eventType,
+					language
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error(`API error: ${response.status}`);
+			}
+
+			const result = await response.json();
+
+			if (result.success && result.description) {
+				// Get the appropriate form field
+				const fieldName = `specificValues${eventType.charAt(0).toUpperCase() + eventType.slice(1)}${language.charAt(0).toUpperCase() + language.slice(1)}`;
+				const field = document.querySelector(
+					`textarea[name="${fieldName}"]`
+				) as HTMLTextAreaElement;
+
+				if (field) {
+					field.value = result.description;
+					console.log(`✅ Generated description for ${eventType} (${language})`);
+				} else {
+					console.error('❌ Could not find form field:', fieldName);
+				}
+			} else {
+				console.error('❌ No description in response:', result);
+			}
+		} catch (error) {
+			console.error('❌ Error generating specific values:', error);
+
+			// Show error message to user
+			currentMessage = 'Fehler beim Generieren der KI-Vorschläge. Versuchen Sie es später erneut.';
+			showErrorMessage = true;
+			showSuccessMessage = false;
+			setTimeout(() => {
+				showErrorMessage = false;
+			}, 5000);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -240,15 +291,39 @@
 
 <!-- Page Header -->
 <div class="mb-8">
-	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-		<div>
-			<h1 class="text-base-content text-3xl font-bold">Einstellungen</h1>
-			<p class="text-base-content/70 mt-2">
+	<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+		<div class="flex-1">
+			<h1 class="text-base-content mb-2 flex items-center gap-3 text-3xl font-bold">
+				<div class="bg-primary/10 rounded-lg p-2">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="text-primary h-8 w-8"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+						/>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+						/>
+					</svg>
+				</div>
+				Einstellungen
+			</h1>
+			<p class="text-base-content/70 text-lg">
 				Verwalten Sie Ihre Konto-Einstellungen und Präferenzen
 			</p>
 		</div>
-		<div class="flex gap-2">
-			<button class="btn btn-outline btn-sm" onclick={exportSettings}>
+		<div class="flex flex-wrap gap-2">
+			<button class="btn btn-outline btn-sm gap-2" onclick={exportSettings}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-4 w-4"
@@ -265,7 +340,7 @@
 				</svg>
 				Exportieren
 			</button>
-			<button class="btn btn-primary btn-sm" onclick={saveSettings}>
+			<button class="btn btn-primary btn-sm gap-2" onclick={saveSettings}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-4 w-4"
@@ -287,24 +362,28 @@
 </div>
 
 <!-- Settings Navigation -->
-<div class="tabs-boxed tabs mb-6">
-	{#each tabs as tab}
-		<button
-			class="tab {activeTab === tab.id ? 'tab-active' : ''}"
-			onclick={() => (activeTab = tab.id)}
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="mr-2 h-4 w-4"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
+<div class="bg-base-100 border-base-200 mb-6 rounded-lg border p-2 shadow-sm">
+	<div class="flex flex-wrap gap-1">
+		{#each tabs as tab}
+			<button
+				class="btn btn-sm gap-2 {activeTab === tab.id
+					? 'btn-primary'
+					: 'btn-ghost'} transition-all duration-200"
+				onclick={() => (activeTab = tab.id)}
 			>
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={tab.icon} />
-			</svg>
-			{tab.label}
-		</button>
-	{/each}
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-4 w-4"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={tab.icon} />
+				</svg>
+				<span class="hidden sm:inline">{tab.label}</span>
+			</button>
+		{/each}
+	</div>
 </div>
 
 <!-- Settings Content -->
@@ -312,9 +391,47 @@
 	<!-- Main Settings Panel -->
 	<div class="lg:col-span-2">
 		{#if activeTab === 'profile'}
-			<div class="card bg-base-100 shadow-xl">
+			<div class="card bg-base-100 border-base-200 border shadow-xl">
 				<div class="card-body">
-					<h2 class="card-title">Profil-Einstellungen</h2>
+					<div class="mb-6 flex items-center justify-between">
+						<h2 class="card-title flex items-center gap-3 text-xl">
+							<div class="bg-primary/10 rounded-lg p-2">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="text-primary h-5 w-5"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+									/>
+								</svg>
+							</div>
+							Profil-Einstellungen
+						</h2>
+						<div class="badge badge-outline badge-lg">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="mr-1 h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+							Persönlich
+						</div>
+					</div>
+
 					<form
 						method="POST"
 						action="?/updateProfile"
@@ -342,90 +459,300 @@
 							};
 						}}
 					>
-						<div class="space-y-4">
-							<div class="form-control">
-								<label class="label" for="fullName">
-									<span class="label-text">Vollständiger Name</span>
-								</label>
-								<input
-									id="fullName"
-									name="fullName"
-									type="text"
-									placeholder="Ihr vollständiger Name"
-									class="input-bordered input w-full"
-									value={data.settings.profile.fullName}
-									required
-								/>
+						<div class="space-y-6">
+							<!-- Personal Information Section -->
+							<div class="bg-base-50 rounded-lg p-4">
+								<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="text-primary h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+									Persönliche Informationen
+								</h3>
+
+								<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+									<div class="form-control">
+										<label class="label" for="fullName">
+											<span class="label-text flex items-center gap-2 font-medium">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-4 w-4"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+													/>
+												</svg>
+												Vollständiger Name
+											</span>
+										</label>
+										<input
+											id="fullName"
+											name="fullName"
+											type="text"
+											placeholder="Ihr vollständiger Name"
+											class="input-bordered input input-lg w-full"
+											value={data.settings.profile.fullName}
+											required
+										/>
+									</div>
+
+									<div class="form-control">
+										<label class="label" for="email">
+											<span class="label-text flex items-center gap-2 font-medium">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-4 w-4"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+													/>
+												</svg>
+												E-Mail-Adresse
+											</span>
+										</label>
+										<input
+											id="email"
+											type="email"
+											placeholder="ihre@email.com"
+											class="input-bordered input input-lg w-full"
+											value={data.settings.profile.email}
+											disabled
+										/>
+										<label class="label">
+											<span class="label-text-alt text-warning flex items-center gap-1">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-3 w-3"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+													/>
+												</svg>
+												E-Mail kann nicht geändert werden
+											</span>
+										</label>
+									</div>
+								</div>
 							</div>
 
-							<div class="form-control">
-								<label class="label" for="email">
-									<span class="label-text">E-Mail-Adresse</span>
-								</label>
-								<input
-									id="email"
-									type="email"
-									placeholder="ihre@email.com"
-									class="input-bordered input w-full"
-									value={data.settings.profile.email}
-									disabled
-								/>
-								<label class="label">
-									<span class="label-text-alt">E-Mail kann nicht geändert werden</span>
-								</label>
+							<!-- Preferences Section -->
+							<div class="bg-base-50 rounded-lg p-4">
+								<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="text-primary h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"
+										/>
+									</svg>
+									Sprache & Region
+								</h3>
+
+								<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+									<div class="form-control">
+										<label class="label" for="language">
+											<span class="label-text flex items-center gap-2 font-medium">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-4 w-4"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+													/>
+												</svg>
+												Sprache
+											</span>
+										</label>
+										<select
+											id="language"
+											name="language"
+											class="select-bordered select select-lg w-full"
+											value={data.settings.profile.language}
+										>
+											{#each languages as lang}
+												<option value={lang.value}>{lang.label}</option>
+											{/each}
+										</select>
+									</div>
+
+									<div class="form-control">
+										<label class="label" for="timezone">
+											<span class="label-text flex items-center gap-2 font-medium">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-4 w-4"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+													/>
+												</svg>
+												Zeitzone
+											</span>
+										</label>
+										<select
+											id="timezone"
+											name="timezone"
+											class="select-bordered select select-lg w-full"
+											value={data.settings.profile.timezone}
+										>
+											{#each timezones as tz}
+												<option value={tz.value}>{tz.label}</option>
+											{/each}
+										</select>
+									</div>
+								</div>
 							</div>
 
-							<div class="form-control">
-								<label class="label" for="language">
-									<span class="label-text">Sprache</span>
-								</label>
-								<select
-									id="language"
-									name="language"
-									class="select-bordered select w-full"
-									value={data.settings.profile.language}
-								>
-									{#each languages as lang}
-										<option value={lang.value}>{lang.label}</option>
-									{/each}
-								</select>
+							<!-- Security Section -->
+							<div class="bg-base-50 rounded-lg p-4">
+								<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="text-primary h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+										/>
+									</svg>
+									Sicherheit
+								</h3>
+
+								<div class="form-control">
+									<label class="label">
+										<span class="label-text flex items-center gap-2 font-medium">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+												/>
+											</svg>
+											Passwort
+										</span>
+									</label>
+									<button
+										type="button"
+										class="btn btn-outline btn-lg gap-2"
+										onclick={() => (showPasswordModal = true)}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+											/>
+										</svg>
+										Passwort ändern
+									</button>
+								</div>
 							</div>
 
-							<div class="form-control">
-								<label class="label" for="timezone">
-									<span class="label-text">Zeitzone</span>
-								</label>
-								<select
-									id="timezone"
-									name="timezone"
-									class="select-bordered select w-full"
-									value={data.settings.profile.timezone}
-								>
-									{#each timezones as tz}
-										<option value={tz.value}>{tz.label}</option>
-									{/each}
-								</select>
-							</div>
-
-							<div class="form-control">
-								<label class="label">
-									<span class="label-text">Passwort</span>
-								</label>
-								<button
-									type="button"
-									class="btn btn-outline"
-									onclick={() => (showPasswordModal = true)}
-								>
-									Passwort ändern
-								</button>
-							</div>
-
-							<div class="card-actions justify-end">
-								<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+							<div
+								class="border-base-300 flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between"
+							>
+								<div class="text-base-content/70 flex items-center gap-2 text-sm">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+									<span>Änderungen werden sofort übernommen</span>
+								</div>
+								<button type="submit" class="btn btn-primary btn-lg gap-2" disabled={isSubmitting}>
 									{#if isSubmitting}
 										<span class="loading loading-spinner loading-sm"></span>
 										Speichern...
 									{:else}
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+											/>
+										</svg>
 										Profil speichern
 									{/if}
 								</button>
@@ -435,9 +762,47 @@
 				</div>
 			</div>
 		{:else if activeTab === 'notifications'}
-			<div class="card bg-base-100 shadow-xl">
+			<div class="card bg-base-100 border-base-200 border shadow-xl">
 				<div class="card-body">
-					<h2 class="card-title">Benachrichtigungen</h2>
+					<div class="mb-6 flex items-center justify-between">
+						<h2 class="card-title flex items-center gap-3 text-xl">
+							<div class="bg-secondary/10 rounded-lg p-2">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="text-secondary h-5 w-5"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+									/>
+								</svg>
+							</div>
+							Benachrichtigungen
+						</h2>
+						<div class="badge badge-outline badge-lg">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="mr-1 h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+								/>
+							</svg>
+							Mitteilungen
+						</div>
+					</div>
+
 					<form
 						method="POST"
 						action="?/updateNotifications"
@@ -465,85 +830,325 @@
 							};
 						}}
 					>
-						<div class="space-y-4">
-							<div class="form-control">
-								<label class="label cursor-pointer">
-									<span class="label-text">E-Mail-Benachrichtigungen</span>
-									<input
-										type="checkbox"
-										name="emailNotifications"
-										class="toggle toggle-primary"
-										checked={data.settings.notifications.emailNotifications}
-									/>
-								</label>
+						<div class="space-y-6">
+							<!-- Communication Settings -->
+							<div class="bg-base-50 rounded-lg p-4">
+								<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="text-primary h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+										/>
+									</svg>
+									Kommunikation
+								</h3>
+
+								<div class="space-y-4">
+									<div class="form-control">
+										<label
+											class="label bg-base-100 hover:bg-base-200 cursor-pointer rounded-lg p-3 transition-colors"
+										>
+											<div class="flex items-center gap-3">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="text-primary h-5 w-5"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+													/>
+												</svg>
+												<div>
+													<span class="label-text font-medium">E-Mail-Benachrichtigungen</span>
+													<p class="text-base-content/70 text-sm">
+														Erhalten Sie wichtige Updates per E-Mail
+													</p>
+												</div>
+											</div>
+											<input
+												type="checkbox"
+												name="emailNotifications"
+												class="toggle toggle-primary"
+												checked={data.settings.notifications.emailNotifications}
+											/>
+										</label>
+									</div>
+
+									<div class="form-control">
+										<label
+											class="label bg-base-100 hover:bg-base-200 cursor-pointer rounded-lg p-3 transition-colors"
+										>
+											<div class="flex items-center gap-3">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="text-secondary h-5 w-5"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+													/>
+												</svg>
+												<div>
+													<span class="label-text font-medium">Push-Benachrichtigungen</span>
+													<p class="text-base-content/70 text-sm">
+														Sofortige Benachrichtigungen auf Ihrem Gerät
+													</p>
+												</div>
+											</div>
+											<input
+												type="checkbox"
+												name="pushNotifications"
+												class="toggle toggle-secondary"
+												checked={data.settings.notifications.pushNotifications}
+											/>
+										</label>
+									</div>
+								</div>
 							</div>
 
-							<div class="form-control">
-								<label class="label cursor-pointer">
-									<span class="label-text">Push-Benachrichtigungen</span>
-									<input
-										type="checkbox"
-										name="pushNotifications"
-										class="toggle toggle-primary"
-										checked={data.settings.notifications.pushNotifications}
-									/>
-								</label>
+							<!-- Content Updates -->
+							<div class="bg-base-50 rounded-lg p-4">
+								<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="text-primary h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+										/>
+									</svg>
+									Wunsch-Updates
+								</h3>
+
+								<div class="space-y-4">
+									<div class="form-control">
+										<label
+											class="label bg-base-100 hover:bg-base-200 cursor-pointer rounded-lg p-3 transition-colors"
+										>
+											<div class="flex items-center gap-3">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="text-accent h-5 w-5"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+													/>
+												</svg>
+												<div>
+													<span class="label-text font-medium">Neue Wunsch-Benachrichtigungen</span>
+													<p class="text-base-content/70 text-sm">
+														Benachrichtigung bei neuen Wünschen im System
+													</p>
+												</div>
+											</div>
+											<input
+												type="checkbox"
+												name="newWishAlerts"
+												class="toggle toggle-accent"
+												checked={data.settings.notifications.newWishAlerts}
+											/>
+										</label>
+									</div>
+
+									<div class="form-control">
+										<label
+											class="label bg-base-100 hover:bg-base-200 cursor-pointer rounded-lg p-3 transition-colors"
+										>
+											<div class="flex items-center gap-3">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="text-warning h-5 w-5"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+													/>
+												</svg>
+												<div>
+													<span class="label-text font-medium">Freigabe-Anfragen</span>
+													<p class="text-base-content/70 text-sm">
+														Benachrichtigung bei Freigabe-Anfragen
+													</p>
+												</div>
+											</div>
+											<input
+												type="checkbox"
+												name="approvalRequests"
+												class="toggle toggle-warning"
+												checked={data.settings.notifications.approvalRequests}
+											/>
+										</label>
+									</div>
+								</div>
 							</div>
 
-							<div class="form-control">
-								<label class="label cursor-pointer">
-									<span class="label-text">Neue Wunsch-Benachrichtigungen</span>
-									<input
-										type="checkbox"
-										name="newWishAlerts"
-										class="toggle toggle-primary"
-										checked={data.settings.notifications.newWishAlerts}
-									/>
-								</label>
+							<!-- System Updates -->
+							<div class="bg-base-50 rounded-lg p-4">
+								<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="text-primary h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
+										/>
+									</svg>
+									System & Berichte
+								</h3>
+
+								<div class="space-y-4">
+									<div class="form-control">
+										<label
+											class="label bg-base-100 hover:bg-base-200 cursor-pointer rounded-lg p-3 transition-colors"
+										>
+											<div class="flex items-center gap-3">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="text-info h-5 w-5"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+													/>
+												</svg>
+												<div>
+													<span class="label-text font-medium">System-Updates</span>
+													<p class="text-base-content/70 text-sm">
+														Wichtige System-Updates und Wartungsarbeiten
+													</p>
+												</div>
+											</div>
+											<input
+												type="checkbox"
+												name="systemUpdates"
+												class="toggle toggle-info"
+												checked={data.settings.notifications.systemUpdates}
+											/>
+										</label>
+									</div>
+
+									<div class="form-control">
+										<label
+											class="label bg-base-100 hover:bg-base-200 cursor-pointer rounded-lg p-3 transition-colors"
+										>
+											<div class="flex items-center gap-3">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="text-success h-5 w-5"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+													/>
+												</svg>
+												<div>
+													<span class="label-text font-medium">Wöchentlicher Bericht</span>
+													<p class="text-base-content/70 text-sm">
+														Wöchentliche Zusammenfassung Ihrer Aktivitäten
+													</p>
+												</div>
+											</div>
+											<input
+												type="checkbox"
+												name="weeklyReport"
+												class="toggle toggle-success"
+												checked={data.settings.notifications.weeklyReport}
+											/>
+										</label>
+									</div>
+								</div>
 							</div>
 
-							<div class="form-control">
-								<label class="label cursor-pointer">
-									<span class="label-text">Freigabe-Anfragen</span>
-									<input
-										type="checkbox"
-										name="approvalRequests"
-										class="toggle toggle-primary"
-										checked={data.settings.notifications.approvalRequests}
-									/>
-								</label>
-							</div>
-
-							<div class="form-control">
-								<label class="label cursor-pointer">
-									<span class="label-text">System-Updates</span>
-									<input
-										type="checkbox"
-										name="systemUpdates"
-										class="toggle toggle-primary"
-										checked={data.settings.notifications.systemUpdates}
-									/>
-								</label>
-							</div>
-
-							<div class="form-control">
-								<label class="label cursor-pointer">
-									<span class="label-text">Wöchentlicher Bericht</span>
-									<input
-										type="checkbox"
-										name="weeklyReport"
-										class="toggle toggle-primary"
-										checked={data.settings.notifications.weeklyReport}
-									/>
-								</label>
-							</div>
-
-							<div class="card-actions justify-end">
-								<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+							<div
+								class="border-base-300 flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between"
+							>
+								<div class="text-base-content/70 flex items-center gap-2 text-sm">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+									<span>Benachrichtigungen können jederzeit geändert werden</span>
+								</div>
+								<button type="submit" class="btn btn-primary btn-lg gap-2" disabled={isSubmitting}>
 									{#if isSubmitting}
 										<span class="loading loading-spinner loading-sm"></span>
 										Speichern...
 									{:else}
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+											/>
+										</svg>
 										Benachrichtigungen speichern
 									{/if}
 								</button>
@@ -841,86 +1446,228 @@
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen. Generiere &#123;count&#125; &#123;countText&#125; in der Sprache &#123;language&#125;..."
 											value={(data.settings as any)?.ai?.promptTemplate || ''}
 										></textarea>
-										<div class="bg-info/10 mt-2 rounded p-3">
-											<p class="mb-3 text-sm font-medium">
-												📝 Verfügbare Platzhalter (klicken zum Einfügen):
+										<div
+											class="from-info/5 to-primary/5 border-info/20 mt-4 rounded-lg border bg-gradient-to-br p-4"
+										>
+											<div class="mb-4 flex items-center gap-2">
+												<div class="badge badge-info badge-lg">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														class="h-4 w-4"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+														/>
+													</svg>
+												</div>
+												<h4 class="text-base font-semibold">Verfügbare Template-Variablen</h4>
+											</div>
+											<p class="text-base-content/70 mb-4 text-sm">
+												Klicken Sie auf eine Variable, um sie an der Cursor-Position einzufügen.
 											</p>
-											<div class="space-y-3">
-												<div>
-													<p class="text-info mb-1 text-xs font-semibold">Grundlagen:</p>
-													<div class="grid grid-cols-2 gap-1 text-xs md:grid-cols-4">
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() => insertPlaceholder('promptTemplate', '{count}')}
-															>{`{count}`}</button
-														>
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() => insertPlaceholder('promptTemplate', '{countText}')}
-															>{`{countText}`}</button
-														>
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() => insertPlaceholder('promptTemplate', '{language}')}
-															>{`{language}`}</button
-														>
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() => insertPlaceholder('promptTemplate', '{style}')}
-															>{`{style}`}</button
-														>
+
+											<div class="space-y-6">
+												<!-- Grundlagen -->
+												<div class="card bg-base-100/50 shadow-sm">
+													<div class="card-body p-4">
+														<h5 class="card-title mb-3 flex items-center gap-2 text-sm">
+															<span class="badge badge-outline badge-sm">📊</span>
+															Grundlagen
+														</h5>
+														<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Anzahl der zu generierenden Wünsche (z.B. 1, 3, 5)"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																	onclick={() => insertPlaceholder('promptTemplate', '{count}')}
+																>
+																	<code class="text-primary font-bold">{`{count}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Anzahl</span>
+																</button>
+															</div>
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Textform der Anzahl (z.B. 'Glückwunsch', 'Glückwünsche')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																	onclick={() => insertPlaceholder('promptTemplate', '{countText}')}
+																>
+																	<code class="text-primary font-bold">{`{countText}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Anzahl-Text</span>
+																</button>
+															</div>
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Zielsprache (z.B. 'de', 'en')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																	onclick={() => insertPlaceholder('promptTemplate', '{language}')}
+																>
+																	<code class="text-primary font-bold">{`{language}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Sprache</span>
+																</button>
+															</div>
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Gewünschter Stil (z.B. 'normal', 'herzlich', 'humorvoll')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																	onclick={() => insertPlaceholder('promptTemplate', '{style}')}
+																>
+																	<code class="text-primary font-bold">{`{style}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Stil</span>
+																</button>
+															</div>
+														</div>
 													</div>
 												</div>
-												<div>
-													<p class="text-info mb-1 text-xs font-semibold">Ereignis & Kontext:</p>
-													<div class="grid grid-cols-2 gap-1 text-xs md:grid-cols-3">
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() => insertPlaceholder('promptTemplate', '{eventText}')}
-															>{`{eventText}`}</button
-														>
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() => insertPlaceholder('promptTemplate', '{eventType}')}
-															>{`{eventType}`}</button
-														>
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() => insertPlaceholder('promptTemplate', '{relationTexts}')}
-															>{`{relationTexts}`}</button
-														>
+
+												<!-- Ereignis & Kontext -->
+												<div class="card bg-base-100/50 shadow-sm">
+													<div class="card-body p-4">
+														<h5 class="card-title mb-3 flex items-center gap-2 text-sm">
+															<span class="badge badge-outline badge-sm">🎉</span>
+															Ereignis & Kontext
+														</h5>
+														<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Übersetzter Anlass (z.B. 'Geburtstag', 'Jubiläum')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
+																	onclick={() => insertPlaceholder('promptTemplate', '{eventText}')}
+																>
+																	<code class="text-secondary font-bold">{`{eventText}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Anlass (DE)</span>
+																</button>
+															</div>
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Roher Event-Typ (z.B. 'birthday', 'anniversary')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
+																	onclick={() => insertPlaceholder('promptTemplate', '{eventType}')}
+																>
+																	<code class="text-secondary font-bold">{`{eventType}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Event-Typ</span>
+																</button>
+															</div>
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Übersetzte Beziehungen (z.B. 'Freund/in, Familie')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
+																	onclick={() =>
+																		insertPlaceholder('promptTemplate', '{relationTexts}')}
+																>
+																	<code class="text-secondary font-bold">{`{relationTexts}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Beziehungen</span>
+																</button>
+															</div>
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Rohe Beziehungen (z.B. 'friend, family')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
+																	onclick={() => insertPlaceholder('promptTemplate', '{relations}')}
+																>
+																	<code class="text-secondary font-bold">{`{relations}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Relations</span>
+																</button>
+															</div>
+														</div>
 													</div>
 												</div>
-												<div>
-													<p class="text-info mb-1 text-xs font-semibold">Zielgruppe & Extras:</p>
-													<div class="grid grid-cols-2 gap-1 text-xs md:grid-cols-3">
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() => insertPlaceholder('promptTemplate', '{ageGroupTexts}')}
-															>{`{ageGroupTexts}`}</button
-														>
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() =>
-																insertPlaceholder('promptTemplate', '{specificValues}')}
-															>{`{specificValues}`}</button
-														>
-														<button
-															type="button"
-															class="btn btn-ghost btn-xs hover:bg-primary hover:text-primary-content text-left font-mono"
-															onclick={() =>
-																insertPlaceholder('promptTemplate', '{additionalInstructions}')}
-															>{`{additionalInstructions}`}</button
-														>
+
+												<!-- Zielgruppe & Extras -->
+												<div class="card bg-base-100/50 shadow-sm">
+													<div class="card-body p-4">
+														<h5 class="card-title mb-3 flex items-center gap-2 text-sm">
+															<span class="badge badge-outline badge-sm">👥</span>
+															Zielgruppe & Extras
+														</h5>
+														<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Übersetzte Altersgruppen (z.B. 'junge Menschen, Senioren')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
+																	onclick={() =>
+																		insertPlaceholder('promptTemplate', '{ageGroupTexts}')}
+																>
+																	<code class="text-accent font-bold">{`{ageGroupTexts}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Altersgruppen</span>
+																</button>
+															</div>
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Rohe Altersgruppen (z.B. 'young, senior')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
+																	onclick={() => insertPlaceholder('promptTemplate', '{ageGroups}')}
+																>
+																	<code class="text-accent font-bold">{`{ageGroups}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Age Groups</span>
+																</button>
+															</div>
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Spezifische Werte (z.B. '18, 30, 50')"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
+																	onclick={() =>
+																		insertPlaceholder('promptTemplate', '{specificValues}')}
+																>
+																	<code class="text-accent font-bold">{`{specificValues}`}</code>
+																	<span class="ml-2 text-xs opacity-70">Spez. Werte</span>
+																</button>
+															</div>
+															<div
+																class="tooltip tooltip-bottom"
+																data-tip="Zusätzliche Benutzer-Anweisungen"
+															>
+																<button
+																	type="button"
+																	class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
+																	onclick={() =>
+																		insertPlaceholder('promptTemplate', '{additionalInstructions}')}
+																>
+																	<code class="text-accent font-bold"
+																		>{`{additionalInstructions}`}</code
+																	>
+																	<span class="ml-2 text-xs opacity-70">Zusatz-Info</span>
+																</button>
+															</div>
+														</div>
 													</div>
 												</div>
 											</div>
@@ -1190,6 +1937,263 @@
 					</form>
 				</div>
 			</div>
+
+			<!-- Specific Values Section -->
+			<div class="card bg-base-100 mt-8 shadow-xl">
+				<div class="card-body">
+					<div class="mb-6 flex items-center justify-between">
+						<div>
+							<h2 class="card-title flex items-center gap-3">
+								<div class="badge badge-accent badge-lg">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-5 w-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+										/>
+									</svg>
+								</div>
+								🎯 Spezifische Event-Werte
+							</h2>
+							<p class="text-base-content/70 mt-2">
+								Definieren Sie bedeutsame Zahlen für verschiedene Anlässe und Sprachen
+							</p>
+						</div>
+					</div>
+
+					<form
+						method="POST"
+						action="?/updateSpecificValues"
+						use:enhance={() => {
+							isSubmitting = true;
+							return async ({ result }) => {
+								isSubmitting = false;
+								if (result.type === 'success') {
+									await invalidateAll();
+									currentMessage = 'Spezifische Werte erfolgreich gespeichert!';
+									showSuccessMessage = true;
+									showErrorMessage = false;
+									setTimeout(() => {
+										showSuccessMessage = false;
+									}, 3000);
+								} else if (result.type === 'failure') {
+									currentMessage =
+										(result.data?.message as string) || 'Fehler beim Speichern der Werte';
+									showErrorMessage = true;
+									showSuccessMessage = false;
+									setTimeout(() => {
+										showErrorMessage = false;
+									}, 5000);
+								}
+							};
+						}}
+					>
+						<div class="tabs tabs-lifted">
+							<input type="radio" name="values_tab" class="tab" aria-label="Deutsch" checked />
+							<div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+								<div class="space-y-6">
+									<div class="form-control">
+										<label class="label">
+											<span class="label-text flex items-center gap-2 font-semibold">
+												🎂 Geburtstage (Deutsch)
+											</span>
+											<button
+												type="button"
+												class="btn btn-ghost btn-xs"
+												onclick={() => generateSpecificValues('birthday', 'de')}
+											>
+												🤖 KI-Vorschlag
+											</button>
+										</label>
+										<textarea
+											name="specificValuesBirthdayDe"
+											class="textarea textarea-bordered w-full"
+											rows="4"
+											placeholder="Beschreiben Sie wichtige Geburtstage und ihre Bedeutung, z.B.: 16 Jahre (Sweet Sixteen), 18 Jahre (Volljährigkeit), 21 Jahre (Erwachsenwerden), 30 Jahre (Lebensmitte), 50 Jahre (Goldenes Jubiläum)..."
+											value={data.settings.specificValues.birthdayDe || ''}
+										></textarea>
+										<label class="label">
+											<span class="label-text-alt"
+												>Beschreibung wichtiger Geburtstage mit Bedeutung</span
+											>
+											<span class="label-text-alt text-info"
+												>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
+											>
+										</label>
+									</div>
+
+									<div class="form-control">
+										<label class="label">
+											<span class="label-text flex items-center gap-2 font-semibold">
+												💒 Hochzeitsjubiläen (Deutsch)
+											</span>
+											<button
+												type="button"
+												class="btn btn-ghost btn-xs"
+												onclick={() => generateSpecificValues('anniversary', 'de')}
+											>
+												🤖 KI-Vorschlag
+											</button>
+										</label>
+										<textarea
+											name="specificValuesAnniversaryDe"
+											class="textarea textarea-bordered w-full"
+											rows="4"
+											placeholder="Beschreiben Sie wichtige Hochzeitstage und ihre Bedeutung, z.B.: 1 Jahr (Papierhochzeit), 5 Jahre (Holzhochzeit), 10 Jahre (Rosenhochzeit), 25 Jahre (Silberhochzeit), 50 Jahre (Goldene Hochzeit)..."
+											value={data.settings.specificValues.anniversaryDe || ''}
+										></textarea>
+										<label class="label">
+											<span class="label-text-alt"
+												>Beschreibung wichtiger Hochzeitstage mit Bedeutung</span
+											>
+											<span class="label-text-alt text-info"
+												>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
+											>
+										</label>
+									</div>
+
+									<div class="form-control">
+										<label class="label">
+											<span class="label-text flex items-center gap-2 font-semibold">
+												🎉 Individuelle Anlässe (Deutsch)
+											</span>
+											<button
+												type="button"
+												class="btn btn-ghost btn-xs"
+												onclick={() => generateSpecificValues('custom', 'de')}
+											>
+												🤖 KI-Vorschlag
+											</button>
+										</label>
+										<textarea
+											name="specificValuesCustomDe"
+											class="textarea textarea-bordered w-full"
+											rows="4"
+											placeholder="Beschreiben Sie wichtige Meilensteine und ihre Bedeutung, z.B.: 5 Jahre (Lustrum), 10 Jahre (Dekade), 25 Jahre (Vierteljahrhundert), 50 Jahre (Halbes Jahrhundert)..."
+											value={data.settings.specificValues.customDe || ''}
+										></textarea>
+										<label class="label">
+											<span class="label-text-alt"
+												>Beschreibung wichtiger Meilensteine mit Bedeutung</span
+											>
+											<span class="label-text-alt text-info"
+												>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
+											>
+										</label>
+									</div>
+								</div>
+							</div>
+
+							<input type="radio" name="values_tab" class="tab" aria-label="English" />
+							<div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+								<div class="space-y-6">
+									<div class="form-control">
+										<label class="label">
+											<span class="label-text flex items-center gap-2 font-semibold">
+												🎂 Birthdays (English)
+											</span>
+											<button
+												type="button"
+												class="btn btn-ghost btn-xs"
+												onclick={() => generateSpecificValues('birthday', 'en')}
+											>
+												🤖 AI Suggestion
+											</button>
+										</label>
+										<textarea
+											name="specificValuesBirthdayEn"
+											class="textarea textarea-bordered w-full"
+											rows="4"
+											placeholder="Describe important birthdays and their meanings, e.g.: 16 years (Sweet Sixteen), 18 years (Coming of age), 21 years (Legal adulthood), 30 years (Milestone birthday), 50 years (Golden birthday)..."
+											value={data.settings.specificValues.birthdayEn || ''}
+										></textarea>
+										<label class="label">
+											<span class="label-text-alt">Significant birthdays (comma-separated)</span>
+											<span class="label-text-alt text-info"
+												>e.g. 16=Sweet Sixteen, 21=Coming of Age</span
+											>
+										</label>
+									</div>
+
+									<div class="form-control">
+										<label class="label">
+											<span class="label-text flex items-center gap-2 font-semibold">
+												💒 Wedding Anniversaries (English)
+											</span>
+											<button
+												type="button"
+												class="btn btn-ghost btn-xs"
+												onclick={() => generateSpecificValues('anniversary', 'en')}
+											>
+												🤖 AI Suggestion
+											</button>
+										</label>
+										<textarea
+											name="specificValuesAnniversaryEn"
+											class="textarea textarea-bordered w-full"
+											rows="4"
+											placeholder="Describe important wedding anniversaries and their meanings, e.g.: 1 year (Paper), 5 years (Wood), 10 years (Tin), 25 years (Silver), 50 years (Golden)..."
+											value={data.settings.specificValues.anniversaryEn || ''}
+										></textarea>
+										<label class="label">
+											<span class="label-text-alt">Wedding anniversaries (comma-separated)</span>
+											<span class="label-text-alt text-info"
+												>e.g. 1=Paper, 10=Tin, 25=Silver, 50=Golden</span
+											>
+										</label>
+									</div>
+
+									<div class="form-control">
+										<label class="label">
+											<span class="label-text flex items-center gap-2 font-semibold">
+												🎉 Custom Events (English)
+											</span>
+											<button
+												type="button"
+												class="btn btn-ghost btn-xs"
+												onclick={() => generateSpecificValues('custom', 'en')}
+											>
+												🤖 AI Suggestion
+											</button>
+										</label>
+										<textarea
+											name="specificValuesCustomEn"
+											class="textarea textarea-bordered w-full"
+											rows="4"
+											placeholder="Describe important milestones and their meanings, e.g.: 5 years (Lustrum), 10 years (Decade), 25 years (Quarter century), 50 years (Half century)..."
+											value={data.settings.specificValues.customEn || ''}
+										></textarea>
+										<label class="label">
+											<span class="label-text-alt">General milestones (comma-separated)</span>
+											<span class="label-text-alt text-info"
+												>e.g. 5=Lustrum, 10=Decade, 25=Quarter Century</span
+											>
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="card-actions mt-6 justify-end">
+							<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+								{#if isSubmitting}
+									<span class="loading loading-spinner loading-sm"></span>
+									Speichern...
+								{:else}
+									Spezifische Werte speichern
+								{/if}
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
 		{:else if activeTab === 'system'}
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
@@ -1300,37 +2304,147 @@
 
 	<!-- Settings Summary -->
 	<div class="space-y-6">
-		<div class="card bg-base-100 shadow-xl">
+		<div class="card bg-base-100 border-base-200 border shadow-xl">
 			<div class="card-body">
-				<h3 class="card-title">Aktuelle Einstellungen</h3>
-				<div class="space-y-2 text-sm">
-					<div class="flex justify-between">
-						<span>Sprache:</span>
-						<span class="font-medium">{data.settings.profile.language.toUpperCase()}</span>
+				<h3 class="card-title flex items-center gap-2 text-lg">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="text-primary h-5 w-5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+						/>
+					</svg>
+					Aktuelle Einstellungen
+				</h3>
+				<div class="space-y-3 text-sm">
+					<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
+						<div class="flex items-center gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-primary h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+								/>
+							</svg>
+							<span>Sprache</span>
+						</div>
+						<div class="badge badge-primary badge-sm">
+							{data.settings.profile.language.toUpperCase()}
+						</div>
 					</div>
-					<div class="flex justify-between">
-						<span>Theme:</span>
-						<span class="font-medium capitalize">{data.settings.preferences.theme}</span>
+					<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
+						<div class="flex items-center gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-secondary h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4 4 4 0 004-4V5z"
+								/>
+							</svg>
+							<span>Theme</span>
+						</div>
+						<div class="badge badge-secondary badge-sm capitalize">
+							{data.settings.preferences.theme}
+						</div>
 					</div>
-					<div class="flex justify-between">
-						<span>E-Mail:</span>
-						<span class="font-medium"
-							>{data.settings.notifications.emailNotifications ? 'An' : 'Aus'}</span
+					<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
+						<div class="flex items-center gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-accent h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+								/>
+							</svg>
+							<span>E-Mail</span>
+						</div>
+						<div
+							class="badge badge-sm {data.settings.notifications.emailNotifications
+								? 'badge-success'
+								: 'badge-error'}"
 						>
+							{data.settings.notifications.emailNotifications ? 'An' : 'Aus'}
+						</div>
 					</div>
-					<div class="flex justify-between">
-						<span>API:</span>
-						<span class="font-medium">{data.settings.system.apiAccess ? 'Aktiv' : 'Inaktiv'}</span>
+					<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
+						<div class="flex items-center gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-info h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+								/>
+							</svg>
+							<span>API</span>
+						</div>
+						<div
+							class="badge badge-sm {data.settings.system.apiAccess
+								? 'badge-success'
+								: 'badge-error'}"
+						>
+							{data.settings.system.apiAccess ? 'Aktiv' : 'Inaktiv'}
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="card bg-base-100 shadow-xl">
+		<div class="card bg-base-100 border-base-200 border shadow-xl">
 			<div class="card-body">
-				<h3 class="card-title">Aktionen</h3>
-				<div class="space-y-2">
-					<button class="btn btn-outline btn-sm w-full" onclick={resetSettings}>
+				<h3 class="card-title flex items-center gap-2 text-lg">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="text-primary h-5 w-5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 10V3L4 14h7v7l9-11h-7z"
+						/>
+					</svg>
+					Schnelle Aktionen
+				</h3>
+				<div class="space-y-3">
+					<button class="btn btn-outline btn-sm w-full gap-2" onclick={resetSettings}>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							class="h-4 w-4"
@@ -1347,7 +2461,7 @@
 						</svg>
 						Zurücksetzen
 					</button>
-					<button class="btn btn-primary btn-sm w-full" onclick={saveSettings}>
+					<button class="btn btn-primary btn-sm w-full gap-2" onclick={saveSettings}>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							class="h-4 w-4"
@@ -1367,57 +2481,205 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Quick Settings Info -->
+		<div class="card from-primary/10 to-secondary/10 border-primary/20 border bg-gradient-to-r">
+			<div class="card-body">
+				<h3 class="card-title flex items-center gap-2 text-base">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="text-primary h-4 w-4"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
+					</svg>
+					Tipp
+				</h3>
+				<p class="text-base-content/70 text-sm">
+					Änderungen werden automatisch gespeichert. Verwenden Sie die Exportfunktion, um Ihre
+					Einstellungen zu sichern.
+				</p>
+			</div>
+		</div>
 	</div>
 </div>
 
 <!-- Password Change Modal -->
 {#if showPasswordModal}
 	<div class="modal-open modal">
-		<div class="modal-box">
-			<h3 class="mb-4 text-lg font-bold">Passwort ändern</h3>
-			<form class="space-y-4">
+		<div class="modal-box max-w-md">
+			<div class="mb-6 flex items-center justify-between">
+				<h3 class="flex items-center gap-3 text-xl font-bold">
+					<div class="bg-primary/10 rounded-lg p-2">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="text-primary h-5 w-5"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+							/>
+						</svg>
+					</div>
+					Passwort ändern
+				</h3>
+				<button class="btn btn-sm btn-circle btn-ghost" onclick={() => (showPasswordModal = false)}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
+
+			<form class="space-y-6">
 				<div class="form-control">
 					<label class="label" for="currentPassword">
-						<span class="label-text">Aktuelles Passwort</span>
+						<span class="label-text flex items-center gap-2 font-medium">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+								/>
+							</svg>
+							Aktuelles Passwort
+						</span>
 					</label>
 					<input
 						id="currentPassword"
 						type="password"
-						placeholder="Aktuelles Passwort"
-						class="input-bordered input w-full"
+						placeholder="Geben Sie Ihr aktuelles Passwort ein"
+						class="input-bordered input input-lg w-full"
 						required
 					/>
 				</div>
+
 				<div class="form-control">
 					<label class="label" for="newPassword">
-						<span class="label-text">Neues Passwort</span>
+						<span class="label-text flex items-center gap-2 font-medium">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+								/>
+							</svg>
+							Neues Passwort
+						</span>
 					</label>
 					<input
 						id="newPassword"
 						type="password"
-						placeholder="Neues Passwort"
-						class="input-bordered input w-full"
+						placeholder="Mindestens 8 Zeichen"
+						class="input-bordered input input-lg w-full"
 						required
 					/>
+					<label class="label">
+						<span class="label-text-alt text-xs">
+							Mindestens 8 Zeichen, enthält Groß- und Kleinbuchstaben, Zahlen
+						</span>
+					</label>
 				</div>
+
 				<div class="form-control">
 					<label class="label" for="confirmPassword">
-						<span class="label-text">Passwort bestätigen</span>
+						<span class="label-text flex items-center gap-2 font-medium">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+							Passwort bestätigen
+						</span>
 					</label>
 					<input
 						id="confirmPassword"
 						type="password"
-						placeholder="Passwort bestätigen"
-						class="input-bordered input w-full"
+						placeholder="Neues Passwort wiederholen"
+						class="input-bordered input input-lg w-full"
 						required
 					/>
 				</div>
 			</form>
-			<div class="modal-action">
-				<button class="btn btn-ghost" onclick={() => (showPasswordModal = false)}>
+
+			<div class="modal-action border-base-300 border-t pt-6">
+				<button class="btn btn-ghost btn-lg gap-2" onclick={() => (showPasswordModal = false)}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
 					Abbrechen
 				</button>
-				<button class="btn btn-primary" onclick={() => (showPasswordModal = false)}>
+				<button class="btn btn-primary btn-lg gap-2" onclick={() => (showPasswordModal = false)}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+						/>
+					</svg>
 					Passwort ändern
 				</button>
 			</div>

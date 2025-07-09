@@ -1,7 +1,7 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
-// Extended interface for user settings including AI fields
+// Extended interface for user settings including AI fields and specific values
 interface UserSettingsWithAI {
 	user_id: string;
 	theme: string;
@@ -30,6 +30,13 @@ interface UserSettingsWithAI {
 	ai_top_p?: number;
 	ai_frequency_penalty?: number;
 	ai_presence_penalty?: number;
+	// Specific Values
+	specific_values_birthday_de?: string;
+	specific_values_birthday_en?: string;
+	specific_values_anniversary_de?: string;
+	specific_values_anniversary_en?: string;
+	specific_values_custom_de?: string;
+	specific_values_custom_en?: string;
 	created_at?: string;
 	updated_at?: string;
 }
@@ -99,7 +106,14 @@ Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträgl
 	ai_max_tokens: 2000,
 	ai_top_p: 0.9,
 	ai_frequency_penalty: 0.1,
-	ai_presence_penalty: 0.1
+	ai_presence_penalty: 0.1,
+	// Specific Values
+	specific_values_birthday_de: '16,18,21,30,40,50,60,65,70,80,90,100',
+	specific_values_birthday_en: '16,18,21,30,40,50,60,65,70,80,90,100',
+	specific_values_anniversary_de: '1,5,10,15,20,25,30,40,50,60,70',
+	specific_values_anniversary_en: '1,5,10,15,20,25,30,40,50,60,70',
+	specific_values_custom_de: '5,10,15,20,25,30',
+	specific_values_custom_en: '5,10,15,20,25,30'
 };
 
 export const load: PageServerLoad = async ({ locals, parent }) => {
@@ -201,6 +215,21 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					topP: settings?.ai_top_p ?? defaultSettings.ai_top_p,
 					frequencyPenalty: settings?.ai_frequency_penalty ?? defaultSettings.ai_frequency_penalty,
 					presencePenalty: settings?.ai_presence_penalty ?? defaultSettings.ai_presence_penalty
+				},
+				specificValues: {
+					birthdayDe:
+						settings?.specific_values_birthday_de || defaultSettings.specific_values_birthday_de,
+					birthdayEn:
+						settings?.specific_values_birthday_en || defaultSettings.specific_values_birthday_en,
+					anniversaryDe:
+						settings?.specific_values_anniversary_de ||
+						defaultSettings.specific_values_anniversary_de,
+					anniversaryEn:
+						settings?.specific_values_anniversary_en ||
+						defaultSettings.specific_values_anniversary_en,
+					customDe:
+						settings?.specific_values_custom_de || defaultSettings.specific_values_custom_de,
+					customEn: settings?.specific_values_custom_en || defaultSettings.specific_values_custom_en
 				}
 			}
 		};
@@ -278,6 +307,14 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					topP: defaultSettings.ai_top_p,
 					frequencyPenalty: defaultSettings.ai_frequency_penalty,
 					presencePenalty: defaultSettings.ai_presence_penalty
+				},
+				specificValues: {
+					birthdayDe: defaultSettings.specific_values_birthday_de,
+					birthdayEn: defaultSettings.specific_values_birthday_en,
+					anniversaryDe: defaultSettings.specific_values_anniversary_de,
+					anniversaryEn: defaultSettings.specific_values_anniversary_en,
+					customDe: defaultSettings.specific_values_custom_de,
+					customEn: defaultSettings.specific_values_custom_en
 				}
 			}
 		};
@@ -600,6 +637,110 @@ export const actions: Actions = {
 			return { success: true, message: 'AI-Einstellungen erfolgreich aktualisiert' };
 		} catch (error) {
 			console.error('Unexpected error updating AI settings:', error);
+			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
+		}
+	},
+
+	updateSpecificValues: async ({ request, locals }) => {
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
+		if (userError || !user) {
+			return fail(401, { message: 'Nicht authentifiziert' });
+		}
+
+		// Get user profile for permission checking
+		const { data: profiles } = await locals.supabase
+			.from('profiles')
+			.select('role')
+			.eq('id', user.id);
+
+		const profile = profiles && profiles.length > 0 ? profiles[0] : null;
+
+		// Only administrators can change specific values
+		if (!profile || profile.role !== 'Administrator') {
+			return fail(403, { message: 'Keine Berechtigung für spezifische Werte-Einstellungen' });
+		}
+
+		const formData = await request.formData();
+
+		try {
+			// First ensure user has settings record
+			const { data: existingSettings } = await locals.supabase
+				.from('user_settings')
+				.select('id')
+				.eq('user_id', user.id)
+				.single();
+
+			if (!existingSettings) {
+				// Create default settings first
+				await locals.supabase.from('user_settings').insert({
+					user_id: user.id,
+					...defaultSettings
+				});
+			}
+
+			// Get form values and validate
+			const specificValuesBirthdayDe = (formData.get('specificValuesBirthdayDe') as string) || '';
+			const specificValuesBirthdayEn = (formData.get('specificValuesBirthdayEn') as string) || '';
+			const specificValuesAnniversaryDe =
+				(formData.get('specificValuesAnniversaryDe') as string) || '';
+			const specificValuesAnniversaryEn =
+				(formData.get('specificValuesAnniversaryEn') as string) || '';
+			const specificValuesCustomDe = (formData.get('specificValuesCustomDe') as string) || '';
+			const specificValuesCustomEn = (formData.get('specificValuesCustomEn') as string) || '';
+
+			// Validate that values are comma-separated numbers
+			const validateValues = (values: string, fieldName: string) => {
+				if (!values.trim()) return true; // Empty is OK
+				const parts = values.split(',').map((v) => v.trim());
+				for (const part of parts) {
+					if (part && isNaN(parseInt(part))) {
+						return `${fieldName} enthält ungültige Zahlen. Bitte verwenden Sie nur durch Kommas getrennte Zahlen.`;
+					}
+				}
+				return true;
+			};
+
+			// Validate all fields
+			const validations = [
+				validateValues(specificValuesBirthdayDe, 'Geburtstag (Deutsch)'),
+				validateValues(specificValuesBirthdayEn, 'Geburtstag (English)'),
+				validateValues(specificValuesAnniversaryDe, 'Jubiläum (Deutsch)'),
+				validateValues(specificValuesAnniversaryEn, 'Jubiläum (English)'),
+				validateValues(specificValuesCustomDe, 'Individuell (Deutsch)'),
+				validateValues(specificValuesCustomEn, 'Individuell (English)')
+			];
+
+			for (const validation of validations) {
+				if (validation !== true) {
+					return fail(400, { message: validation });
+				}
+			}
+
+			// Update specific values
+			const { error } = await locals.supabase
+				.from('user_settings')
+				.update({
+					specific_values_birthday_de: specificValuesBirthdayDe,
+					specific_values_birthday_en: specificValuesBirthdayEn,
+					specific_values_anniversary_de: specificValuesAnniversaryDe,
+					specific_values_anniversary_en: specificValuesAnniversaryEn,
+					specific_values_custom_de: specificValuesCustomDe,
+					specific_values_custom_en: specificValuesCustomEn,
+					updated_at: new Date().toISOString()
+				})
+				.eq('user_id', user.id);
+
+			if (error) {
+				console.error('Error updating specific values:', error);
+				return fail(500, { message: 'Fehler beim Aktualisieren der spezifischen Werte' });
+			}
+
+			return { success: true, message: 'Spezifische Werte erfolgreich aktualisiert' };
+		} catch (error) {
+			console.error('Unexpected error updating specific values:', error);
 			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
 		}
 	}
