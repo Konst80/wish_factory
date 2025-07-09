@@ -708,7 +708,8 @@
 									}, 3000);
 								} else if (result.type === 'failure') {
 									currentMessage =
-										(result.data?.message as string) || 'Fehler beim Speichern der KI-Einstellungen';
+										(result.data?.message as string) ||
+										'Fehler beim Speichern der KI-Einstellungen';
 									showErrorMessage = true;
 									showSuccessMessage = false;
 									setTimeout(() => {
@@ -766,17 +767,25 @@
 										id="model"
 										name="model"
 										class="select select-bordered w-full"
-										value={(data.settings as any)?.ai?.model || 'anthropic/claude-3.5-sonnet'}
+										value={(data.settings as any)?.ai?.model || 'anthropic/claude-sonnet-4'}
 									>
+										<option value="anthropic/claude-sonnet-4"
+											>🚀 Claude Sonnet 4 (Neueste Version)</option
+										>
 										<option value="anthropic/claude-3.5-sonnet"
-											>🏆 Claude 3.5 Sonnet (Empfohlen)</option
+											>🏆 Claude 3.5 Sonnet (Bewährt)</option
 										>
 										<option value="anthropic/claude-3-haiku"
 											>⚡ Claude 3 Haiku (Schnell & Günstig)</option
 										>
+										<option value="openai/gpt-4.1">⭐ GPT-4.1 (Premium, Code-optimiert)</option>
 										<option value="openai/gpt-4o">🧠 GPT-4o (OpenAI)</option>
 										<option value="openai/gpt-4o-mini">💡 GPT-4o Mini (Kompakt)</option>
 										<option value="google/gemini-pro-1.5">💎 Gemini Pro 1.5 (Google)</option>
+										<option value="google/gemini-2.5-pro">✨ Gemini 2.5 Pro (Google)</option>
+										<option value="deepseek/deepseek-chat-v3-0324:free"
+											>🆓 DeepSeek V3 (Kostenlos)</option
+										>
 										<option value="deepseek/deepseek-chat">🔥 DeepSeek Chat</option>
 									</select>
 								</div>

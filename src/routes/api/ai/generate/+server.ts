@@ -119,31 +119,28 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		if (settingsError) {
 			console.log('⚠️ Keine benutzerdefinierten KI-Einstellungen gefunden, verwende Defaults');
+			console.log('⚠️ Settings Error:', settingsError);
 		} else {
-			console.log('✅ KI-Einstellungen geladen');
+			console.log('✅ KI-Einstellungen geladen:', userSettings);
 		}
 
-		const aiSettings = userSettings
-			? {
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					promptSystem: (userSettings as any).ai_prompt_system,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					promptTemplate: (userSettings as any).ai_prompt_template,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					model: (userSettings as any).ai_model,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					temperature: (userSettings as any).ai_temperature,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					maxTokens: (userSettings as any).ai_max_tokens,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					topP: (userSettings as any).ai_top_p,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					frequencyPenalty: (userSettings as any).ai_frequency_penalty,
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					presencePenalty: (userSettings as any).ai_presence_penalty
-				}
-			: undefined;
+		// Erstelle AI-Settings mit benutzerdefinierten Werten oder Fallbacks
+		const aiSettings = userSettings ? {
+			promptSystem: userSettings.ai_prompt_system || 'Du bist ein Experte für das Schreiben von Glückwünschen. Du MUSST immer im exakten JSON-Format antworten, niemals als Text oder Markdown. Antworte NUR mit einem gültigen JSON-Objekt.',
+			promptTemplate: userSettings.ai_prompt_template || undefined, // null zu undefined konvertieren
+			model: userSettings.ai_model || 'anthropic/claude-sonnet-4',
+			temperature: userSettings.ai_temperature ?? 0.8,
+			maxTokens: userSettings.ai_max_tokens || 2000,
+			topP: userSettings.ai_top_p ?? 0.9,
+			frequencyPenalty: userSettings.ai_frequency_penalty ?? 0.1,
+			presencePenalty: userSettings.ai_presence_penalty ?? 0.1
+		} : undefined;
 
+		console.log('🤖 Finale AI Settings:', aiSettings);
+		console.log(`🎯 Verwende benutzerdefiniertes Template: ${!!aiSettings?.promptTemplate}`);
+		if (aiSettings?.promptTemplate) {
+			console.log('📝 Custom Template Vorschau:', aiSettings.promptTemplate.substring(0, 150) + '...');
+		}
 		console.log('🤖 Starte KI-Generierung...');
 
 		// KI-Generierung mit User-Tracking und Custom-Settings

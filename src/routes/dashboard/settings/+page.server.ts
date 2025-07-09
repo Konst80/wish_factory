@@ -55,7 +55,7 @@ const defaultSettings: Omit<UserSettingsWithAI, 'user_id' | 'created_at' | 'upda
 	data_retention: 365,
 	// AI Settings
 	ai_prompt_system:
-		'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.',
+		'Du bist ein Experte für das Schreiben von Glückwünschen. Du MUSST immer im exakten JSON-Format antworten, niemals als Text oder Markdown. Antworte NUR mit einem gültigen JSON-Objekt.',
 	ai_prompt_template: `Du bist ein Experte für das Schreiben von Glückwünschen. Generiere {count} {countText} in der Sprache "{language}" basierend auf folgenden Kriterien:
 
 **Wichtige Regeln:**
@@ -76,12 +76,13 @@ const defaultSettings: Omit<UserSettingsWithAI, 'user_id' | 'created_at' | 'upda
 
 Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträglichen (belated) Text.
 
-**Antwortformat (JSON):**
+**KRITISCH WICHTIG: Du MUSST exakt in diesem JSON-Format antworten - KEIN anderes Format ist erlaubt:**
+
 {
   "wishes": [
     {
-      "text": "Haupttext des Glückwunsches",
-      "belated": "Nachträglicher Text",
+      "text": "Haupttext des Glückwunsches hier",
+      "belated": "Nachträglicher Text hier", 
       "metadata": {
         "style": "{style}",
         "confidence": 0.95
@@ -89,9 +90,11 @@ Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträgl
     }
   ],
   "totalGenerated": {count}
-}`,
+}
 
-	ai_model: 'anthropic/claude-3.5-sonnet',
+**ANTWORTE NUR MIT DIESEM JSON - KEIN zusätzlicher Text, keine Markdown-Formatierung, keine Erklärungen!**`,
+
+	ai_model: 'anthropic/claude-sonnet-4',
 	ai_temperature: 0.8,
 	ai_max_tokens: 2000,
 	ai_top_p: 0.9,

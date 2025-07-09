@@ -549,25 +549,22 @@
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 	<!-- Main Form -->
 	<div class="lg:col-span-2">
-		<div class="card bg-base-100 shadow-xl">
+		<div class="card bg-base-100 shadow-xl border border-base-200">
 			<div class="card-body">
-				<h2 class="card-title mb-6">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-6 w-6"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-						/>
-					</svg>
-					Wunsch-Details
-				</h2>
+				<div class="flex items-center justify-between mb-6">
+					<h2 class="card-title text-xl">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+						</svg>
+						Wunsch-Details
+					</h2>
+					<div class="badge badge-outline badge-lg">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						Entwurf
+					</div>
+				</div>
 
 				<form
 					bind:this={formElement}
@@ -581,318 +578,392 @@
 						};
 					}}
 				>
-					<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-						<!-- Wunsch-Typ -->
-						<div class="form-control">
-							<label class="label" for="type">
-								<span class="label-text font-medium">Wunsch-Typ *</span>
-							</label>
-							<select
-								id="type"
-								name="type"
-								class="select-bordered select w-full"
-								class:select-error={errors.type}
-								bind:value={formData.type}
-								required
-							>
-								{#each Object.values(WishType) as type (type)}
-									<option value={type}>{typeLabels[type]}</option>
-								{/each}
-							</select>
-							{#if errors.type}
-								<label class="label">
-									<span class="label-text-alt text-error">{errors.type}</span>
+					<!-- Basic Settings Section -->
+					<div class="bg-base-50 rounded-lg p-6 mb-6">
+						<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+							</svg>
+							Grundeinstellungen
+						</h3>
+						<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+							<!-- Wunsch-Typ -->
+							<div class="form-control">
+								<label class="label" for="type">
+									<span class="label-text font-medium text-base flex items-center gap-2">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+										</svg>
+										Wunsch-Typ *
+									</span>
 								</label>
-							{/if}
-						</div>
+								<select
+									id="type"
+									name="type"
+									class="select-bordered select w-full select-lg"
+									class:select-error={errors.type}
+									bind:value={formData.type}
+									required
+								>
+									{#each Object.values(WishType) as type (type)}
+										<option value={type}>{typeLabels[type]}</option>
+									{/each}
+								</select>
+								{#if errors.type}
+									<label class="label">
+										<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.type}</span>
+									</label>
+								{/if}
+							</div>
 
-						<!-- Anlass -->
-						<div class="form-control">
-							<label class="label" for="eventType">
-								<span class="label-text font-medium">Anlass *</span>
-							</label>
-							<select
-								id="eventType"
-								name="eventType"
-								class="select-bordered select w-full"
-								class:select-error={errors.eventType}
-								bind:value={formData.eventType}
-								required
-							>
-								{#each Object.values(EventType) as eventType (eventType)}
-									<option value={eventType}>{eventTypeLabels[eventType]}</option>
-								{/each}
-							</select>
-							{#if errors.eventType}
-								<label class="label">
-									<span class="label-text-alt text-error">{errors.eventType}</span>
+							<!-- Anlass -->
+							<div class="form-control">
+								<label class="label" for="eventType">
+									<span class="label-text font-medium text-base flex items-center gap-2">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+										</svg>
+										Anlass *
+									</span>
 								</label>
-							{/if}
-						</div>
+								<select
+									id="eventType"
+									name="eventType"
+									class="select-bordered select w-full select-lg"
+									class:select-error={errors.eventType}
+									bind:value={formData.eventType}
+									required
+								>
+									{#each Object.values(EventType) as eventType (eventType)}
+										<option value={eventType}>{eventTypeLabels[eventType]}</option>
+									{/each}
+								</select>
+								{#if errors.eventType}
+									<label class="label">
+										<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.eventType}</span>
+									</label>
+								{/if}
+							</div>
 
-						<!-- Sprache -->
-						<div class="form-control">
-							<label class="label" for="language">
-								<span class="label-text font-medium">Sprache *</span>
-							</label>
-							<select
-								id="language"
-								name="language"
-								class="select-bordered select w-full"
-								class:select-error={errors.language}
-								bind:value={formData.language}
-								required
-							>
-								{#each Object.values(Language) as language (language)}
-									<option value={language}>{languageLabels[language]}</option>
-								{/each}
-							</select>
-							{#if errors.language}
-								<label class="label">
-									<span class="label-text-alt text-error">{errors.language}</span>
+							<!-- Sprache -->
+							<div class="form-control">
+								<label class="label" for="language">
+									<span class="label-text font-medium text-base flex items-center gap-2">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+										</svg>
+										Sprache *
+									</span>
 								</label>
-							{/if}
+								<select
+									id="language"
+									name="language"
+									class="select-bordered select w-full select-lg"
+									class:select-error={errors.language}
+									bind:value={formData.language}
+									required
+								>
+									{#each Object.values(Language) as language (language)}
+										<option value={language}>{languageLabels[language]}</option>
+									{/each}
+								</select>
+								{#if errors.language}
+									<label class="label">
+										<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.language}</span>
+									</label>
+								{/if}
+							</div>
 						</div>
 					</div>
 
 					<!-- Hidden Status Field - Always "Entwurf" for new wishes -->
 					<input type="hidden" name="status" value="Entwurf" />
 
-					<!-- Beziehungen -->
-					<div class="form-control mt-6">
-						<label class="label">
-							<span class="label-text font-medium">Ziel-Beziehungen *</span>
-							<span class="label-text-alt">Mindestens eine auswählen</span>
-						</label>
-						<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-							{#each Object.values(Relation) as relation (relation)}
-								<label class="label cursor-pointer justify-start">
-									<input
-										type="checkbox"
-										name="relations"
-										value={relation}
-										class="checkbox checkbox-primary"
-										class:checkbox-error={errors.relations}
-										checked={formData.relations.includes(relation)}
-										onchange={(e) => handleRelationChange(relation, e.currentTarget.checked)}
-									/>
-									<span class="label-text ml-3">{relationLabels[relation]}</span>
-								</label>
-							{/each}
-						</div>
-						{#if errors.relations}
+					<!-- Target Audience Section -->
+					<div class="bg-base-50 rounded-lg p-6 mb-6">
+						<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+							</svg>
+							Zielgruppe
+						</h3>
+						
+						<!-- Beziehungen -->
+						<div class="form-control mb-6">
 							<label class="label">
-								<span class="label-text-alt text-error">{errors.relations}</span>
+								<span class="label-text font-medium text-base flex items-center gap-2">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+									</svg>
+									Beziehungen *
+								</span>
+								<span class="label-text-alt badge badge-neutral badge-sm">Mindestens eine auswählen</span>
 							</label>
-						{/if}
+							<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+								{#each Object.values(Relation) as relation (relation)}
+									<label class="label cursor-pointer justify-start bg-base-100 rounded-lg p-3 hover:bg-base-200 transition-colors border-2 {formData.relations.includes(relation) ? 'border-primary bg-primary/5' : 'border-base-300'}">
+										<input
+											type="checkbox"
+											name="relations"
+											value={relation}
+											class="checkbox checkbox-primary"
+											class:checkbox-error={errors.relations}
+											checked={formData.relations.includes(relation)}
+											onchange={(e) => handleRelationChange(relation, e.currentTarget.checked)}
+										/>
+										<span class="label-text ml-3 font-medium">{relationLabels[relation]}</span>
+									</label>
+								{/each}
+							</div>
+							{#if errors.relations}
+								<label class="label">
+									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.relations}</span>
+								</label>
+							{/if}
+						</div>
+
+						<!-- Altersgruppen -->
+						<div class="form-control mb-6">
+							<label class="label">
+								<span class="label-text font-medium text-base flex items-center gap-2">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+									</svg>
+									Altersgruppe *
+								</span>
+								<span class="label-text-alt badge badge-neutral badge-sm">Eine Auswahl treffen</span>
+							</label>
+							<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+								{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
+									<label class="label cursor-pointer justify-start bg-base-100 rounded-lg p-3 hover:bg-base-200 transition-colors border-2 {formData.ageGroups.includes(ageGroup) ? 'border-primary bg-primary/5' : 'border-base-300'}">
+										<input
+											type="radio"
+											name="ageGroups"
+											value={ageGroup}
+											class="radio radio-primary"
+											class:radio-error={errors.ageGroups}
+											checked={formData.ageGroups.includes(ageGroup)}
+											onchange={() => handleAgeGroupChange(ageGroup)}
+										/>
+										<span class="label-text ml-3 font-medium">{ageGroupLabels[ageGroup]}</span>
+									</label>
+								{/each}
+							</div>
+							{#if errors.ageGroups}
+								<label class="label">
+									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.ageGroups}</span>
+								</label>
+							{/if}
+						</div>
+
+						<!-- Spezifische Werte -->
+						<div class="form-control">
+							<label class="label" for="specificValues">
+								<span class="label-text font-medium text-base flex items-center gap-2">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+									</svg>
+									Spezifische Werte
+								</span>
+								<span class="label-text-alt">z.B. 18, 30, 50 (durch Komma getrennt)</span>
+							</label>
+							<input
+								id="specificValues"
+								name="specificValues"
+								type="text"
+								placeholder="18, 30, 50, 65"
+								class="input-bordered input w-full input-lg"
+								class:input-error={errors.specificValues ||
+									!validateSpecificValues(formData.specificValues)}
+								bind:value={formData.specificValues}
+							/>
+							{#if errors.specificValues}
+								<label class="label">
+									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.specificValues}</span>
+								</label>
+							{:else if formData.specificValues && !validateSpecificValues(formData.specificValues)}
+								<label class="label">
+									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+										>Bitte nur positive Zahlen, getrennt durch Kommas</span
+									>
+								</label>
+							{/if}
+						</div>
 					</div>
 
-					<!-- Altersgruppen -->
-					<div class="form-control mt-6">
-						<label class="label">
-							<span class="label-text font-medium">Ziel-Altersgruppe *</span>
-							<span class="label-text-alt">Eine Auswahl treffen</span>
-						</label>
-						<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-							{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
-								<label class="label cursor-pointer justify-start">
-									<input
-										type="radio"
-										name="ageGroups"
-										value={ageGroup}
-										class="radio radio-primary"
-										class:radio-error={errors.ageGroups}
-										checked={formData.ageGroups.includes(ageGroup)}
-										onchange={() => handleAgeGroupChange(ageGroup)}
-									/>
-									<span class="label-text ml-3">{ageGroupLabels[ageGroup]}</span>
-								</label>
-							{/each}
-						</div>
-						{#if errors.ageGroups}
-							<label class="label">
-								<span class="label-text-alt text-error">{errors.ageGroups}</span>
-							</label>
+					<!-- Content Creation Section -->
+					<div class="bg-base-50 rounded-lg p-6 mb-6">
+						<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l3 3-3 3m-1 0H4.5A2.5 2.5 0 012 14.5v-3A2.5 2.5 0 014.5 9H8m0-2v4l-4-4m0 8l4-4m-4 4v-4l4 4" />
+							</svg>
+							Wunsch-Inhalt
+						</h3>
+						
+						<!-- AI Generation Status -->
+						{#if isGenerating}
+							<div class="alert alert-info mb-4">
+								<div class="flex items-center gap-2">
+									<span class="loading loading-spinner loading-sm"></span>
+									<span>KI generiert Ihren Wunsch...</span>
+								</div>
+							</div>
 						{/if}
-					</div>
 
-					<!-- Spezifische Werte -->
-					<div class="form-control mt-6">
-						<label class="label" for="specificValues">
-							<span class="label-text font-medium">Spezifische Werte</span>
-							<span class="label-text-alt">z.B. 18, 30, 50 (durch Komma getrennt)</span>
-						</label>
-						<input
-							id="specificValues"
-							name="specificValues"
-							type="text"
-							placeholder="18, 30, 50, 65"
-							class="input-bordered input w-full"
-							class:input-error={errors.specificValues ||
-								!validateSpecificValues(formData.specificValues)}
-							bind:value={formData.specificValues}
-						/>
-						{#if errors.specificValues}
-							<label class="label">
-								<span class="label-text-alt text-error">{errors.specificValues}</span>
+						<!-- Haupttext -->
+						<div class="form-control mb-6">
+							<label class="label" for="text">
+								<span class="label-text font-medium text-base flex items-center gap-2">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+									</svg>
+									Wunsch-Text *
+								</span>
+								<div class="flex items-center gap-2">
+									<span class="label-text-alt">{formData.text.length}/1000</span>
+									<div class="badge badge-primary badge-sm">KI-unterstützt</div>
+								</div>
 							</label>
-						{:else if formData.specificValues && !validateSpecificValues(formData.specificValues)}
-							<label class="label">
-								<span class="label-text-alt text-error"
-									>Bitte nur positive Zahlen, getrennt durch Kommas</span
+							<div class="relative">
+								<textarea
+									id="text"
+									name="text"
+									rows="6"
+									placeholder="Liebe/r [Name], zu deinem [Anlass] wünsche ich dir..."
+									class="textarea-bordered textarea w-full pr-32 textarea-lg"
+									class:textarea-error={errors.text}
+									bind:value={formData.text}
+									required
+								></textarea>
+								<button
+									type="button"
+									class="btn btn-primary btn-sm absolute top-2 right-2 gap-1"
+									onclick={generateWithAI}
+									disabled={isGenerating ||
+										!formData.eventType ||
+										formData.relations.length === 0 ||
+										formData.ageGroups.length === 0}
+									title="Text mit KI basierend auf aktuellen Einstellungen generieren"
 								>
-							</label>
-						{/if}
-					</div>
-
-					<!-- Haupttext -->
-					<div class="form-control mt-6">
-						<label class="label" for="text">
-							<span class="label-text font-medium">Wunsch-Text *</span>
-							<span class="label-text-alt">{formData.text.length}/1000</span>
-						</label>
-						<div class="relative">
-							<textarea
-								id="text"
-								name="text"
-								rows="6"
-								placeholder="Liebe/r [Name], zu deinem [Anlass] wünsche ich dir..."
-								class="textarea-bordered textarea w-full pr-24"
-								class:textarea-error={errors.text}
-								bind:value={formData.text}
-								required
-							></textarea>
-							<button
-								type="button"
-								class="btn btn-primary btn-sm absolute top-2 right-2"
-								onclick={generateWithAI}
-								disabled={isGenerating ||
-									!formData.eventType ||
-									formData.relations.length === 0 ||
-									formData.ageGroups.length === 0}
-								title="Text mit KI basierend auf aktuellen Einstellungen generieren"
-							>
-								{#if isGenerating}
-									<span class="loading loading-spinner loading-sm"></span>
-								{:else}
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M13 10V3L4 14h7v7l9-11h-7z"
-										/>
-									</svg>
-								{/if}
-							</button>
-						</div>
-						<label class="label">
-							<span class="label-text-alt">
-								Verwenden Sie Platzhalter wie [Name], [Anlass], [Alter] für dynamische Inhalte
-							</span>
-						</label>
-						{#if errors.text}
+									{#if isGenerating}
+										<span class="loading loading-spinner loading-xs"></span>
+									{:else}
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+										</svg>
+									{/if}
+									KI
+								</button>
+							</div>
 							<label class="label">
-								<span class="label-text-alt text-error">{errors.text}</span>
-							</label>
-						{/if}
-					</div>
-
-					<!-- Nachträglicher Text -->
-					<div class="form-control mt-6">
-						<label class="label" for="belated">
-							<span class="label-text font-medium">Nachträglicher Text *</span>
-							<span class="label-text-alt">{formData.belated.length}/1000</span>
-						</label>
-						<div class="relative">
-							<textarea
-								id="belated"
-								name="belated"
-								rows="4"
-								placeholder="Liebe/r [Name], auch wenn ich zu spät dran bin..."
-								class="textarea-bordered textarea w-full pr-24"
-								class:textarea-error={errors.belated}
-								bind:value={formData.belated}
-								required
-							></textarea>
-							<button
-								type="button"
-								class="btn btn-secondary btn-sm absolute top-2 right-2"
-								onclick={generateWithAI}
-								disabled={isGenerating ||
-									!formData.eventType ||
-									formData.relations.length === 0 ||
-									formData.ageGroups.length === 0}
-								title="Nachträglichen Text mit KI generieren"
-							>
-								{#if isGenerating}
-									<span class="loading loading-spinner loading-sm"></span>
-								{:else}
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M13 10V3L4 14h7v7l9-11h-7z"
-										/>
+								<span class="label-text-alt flex items-center gap-2">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 									</svg>
-								{/if}
-							</button>
-						</div>
-						<label class="label">
-							<span class="label-text-alt">
-								Text für verspätete Glückwünsche mit Platzhaltern
-							</span>
-						</label>
-						{#if errors.belated}
-							<label class="label">
-								<span class="label-text-alt text-error">{errors.belated}</span>
+									Verwenden Sie Platzhalter wie [Name], [Anlass], [Alter] für dynamische Inhalte
+								</span>
 							</label>
-						{/if}
+							{#if errors.text}
+								<label class="label">
+									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.text}</span>
+								</label>
+							{/if}
+						</div>
+
+						<!-- Nachträglicher Text -->
+						<div class="form-control">
+							<label class="label" for="belated">
+								<span class="label-text font-medium text-base flex items-center gap-2">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+									Nachträglicher Text *
+								</span>
+								<div class="flex items-center gap-2">
+									<span class="label-text-alt">{formData.belated.length}/1000</span>
+									<div class="badge badge-secondary badge-sm">Verspätet</div>
+								</div>
+							</label>
+							<div class="relative">
+								<textarea
+									id="belated"
+									name="belated"
+									rows="4"
+									placeholder="Liebe/r [Name], auch wenn ich zu spät dran bin..."
+									class="textarea-bordered textarea w-full pr-32 textarea-lg"
+									class:textarea-error={errors.belated}
+									bind:value={formData.belated}
+									required
+								></textarea>
+								<button
+									type="button"
+									class="btn btn-secondary btn-sm absolute top-2 right-2 gap-1"
+									onclick={generateWithAI}
+									disabled={isGenerating ||
+										!formData.eventType ||
+										formData.relations.length === 0 ||
+										formData.ageGroups.length === 0}
+									title="Nachträglichen Text mit KI generieren"
+								>
+									{#if isGenerating}
+										<span class="loading loading-spinner loading-xs"></span>
+									{:else}
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+										</svg>
+									{/if}
+									KI
+								</button>
+							</div>
+							<label class="label">
+								<span class="label-text-alt flex items-center gap-2">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+									Text für verspätete Glückwünsche mit Platzhaltern
+								</span>
+							</label>
+							{#if errors.belated}
+								<label class="label">
+									<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200">{errors.belated}</span>
+								</label>
+							{/if}
+						</div>
 					</div>
 
 					<!-- Action Buttons -->
-					<div class="card-actions mt-8 justify-end">
-						<a href="/dashboard/wishes" class="btn btn-outline"> Abbrechen </a>
-						<button
-							type="submit"
-							class="btn btn-primary"
-							class:loading={isSubmitting}
-							disabled={isSubmitting}
-						>
-							{#if isSubmitting}
-								<span class="loading loading-spinner loading-sm"></span>
-								Speichern...
-							{:else}
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									class="h-5 w-5"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-									/>
+					<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-base-300">
+						<div class="flex items-center gap-2 text-sm text-base-content/70">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+							<span>Entwürfe werden automatisch gespeichert</span>
+						</div>
+						<div class="flex gap-3">
+							<a href="/dashboard/wishes" class="btn btn-outline btn-lg gap-2">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 								</svg>
-								Wunsch erstellen
-							{/if}
-						</button>
+								Abbrechen
+							</a>
+							<button
+								type="submit"
+								class="btn btn-primary btn-lg gap-2"
+								class:loading={isSubmitting}
+								disabled={isSubmitting}
+							>
+								{#if isSubmitting}
+									<span class="loading loading-spinner loading-sm"></span>
+									Speichern...
+								{:else}
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+									</svg>
+									Wunsch erstellen
+								{/if}
+							</button>
+						</div>
 					</div>
 				</form>
 			</div>
@@ -900,27 +971,22 @@
 
 		<!-- Generation Error Alert -->
 		{#if generationError}
-			<div class="alert alert-error mt-4">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-6 w-6 shrink-0 stroke-current"
-					fill="none"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-					/>
+			<div class="alert alert-error mt-4 animate-in slide-in-from-top-2 duration-300">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
 				</svg>
-				<span>{generationError}</span>
+				<div class="flex-1">
+					<h4 class="font-medium">KI-Generierung fehlgeschlagen</h4>
+					<p class="text-sm opacity-90">{generationError}</p>
+				</div>
 				<button
 					type="button"
-					class="btn btn-ghost btn-sm ml-auto"
+					class="btn btn-ghost btn-sm"
 					onclick={() => (generationError = '')}
 				>
-					×
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
 				</button>
 			</div>
 		{/if}
@@ -1459,40 +1525,37 @@
 	<div class="lg:col-span-1">
 		<!-- Preview Card -->
 		{#if showPreview && formData.text}
-			<div class="card bg-base-100 mb-6 shadow-xl">
+			<div class="card bg-base-100 mb-6 shadow-xl border border-base-200">
 				<div class="card-body">
 					<h3 class="card-title text-lg">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-5 w-5"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-							/>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-							/>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
 						</svg>
 						Vorschau
 					</h3>
 					<div class="divider my-2"></div>
 					<div class="mockup-window border-base-300 bg-base-200 border">
 						<div class="bg-base-200 px-4 py-6">
-							<h4 class="text-primary font-medium">Haupttext:</h4>
-							<p class="mb-4 text-sm">{formData.text}</p>
-							{#if formData.belated}
-								<h4 class="text-secondary font-medium">Nachträglich:</h4>
-								<p class="text-sm">{formData.belated}</p>
-							{/if}
+							<div class="space-y-4">
+								<div>
+									<div class="flex items-center gap-2 mb-2">
+										<div class="badge badge-primary badge-sm">Haupttext</div>
+										<div class="badge badge-outline badge-sm">{formData.text.length} Zeichen</div>
+									</div>
+									<p class="text-sm leading-relaxed">{formData.text}</p>
+								</div>
+								{#if formData.belated}
+									<div class="divider my-2"></div>
+									<div>
+										<div class="flex items-center gap-2 mb-2">
+											<div class="badge badge-secondary badge-sm">Nachträglich</div>
+											<div class="badge badge-outline badge-sm">{formData.belated.length} Zeichen</div>
+										</div>
+										<p class="text-sm leading-relaxed">{formData.belated}</p>
+									</div>
+								{/if}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -1500,61 +1563,88 @@
 		{/if}
 
 		<!-- Help Card -->
-		<div class="card bg-base-100 shadow-xl">
+		<div class="card bg-base-100 shadow-xl border border-base-200">
 			<div class="card-body">
 				<h3 class="card-title text-lg">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 					</svg>
 					Hilfe & Tipps
 				</h3>
 				<div class="divider my-2"></div>
 				<div class="space-y-4 text-sm">
-					<div>
-						<h4 class="font-medium">📝 Platzhalter verwenden:</h4>
-						<ul class="mt-1 list-inside list-disc space-y-1 text-xs opacity-70">
-							<li><code>[Name]</code> - Name der Person</li>
-							<li><code>[Anlass]</code> - Grund der Feier</li>
-							<li><code>[Alter]</code> - Lebensalter</li>
-							<li><code>[Zahl]</code> - Spezifischer Wert</li>
-						</ul>
+					<div class="bg-base-50 rounded-lg p-3">
+						<h4 class="font-medium flex items-center gap-2 mb-2">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+							</svg>
+							Platzhalter verwenden
+						</h4>
+						<div class="grid grid-cols-2 gap-2 text-xs">
+							<div class="flex items-center gap-1">
+								<code class="bg-base-200 px-1 rounded">[Name]</code>
+								<span class="opacity-70">Name der Person</span>
+							</div>
+							<div class="flex items-center gap-1">
+								<code class="bg-base-200 px-1 rounded">[Anlass]</code>
+								<span class="opacity-70">Grund der Feier</span>
+							</div>
+							<div class="flex items-center gap-1">
+								<code class="bg-base-200 px-1 rounded">[Alter]</code>
+								<span class="opacity-70">Lebensalter</span>
+							</div>
+							<div class="flex items-center gap-1">
+								<code class="bg-base-200 px-1 rounded">[Zahl]</code>
+								<span class="opacity-70">Spezifischer Wert</span>
+							</div>
+						</div>
 					</div>
-					<div>
-						<h4 class="font-medium">🤖 KI-Generierung:</h4>
+					
+					<div class="bg-primary/5 rounded-lg p-3">
+						<h4 class="font-medium flex items-center gap-2 mb-2">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+							</svg>
+							KI-Unterstützung
+						</h4>
 						<p class="text-xs opacity-70">
-							Klicken Sie auf die KI-Buttons in den Textfeldern für automatische Generierung.
+							Nutzen Sie die KI-Buttons für automatische Textgenerierung basierend auf Ihren Einstellungen.
 						</p>
 					</div>
-					<div>
-						<h4 class="font-medium">🎯 Zielgruppen:</h4>
+					
+					<div class="bg-secondary/5 rounded-lg p-3">
+						<h4 class="font-medium flex items-center gap-2 mb-2">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+							</svg>
+							Zielgruppen-Tipp
+						</h4>
 						<p class="text-xs opacity-70">
-							Wählen Sie passende Beziehungen und Altersgruppen für maximale Relevanz.
+							Präzise Zielgruppen-Auswahl erhöht die Relevanz und Wirkung Ihrer Wünsche.
 						</p>
 					</div>
-					<div>
-						<h4 class="font-medium">🔢 Spezifische Werte:</h4>
-						<p class="text-xs opacity-70">
-							Zahlen für Meilensteine (18, 30, 50, etc.) helfen bei der Personalisierung.
-						</p>
-					</div>
-					<div>
-						<h4 class="font-medium">📋 Status-Info:</h4>
-						<ul class="mt-1 list-inside list-disc space-y-1 text-xs opacity-70">
-							<li><strong>Entwurf:</strong> Noch in Bearbeitung</li>
-							<li><strong>Zur Freigabe:</strong> Bereit zur Prüfung</li>
-							<li><strong>Freigegeben:</strong> Öffentlich verfügbar</li>
-						</ul>
+					
+					<div class="bg-accent/5 rounded-lg p-3">
+						<h4 class="font-medium flex items-center gap-2 mb-2">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+							Status-Übersicht
+						</h4>
+						<div class="space-y-1 text-xs">
+							<div class="flex items-center gap-2">
+								<div class="badge badge-neutral badge-xs">Entwurf</div>
+								<span class="opacity-70">Noch in Bearbeitung</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<div class="badge badge-warning badge-xs">Zur Freigabe</div>
+								<span class="opacity-70">Bereit zur Prüfung</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<div class="badge badge-success badge-xs">Freigegeben</div>
+								<span class="opacity-70">Öffentlich verfügbar</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

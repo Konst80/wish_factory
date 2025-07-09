@@ -30,7 +30,7 @@ interface AIResponse {
 
 interface AISettings {
 	promptSystem: string;
-	promptTemplate: string;
+	promptTemplate?: string; // Optional - falls nicht gesetzt wird Default verwendet
 	model: string;
 	temperature: number;
 	maxTokens: number;
@@ -57,7 +57,7 @@ class OpenRouterAIService {
 	): Promise<AIResponse> {
 		try {
 			const prompt = this.generatePrompt(params, aiSettings);
-			const model = aiSettings?.model || 'anthropic/claude-3.5-sonnet';
+			const model = aiSettings?.model || 'anthropic/claude-sonnet-4';
 
 			console.log('🔧 AI Service Parameters:', {
 				model,
@@ -78,10 +78,10 @@ class OpenRouterAIService {
 				body: JSON.stringify({
 					model,
 					// Fallback-Modelle für bessere Verfügbarkeit (max 3 erlaubt)
-					models: ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'openai/gpt-4o-mini'],
+					models: ['anthropic/claude-sonnet-4', 'openai/gpt-4.1', 'anthropic/claude-3.5-sonnet'],
 					route: 'fallback',
-					// Strukturierte JSON-Ausgabe erzwingen
-					response_format: { type: 'json_object' },
+					// Strukturierte JSON-Ausgabe erzwingen - aber nicht bei allen Modellen unterstützt
+					...(model.includes('anthropic') || model.includes('openai') ? { response_format: { type: 'json_object' } } : {}),
 					// AI-Parameter aus Settings oder Defaults
 					temperature: aiSettings?.temperature ?? 0.8,
 					max_tokens: aiSettings?.maxTokens || 2000,
@@ -97,12 +97,13 @@ class OpenRouterAIService {
 						{
 							role: 'system',
 							content:
-								aiSettings?.promptSystem ||
-								'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'
+								(aiSettings?.promptSystem ||
+								'Du bist ein Experte für das Schreiben von Glückwünschen.') +
+								' KRITISCH WICHTIG: Du MUSST immer im exakten JSON-Format antworten, niemals als Text oder Markdown. Antworte NUR mit einem gültigen JSON-Objekt mit dem "wishes" Array. Keine Erklärungen, kein zusätzlicher Text!'
 						},
 						{
 							role: 'user',
-							content: prompt
+							content: prompt + '\n\nWICHTIG: Antworte ausschließlich im JSON-Format wie oben beschrieben. Kein Text außerhalb des JSON!'
 						}
 					]
 				})
@@ -125,35 +126,55 @@ class OpenRouterAIService {
 
 			console.log('📝 AI Response Content:', content);
 
-			// Parse JSON response
+			// Parse JSON response mit verbessertem Fallback
 			let parsedResponse;
 			try {
 				parsedResponse = JSON.parse(content);
 				console.log('✅ Parsed JSON Response:', parsedResponse);
 			} catch (parseError) {
 				console.error('❌ JSON Parse Error:', parseError);
-				console.log('🔍 Attempting to extract JSON from content...');
+				console.log('🔍 Attempting to extract and convert from text format...');
 				
-				// Fallback: Versuche JSON aus dem Text zu extrahieren
+				// Fallback 1: Versuche JSON aus dem Text zu extrahieren
 				const jsonMatch = content.match(/\{[\s\S]*\}/);
 				if (jsonMatch) {
 					try {
 						parsedResponse = JSON.parse(jsonMatch[0]);
 						console.log('✅ Extracted JSON:', parsedResponse);
-					} catch (extractError) {
-						console.error('❌ JSON Extract Error:', extractError);
-						throw new Error('Could not parse JSON from AI response');
+					} catch {
+						console.log('❌ JSON Extract failed, trying text conversion...');
+						// Fallback 2: Konvertiere Text zu JSON-Format
+						parsedResponse = this.convertTextToJSON(content, params);
 					}
 				} else {
-					console.error('❌ No JSON found in content');
-					throw new Error('Could not parse JSON from AI response');
+					console.log('❌ No JSON found, converting text format...');
+					// Fallback 3: Konvertiere Text zu JSON-Format
+					parsedResponse = this.convertTextToJSON(content, params);
 				}
 			}
 
-			// Validiere Response-Format
+			// Validiere Response-Format und konvertiere falls nötig
 			if (!parsedResponse.wishes || !Array.isArray(parsedResponse.wishes)) {
-				console.error('❌ Invalid response format:', parsedResponse);
-				throw new Error('Invalid AI response format: missing wishes array');
+				console.log('⚠️ Response nicht im erwarteten Format, versuche Konvertierung...');
+				
+				// Fallback: Wenn die AI ein einzelnes Objekt mit text/belated zurückgibt
+				if (parsedResponse.text && parsedResponse.belated) {
+					console.log('✅ Konvertiere einzelnes Objekt zu wishes Array');
+					parsedResponse = {
+						wishes: [{
+							text: parsedResponse.text,
+							belated: parsedResponse.belated,
+							metadata: {
+								style: params.style || 'normal',
+								confidence: 0.95
+							}
+						}],
+						totalGenerated: 1
+					};
+				} else {
+					console.error('❌ Invalid response format:', parsedResponse);
+					throw new Error('Invalid AI response format: missing wishes array');
+				}
 			}
 
 			console.log('✅ Valid wishes array found:', parsedResponse.wishes.length, 'wishes');
@@ -176,6 +197,53 @@ class OpenRouterAIService {
 		}
 	}
 
+	// Neue Hilfsfunktion zum Konvertieren von Text zu JSON
+	private convertTextToJSON(content: string, params: WishGenerationParams): AIResponse {
+		console.log('🔄 Converting text content to JSON format...');
+		
+		try {
+			// Suche nach Text- und Belated-Abschnitten
+			const textMatch = content.match(/\*\*text:\*\*\s*([\s\S]*?)(?=\*\*belated:\*\*|$)/i);
+			const belatedMatch = content.match(/\*\*belated:\*\*\s*([\s\S]*?)$/i);
+			
+			if (textMatch && belatedMatch) {
+				const text = textMatch[1].trim().replace(/^\s*\n/, '').replace(/\n\s*$/, '');
+				const belated = belatedMatch[1].trim().replace(/^\s*\n/, '').replace(/\n\s*$/, '');
+				
+				console.log('✅ Extracted text and belated sections');
+				
+				return {
+					wishes: [{
+						text: text,
+						belated: belated,
+						metadata: {
+							style: params.style || 'normal',
+							confidence: 0.9
+						}
+					}],
+					totalGenerated: 1
+				};
+			}
+			
+			// Fallback: Verwende den gesamten Inhalt als Text
+			console.log('⚠️ Using entire content as main text');
+			return {
+				wishes: [{
+					text: content.trim(),
+					belated: `Nachträglich ${content.trim()}`,
+					metadata: {
+						style: params.style || 'normal',
+						confidence: 0.8
+					}
+				}],
+				totalGenerated: 1
+			};
+		} catch (error) {
+			console.error('❌ Text conversion failed:', error);
+			throw new Error('Could not convert text response to JSON format');
+		}
+	}
+
 	private generatePrompt(params: WishGenerationParams, aiSettings?: AISettings): string {
 		const {
 			eventType,
@@ -188,12 +256,21 @@ class OpenRouterAIService {
 			additionalInstructions
 		} = params;
 
-		// Verwende konfigurierbare Templates oder Fallback
+		// Priorisiere benutzerdefiniertes Template
 		let template = aiSettings?.promptTemplate;
+
+		console.log('🧩 Prompt Template Debug:', {
+			hasCustomTemplate: !!template,
+			templateSource: template ? 'user_settings' : 'default_fallback',
+			templatePreview: template ? template.substring(0, 100) + '...' : 'Using default template'
+		});
 
 		if (!template) {
 			// Fallback auf Default-Template (unterstützt alle Sprachen mit {language} Variable)
 			template = this.getDefaultTemplate();
+			console.log('📝 Fallback to default template used');
+		} else {
+			console.log('✅ Using custom user template from settings');
 		}
 
 		// Übersetze Enums für bessere Prompts
@@ -225,8 +302,23 @@ class OpenRouterAIService {
 			? `\n- Zusätzliche Anweisungen: ${additionalInstructions}`
 			: '';
 
+		console.log('🔧 Prompt Variables:', {
+			eventType,
+			eventText,
+			language,
+			relations,
+			relationTexts,
+			ageGroups,
+			ageGroupTexts,
+			style,
+			count,
+			countText,
+			specificValuesText,
+			additionalInstructionsText
+		});
+
 		// Template-Variablen ersetzen
-		return template
+		let finalPrompt = template
 			.replace(/\{count\}/g, count.toString())
 			.replace(/\{countText\}/g, countText)
 			.replace(/\{countPlural\}/g, count === 1 ? '' : 's')
@@ -240,6 +332,44 @@ class OpenRouterAIService {
 			.replace(/\{ageGroups\}/g, ageGroups.join(', '))
 			.replace(/\{specificValues\}/g, specificValuesText)
 			.replace(/\{additionalInstructions\}/g, additionalInstructionsText);
+
+		// HARDCODIERTE JSON-FORMAT-ANWEISUNG - IMMER ANHÄNGEN
+		const mandatoryJsonInstructions = '\n\n' +
+			'===============================================================================\n' +
+			'KRITISCH WICHTIG - JSON-AUSGABE-FORMAT (NICHT VERHANDELBAR)\n' +
+			'===============================================================================\n\n' +
+			'Du MUSST exakt in diesem JSON-Format antworten - KEIN anderes Format ist erlaubt:\n\n' +
+			'{\n' +
+			'  "wishes": [\n' +
+			'    {\n' +
+			'      "text": "Haupttext des Glückwunsches hier",\n' +
+			'      "belated": "Nachträglicher Text hier",\n' +
+			'      "metadata": {\n' +
+			'        "style": "' + style + '",\n' +
+			'        "confidence": 0.95\n' +
+			'      }\n' +
+			'    }\n' +
+			'  ],\n' +
+			'  "totalGenerated": ' + count + '\n' +
+			'}\n\n' +
+			'WICHTIGE REGELN:\n' +
+			'- Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt\n' +
+			'- KEIN zusätzlicher Text vor oder nach dem JSON\n' +
+			'- KEINE Markdown-Formatierung (```json)\n' +
+			'- KEINE Erklärungen oder Kommentare\n' +
+			'- Das JSON muss vollständig valid sein\n' +
+			'- Verwende exakt die Feldnamen: "wishes", "text", "belated", "metadata", "style", "confidence", "totalGenerated"\n\n' +
+			'BEISPIEL KORREKTE ANTWORT:\n' +
+			'{"wishes":[{"text":"Beispieltext","belated":"Beispiel nachträglich","metadata":{"style":"' + style + '","confidence":0.95}}],"totalGenerated":' + count + '}\n\n' +
+			'===============================================================================';
+
+		// Füge die hardcodierte JSON-Anweisung IMMER hinzu
+		finalPrompt += mandatoryJsonInstructions;
+
+		console.log('📝 Final Prompt after variable replacement (first 500 chars):', finalPrompt.substring(0, 500) + '...');
+		console.log('🔒 Hardcodierte JSON-Anweisung wurde hinzugefügt');
+		
+		return finalPrompt;
 	}
 
 	private getDefaultTemplate(): string {
@@ -263,12 +393,13 @@ class OpenRouterAIService {
 
 Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträglichen (belated) Text.
 
-**WICHTIG: Antworte EXAKT in diesem JSON-Format:**
+**KRITISCH WICHTIG: Du MUSST exakt in diesem JSON-Format antworten - KEIN anderes Format ist erlaubt:**
+
 {
   "wishes": [
     {
-      "text": "Haupttext des Glückwunsches",
-      "belated": "Nachträglicher Text",
+      "text": "Haupttext des Glückwunsches hier",
+      "belated": "Nachträglicher Text hier", 
       "metadata": {
         "style": "{style}",
         "confidence": 0.95
@@ -276,7 +407,9 @@ Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträgl
     }
   ],
   "totalGenerated": {count}
-}`;
+}
+
+**ANTWORTE NUR MIT DIESEM JSON - KEIN zusätzlicher Text, keine Markdown-Formatierung, keine Erklärungen!**`;
 	}
 
 	private getDefaultGermanTemplate(): string {
@@ -375,7 +508,7 @@ Generate both a regular text and a belated text for each wish.
 		aiSettings?: AISettings
 	): Promise<ReadableStream<Uint8Array>> {
 		const prompt = this.generatePrompt(params, aiSettings);
-		const model = aiSettings?.model || 'anthropic/claude-3.5-sonnet';
+		const model = aiSettings?.model || 'anthropic/claude-sonnet-4';
 
 		const response = await fetch(`${this.baseUrl}/chat/completions`, {
 			method: 'POST',
@@ -387,7 +520,7 @@ Generate both a regular text and a belated text for each wish.
 			},
 			body: JSON.stringify({
 				model,
-				models: ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'openai/gpt-4o-mini'],
+				models: ['anthropic/claude-sonnet-4', 'openai/gpt-4.1', 'anthropic/claude-3.5-sonnet'],
 				route: 'fallback',
 				response_format: { type: 'json_object' },
 				stream: true, // Aktiviere Streaming
@@ -529,13 +662,13 @@ Generate both a regular text and a belated text for each wish.
 			});
 
 			if (!response.ok) {
-				return ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'openai/gpt-4o-mini'];
+				return ['anthropic/claude-sonnet-4', 'openai/gpt-4.1', 'anthropic/claude-3.5-sonnet'];
 			}
 
 			const data = await response.json();
-			return data.data?.map((model: { id: string }) => model.id) || ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'openai/gpt-4o-mini'];
+			return data.data?.map((model: { id: string }) => model.id) || ['anthropic/claude-sonnet-4', 'openai/gpt-4.1', 'anthropic/claude-3.5-sonnet'];
 		} catch {
-			return ['anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'openai/gpt-4o-mini'];
+			return ['anthropic/claude-sonnet-4', 'openai/gpt-4.1', 'anthropic/claude-3.5-sonnet'];
 		}
 	}
 }
