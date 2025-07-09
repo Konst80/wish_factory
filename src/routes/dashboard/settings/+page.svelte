@@ -14,6 +14,7 @@
 	let isAgeSpecificPromptsCollapsed = $state(true);
 	let isSpecificValuesCollapsed = $state(true);
 	let isAdvancedParametersCollapsed = $state(true);
+	let isTemplateVariablesCollapsed = $state(true);
 
 	// Show form result messages
 	$effect(() => {
@@ -1428,7 +1429,7 @@
 										<textarea
 											id="promptSystem"
 											name="promptSystem"
-											class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+											class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen..."
 											value={(data.settings as any)?.ai?.promptSystem ||
 												'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'}
@@ -1445,18 +1446,42 @@
 										<textarea
 											id="promptTemplate"
 											name="promptTemplate"
-											class="textarea textarea-bordered h-40 w-full font-mono text-sm"
+											class="textarea textarea-bordered h-96 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen. Generiere &#123;count&#125; &#123;countText&#125; in der Sprache &#123;language&#125;..."
 											value={(data.settings as any)?.ai?.promptTemplate || ''}
 										></textarea>
 										<div
 											class="from-info/5 to-primary/5 border-info/20 mt-4 rounded-lg border bg-gradient-to-br p-4"
 										>
-											<div class="mb-4 flex items-center gap-2">
-												<div class="badge badge-info badge-lg">
+											<div class="mb-4 flex items-center justify-between">
+												<button
+													type="button"
+													class="hover:text-primary flex cursor-pointer items-center gap-2 text-base font-semibold transition-colors"
+													onclick={() =>
+														(isTemplateVariablesCollapsed = !isTemplateVariablesCollapsed)}
+												>
+													<div class="badge badge-info badge-lg">
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class="h-4 w-4"
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+															/>
+														</svg>
+													</div>
+													Verfügbare Template-Variablen
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
-														class="h-4 w-4"
+														class="h-4 w-4 transition-transform {isTemplateVariablesCollapsed
+															? 'rotate-0'
+															: 'rotate-180'}"
 														fill="none"
 														viewBox="0 0 24 24"
 														stroke="currentColor"
@@ -1465,215 +1490,230 @@
 															stroke-linecap="round"
 															stroke-linejoin="round"
 															stroke-width="2"
-															d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+															d="M19 9l-7 7-7-7"
 														/>
 													</svg>
-												</div>
-												<h4 class="text-base font-semibold">Verfügbare Template-Variablen</h4>
+												</button>
 											</div>
-											<p class="text-base-content/70 mb-4 text-sm">
-												Klicken Sie auf eine Variable, um sie an der Cursor-Position einzufügen.
-											</p>
+											{#if !isTemplateVariablesCollapsed}
+												<div class="transition-all duration-300">
+													<p class="text-base-content/70 mb-4 text-sm">
+														Klicken Sie auf eine Variable, um sie an der Cursor-Position einzufügen.
+													</p>
 
-											<div class="space-y-6">
-												<!-- Grundlagen -->
-												<div class="card bg-base-100/50 shadow-sm">
-													<div class="card-body p-4">
-														<h5 class="card-title mb-3 flex items-center gap-2 text-sm">
-															<span class="badge badge-outline badge-sm">📊</span>
-															Grundlagen
-														</h5>
-														<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Anzahl der zu generierenden Wünsche (z.B. 1, 3, 5)"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
-																	onclick={() => insertPlaceholder('promptTemplate', '{count}')}
-																>
-																	<code class="text-primary font-bold">{`{count}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Anzahl</span>
-																</button>
-															</div>
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Textform der Anzahl (z.B. 'Glückwunsch', 'Glückwünsche')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
-																	onclick={() => insertPlaceholder('promptTemplate', '{countText}')}
-																>
-																	<code class="text-primary font-bold">{`{countText}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Anzahl-Text</span>
-																</button>
-															</div>
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Zielsprache (z.B. 'de', 'en')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
-																	onclick={() => insertPlaceholder('promptTemplate', '{language}')}
-																>
-																	<code class="text-primary font-bold">{`{language}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Sprache</span>
-																</button>
-															</div>
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Gewünschter Stil (z.B. 'normal', 'herzlich', 'humorvoll')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
-																	onclick={() => insertPlaceholder('promptTemplate', '{style}')}
-																>
-																	<code class="text-primary font-bold">{`{style}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Stil</span>
-																</button>
-															</div>
-														</div>
-													</div>
-												</div>
-
-												<!-- Ereignis & Kontext -->
-												<div class="card bg-base-100/50 shadow-sm">
-													<div class="card-body p-4">
-														<h5 class="card-title mb-3 flex items-center gap-2 text-sm">
-															<span class="badge badge-outline badge-sm">🎉</span>
-															Ereignis & Kontext
-														</h5>
-														<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Übersetzter Anlass (z.B. 'Geburtstag', 'Jubiläum')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
-																	onclick={() => insertPlaceholder('promptTemplate', '{eventText}')}
-																>
-																	<code class="text-secondary font-bold">{`{eventText}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Anlass (DE)</span>
-																</button>
-															</div>
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Roher Event-Typ (z.B. 'birthday', 'anniversary')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
-																	onclick={() => insertPlaceholder('promptTemplate', '{eventType}')}
-																>
-																	<code class="text-secondary font-bold">{`{eventType}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Event-Typ</span>
-																</button>
-															</div>
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Übersetzte Beziehungen (z.B. 'Freund/in, Familie')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
-																	onclick={() =>
-																		insertPlaceholder('promptTemplate', '{relationTexts}')}
-																>
-																	<code class="text-secondary font-bold">{`{relationTexts}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Beziehungen</span>
-																</button>
-															</div>
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Rohe Beziehungen (z.B. 'friend, family')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
-																	onclick={() => insertPlaceholder('promptTemplate', '{relations}')}
-																>
-																	<code class="text-secondary font-bold">{`{relations}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Relations</span>
-																</button>
-															</div>
-														</div>
-													</div>
-												</div>
-
-												<!-- Zielgruppe & Extras -->
-												<div class="card bg-base-100/50 shadow-sm">
-													<div class="card-body p-4">
-														<h5 class="card-title mb-3 flex items-center gap-2 text-sm">
-															<span class="badge badge-outline badge-sm">👥</span>
-															Zielgruppe & Extras
-														</h5>
-														<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Übersetzte Altersgruppen (z.B. 'junge Menschen, Senioren')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
-																	onclick={() =>
-																		insertPlaceholder('promptTemplate', '{ageGroupTexts}')}
-																>
-																	<code class="text-accent font-bold">{`{ageGroupTexts}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Altersgruppen</span>
-																</button>
-															</div>
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Rohe Altersgruppen (z.B. 'young, senior')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
-																	onclick={() => insertPlaceholder('promptTemplate', '{ageGroups}')}
-																>
-																	<code class="text-accent font-bold">{`{ageGroups}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Age Groups</span>
-																</button>
-															</div>
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Spezifische Werte (z.B. '18, 30, 50')"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
-																	onclick={() =>
-																		insertPlaceholder('promptTemplate', '{specificValues}')}
-																>
-																	<code class="text-accent font-bold">{`{specificValues}`}</code>
-																	<span class="ml-2 text-xs opacity-70">Spez. Werte</span>
-																</button>
-															</div>
-															<div
-																class="tooltip tooltip-bottom"
-																data-tip="Zusätzliche Benutzer-Anweisungen"
-															>
-																<button
-																	type="button"
-																	class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
-																	onclick={() =>
-																		insertPlaceholder('promptTemplate', '{additionalInstructions}')}
-																>
-																	<code class="text-accent font-bold"
-																		>{`{additionalInstructions}`}</code
+													<div class="space-y-6">
+														<!-- Grundlagen -->
+														<div class="card bg-base-100/50 shadow-sm">
+															<div class="card-body p-4">
+																<h5 class="card-title mb-3 flex items-center gap-2 text-sm">
+																	<span class="badge badge-outline badge-sm">📊</span>
+																	Grundlagen
+																</h5>
+																<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Anzahl der zu generierenden Wünsche (z.B. 1, 3, 5)"
 																	>
-																	<span class="ml-2 text-xs opacity-70">Zusatz-Info</span>
-																</button>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() => insertPlaceholder('promptTemplate', '{count}')}
+																		>
+																			<code class="text-primary font-bold">{`{count}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Anzahl</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Textform der Anzahl (z.B. 'Glückwunsch', 'Glückwünsche')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{countText}')}
+																		>
+																			<code class="text-primary font-bold">{`{countText}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Anzahl-Text</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Zielsprache (z.B. 'de', 'en')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{language}')}
+																		>
+																			<code class="text-primary font-bold">{`{language}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Sprache</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Gewünschter Stil (z.B. 'normal', 'herzlich', 'humorvoll')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() => insertPlaceholder('promptTemplate', '{style}')}
+																		>
+																			<code class="text-primary font-bold">{`{style}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Stil</span>
+																		</button>
+																	</div>
+																</div>
+															</div>
+														</div>
+
+														<!-- Ereignis & Kontext -->
+														<div class="card bg-base-100/50 shadow-sm">
+															<div class="card-body p-4">
+																<h5 class="card-title mb-3 flex items-center gap-2 text-sm">
+																	<span class="badge badge-outline badge-sm">🎉</span>
+																	Ereignis & Kontext
+																</h5>
+																<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Übersetzter Anlass (z.B. 'Geburtstag', 'Jubiläum')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{eventText}')}
+																		>
+																			<code class="text-secondary font-bold">{`{eventText}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Anlass (DE)</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Roher Event-Typ (z.B. 'birthday', 'anniversary')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{eventType}')}
+																		>
+																			<code class="text-secondary font-bold">{`{eventType}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Event-Typ</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Übersetzte Beziehungen (z.B. 'Freund/in, Familie')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{relationTexts}')}
+																		>
+																			<code class="text-secondary font-bold"
+																				>{`{relationTexts}`}</code
+																			>
+																			<span class="ml-2 text-xs opacity-70">Beziehungen</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Rohe Beziehungen (z.B. 'friend, family')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{relations}')}
+																		>
+																			<code class="text-secondary font-bold">{`{relations}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Relations</span>
+																		</button>
+																	</div>
+																</div>
+															</div>
+														</div>
+
+														<!-- Zielgruppe & Extras -->
+														<div class="card bg-base-100/50 shadow-sm">
+															<div class="card-body p-4">
+																<h5 class="card-title mb-3 flex items-center gap-2 text-sm">
+																	<span class="badge badge-outline badge-sm">👥</span>
+																	Zielgruppe & Extras
+																</h5>
+																<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Übersetzte Altersgruppen (z.B. 'junge Menschen, Senioren')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{ageGroupTexts}')}
+																		>
+																			<code class="text-accent font-bold">{`{ageGroupTexts}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Altersgruppen</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Rohe Altersgruppen (z.B. 'young, senior')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{ageGroups}')}
+																		>
+																			<code class="text-accent font-bold">{`{ageGroups}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Age Groups</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Spezifische Werte (z.B. '18, 30, 50')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{specificValues}')}
+																		>
+																			<code class="text-accent font-bold">{`{specificValues}`}</code
+																			>
+																			<span class="ml-2 text-xs opacity-70">Spez. Werte</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Zusätzliche Benutzer-Anweisungen"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-accent hover:text-accent-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder(
+																					'promptTemplate',
+																					'{additionalInstructions}'
+																				)}
+																		>
+																			<code class="text-accent font-bold"
+																				>{`{additionalInstructions}`}</code
+																			>
+																			<span class="ml-2 text-xs opacity-70">Zusatz-Info</span>
+																		</button>
+																	</div>
+																</div>
 															</div>
 														</div>
 													</div>
 												</div>
-											</div>
+											{/if}
 										</div>
 									</div>
 								</div>
@@ -1795,6 +1835,288 @@
 												placeholder="z.B. Verwende ehrfürchtigen, würdevollen Ton. Betone Weisheit und Erfahrung..."
 												value={(data.settings as any)?.ai?.promptAgeSenior || ''}
 											></textarea>
+										</div>
+									</div>
+								{/if}
+							</div>
+
+							<!-- Specific Values Section -->
+							<div class="bg-base-200 mb-6 rounded-lg p-6">
+								<div class="mb-6 flex items-center justify-between">
+									<button
+										type="button"
+										class="hover:text-primary flex cursor-pointer items-center gap-3 text-xl font-bold transition-colors"
+										onclick={() => (isSpecificValuesCollapsed = !isSpecificValuesCollapsed)}
+									>
+										<div class="badge badge-accent badge-lg">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+												/>
+											</svg>
+										</div>
+										Spezifische Event-Werte
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-5 w-5 transition-transform {isSpecificValuesCollapsed
+												? 'rotate-0'
+												: 'rotate-180'}"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 9l-7 7-7-7"
+											/>
+										</svg>
+									</button>
+									<div class="badge badge-info badge-sm">Optional</div>
+								</div>
+
+								{#if !isSpecificValuesCollapsed}
+									<div class="space-y-6 transition-all duration-300">
+										<div class="alert alert-info">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												fill="none"
+												viewBox="0 0 24 24"
+												class="h-6 w-6 shrink-0 stroke-current"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+											<div>
+												<p>
+													<strong>Spezifische Event-Werte:</strong>
+													Definieren Sie bedeutsame Zahlen für verschiedene Anlässe und Sprachen. Diese
+													werden für die KI-Prompt-Generierung verwendet.
+												</p>
+											</div>
+										</div>
+
+										<div class="tabs tabs-lifted">
+											<input
+												type="radio"
+												name="values_tab"
+												class="tab"
+												aria-label="Deutsch"
+												checked
+											/>
+											<div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+												<div class="space-y-6">
+													<div class="form-control">
+														<label class="label">
+															<span class="label-text flex items-center gap-2 font-semibold">
+																🎂 Geburtstage (Deutsch)
+															</span>
+															<button
+																type="button"
+																class="btn btn-ghost btn-xs"
+																onclick={() => generateSpecificValues('birthday', 'de')}
+															>
+																🤖 KI-Vorschlag
+															</button>
+														</label>
+														<textarea
+															name="specificValuesBirthdayDe"
+															class="textarea textarea-bordered w-full"
+															rows="4"
+															placeholder="Beschreiben Sie wichtige Geburtstage und ihre Bedeutung, z.B.: 16 Jahre (Sweet Sixteen), 18 Jahre (Volljährigkeit), 21 Jahre (Erwachsenwerden), 30 Jahre (Lebensmitte), 50 Jahre (Goldenes Jubiläum)..."
+															value={data.settings.specificValues.birthdayDe || ''}
+														></textarea>
+														<label class="label">
+															<span class="label-text-alt"
+																>Beschreibung wichtiger Geburtstage mit Bedeutung</span
+															>
+															<span class="label-text-alt text-info"
+																>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
+															>
+														</label>
+													</div>
+
+													<div class="form-control">
+														<label class="label">
+															<span class="label-text flex items-center gap-2 font-semibold">
+																💒 Hochzeitsjubiläen (Deutsch)
+															</span>
+															<button
+																type="button"
+																class="btn btn-ghost btn-xs"
+																onclick={() => generateSpecificValues('anniversary', 'de')}
+															>
+																🤖 KI-Vorschlag
+															</button>
+														</label>
+														<textarea
+															name="specificValuesAnniversaryDe"
+															class="textarea textarea-bordered w-full"
+															rows="4"
+															placeholder="Beschreiben Sie wichtige Hochzeitstage und ihre Bedeutung, z.B.: 1 Jahr (Papierhochzeit), 5 Jahre (Holzhochzeit), 10 Jahre (Rosenhochzeit), 25 Jahre (Silberhochzeit), 50 Jahre (Goldene Hochzeit)..."
+															value={data.settings.specificValues.anniversaryDe || ''}
+														></textarea>
+														<label class="label">
+															<span class="label-text-alt"
+																>Beschreibung wichtiger Hochzeitstage mit Bedeutung</span
+															>
+															<span class="label-text-alt text-info"
+																>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
+															>
+														</label>
+													</div>
+
+													<div class="form-control">
+														<label class="label">
+															<span class="label-text flex items-center gap-2 font-semibold">
+																🎉 Individuelle Anlässe (Deutsch)
+															</span>
+															<button
+																type="button"
+																class="btn btn-ghost btn-xs"
+																onclick={() => generateSpecificValues('custom', 'de')}
+															>
+																🤖 KI-Vorschlag
+															</button>
+														</label>
+														<textarea
+															name="specificValuesCustomDe"
+															class="textarea textarea-bordered w-full"
+															rows="4"
+															placeholder="Beschreiben Sie wichtige Meilensteine und ihre Bedeutung, z.B.: 5 Jahre (Lustrum), 10 Jahre (Dekade), 25 Jahre (Vierteljahrhundert), 50 Jahre (Halbes Jahrhundert)..."
+															value={data.settings.specificValues.customDe || ''}
+														></textarea>
+														<label class="label">
+															<span class="label-text-alt"
+																>Beschreibung wichtiger Meilensteine mit Bedeutung</span
+															>
+															<span class="label-text-alt text-info"
+																>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
+															>
+														</label>
+													</div>
+												</div>
+											</div>
+
+											<input type="radio" name="values_tab" class="tab" aria-label="English" />
+											<div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+												<div class="space-y-6">
+													<div class="form-control">
+														<label class="label">
+															<span class="label-text flex items-center gap-2 font-semibold">
+																🎂 Birthdays (English)
+															</span>
+															<button
+																type="button"
+																class="btn btn-ghost btn-xs"
+																onclick={() => generateSpecificValues('birthday', 'en')}
+															>
+																🤖 AI Suggestion
+															</button>
+														</label>
+														<textarea
+															name="specificValuesBirthdayEn"
+															class="textarea textarea-bordered w-full"
+															rows="4"
+															placeholder="Describe important birthdays and their meanings, e.g.: 16 years (Sweet Sixteen), 18 years (Coming of age), 21 years (Legal adulthood), 30 years (Milestone birthday), 50 years (Golden birthday)..."
+															value={data.settings.specificValues.birthdayEn || ''}
+														></textarea>
+														<label class="label">
+															<span class="label-text-alt"
+																>Significant birthdays (comma-separated)</span
+															>
+															<span class="label-text-alt text-info"
+																>e.g. 16=Sweet Sixteen, 21=Coming of Age</span
+															>
+														</label>
+													</div>
+
+													<div class="form-control">
+														<label class="label">
+															<span class="label-text flex items-center gap-2 font-semibold">
+																💒 Wedding Anniversaries (English)
+															</span>
+															<button
+																type="button"
+																class="btn btn-ghost btn-xs"
+																onclick={() => generateSpecificValues('anniversary', 'en')}
+															>
+																🤖 AI Suggestion
+															</button>
+														</label>
+														<textarea
+															name="specificValuesAnniversaryEn"
+															class="textarea textarea-bordered w-full"
+															rows="4"
+															placeholder="Describe important wedding anniversaries and their meanings, e.g.: 1 year (Paper), 5 years (Wood), 10 years (Tin), 25 years (Silver), 50 years (Golden)..."
+															value={data.settings.specificValues.anniversaryEn || ''}
+														></textarea>
+														<label class="label">
+															<span class="label-text-alt"
+																>Wedding anniversaries (comma-separated)</span
+															>
+															<span class="label-text-alt text-info"
+																>e.g. 1=Paper, 10=Tin, 25=Silver, 50=Golden</span
+															>
+														</label>
+													</div>
+
+													<div class="form-control">
+														<label class="label">
+															<span class="label-text flex items-center gap-2 font-semibold">
+																🎉 Custom Events (English)
+															</span>
+															<button
+																type="button"
+																class="btn btn-ghost btn-xs"
+																onclick={() => generateSpecificValues('custom', 'en')}
+															>
+																🤖 AI Suggestion
+															</button>
+														</label>
+														<textarea
+															name="specificValuesCustomEn"
+															class="textarea textarea-bordered w-full"
+															rows="4"
+															placeholder="Describe important milestones and their meanings, e.g.: 5 years (Lustrum), 10 years (Decade), 25 years (Quarter century), 50 years (Half century)..."
+															value={data.settings.specificValues.customEn || ''}
+														></textarea>
+														<label class="label">
+															<span class="label-text-alt"
+																>General milestones (comma-separated)</span
+															>
+															<span class="label-text-alt text-info"
+																>e.g. 5=Lustrum, 10=Decade, 25=Quarter Century</span
+															>
+														</label>
+													</div>
+												</div>
+											</div>
+										</div>
+
+										<div class="card-actions mt-6 justify-end">
+											<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+												{#if isSubmitting}
+													<span class="loading loading-spinner loading-sm"></span>
+													Speichern...
+												{:else}
+													Spezifische Werte speichern
+												{/if}
+											</button>
 										</div>
 									</div>
 								{/if}
@@ -2079,263 +2401,6 @@
 									{/if}
 								</button>
 							</div>
-						</div>
-					</form>
-				</div>
-			</div>
-
-			<!-- Specific Values Section -->
-			<div class="card bg-base-100 mt-8 shadow-xl">
-				<div class="card-body">
-					<div class="mb-6 flex items-center justify-between">
-						<div>
-							<h2 class="card-title flex items-center gap-3">
-								<div class="badge badge-accent badge-lg">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-5 w-5"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-										/>
-									</svg>
-								</div>
-								🎯 Spezifische Event-Werte
-							</h2>
-							<p class="text-base-content/70 mt-2">
-								Definieren Sie bedeutsame Zahlen für verschiedene Anlässe und Sprachen
-							</p>
-						</div>
-					</div>
-
-					<form
-						method="POST"
-						action="?/updateSpecificValues"
-						use:enhance={() => {
-							isSubmitting = true;
-							return async ({ result }) => {
-								isSubmitting = false;
-								if (result.type === 'success') {
-									await invalidateAll();
-									currentMessage = 'Spezifische Werte erfolgreich gespeichert!';
-									showSuccessMessage = true;
-									showErrorMessage = false;
-									setTimeout(() => {
-										showSuccessMessage = false;
-									}, 3000);
-								} else if (result.type === 'failure') {
-									currentMessage =
-										(result.data?.message as string) || 'Fehler beim Speichern der Werte';
-									showErrorMessage = true;
-									showSuccessMessage = false;
-									setTimeout(() => {
-										showErrorMessage = false;
-									}, 5000);
-								}
-							};
-						}}
-					>
-						<div class="tabs tabs-lifted">
-							<input type="radio" name="values_tab" class="tab" aria-label="Deutsch" checked />
-							<div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
-								<div class="space-y-6">
-									<div class="form-control">
-										<label class="label">
-											<span class="label-text flex items-center gap-2 font-semibold">
-												🎂 Geburtstage (Deutsch)
-											</span>
-											<button
-												type="button"
-												class="btn btn-ghost btn-xs"
-												onclick={() => generateSpecificValues('birthday', 'de')}
-											>
-												🤖 KI-Vorschlag
-											</button>
-										</label>
-										<textarea
-											name="specificValuesBirthdayDe"
-											class="textarea textarea-bordered w-full"
-											rows="4"
-											placeholder="Beschreiben Sie wichtige Geburtstage und ihre Bedeutung, z.B.: 16 Jahre (Sweet Sixteen), 18 Jahre (Volljährigkeit), 21 Jahre (Erwachsenwerden), 30 Jahre (Lebensmitte), 50 Jahre (Goldenes Jubiläum)..."
-											value={data.settings.specificValues.birthdayDe || ''}
-										></textarea>
-										<label class="label">
-											<span class="label-text-alt"
-												>Beschreibung wichtiger Geburtstage mit Bedeutung</span
-											>
-											<span class="label-text-alt text-info"
-												>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
-											>
-										</label>
-									</div>
-
-									<div class="form-control">
-										<label class="label">
-											<span class="label-text flex items-center gap-2 font-semibold">
-												💒 Hochzeitsjubiläen (Deutsch)
-											</span>
-											<button
-												type="button"
-												class="btn btn-ghost btn-xs"
-												onclick={() => generateSpecificValues('anniversary', 'de')}
-											>
-												🤖 KI-Vorschlag
-											</button>
-										</label>
-										<textarea
-											name="specificValuesAnniversaryDe"
-											class="textarea textarea-bordered w-full"
-											rows="4"
-											placeholder="Beschreiben Sie wichtige Hochzeitstage und ihre Bedeutung, z.B.: 1 Jahr (Papierhochzeit), 5 Jahre (Holzhochzeit), 10 Jahre (Rosenhochzeit), 25 Jahre (Silberhochzeit), 50 Jahre (Goldene Hochzeit)..."
-											value={data.settings.specificValues.anniversaryDe || ''}
-										></textarea>
-										<label class="label">
-											<span class="label-text-alt"
-												>Beschreibung wichtiger Hochzeitstage mit Bedeutung</span
-											>
-											<span class="label-text-alt text-info"
-												>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
-											>
-										</label>
-									</div>
-
-									<div class="form-control">
-										<label class="label">
-											<span class="label-text flex items-center gap-2 font-semibold">
-												🎉 Individuelle Anlässe (Deutsch)
-											</span>
-											<button
-												type="button"
-												class="btn btn-ghost btn-xs"
-												onclick={() => generateSpecificValues('custom', 'de')}
-											>
-												🤖 KI-Vorschlag
-											</button>
-										</label>
-										<textarea
-											name="specificValuesCustomDe"
-											class="textarea textarea-bordered w-full"
-											rows="4"
-											placeholder="Beschreiben Sie wichtige Meilensteine und ihre Bedeutung, z.B.: 5 Jahre (Lustrum), 10 Jahre (Dekade), 25 Jahre (Vierteljahrhundert), 50 Jahre (Halbes Jahrhundert)..."
-											value={data.settings.specificValues.customDe || ''}
-										></textarea>
-										<label class="label">
-											<span class="label-text-alt"
-												>Beschreibung wichtiger Meilensteine mit Bedeutung</span
-											>
-											<span class="label-text-alt text-info"
-												>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
-											>
-										</label>
-									</div>
-								</div>
-							</div>
-
-							<input type="radio" name="values_tab" class="tab" aria-label="English" />
-							<div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
-								<div class="space-y-6">
-									<div class="form-control">
-										<label class="label">
-											<span class="label-text flex items-center gap-2 font-semibold">
-												🎂 Birthdays (English)
-											</span>
-											<button
-												type="button"
-												class="btn btn-ghost btn-xs"
-												onclick={() => generateSpecificValues('birthday', 'en')}
-											>
-												🤖 AI Suggestion
-											</button>
-										</label>
-										<textarea
-											name="specificValuesBirthdayEn"
-											class="textarea textarea-bordered w-full"
-											rows="4"
-											placeholder="Describe important birthdays and their meanings, e.g.: 16 years (Sweet Sixteen), 18 years (Coming of age), 21 years (Legal adulthood), 30 years (Milestone birthday), 50 years (Golden birthday)..."
-											value={data.settings.specificValues.birthdayEn || ''}
-										></textarea>
-										<label class="label">
-											<span class="label-text-alt">Significant birthdays (comma-separated)</span>
-											<span class="label-text-alt text-info"
-												>e.g. 16=Sweet Sixteen, 21=Coming of Age</span
-											>
-										</label>
-									</div>
-
-									<div class="form-control">
-										<label class="label">
-											<span class="label-text flex items-center gap-2 font-semibold">
-												💒 Wedding Anniversaries (English)
-											</span>
-											<button
-												type="button"
-												class="btn btn-ghost btn-xs"
-												onclick={() => generateSpecificValues('anniversary', 'en')}
-											>
-												🤖 AI Suggestion
-											</button>
-										</label>
-										<textarea
-											name="specificValuesAnniversaryEn"
-											class="textarea textarea-bordered w-full"
-											rows="4"
-											placeholder="Describe important wedding anniversaries and their meanings, e.g.: 1 year (Paper), 5 years (Wood), 10 years (Tin), 25 years (Silver), 50 years (Golden)..."
-											value={data.settings.specificValues.anniversaryEn || ''}
-										></textarea>
-										<label class="label">
-											<span class="label-text-alt">Wedding anniversaries (comma-separated)</span>
-											<span class="label-text-alt text-info"
-												>e.g. 1=Paper, 10=Tin, 25=Silver, 50=Golden</span
-											>
-										</label>
-									</div>
-
-									<div class="form-control">
-										<label class="label">
-											<span class="label-text flex items-center gap-2 font-semibold">
-												🎉 Custom Events (English)
-											</span>
-											<button
-												type="button"
-												class="btn btn-ghost btn-xs"
-												onclick={() => generateSpecificValues('custom', 'en')}
-											>
-												🤖 AI Suggestion
-											</button>
-										</label>
-										<textarea
-											name="specificValuesCustomEn"
-											class="textarea textarea-bordered w-full"
-											rows="4"
-											placeholder="Describe important milestones and their meanings, e.g.: 5 years (Lustrum), 10 years (Decade), 25 years (Quarter century), 50 years (Half century)..."
-											value={data.settings.specificValues.customEn || ''}
-										></textarea>
-										<label class="label">
-											<span class="label-text-alt">General milestones (comma-separated)</span>
-											<span class="label-text-alt text-info"
-												>e.g. 5=Lustrum, 10=Decade, 25=Quarter Century</span
-											>
-										</label>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="card-actions mt-6 justify-end">
-							<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
-								{#if isSubmitting}
-									<span class="loading loading-spinner loading-sm"></span>
-									Speichern...
-								{:else}
-									Spezifische Werte speichern
-								{/if}
-							</button>
 						</div>
 					</form>
 				</div>
