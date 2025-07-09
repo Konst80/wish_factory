@@ -1938,8 +1938,7 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Beschreiben Sie wichtige Geburtstage und ihre Bedeutung, z.B.: 16 Jahre (Sweet Sixteen), 18 Jahre (Volljährigkeit), 21 Jahre (Erwachsenwerden), 30 Jahre (Lebensmitte), 50 Jahre (Goldenes Jubiläum)..."
-															value={data.settings.specificValues.birthdayDe || ''}
-														></textarea>
+														>{data.settings.specificValues.birthdayDe || ''}</textarea>
 														<label class="label">
 															<span class="label-text-alt"
 																>Beschreibung wichtiger Geburtstage mit Bedeutung</span
@@ -1968,8 +1967,7 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Beschreiben Sie wichtige Hochzeitstage und ihre Bedeutung, z.B.: 1 Jahr (Papierhochzeit), 5 Jahre (Holzhochzeit), 10 Jahre (Rosenhochzeit), 25 Jahre (Silberhochzeit), 50 Jahre (Goldene Hochzeit)..."
-															value={data.settings.specificValues.anniversaryDe || ''}
-														></textarea>
+														>{data.settings.specificValues.anniversaryDe || ''}</textarea>
 														<label class="label">
 															<span class="label-text-alt"
 																>Beschreibung wichtiger Hochzeitstage mit Bedeutung</span
@@ -1998,8 +1996,7 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Beschreiben Sie wichtige Meilensteine und ihre Bedeutung, z.B.: 5 Jahre (Lustrum), 10 Jahre (Dekade), 25 Jahre (Vierteljahrhundert), 50 Jahre (Halbes Jahrhundert)..."
-															value={data.settings.specificValues.customDe || ''}
-														></textarea>
+														>{data.settings.specificValues.customDe || ''}</textarea>
 														<label class="label">
 															<span class="label-text-alt"
 																>Beschreibung wichtiger Meilensteine mit Bedeutung</span
@@ -2033,8 +2030,7 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Describe important birthdays and their meanings, e.g.: 16 years (Sweet Sixteen), 18 years (Coming of age), 21 years (Legal adulthood), 30 years (Milestone birthday), 50 years (Golden birthday)..."
-															value={data.settings.specificValues.birthdayEn || ''}
-														></textarea>
+														>{data.settings.specificValues.birthdayEn || ''}</textarea>
 														<label class="label">
 															<span class="label-text-alt"
 																>Significant birthdays (comma-separated)</span
@@ -2063,8 +2059,7 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Describe important wedding anniversaries and their meanings, e.g.: 1 year (Paper), 5 years (Wood), 10 years (Tin), 25 years (Silver), 50 years (Golden)..."
-															value={data.settings.specificValues.anniversaryEn || ''}
-														></textarea>
+														>{data.settings.specificValues.anniversaryEn || ''}</textarea>
 														<label class="label">
 															<span class="label-text-alt"
 																>Wedding anniversaries (comma-separated)</span
@@ -2093,8 +2088,7 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Describe important milestones and their meanings, e.g.: 5 years (Lustrum), 10 years (Decade), 25 years (Quarter century), 50 years (Half century)..."
-															value={data.settings.specificValues.customEn || ''}
-														></textarea>
+														>{data.settings.specificValues.customEn || ''}</textarea>
 														<label class="label">
 															<span class="label-text-alt"
 																>General milestones (comma-separated)</span

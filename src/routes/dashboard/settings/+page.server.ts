@@ -622,23 +622,71 @@ export const actions: Actions = {
 				return fail(400, { message: 'Top-P muss zwischen 0 und 1 liegen' });
 			}
 
-			// Update AI settings (without specific values - they have their own form)
+			// Build update object with only non-null values
+			const updateData: any = {
+				ai_model: formData.get('model') as string,
+				ai_temperature: temperature,
+				ai_max_tokens: maxTokens,
+				ai_top_p: topP,
+				ai_frequency_penalty: frequencyPenalty,
+				ai_presence_penalty: presencePenalty,
+				updated_at: new Date().toISOString()
+			};
+
+			// Only update prompts if they are provided (not null/empty)
+			const promptSystem = formData.get('promptSystem') as string;
+			const promptTemplate = formData.get('promptTemplate') as string;
+			const promptAgeYoung = formData.get('promptAgeYoung') as string;
+			const promptAgeMiddle = formData.get('promptAgeMiddle') as string;
+			const promptAgeSenior = formData.get('promptAgeSenior') as string;
+
+			if (promptSystem !== null && promptSystem !== undefined) {
+				updateData.ai_prompt_system = promptSystem;
+			}
+			if (promptTemplate !== null && promptTemplate !== undefined) {
+				updateData.ai_prompt_template = promptTemplate;
+			}
+			if (promptAgeYoung !== null && promptAgeYoung !== undefined) {
+				updateData.ai_prompt_age_young = promptAgeYoung;
+			}
+			if (promptAgeMiddle !== null && promptAgeMiddle !== undefined) {
+				updateData.ai_prompt_age_middle = promptAgeMiddle;
+			}
+			if (promptAgeSenior !== null && promptAgeSenior !== undefined) {
+				updateData.ai_prompt_age_senior = promptAgeSenior;
+			}
+
+			// Only update specific values if they are provided
+			const specificValuesBirthdayDe = formData.get('specificValuesBirthdayDe') as string;
+			const specificValuesBirthdayEn = formData.get('specificValuesBirthdayEn') as string;
+			const specificValuesAnniversaryDe = formData.get('specificValuesAnniversaryDe') as string;
+			const specificValuesAnniversaryEn = formData.get('specificValuesAnniversaryEn') as string;
+			const specificValuesCustomDe = formData.get('specificValuesCustomDe') as string;
+			const specificValuesCustomEn = formData.get('specificValuesCustomEn') as string;
+
+			if (specificValuesBirthdayDe !== null && specificValuesBirthdayDe !== undefined) {
+				updateData.specific_values_birthday_de = specificValuesBirthdayDe;
+			}
+			if (specificValuesBirthdayEn !== null && specificValuesBirthdayEn !== undefined) {
+				updateData.specific_values_birthday_en = specificValuesBirthdayEn;
+			}
+			if (specificValuesAnniversaryDe !== null && specificValuesAnniversaryDe !== undefined) {
+				updateData.specific_values_anniversary_de = specificValuesAnniversaryDe;
+			}
+			if (specificValuesAnniversaryEn !== null && specificValuesAnniversaryEn !== undefined) {
+				updateData.specific_values_anniversary_en = specificValuesAnniversaryEn;
+			}
+			if (specificValuesCustomDe !== null && specificValuesCustomDe !== undefined) {
+				updateData.specific_values_custom_de = specificValuesCustomDe;
+			}
+			if (specificValuesCustomEn !== null && specificValuesCustomEn !== undefined) {
+				updateData.specific_values_custom_en = specificValuesCustomEn;
+			}
+
+			// Update AI settings with only the provided fields
 			const { error } = await locals.supabase
 				.from('user_settings')
-				.update({
-					ai_prompt_system: formData.get('promptSystem') as string,
-					ai_prompt_template: formData.get('promptTemplate') as string,
-					ai_prompt_age_young: formData.get('promptAgeYoung') as string,
-					ai_prompt_age_middle: formData.get('promptAgeMiddle') as string,
-					ai_prompt_age_senior: formData.get('promptAgeSenior') as string,
-					ai_model: formData.get('model') as string,
-					ai_temperature: temperature,
-					ai_max_tokens: maxTokens,
-					ai_top_p: topP,
-					ai_frequency_penalty: frequencyPenalty,
-					ai_presence_penalty: presencePenalty,
-					updated_at: new Date().toISOString()
-				})
+				.update(updateData)
 				.eq('user_id', user.id);
 
 			if (error) {
@@ -646,7 +694,7 @@ export const actions: Actions = {
 				return fail(500, { message: 'Fehler beim Aktualisieren der AI-Einstellungen' });
 			}
 
-			return { success: true, message: 'AI-Einstellungen erfolgreich aktualisiert' };
+			return { success: true, message: 'AI-Einstellungen und spezifische Werte erfolgreich aktualisiert' };
 		} catch (error) {
 			console.error('Unexpected error updating AI settings:', error);
 			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
