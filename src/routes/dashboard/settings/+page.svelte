@@ -11,6 +11,9 @@
 	let currentMessage = $state('');
 	let showPasswordModal = $state(false);
 	let isSubmitting = $state(false);
+	let isAgeSpecificPromptsCollapsed = $state(true);
+	let isSpecificValuesCollapsed = $state(true);
+	let isAdvancedParametersCollapsed = $state(true);
 
 	// Show form result messages
 	$effect(() => {
@@ -1679,7 +1682,11 @@
 							<!-- Age-Specific Prompts Section -->
 							<div class="bg-base-200 mb-6 rounded-lg p-6">
 								<div class="mb-6 flex items-center justify-between">
-									<h4 class="flex items-center gap-3 text-xl font-bold">
+									<button
+										type="button"
+										class="hover:text-primary flex cursor-pointer items-center gap-3 text-xl font-bold transition-colors"
+										onclick={() => (isAgeSpecificPromptsCollapsed = !isAgeSpecificPromptsCollapsed)}
+									>
 										<div class="badge badge-primary badge-lg">
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
@@ -1697,83 +1704,110 @@
 											</svg>
 										</div>
 										Altersgruppen-spezifische Prompts
-									</h4>
-									<div class="badge badge-info badge-sm">Optional</div>
-								</div>
-
-								<div class="space-y-6">
-									<div class="alert alert-info">
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
+											class="h-5 w-5 transition-transform {isAgeSpecificPromptsCollapsed
+												? 'rotate-0'
+												: 'rotate-180'}"
 											fill="none"
 											viewBox="0 0 24 24"
-											class="h-6 w-6 shrink-0 stroke-current"
+											stroke="currentColor"
 										>
 											<path
 												stroke-linecap="round"
 												stroke-linejoin="round"
 												stroke-width="2"
-												d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												d="M19 9l-7 7-7-7"
 											/>
 										</svg>
-										<div>
-											<p>
-												<strong>Zusätzliche Anweisungen für spezifische Altersgruppen:</strong>
-												Diese Prompts werden zusätzlich zum Hauptprompt verwendet, wenn eine
-												bestimmte Altersgruppe ausgewählt wird. Bei "Alle" werden alle drei
-												Prompts kombiniert.
-											</p>
+									</button>
+									<div class="badge badge-info badge-sm">Optional</div>
+								</div>
+
+								{#if !isAgeSpecificPromptsCollapsed}
+									<div class="space-y-6 transition-all duration-300">
+										<div class="alert alert-info">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												fill="none"
+												viewBox="0 0 24 24"
+												class="h-6 w-6 shrink-0 stroke-current"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+											<div>
+												<p>
+													<strong>Zusätzliche Anweisungen für spezifische Altersgruppen:</strong>
+													Diese Prompts werden zusätzlich zum Hauptprompt verwendet, wenn eine bestimmte
+													Altersgruppe ausgewählt wird. Bei "Alle" werden alle drei Prompts kombiniert.
+												</p>
+											</div>
+										</div>
+
+										<div class="form-control">
+											<label class="label" for="promptAgeYoung">
+												<span class="label-text font-medium">👦 Prompt für junge Menschen</span>
+												<span class="label-text-alt"
+													>Zusätzliche Anweisungen für junge Zielgruppe</span
+												>
+											</label>
+											<textarea
+												id="promptAgeYoung"
+												name="promptAgeYoung"
+												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+												placeholder="z.B. Verwende modernen, lockeren Ton. Nutze aktuelle Trends und Ausdrücke..."
+												value={(data.settings as any)?.ai?.promptAgeYoung || ''}
+											></textarea>
+										</div>
+
+										<div class="form-control">
+											<label class="label" for="promptAgeMiddle">
+												<span class="label-text font-medium">👨 Prompt für mittleres Alter</span>
+												<span class="label-text-alt"
+													>Zusätzliche Anweisungen für mittlere Altersgruppe</span
+												>
+											</label>
+											<textarea
+												id="promptAgeMiddle"
+												name="promptAgeMiddle"
+												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+												placeholder="z.B. Verwende ausgewogenen, respektvollen Ton. Berücksichtige Lebenserfahrung..."
+												value={(data.settings as any)?.ai?.promptAgeMiddle || ''}
+											></textarea>
+										</div>
+
+										<div class="form-control">
+											<label class="label" for="promptAgeSenior">
+												<span class="label-text font-medium">👴 Prompt für ältere Menschen</span>
+												<span class="label-text-alt"
+													>Zusätzliche Anweisungen für ältere Zielgruppe</span
+												>
+											</label>
+											<textarea
+												id="promptAgeSenior"
+												name="promptAgeSenior"
+												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+												placeholder="z.B. Verwende ehrfürchtigen, würdevollen Ton. Betone Weisheit und Erfahrung..."
+												value={(data.settings as any)?.ai?.promptAgeSenior || ''}
+											></textarea>
 										</div>
 									</div>
-
-									<div class="form-control">
-										<label class="label" for="promptAgeYoung">
-											<span class="label-text font-medium">👦 Prompt für junge Menschen</span>
-											<span class="label-text-alt">Zusätzliche Anweisungen für junge Zielgruppe</span>
-										</label>
-										<textarea
-											id="promptAgeYoung"
-											name="promptAgeYoung"
-											class="textarea textarea-bordered h-20 w-full font-mono text-sm"
-											placeholder="z.B. Verwende modernen, lockeren Ton. Nutze aktuelle Trends und Ausdrücke..."
-											value={(data.settings as any)?.ai?.promptAgeYoung || ''}
-										></textarea>
-									</div>
-
-									<div class="form-control">
-										<label class="label" for="promptAgeMiddle">
-											<span class="label-text font-medium">👨 Prompt für mittleres Alter</span>
-											<span class="label-text-alt">Zusätzliche Anweisungen für mittlere Altersgruppe</span>
-										</label>
-										<textarea
-											id="promptAgeMiddle"
-											name="promptAgeMiddle"
-											class="textarea textarea-bordered h-20 w-full font-mono text-sm"
-											placeholder="z.B. Verwende ausgewogenen, respektvollen Ton. Berücksichtige Lebenserfahrung..."
-											value={(data.settings as any)?.ai?.promptAgeMiddle || ''}
-										></textarea>
-									</div>
-
-									<div class="form-control">
-										<label class="label" for="promptAgeSenior">
-											<span class="label-text font-medium">👴 Prompt für ältere Menschen</span>
-											<span class="label-text-alt">Zusätzliche Anweisungen für ältere Zielgruppe</span>
-										</label>
-										<textarea
-											id="promptAgeSenior"
-											name="promptAgeSenior"
-											class="textarea textarea-bordered h-20 w-full font-mono text-sm"
-											placeholder="z.B. Verwende ehrfürchtigen, würdevollen Ton. Betone Weisheit und Erfahrung..."
-											value={(data.settings as any)?.ai?.promptAgeSenior || ''}
-										></textarea>
-									</div>
-								</div>
+								{/if}
 							</div>
 
 							<!-- Advanced Parameters Section -->
 							<div class="bg-base-200 mb-6 rounded-lg p-6">
 								<div class="mb-6 flex items-center justify-between">
-									<h4 class="flex items-center gap-3 text-xl font-bold">
+									<button
+										type="button"
+										class="hover:text-primary flex cursor-pointer items-center gap-3 text-xl font-bold transition-colors"
+										onclick={() => (isAdvancedParametersCollapsed = !isAdvancedParametersCollapsed)}
+									>
 										<div class="badge badge-primary badge-lg">
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
@@ -1791,7 +1825,23 @@
 											</svg>
 										</div>
 										Erweiterte Parameter
-									</h4>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-5 w-5 transition-transform {isAdvancedParametersCollapsed
+												? 'rotate-0'
+												: 'rotate-180'}"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 9l-7 7-7-7"
+											/>
+										</svg>
+									</button>
 									<div
 										class="tooltip tooltip-left"
 										data-tip="Optimale Werte für die meisten Anwendungen"
@@ -1815,182 +1865,184 @@
 									</div>
 								</div>
 
-								<div class="space-y-8">
-									<!-- Creativity Controls -->
-									<div class="card bg-base-100 shadow-sm">
-										<div class="card-body p-6">
-											<h5 class="card-title mb-6 flex items-center gap-3 text-xl">
-												🎨 Kreativitäts-Kontrolle
-											</h5>
+								{#if !isAdvancedParametersCollapsed}
+									<div class="space-y-8 transition-all duration-300">
+										<!-- Creativity Controls -->
+										<div class="card bg-base-100 shadow-sm">
+											<div class="card-body p-6">
+												<h5 class="card-title mb-6 flex items-center gap-3 text-xl">
+													🎨 Kreativitäts-Kontrolle
+												</h5>
 
-											<div class="space-y-8">
-												<div class="form-control">
-													<div class="mb-4 flex items-center justify-between">
-														<label for="temperature" class="label-text text-lg font-semibold"
-															>🌡️ Temperature</label
-														>
-														<div class="badge badge-outline badge-lg">
-															{(data.settings as any)?.ai?.temperature || 0.8}
+												<div class="space-y-8">
+													<div class="form-control">
+														<div class="mb-4 flex items-center justify-between">
+															<label for="temperature" class="label-text text-lg font-semibold"
+																>🌡️ Temperature</label
+															>
+															<div class="badge badge-outline badge-lg">
+																{(data.settings as any)?.ai?.temperature || 0.8}
+															</div>
 														</div>
+														<input
+															id="temperature"
+															name="temperature"
+															type="range"
+															min="0"
+															max="2"
+															step="0.1"
+															class="range range-primary w-full"
+															value={(data.settings as any)?.ai?.temperature || 0.8}
+														/>
+														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
+															<span>Deterministisch</span>
+															<span class="font-medium">Empfohlen: 0.7-1.0</span>
+															<span>Sehr kreativ</span>
+														</div>
+														<p class="text-base-content/70 mt-4 text-base leading-relaxed">
+															Steuert die Zufälligkeit der Antworten. Niedrige Werte = konsistenter,
+															hohe Werte = kreativer.
+														</p>
 													</div>
-													<input
-														id="temperature"
-														name="temperature"
-														type="range"
-														min="0"
-														max="2"
-														step="0.1"
-														class="range range-primary w-full"
-														value={(data.settings as any)?.ai?.temperature || 0.8}
-													/>
-													<div class="text-base-content/60 mt-3 flex justify-between text-sm">
-														<span>Deterministisch</span>
-														<span class="font-medium">Empfohlen: 0.7-1.0</span>
-														<span>Sehr kreativ</span>
+
+													<div class="form-control">
+														<div class="mb-4 flex items-center justify-between">
+															<label for="topP" class="label-text text-lg font-semibold"
+																>🎯 Top P</label
+															>
+															<div class="badge badge-outline badge-lg">
+																{(data.settings as any)?.ai?.topP || 0.9}
+															</div>
+														</div>
+														<input
+															id="topP"
+															name="topP"
+															type="range"
+															min="0"
+															max="1"
+															step="0.1"
+															class="range range-secondary w-full"
+															value={(data.settings as any)?.ai?.topP || 0.9}
+														/>
+														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
+															<span>Fokussiert</span>
+															<span class="font-medium">Empfohlen: 0.8-0.95</span>
+															<span>Vielfältig</span>
+														</div>
+														<p class="text-base-content/70 mt-4 text-base leading-relaxed">
+															Nucleus Sampling - begrenzt die Wortauswahl auf die wahrscheinlichsten
+															Optionen.
+														</p>
 													</div>
-													<p class="text-base-content/70 mt-4 text-base leading-relaxed">
-														Steuert die Zufälligkeit der Antworten. Niedrige Werte = konsistenter,
-														hohe Werte = kreativer.
-													</p>
 												</div>
+											</div>
+										</div>
 
-												<div class="form-control">
-													<div class="mb-4 flex items-center justify-between">
-														<label for="topP" class="label-text text-lg font-semibold"
-															>🎯 Top P</label
-														>
-														<div class="badge badge-outline badge-lg">
-															{(data.settings as any)?.ai?.topP || 0.9}
+										<!-- Output Controls -->
+										<div class="card bg-base-100 shadow-sm">
+											<div class="card-body p-6">
+												<h5 class="card-title mb-6 flex items-center gap-3 text-xl">
+													⚙️ Ausgabe-Kontrolle
+												</h5>
+
+												<div class="space-y-8">
+													<div class="form-control">
+														<label class="label mb-4" for="maxTokens">
+															<span class="label-text text-lg font-semibold">📏 Max Tokens</span>
+															<span class="badge badge-ghost badge-lg">
+																{(data.settings as any)?.ai?.maxTokens || 2000}
+															</span>
+														</label>
+														<input
+															id="maxTokens"
+															name="maxTokens"
+															type="range"
+															min="500"
+															max="4000"
+															step="100"
+															class="range range-accent w-full"
+															value={(data.settings as any)?.ai?.maxTokens || 2000}
+														/>
+														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
+															<span>500</span>
+															<span class="font-medium">Empfohlen: 1500-2500</span>
+															<span>4000</span>
 														</div>
+														<p class="text-base-content/70 mt-4 text-base leading-relaxed">
+															Maximale Länge der generierten Antwort. ~4 Zeichen = 1 Token.
+														</p>
 													</div>
-													<input
-														id="topP"
-														name="topP"
-														type="range"
-														min="0"
-														max="1"
-														step="0.1"
-														class="range range-secondary w-full"
-														value={(data.settings as any)?.ai?.topP || 0.9}
-													/>
-													<div class="text-base-content/60 mt-3 flex justify-between text-sm">
-														<span>Fokussiert</span>
-														<span class="font-medium">Empfohlen: 0.8-0.95</span>
-														<span>Vielfältig</span>
+
+													<div class="form-control">
+														<label class="label mb-4" for="frequencyPenalty">
+															<span class="label-text text-lg font-semibold"
+																>🔄 Frequency Penalty</span
+															>
+															<span class="badge badge-ghost badge-lg">
+																{(data.settings as any)?.ai?.frequencyPenalty || 0.1}
+															</span>
+														</label>
+														<input
+															id="frequencyPenalty"
+															name="frequencyPenalty"
+															type="range"
+															min="-1"
+															max="1"
+															step="0.1"
+															class="range range-warning w-full"
+															value={(data.settings as any)?.ai?.frequencyPenalty || 0.1}
+														/>
+														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
+															<span>Wiederholungen</span>
+															<span class="font-medium">Empfohlen: 0.0-0.3</span>
+															<span>Abwechslung</span>
+														</div>
+														<p class="text-base-content/70 mt-4 text-base leading-relaxed">
+															Bestraft häufige Wiederholungen. Positive Werte fördern Vielfalt.
+														</p>
 													</div>
-													<p class="text-base-content/70 mt-4 text-base leading-relaxed">
-														Nucleus Sampling - begrenzt die Wortauswahl auf die wahrscheinlichsten
-														Optionen.
-													</p>
 												</div>
 											</div>
 										</div>
 									</div>
 
-									<!-- Output Controls -->
-									<div class="card bg-base-100 shadow-sm">
-										<div class="card-body p-6">
-											<h5 class="card-title mb-6 flex items-center gap-3 text-xl">
-												⚙️ Ausgabe-Kontrolle
-											</h5>
-
-											<div class="space-y-8">
-												<div class="form-control">
-													<label class="label mb-4" for="maxTokens">
-														<span class="label-text text-lg font-semibold">📏 Max Tokens</span>
-														<span class="badge badge-ghost badge-lg">
-															{(data.settings as any)?.ai?.maxTokens || 2000}
-														</span>
-													</label>
-													<input
-														id="maxTokens"
-														name="maxTokens"
-														type="range"
-														min="500"
-														max="4000"
-														step="100"
-														class="range range-accent w-full"
-														value={(data.settings as any)?.ai?.maxTokens || 2000}
-													/>
-													<div class="text-base-content/60 mt-3 flex justify-between text-sm">
-														<span>500</span>
-														<span class="font-medium">Empfohlen: 1500-2500</span>
-														<span>4000</span>
-													</div>
-													<p class="text-base-content/70 mt-4 text-base leading-relaxed">
-														Maximale Länge der generierten Antwort. ~4 Zeichen = 1 Token.
-													</p>
-												</div>
-
-												<div class="form-control">
-													<label class="label mb-4" for="frequencyPenalty">
-														<span class="label-text text-lg font-semibold"
-															>🔄 Frequency Penalty</span
-														>
-														<span class="badge badge-ghost badge-lg">
-															{(data.settings as any)?.ai?.frequencyPenalty || 0.1}
-														</span>
-													</label>
-													<input
-														id="frequencyPenalty"
-														name="frequencyPenalty"
-														type="range"
-														min="-1"
-														max="1"
-														step="0.1"
-														class="range range-warning w-full"
-														value={(data.settings as any)?.ai?.frequencyPenalty || 0.1}
-													/>
-													<div class="text-base-content/60 mt-3 flex justify-between text-sm">
-														<span>Wiederholungen</span>
-														<span class="font-medium">Empfohlen: 0.0-0.3</span>
-														<span>Abwechslung</span>
-													</div>
-													<p class="text-base-content/70 mt-4 text-base leading-relaxed">
-														Bestraft häufige Wiederholungen. Positive Werte fördern Vielfalt.
-													</p>
-												</div>
+									<!-- Quick Presets -->
+									<div class="card bg-base-100 mt-6 shadow-sm">
+										<div class="card-body p-4">
+											<h5 class="card-title mb-3 text-sm">⚡ Schnell-Einstellungen</h5>
+											<div class="flex flex-wrap gap-2">
+												<button
+													type="button"
+													class="btn btn-outline btn-sm"
+													onclick={() => setPreset('precise')}
+												>
+													🎯 Präzise (Temp: 0.3, TopP: 0.7)
+												</button>
+												<button
+													type="button"
+													class="btn btn-outline btn-sm"
+													onclick={() => setPreset('balanced')}
+												>
+													⚖️ Ausgewogen (Temp: 0.8, TopP: 0.9)
+												</button>
+												<button
+													type="button"
+													class="btn btn-outline btn-sm"
+													onclick={() => setPreset('creative')}
+												>
+													🎨 Kreativ (Temp: 1.2, TopP: 0.95)
+												</button>
+												<button
+													type="button"
+													class="btn btn-outline btn-sm"
+													onclick={() => setPreset('default')}
+												>
+													🔄 Reset Defaults
+												</button>
 											</div>
 										</div>
 									</div>
-								</div>
-
-								<!-- Quick Presets -->
-								<div class="card bg-base-100 mt-6 shadow-sm">
-									<div class="card-body p-4">
-										<h5 class="card-title mb-3 text-sm">⚡ Schnell-Einstellungen</h5>
-										<div class="flex flex-wrap gap-2">
-											<button
-												type="button"
-												class="btn btn-outline btn-sm"
-												onclick={() => setPreset('precise')}
-											>
-												🎯 Präzise (Temp: 0.3, TopP: 0.7)
-											</button>
-											<button
-												type="button"
-												class="btn btn-outline btn-sm"
-												onclick={() => setPreset('balanced')}
-											>
-												⚖️ Ausgewogen (Temp: 0.8, TopP: 0.9)
-											</button>
-											<button
-												type="button"
-												class="btn btn-outline btn-sm"
-												onclick={() => setPreset('creative')}
-											>
-												🎨 Kreativ (Temp: 1.2, TopP: 0.95)
-											</button>
-											<button
-												type="button"
-												class="btn btn-outline btn-sm"
-												onclick={() => setPreset('default')}
-											>
-												🔄 Reset Defaults
-											</button>
-										</div>
-									</div>
-								</div>
+								{/if}
 							</div>
 
 							<!-- Important Notice -->
