@@ -112,7 +112,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const { data: userSettings, error: settingsError } = await locals.supabase
 			.from('user_settings')
 			.select(
-				'ai_prompt_system, ai_prompt_template, ai_prompt_age_young, ai_prompt_age_middle, ai_prompt_age_senior, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty, specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
+				'ai_prompt_system, ai_prompt_template, ai_prompt_age_young, ai_prompt_age_middle, ai_prompt_age_senior, ai_prompt_relation_friend, ai_prompt_relation_family, ai_prompt_relation_partner, ai_prompt_relation_colleague, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty, specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
 			)
 			.eq('user_id', user.id)
 			.single();
@@ -125,21 +125,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Erstelle AI-Settings mit benutzerdefinierten Werten oder Fallbacks
-		const aiSettings = userSettings
+		const aiSettings = userSettings as any
 			? {
 					promptSystem:
-						userSettings.ai_prompt_system ||
+						(userSettings as any).ai_prompt_system ||
 						'Du bist ein Experte für das Schreiben von Glückwünschen. Du MUSST immer im exakten JSON-Format antworten, niemals als Text oder Markdown. Antworte NUR mit einem gültigen JSON-Objekt.',
-					promptTemplate: userSettings.ai_prompt_template || undefined, // null zu undefined konvertieren
-					promptAgeYoung: userSettings.ai_prompt_age_young || undefined,
-					promptAgeMiddle: userSettings.ai_prompt_age_middle || undefined,
-					promptAgeSenior: userSettings.ai_prompt_age_senior || undefined,
-					model: userSettings.ai_model || 'anthropic/claude-sonnet-4',
-					temperature: userSettings.ai_temperature ?? 0.8,
-					maxTokens: userSettings.ai_max_tokens || 2000,
-					topP: userSettings.ai_top_p ?? 0.9,
-					frequencyPenalty: userSettings.ai_frequency_penalty ?? 0.1,
-					presencePenalty: userSettings.ai_presence_penalty ?? 0.1
+					promptTemplate: (userSettings as any).ai_prompt_template || undefined, // null zu undefined konvertieren
+					promptAgeYoung: (userSettings as any).ai_prompt_age_young || undefined,
+					promptAgeMiddle: (userSettings as any).ai_prompt_age_middle || undefined,
+					promptAgeSenior: (userSettings as any).ai_prompt_age_senior || undefined,
+					promptRelationFriend: (userSettings as any).ai_prompt_relation_friend || undefined,
+					promptRelationFamily: (userSettings as any).ai_prompt_relation_family || undefined,
+					promptRelationPartner: (userSettings as any).ai_prompt_relation_partner || undefined,
+					promptRelationColleague: (userSettings as any).ai_prompt_relation_colleague || undefined,
+					model: (userSettings as any).ai_model || 'anthropic/claude-sonnet-4',
+					temperature: (userSettings as any).ai_temperature ?? 0.8,
+					maxTokens: (userSettings as any).ai_max_tokens || 2000,
+					topP: (userSettings as any).ai_top_p ?? 0.9,
+					frequencyPenalty: (userSettings as any).ai_frequency_penalty ?? 0.1,
+					presencePenalty: (userSettings as any).ai_presence_penalty ?? 0.1
 				}
 			: undefined;
 
@@ -147,12 +151,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		let mergedSpecificValues = specificValues || [];
 		let specificValuesDescription = '';
 
-		if (userSettings && specificValues && specificValues.length > 0) {
+		if ((userSettings as any) && specificValues && specificValues.length > 0) {
 			// Bestimme das richtige Feld basierend auf eventType und language
 			const eventKey = eventType.toLowerCase();
 			const languageKey = language.toLowerCase();
 			const settingsKey = `specific_values_${eventKey}_${languageKey}` as keyof typeof userSettings;
-			const storedDescription = userSettings[settingsKey];
+			const storedDescription = (userSettings as any)[settingsKey];
 
 			if (storedDescription && typeof storedDescription === 'string' && storedDescription.trim()) {
 				specificValuesDescription = storedDescription;

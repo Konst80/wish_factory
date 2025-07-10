@@ -47,6 +47,11 @@ interface AISettings {
 	promptAgeYoung?: string; // Optional - zusätzliche Anweisungen für junge Menschen
 	promptAgeMiddle?: string; // Optional - zusätzliche Anweisungen für mittlere Altersgruppe
 	promptAgeSenior?: string; // Optional - zusätzliche Anweisungen für ältere Menschen
+	// Relation-specific prompts
+	promptRelationFriend?: string; // Optional - zusätzliche Anweisungen für Freunde
+	promptRelationFamily?: string; // Optional - zusätzliche Anweisungen für Familie
+	promptRelationPartner?: string; // Optional - zusätzliche Anweisungen für Partner
+	promptRelationColleague?: string; // Optional - zusätzliche Anweisungen für Kollegen
 	model: string;
 	temperature: number;
 	maxTokens: number;
@@ -376,6 +381,22 @@ class OpenRouterAIService {
 		}
 		const ageGroupPromptsText = ageGroupPrompts.length > 0 ? `\n\n**Altersgruppen-spezifische Anweisungen:**\n${ageGroupPrompts.join('\n')}` : '';
 
+		// Build relation-specific prompts based on selection
+		const relationPrompts = [];
+		if (relations.includes('friend') && aiSettings?.promptRelationFriend) {
+			relationPrompts.push(`**Für Freunde:** ${aiSettings.promptRelationFriend}`);
+		}
+		if (relations.includes('family') && aiSettings?.promptRelationFamily) {
+			relationPrompts.push(`**Für Familie:** ${aiSettings.promptRelationFamily}`);
+		}
+		if (relations.includes('partner') && aiSettings?.promptRelationPartner) {
+			relationPrompts.push(`**Für Partner:** ${aiSettings.promptRelationPartner}`);
+		}
+		if (relations.includes('colleague') && aiSettings?.promptRelationColleague) {
+			relationPrompts.push(`**Für Kollegen:** ${aiSettings.promptRelationColleague}`);
+		}
+		const relationPromptsText = relationPrompts.length > 0 ? `\n\n**Beziehungs-spezifische Anweisungen:**\n${relationPrompts.join('\n')}` : '';
+
 		const countText = count === 1 ? 'Glückwunsch' : 'Glückwünsche';
 		const specificValuesText =
 			specificValues && specificValues.length > 0
@@ -398,8 +419,18 @@ class OpenRouterAIService {
 			count,
 			countText,
 			specificValuesText,
-			additionalInstructionsText
+			additionalInstructionsText,
+			ageGroupPromptsText: ageGroupPromptsText ? 'SET' : 'EMPTY',
+			relationPromptsText: relationPromptsText ? 'SET' : 'EMPTY'
 		});
+
+		// Log detailed prompts for debugging
+		if (ageGroupPromptsText) {
+			console.log('👥 Altersgruppen-spezifische Prompts:', ageGroupPromptsText);
+		}
+		if (relationPromptsText) {
+			console.log('🤝 Beziehungs-spezifische Prompts:', relationPromptsText);
+		}
 
 		// Template-Variablen ersetzen
 		let finalPrompt = template
@@ -417,8 +448,9 @@ class OpenRouterAIService {
 			.replace(/\{specificValues\}/g, specificValuesText)
 			.replace(/\{additionalInstructions\}/g, additionalInstructionsText);
 
-		// Age group prompts an das Ende des Templates anhängen
+		// Age group prompts und relation prompts an das Ende des Templates anhängen
 		finalPrompt += ageGroupPromptsText;
+		finalPrompt += relationPromptsText;
 
 		// HARDCODIERTE JSON-FORMAT-ANWEISUNG - IMMER ANHÄNGEN
 		const mandatoryJsonInstructions =
@@ -462,11 +494,17 @@ class OpenRouterAIService {
 		// Füge die hardcodierte JSON-Anweisung IMMER hinzu
 		finalPrompt += mandatoryJsonInstructions;
 
-		console.log(
-			'📝 Final Prompt after variable replacement (first 500 chars):',
-			finalPrompt.substring(0, 500) + '...'
-		);
-		console.log('🔒 Hardcodierte JSON-Anweisung wurde hinzugefügt');
+		// Enhanced Prompt Logging für bessere Debugging
+		console.log('\n' + '='.repeat(80));
+		console.log('📝 FINAL GENERATED PROMPT - COMPLETE');
+		console.log('='.repeat(80));
+		console.log(finalPrompt);
+		console.log('='.repeat(80));
+		console.log(`📊 Prompt Stats: ${finalPrompt.length} characters, ~${Math.ceil(finalPrompt.length / 4)} tokens`);
+		console.log('🔒 JSON-Format-Anweisung: ✅ Hinzugefügt');
+		console.log('👥 Altersgruppen-Prompts:', ageGroupPromptsText ? '✅ Aktiv' : '❌ Keine');
+		console.log('🤝 Beziehungs-Prompts:', relationPromptsText ? '✅ Aktiv' : '❌ Keine');
+		console.log('='.repeat(80) + '\n');
 
 		return finalPrompt;
 	}

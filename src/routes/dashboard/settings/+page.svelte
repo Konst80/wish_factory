@@ -2080,14 +2080,6 @@
 															placeholder="Beschreiben Sie wichtige Geburtstage und ihre Bedeutung, z.B.: 16 Jahre (Sweet Sixteen), 18 Jahre (Volljährigkeit), 21 Jahre (Erwachsenwerden), 30 Jahre (Lebensmitte), 50 Jahre (Goldenes Jubiläum)..."
 															>{data.settings.specificValues.birthdayDe || ''}</textarea
 														>
-														<label class="label">
-															<span class="label-text-alt"
-																>Beschreibung wichtiger Geburtstage mit Bedeutung</span
-															>
-															<span class="label-text-alt text-info"
-																>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
-															>
-														</label>
 													</div>
 
 													<div class="form-control">
@@ -2110,14 +2102,6 @@
 															placeholder="Beschreiben Sie wichtige Hochzeitstage und ihre Bedeutung, z.B.: 1 Jahr (Papierhochzeit), 5 Jahre (Holzhochzeit), 10 Jahre (Rosenhochzeit), 25 Jahre (Silberhochzeit), 50 Jahre (Goldene Hochzeit)..."
 															>{data.settings.specificValues.anniversaryDe || ''}</textarea
 														>
-														<label class="label">
-															<span class="label-text-alt"
-																>Beschreibung wichtiger Hochzeitstage mit Bedeutung</span
-															>
-															<span class="label-text-alt text-info"
-																>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
-															>
-														</label>
 													</div>
 
 													<div class="form-control">
@@ -2140,14 +2124,6 @@
 															placeholder="Beschreiben Sie wichtige Meilensteine und ihre Bedeutung, z.B.: 5 Jahre (Lustrum), 10 Jahre (Dekade), 25 Jahre (Vierteljahrhundert), 50 Jahre (Halbes Jahrhundert)..."
 															>{data.settings.specificValues.customDe || ''}</textarea
 														>
-														<label class="label">
-															<span class="label-text-alt"
-																>Beschreibung wichtiger Meilensteine mit Bedeutung</span
-															>
-															<span class="label-text-alt text-info"
-																>Diese Beschreibung wird zur KI-Prompt-Erstellung verwendet</span
-															>
-														</label>
 													</div>
 												</div>
 											</div>
