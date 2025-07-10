@@ -17,6 +17,7 @@
 	let isSpecificValuesCollapsed = $state(true);
 	let isAdvancedParametersCollapsed = $state(true);
 	let isTemplateVariablesCollapsed = $state(true);
+	let isBatchPlaceholdersCollapsed = $state(true);
 
 	// Show form result messages
 	$effect(() => {
@@ -1448,10 +1449,9 @@
 										<textarea
 											id="promptTemplate"
 											name="promptTemplate"
-											class="textarea textarea-bordered h-96 w-full font-mono text-sm overflow-y-auto"
+											class="textarea textarea-bordered h-96 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen. Generiere &#123;count&#125; &#123;countText&#125; in der Sprache &#123;language&#125;..."
 											value={(data.settings as any)?.ai?.promptTemplate || ''}
-											onwheel={(e) => e.stopPropagation()}
 										></textarea>
 										<div
 											class="from-info/5 to-primary/5 border-info/20 mt-4 rounded-lg border bg-gradient-to-br p-4"
@@ -2068,11 +2068,161 @@
 												value={(data.settings as any)?.ai?.promptBatch || ''}
 											></textarea>
 											<label class="label">
-												<span class="label-text-alt"
-													>Platzhalter: {'{count}'} für Anzahl der Wünsche</span
-												>
 												<span class="label-text-alt text-info">Für optimale Batch-Ergebnisse</span>
 											</label>
+
+											<!-- Batch Prompt Platzhalter -->
+											<div class="mt-4">
+												<div class="mb-3 flex items-center justify-between">
+													<button
+														type="button"
+														class="hover:text-primary flex cursor-pointer items-center gap-2 text-base font-semibold transition-colors"
+														onclick={() =>
+															(isBatchPlaceholdersCollapsed = !isBatchPlaceholdersCollapsed)}
+													>
+														<div class="badge badge-info badge-lg">
+															<svg
+																xmlns="http://www.w3.org/2000/svg"
+																class="h-4 w-4"
+																fill="none"
+																viewBox="0 0 24 24"
+																stroke="currentColor"
+															>
+																<path
+																	stroke-linecap="round"
+																	stroke-linejoin="round"
+																	stroke-width="2"
+																	d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+																/>
+															</svg>
+														</div>
+														Verfügbare Batch-Platzhalter
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class="h-4 w-4 transition-transform {isBatchPlaceholdersCollapsed
+																? 'rotate-0'
+																: 'rotate-180'}"
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M19 9l-7 7-7-7"
+															/>
+														</svg>
+													</button>
+												</div>
+												{#if !isBatchPlaceholdersCollapsed}
+													<div class="transition-all duration-300">
+														<div
+															class="from-info/5 to-primary/5 border-info/20 rounded-lg border bg-gradient-to-br p-4"
+														>
+															<p class="text-base-content/70 mb-4 text-sm">
+																Klicken Sie auf einen Platzhalter, um ihn an der Cursor-Position
+																einzufügen.
+															</p>
+															<div class="space-y-2 text-sm">
+																<div class="grid grid-cols-1 gap-2 md:grid-cols-2">
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Anzahl der zu generierenden Wünsche"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() => insertPlaceholder('promptBatch', '{count}')}
+																		>
+																			<code class="text-primary font-bold">{'{count}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Anzahl</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Ausgewählte Wunschtypen (übersetzt)"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptBatch', '{wishTypes}')}
+																		>
+																			<code class="text-primary font-bold">{'{wishTypes}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Typen</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Ausgewählte Anlässe (übersetzt)"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptBatch', '{eventTypes}')}
+																		>
+																			<code class="text-primary font-bold">{'{eventTypes}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Anlässe</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Ausgewählte Sprachen (übersetzt)"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptBatch', '{languages}')}
+																		>
+																			<code class="text-primary font-bold">{'{languages}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Sprachen</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Ausgewählte Beziehungen (übersetzt)"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptBatch', '{relations}')}
+																		>
+																			<code class="text-primary font-bold">{'{relations}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Beziehungen</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Ausgewählte Altersgruppen (übersetzt)"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptBatch', '{ageGroups}')}
+																		>
+																			<code class="text-primary font-bold">{'{ageGroups}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Altersgruppen</span>
+																		</button>
+																	</div>
+																</div>
+																<div class="mt-3 text-xs opacity-70">
+																	<strong>Roh-Werte (englisch):</strong>
+																	<code class="text-primary">{'{wishTypesRaw}'}</code>,
+																	<code class="text-primary">{'{eventTypesRaw}'}</code>,
+																	<code class="text-primary">{'{languagesRaw}'}</code>,
+																	<code class="text-primary">{'{relationsRaw}'}</code>,
+																	<code class="text-primary">{'{ageGroupsRaw}'}</code>
+																</div>
+															</div>
+														</div>
+													</div>
+												{/if}
+											</div>
 										</div>
 									</div>
 								{/if}

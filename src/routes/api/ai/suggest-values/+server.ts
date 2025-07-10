@@ -41,13 +41,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// AI-Service aufrufen
 		const result = await aiService.generateWishes(
 			{
-				type: 'normal',
-				eventType,
-				language,
+				types: ['normal'],
+				eventTypes: [eventType],
+				languages: [language],
 				relations: ['friend'],
 				ageGroups: ['all'],
 				specificValues: [],
-				style: 'normal',
 				count: 1,
 				additionalInstructions: prompt
 			},

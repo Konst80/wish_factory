@@ -16,17 +16,3 @@
 		valentine,
 		aqua;
 }
-
-/* Fix scrolling issues - Force scrolling for textareas */
-textarea.textarea {
-	overflow: auto !important;
-	overflow-y: scroll !important;
-	scroll-behavior: auto !important;
-	overscroll-behavior-y: contain !important;
-}
-
-/* Fix scrolling for custom containers */
-.overflow-y-auto, 
-.overflow-y-scroll {
-	overscroll-behavior: contain !important;
-}

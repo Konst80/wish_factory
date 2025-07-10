@@ -21,6 +21,10 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		(url.searchParams.get('relations')?.split(',').filter(Boolean) as Relation[]) || [];
 	const ageGroups =
 		(url.searchParams.get('ageGroups')?.split(',').filter(Boolean) as AgeGroup[]) || [];
+	
+	// Extract sorting parameters
+	const sortBy = url.searchParams.get('sortBy') || 'created_at';
+	const sortOrder = url.searchParams.get('sortOrder') || 'desc';
 
 	// Check for success messages
 	const deleted = url.searchParams.get('deleted') === 'true';
@@ -33,6 +37,16 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		eventType: eventType || undefined,
 		relations: relations.length > 0 ? relations : undefined,
 		ageGroups: ageGroups.length > 0 ? ageGroups : undefined
+	};
+
+	// Define sortable columns mapping
+	const sortableColumns: Record<string, string> = {
+		'created_at': 'created_at',
+		'updated_at': 'updated_at',
+		'status': 'status',
+		'language': 'language',
+		'event_type': 'event_type',
+		'text': 'text'
 	};
 
 	// Build query
@@ -58,8 +72,12 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		query = query.overlaps('age_groups', ageGroups);
 	}
 
-	const { data: wishes = [], error: wishError } = await query.order('created_at', {
-		ascending: false
+	// Apply sorting with validation
+	const validSortBy = sortableColumns[sortBy] || 'created_at';
+	const ascending = sortOrder === 'asc';
+	
+	const { data: wishes = [], error: wishError } = await query.order(validSortBy, {
+		ascending
 	});
 
 	if (wishError) {
@@ -110,7 +128,11 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		stats: statistics,
 		deleted,
 		deletedCount,
-		profile
+		profile,
+		sorting: {
+			sortBy,
+			sortOrder
+		}
 	};
 };
 

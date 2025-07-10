@@ -14,6 +14,10 @@
 	let selectedRelations = $state(data.filters.relations || []);
 	let selectedAgeGroups = $state(data.filters.ageGroups || []);
 
+	// Sorting State
+	let currentSortBy = $state(data.sorting?.sortBy || 'created_at');
+	let currentSortOrder = $state(data.sorting?.sortOrder || 'desc');
+
 	// UI State
 	let showFilters = $state(false);
 	let selectedWishes = $state<string[]>([]);
@@ -46,7 +50,30 @@
 		if (selectedEventType) params.set('eventType', selectedEventType);
 		if (selectedRelations.length) params.set('relations', selectedRelations.join(','));
 		if (selectedAgeGroups.length) params.set('ageGroups', selectedAgeGroups.join(','));
+		
+		// Preserve current sorting
+		if (currentSortBy !== 'created_at') params.set('sortBy', currentSortBy);
+		if (currentSortOrder !== 'desc') params.set('sortOrder', currentSortOrder);
 
+		goto(`?${params.toString()}`, { replaceState: true });
+	}
+
+	// Sorting function
+	function sortBy(column: string) {
+		const params = new URLSearchParams(window.location.search);
+		
+		// Toggle sort order if clicking the same column
+		if (currentSortBy === column) {
+			currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+		} else {
+			currentSortBy = column;
+			currentSortOrder = 'desc'; // Default to descending for new columns
+		}
+		
+		// Update URL parameters
+		params.set('sortBy', currentSortBy);
+		params.set('sortOrder', currentSortOrder);
+		
 		goto(`?${params.toString()}`, { replaceState: true });
 	}
 
@@ -526,11 +553,96 @@
 							/>
 						</label>
 					</th>
-					<th class="px-3 py-4 text-left text-sm font-semibold">Anlass</th>
-					<th class="min-w-80 px-3 py-4 text-left text-sm font-semibold">Text</th>
-					<th class="px-3 py-4 text-left text-sm font-semibold">Status</th>
-					<th class="w-16 px-3 py-4 text-center text-sm font-semibold">Lang</th>
-					<th class="px-3 py-4 text-left text-sm font-semibold">Erstellt</th>
+					<th 
+						class="px-3 py-4 text-left text-sm font-semibold cursor-pointer hover:bg-base-200 select-none transition-colors"
+						onclick={() => sortBy('event_type')}
+						title="Nach Anlass sortieren"
+					>
+						<div class="flex items-center gap-2">
+							<span>Anlass</span>
+							{#if currentSortBy === 'event_type'}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 {currentSortOrder === 'asc' ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+								</svg>
+							{:else}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+								</svg>
+							{/if}
+						</div>
+					</th>
+					<th 
+						class="min-w-80 px-3 py-4 text-left text-sm font-semibold cursor-pointer hover:bg-base-200 select-none transition-colors"
+						onclick={() => sortBy('text')}
+						title="Nach Text sortieren"
+					>
+						<div class="flex items-center gap-2">
+							<span>Text</span>
+							{#if currentSortBy === 'text'}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 {currentSortOrder === 'asc' ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+								</svg>
+							{:else}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+								</svg>
+							{/if}
+						</div>
+					</th>
+					<th 
+						class="px-3 py-4 text-left text-sm font-semibold cursor-pointer hover:bg-base-200 select-none transition-colors"
+						onclick={() => sortBy('status')}
+						title="Nach Status sortieren"
+					>
+						<div class="flex items-center gap-2">
+							<span>Status</span>
+							{#if currentSortBy === 'status'}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 {currentSortOrder === 'asc' ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+								</svg>
+							{:else}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+								</svg>
+							{/if}
+						</div>
+					</th>
+					<th 
+						class="w-16 px-3 py-4 text-center text-sm font-semibold cursor-pointer hover:bg-base-200 select-none transition-colors"
+						onclick={() => sortBy('language')}
+						title="Nach Sprache sortieren"
+					>
+						<div class="flex items-center gap-2 justify-center">
+							<span>Lang</span>
+							{#if currentSortBy === 'language'}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 {currentSortOrder === 'asc' ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+								</svg>
+							{:else}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+								</svg>
+							{/if}
+						</div>
+					</th>
+					<th 
+						class="px-3 py-4 text-left text-sm font-semibold cursor-pointer hover:bg-base-200 select-none transition-colors"
+						onclick={() => sortBy('created_at')}
+						title="Nach Erstellungsdatum sortieren"
+					>
+						<div class="flex items-center gap-2">
+							<span>Erstellt</span>
+							{#if currentSortBy === 'created_at'}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 {currentSortOrder === 'asc' ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+								</svg>
+							{:else}
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+								</svg>
+							{/if}
+						</div>
+					</th>
 					<th class="px-3 py-4 text-left text-sm font-semibold">Von</th>
 					<th class="w-20 px-3 py-4 text-center text-sm font-semibold">Aktionen</th>
 				</tr>

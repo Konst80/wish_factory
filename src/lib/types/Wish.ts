@@ -111,8 +111,8 @@ export const wishSchema = z.object({
 		.max(1000, 'Text darf nicht länger als 1000 Zeichen sein'),
 	belated: z
 		.string()
-		.min(10, 'Belated-Text muss mindestens 10 Zeichen haben')
-		.max(1000, 'Belated-Text darf nicht länger als 1000 Zeichen sein'),
+		.max(1000, 'Belated-Text darf nicht länger als 1000 Zeichen sein')
+		.default(''),
 	status: wishStatusSchema.default('Entwurf'),
 	language: languageSchema,
 	createdAt: z.date().default(() => new Date()),

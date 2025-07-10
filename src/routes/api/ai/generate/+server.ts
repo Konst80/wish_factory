@@ -50,8 +50,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const {
 			type,
+			types,
 			eventType,
+			eventTypes,
 			language,
+			languages,
 			relations,
 			ageGroups,
 			specificValues,
@@ -61,20 +64,47 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			isBatch = false
 		} = body;
 
-		// Validierung der Eingaben
-		if (!type || !Object.values(WishType).includes(type)) {
-			console.log(`❌ Ungültiger Wunsch-Typ: ${type}`);
-			throw error(400, 'Ungültiger Wunsch-Typ');
+		// Handle backward compatibility and new array format
+		const finalTypes = types || (type ? [type] : []);
+		const finalEventTypes = eventTypes || (eventType ? [eventType] : []);
+		const finalLanguages = languages || (language ? [language] : []);
+
+		// Validierung der Eingaben - Arrays müssen mindestens einen Wert haben
+		if (!finalTypes || finalTypes.length === 0) {
+			console.log(`❌ Keine Wunsch-Typen angegeben: ${finalTypes}`);
+			throw error(400, 'Mindestens ein Wunsch-Typ muss ausgewählt sein');
 		}
 
-		if (!eventType || !Object.values(EventType).includes(eventType)) {
-			console.log(`❌ Ungültiger Event-Typ: ${eventType}`);
-			throw error(400, 'Ungültiger Event-Typ');
+		if (!finalEventTypes || finalEventTypes.length === 0) {
+			console.log(`❌ Keine Event-Typen angegeben: ${finalEventTypes}`);
+			throw error(400, 'Mindestens ein Event-Typ muss ausgewählt sein');
 		}
 
-		if (!language || !Object.values(Language).includes(language)) {
-			console.log(`❌ Ungültige Sprache: ${language}`);
-			throw error(400, 'Ungültige Sprache');
+		if (!finalLanguages || finalLanguages.length === 0) {
+			console.log(`❌ Keine Sprachen angegeben: ${finalLanguages}`);
+			throw error(400, 'Mindestens eine Sprache muss ausgewählt sein');
+		}
+
+		// Validiere einzelne Werte in den Arrays
+		for (const t of finalTypes) {
+			if (!Object.values(WishType).includes(t)) {
+				console.log(`❌ Ungültiger Wunsch-Typ: ${t}`);
+				throw error(400, `Ungültiger Wunsch-Typ: ${t}`);
+			}
+		}
+
+		for (const et of finalEventTypes) {
+			if (!Object.values(EventType).includes(et)) {
+				console.log(`❌ Ungültiger Event-Typ: ${et}`);
+				throw error(400, `Ungültiger Event-Typ: ${et}`);
+			}
+		}
+
+		for (const l of finalLanguages) {
+			if (!Object.values(Language).includes(l)) {
+				console.log(`❌ Ungültige Sprache: ${l}`);
+				throw error(400, `Ungültige Sprache: ${l}`);
+			}
 		}
 
 		if (!relations || !Array.isArray(relations) || relations.length === 0) {
@@ -155,9 +185,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		let specificValuesDescription = '';
 
 		if ((userSettings as any) && specificValues && specificValues.length > 0) {
-			// Bestimme das richtige Feld basierend auf eventType und language
-			const eventKey = eventType.toLowerCase();
-			const languageKey = language.toLowerCase();
+			// Verwende den ersten Event-Typ und die erste Sprache für spezifische Werte
+			const eventKey = finalEventTypes[0].toLowerCase();
+			const languageKey = finalLanguages[0].toLowerCase();
 			const settingsKey = `specific_values_${eventKey}_${languageKey}` as keyof typeof userSettings;
 			const storedDescription = (userSettings as any)[settingsKey];
 
@@ -190,13 +220,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// KI-Generierung mit User-Tracking und Custom-Settings
 		const result = await aiService.generateWishes(
 			{
-				type,
-				eventType,
-				language,
+				types: finalTypes,
+				eventTypes: finalEventTypes,
+				languages: finalLanguages,
 				relations,
 				ageGroups,
 				specificValues: mergedSpecificValues,
-				style,
 				count: limitedCount,
 				additionalInstructions: specificValuesDescription
 					? `${additionalInstructions ? additionalInstructions + '\n\n' : ''}Spezifische Werte und Bedeutungen:\n${specificValuesDescription}`

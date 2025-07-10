@@ -322,13 +322,12 @@
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({
-						type: primaryType,
-						eventType: primaryEventType,
-						language: primaryLanguage,
+						types: typesToGenerate as WishType[], // Send full array for AI to choose from
+						eventTypes: eventTypesToGenerate as EventType[], // Send full array for AI to choose from
+						languages: languagesToGenerate as Language[], // Send full array for AI to choose from
 						relations: relationsToGenerate as Relation[],
 						ageGroups: ageGroupsToGenerate as AgeGroup[],
 						specificValues: specificValuesToUse ? [parseInt(specificValuesToUse.toString())] : [],
-						style: batchSettings.includeAlternatives ? 'mixed' : 'normal',
 						count: batchSettings.count, // Request multiple wishes at once
 						isBatch: true // Flag to indicate this is a batch request
 					})
@@ -365,17 +364,17 @@
 
 					generatedWishes.push({
 						id: `ai-generated-${idCounter++}`,
-						type: primaryType as WishType,
-						eventType: primaryEventType as EventType,
-						relations: relationsToGenerate as Relation[],
-						ageGroups: ageGroupsToGenerate as AgeGroup[],
+						type: wish.metadata?.type || (primaryType as WishType),
+						eventType: wish.metadata?.eventType || (primaryEventType as EventType),
+						relations: wish.metadata?.relations || (relationsToGenerate as Relation[]),
+						ageGroups: wish.metadata?.ageGroups || (ageGroupsToGenerate as AgeGroup[]),
 						specificValues: specificValuesToUse,
 						text: wish.text,
 						belated: wish.belated,
-						language: primaryLanguage as Language,
+						language: wish.metadata?.language || (primaryLanguage as Language),
 						status: formData.status as WishStatus,
 						metadata: {
-							style: wish.metadata?.style || primaryType,
+							style: wish.metadata?.style || wish.metadata?.type || primaryType,
 							generated: true,
 							timestamp: new Date().toISOString(),
 							aiGenerated: true,
@@ -468,7 +467,9 @@
 				for (const type of typesToGenerate) {
 					for (const eventType of eventTypesToGenerate) {
 						for (const language of languagesToGenerate) {
-							const variations = batchSettings.includeAlternatives ? ['normal', 'herzlich', 'humorvoll', 'formell'] : ['normal'];
+							const variations = batchSettings.includeAlternatives
+								? ['normal', 'herzlich', 'humorvoll', 'formell']
+								: ['normal'];
 							for (const variation of variations) {
 								const eventKey = eventType.toLowerCase();
 								const eventTemplates = templates[eventKey] || templates.custom;
@@ -550,14 +551,30 @@
 		isSubmitting = true;
 		try {
 			const wishesToSave = generatedWishes.filter((w) => selectedGeneratedWishes.includes(w.id));
-			// Here would be the actual API call to save multiple wishes
-			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			// Redirect to wishes list or show success message
-			window.location.href = '/dashboard/wishes?created=' + wishesToSave.length;
+			if (wishesToSave.length === 0) {
+				alert('Bitte wählen Sie mindestens einen Wunsch zum Speichern aus.');
+				isSubmitting = false;
+				return;
+			}
+
+			// Create a hidden form and submit it using SvelteKit's form action
+			const form = document.createElement('form');
+			form.method = 'POST';
+			form.action = '?/createBatch';
+			form.style.display = 'none';
+
+			const wishesInput = document.createElement('input');
+			wishesInput.type = 'hidden';
+			wishesInput.name = 'wishes';
+			wishesInput.value = JSON.stringify(wishesToSave);
+			form.appendChild(wishesInput);
+
+			document.body.appendChild(form);
+			form.submit();
 		} catch (error) {
 			console.error('Fehler beim Speichern:', error);
-		} finally {
+			alert('Fehler beim Speichern der Wünsche. Bitte versuchen Sie es erneut.');
 			isSubmitting = false;
 		}
 	}
@@ -1425,138 +1442,220 @@
 					{#if currentStep === 1}
 						<!-- Step 1: Configuration -->
 						<div class="space-y-6">
-							<!-- Quick Actions -->
-							<div class="flex flex-wrap gap-2">
-								<button
-									type="button"
-									class="btn btn-outline btn-sm"
-									onclick={copyFromMainForm}
-									title="Einstellungen aus Hauptformular übernehmen"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
+							<!-- Header with Quick Actions -->
+							<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+								<div>
+									<h4 class="text-base-content text-lg font-semibold">🔧 Batch-Konfiguration</h4>
+									<p class="text-base-content/70 text-sm">
+										Konfiguriere die Parameter für die KI-Generierung
+									</p>
+								</div>
+								<div class="flex flex-wrap gap-2">
+									<button
+										type="button"
+										class="btn btn-outline btn-sm"
+										onclick={copyFromMainForm}
+										title="Einstellungen aus Hauptformular übernehmen"
 									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-										/>
-									</svg>
-									Hauptformular übernehmen
-								</button>
-								<button
-									type="button"
-									class="btn btn-ghost btn-sm"
-									onclick={resetBatchSettings}
-									title="Alle Filter zurücksetzen"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+											/>
+										</svg>
+										Hauptformular übernehmen
+									</button>
+									<button
+										type="button"
+										class="btn btn-ghost btn-sm"
+										onclick={resetBatchSettings}
+										title="Alle Filter zurücksetzen"
 									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-										/>
-									</svg>
-									Zurücksetzen
-								</button>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+											/>
+										</svg>
+										Zurücksetzen
+									</button>
+								</div>
 							</div>
 
 							<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 								<!-- Left Column: Basic Settings -->
 								<div class="space-y-4">
 									<!-- Generation Settings -->
-									<div class="card bg-base-100 shadow-sm">
+									<div
+										class="card from-primary/5 to-secondary/5 border-primary/20 border bg-gradient-to-br shadow-lg"
+									>
 										<div class="card-body">
-											<h4 class="card-title text-base">Generierungs-Einstellungen</h4>
+											<h4 class="card-title flex items-center gap-2 text-base">
+												<div class="badge badge-primary badge-sm">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														class="h-3 w-3"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+														/>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+														/>
+													</svg>
+												</div>
+												⚙️ Generierungs-Einstellungen
+											</h4>
 
 											<div class="form-control">
-												<label class="label">
-													<span class="label-text"
-														>Anzahl Wünsche: <strong>{batchSettings.count}</strong></span
-													>
+												<label class="label pb-3">
+													<span class="label-text text-base font-semibold"> Anzahl Wünsche </span>
+													<div class="flex items-center gap-2">
+														<span class="badge badge-primary badge-lg px-4 py-3 text-lg font-bold">
+															{batchSettings.count}
+														</span>
+														<span class="text-xs opacity-70">Wünsche</span>
+													</div>
 												</label>
 												<input
 													type="range"
 													min="3"
-													max="20"
-													class="range range-primary range-sm"
+													max="50"
+													class="range range-primary range-lg w-full"
 													bind:value={batchSettings.count}
 												/>
-												<div class="flex justify-between px-2 text-xs opacity-60">
-													<span>3</span>
-													<span>20</span>
+												<div class="mt-1 flex justify-between px-2 text-xs opacity-60">
+													<span class="font-medium">Min: 3</span>
+													<span class="text-primary font-bold">Optimal: 5-15</span>
+													<span class="font-medium">Max: 50</span>
 												</div>
 											</div>
 
-											<!-- Vielfalt-Einstellung -->
-											<div class="form-control">
-												<label class="label">
-													<span class="label-text flex items-center gap-2">
-														<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-														</svg>
-														Stil-Vielfalt
-													</span>
-													<span class="label-text-alt">Variationen automatisch generieren</span>
-												</label>
-												<div class="flex items-center gap-3">
-													<input
-														type="checkbox"
-														class="toggle toggle-primary"
-														bind:checked={batchSettings.includeAlternatives}
-													/>
-													<div class="text-sm">
-														<div class="font-medium {batchSettings.includeAlternatives ? 'text-primary' : 'text-base-content/60'}">
-															{batchSettings.includeAlternatives ? 'Verschiedene Stile mischen' : 'Einheitlicher Stil'}
-														</div>
-														<div class="text-xs opacity-70">
-															{batchSettings.includeAlternatives 
-																? 'Normal, herzlich, humorvoll, formell' 
-																: 'Nur der im Hauptformular gewählte Stil'
-															}
-														</div>
-													</div>
-												</div>
+											<div class="alert alert-info mt-4">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-4 w-4 shrink-0 stroke-current"
+													fill="none"
+													viewBox="0 0 24 24"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+													></path>
+												</svg>
+												<span class="text-xs"
+													>Mehr Wünsche = längere Generierungszeit, aber größere Auswahl</span
+												>
 											</div>
 										</div>
 									</div>
 
 									<!-- Content Filters -->
-									<div class="card bg-base-100 shadow-sm">
+									<div
+										class="card from-accent/5 to-warning/5 border-accent/20 border bg-gradient-to-br shadow-lg"
+									>
 										<div class="card-body">
-											<h4 class="card-title text-base">Inhalts-Filter</h4>
-											<p class="mb-4 text-xs opacity-70">
-												Leer lassen = Werte aus Hauptformular verwenden
-											</p>
+											<h4 class="card-title flex items-center gap-2 text-base">
+												<div class="badge badge-accent badge-sm">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														class="h-3 w-3"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"
+														/>
+													</svg>
+												</div>
+												🎯 Inhalts-Filter
+											</h4>
+											<div class="alert alert-warning mt-2 mb-4">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-4 w-4 shrink-0 stroke-current"
+													fill="none"
+													viewBox="0 0 24 24"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+													></path>
+												</svg>
+												<span class="text-xs"
+													>Mehrfachauswahl möglich - KI wählt für jeden Wunsch aus</span
+												>
+											</div>
 
-											<div class="space-y-3">
+											<div class="space-y-4">
 												<!-- Type Filter -->
 												<div class="form-control">
-													<label class="label pb-1">
-														<span class="label-text text-sm font-medium">Wunsch-Typen</span>
+													<label class="label pb-2">
+														<span class="label-text flex items-center gap-2 text-sm font-medium">
+															🎨 Wunsch-Typen
+															<span class="badge badge-neutral badge-xs"
+																>{batchSettings.types.length || 'Hauptformular'}</span
+															>
+														</span>
 													</label>
-													<div class="flex gap-3">
+													<div class="grid grid-cols-1 gap-2">
 														{#each Object.values(WishType) as type}
-															<label class="flex cursor-pointer items-center">
+															<label
+																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.types.includes(
+																	type
+																)
+																	? 'border-primary bg-primary/5'
+																	: 'border-base-300'}"
+															>
 																<input
 																	type="checkbox"
-																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	class="checkbox checkbox-primary mr-3"
 																	bind:group={batchSettings.types}
 																	value={type}
 																/>
-																<span class="text-sm">{typeLabels[type]}</span>
+																<div class="flex-1">
+																	<span class="font-medium">{typeLabels[type]}</span>
+																	<div class="text-xs opacity-70">
+																		{type === 'normal'
+																			? 'Klassisch und freundlich'
+																			: type === 'herzlich'
+																				? 'Warm und emotional'
+																				: 'Lustig und spielerisch'}
+																	</div>
+																</div>
 															</label>
 														{/each}
 													</div>
@@ -1564,19 +1663,39 @@
 
 												<!-- Event Type Filter -->
 												<div class="form-control">
-													<label class="label pb-1">
-														<span class="label-text text-sm font-medium">Anlässe</span>
+													<label class="label pb-2">
+														<span class="label-text flex items-center gap-2 text-sm font-medium">
+															🎉 Anlässe
+															<span class="badge badge-neutral badge-xs"
+																>{batchSettings.eventTypes.length || 'Hauptformular'}</span
+															>
+														</span>
 													</label>
-													<div class="flex gap-3">
+													<div class="grid grid-cols-1 gap-2">
 														{#each Object.values(EventType) as eventType}
-															<label class="flex cursor-pointer items-center">
+															<label
+																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.eventTypes.includes(
+																	eventType
+																)
+																	? 'border-primary bg-primary/5'
+																	: 'border-base-300'}"
+															>
 																<input
 																	type="checkbox"
-																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	class="checkbox checkbox-primary mr-3"
 																	bind:group={batchSettings.eventTypes}
 																	value={eventType}
 																/>
-																<span class="text-sm">{eventTypeLabels[eventType]}</span>
+																<div class="flex-1">
+																	<span class="font-medium">{eventTypeLabels[eventType]}</span>
+																	<div class="text-xs opacity-70">
+																		{eventType === 'birthday'
+																			? 'Geburtstagswünsche'
+																			: eventType === 'anniversary'
+																				? 'Jubiläumswünsche'
+																				: 'Individuelle Anlässe'}
+																	</div>
+																</div>
 															</label>
 														{/each}
 													</div>
@@ -1584,19 +1703,35 @@
 
 												<!-- Language Filter -->
 												<div class="form-control">
-													<label class="label pb-1">
-														<span class="label-text text-sm font-medium">Sprachen</span>
+													<label class="label pb-2">
+														<span class="label-text flex items-center gap-2 text-sm font-medium">
+															🌍 Sprachen
+															<span class="badge badge-neutral badge-xs"
+																>{batchSettings.languages.length || 'Hauptformular'}</span
+															>
+														</span>
 													</label>
-													<div class="flex gap-3">
+													<div class="grid grid-cols-2 gap-2">
 														{#each Object.values(Language) as language}
-															<label class="flex cursor-pointer items-center">
+															<label
+																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.languages.includes(
+																	language
+																)
+																	? 'border-primary bg-primary/5'
+																	: 'border-base-300'}"
+															>
 																<input
 																	type="checkbox"
-																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	class="checkbox checkbox-primary mr-3"
 																	bind:group={batchSettings.languages}
 																	value={language}
 																/>
-																<span class="text-sm">{languageLabels[language]}</span>
+																<div class="flex-1">
+																	<span class="font-medium">{languageLabels[language]}</span>
+																	<div class="text-xs opacity-70">
+																		{language === 'de' ? 'Deutsche Wünsche' : 'English wishes'}
+																	</div>
+																</div>
 															</label>
 														{/each}
 													</div>
@@ -1609,26 +1744,86 @@
 								<!-- Right Column: Target Groups -->
 								<div class="space-y-4">
 									<!-- Target Groups -->
-									<div class="card bg-base-100 shadow-sm">
+									<div
+										class="card from-success/5 to-info/5 border-success/20 border bg-gradient-to-br shadow-lg"
+									>
 										<div class="card-body">
-											<h4 class="card-title text-base">Zielgruppen</h4>
+											<h4 class="card-title flex items-center gap-2 text-base">
+												<div class="badge badge-success badge-sm">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														class="h-3 w-3"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+														/>
+													</svg>
+												</div>
+												👥 Zielgruppen
+											</h4>
+											<div class="alert alert-success mt-2 mb-4">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-4 w-4 shrink-0 stroke-current"
+													fill="none"
+													viewBox="0 0 24 24"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+													></path>
+												</svg>
+												<span class="text-xs"
+													>Wünsche können für mehrere Zielgruppen geeignet sein</span
+												>
+											</div>
 
-											<div class="space-y-3">
+											<div class="space-y-4">
 												<!-- Relations -->
 												<div class="form-control">
-													<label class="label pb-1">
-														<span class="label-text text-sm font-medium">Beziehungen</span>
+													<label class="label pb-2">
+														<span class="label-text flex items-center gap-2 text-sm font-medium">
+															🤝 Beziehungen
+															<span class="badge badge-neutral badge-xs"
+																>{batchSettings.relations.length || 'Hauptformular'}</span
+															>
+														</span>
 													</label>
-													<div class="flex flex-wrap gap-2">
+													<div class="grid grid-cols-2 gap-2">
 														{#each Object.values(Relation) as relation}
-															<label class="flex cursor-pointer items-center">
+															<label
+																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.relations.includes(
+																	relation
+																)
+																	? 'border-success bg-success/5'
+																	: 'border-base-300'}"
+															>
 																<input
 																	type="checkbox"
-																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	class="checkbox checkbox-success mr-3"
 																	bind:group={batchSettings.relations}
 																	value={relation}
 																/>
-																<span class="text-sm">{relationLabels[relation]}</span>
+																<div class="flex-1">
+																	<span class="font-medium">{relationLabels[relation]}</span>
+																	<div class="text-xs opacity-70">
+																		{relation === 'friend'
+																			? 'Freundschaftliche Wünsche'
+																			: relation === 'family'
+																				? 'Familiäre Wünsche'
+																				: relation === 'partner'
+																					? 'Romantische Wünsche'
+																					: 'Professionelle Wünsche'}
+																	</div>
+																</div>
 															</label>
 														{/each}
 													</div>
@@ -1636,81 +1831,261 @@
 
 												<!-- Age Groups -->
 												<div class="form-control">
-													<label class="label pb-1">
-														<span class="label-text text-sm font-medium">Altersgruppen</span>
+													<label class="label pb-2">
+														<span class="label-text flex items-center gap-2 text-sm font-medium">
+															👶👨‍💼👴 Altersgruppen
+															<span class="badge badge-neutral badge-xs"
+																>{batchSettings.ageGroups.length || 'Hauptformular'}</span
+															>
+														</span>
 													</label>
-													<div class="flex flex-wrap gap-2">
+													<div class="grid grid-cols-2 gap-2">
 														{#each Object.values(AgeGroup) as ageGroup}
-															<label class="flex cursor-pointer items-center">
+															<label
+																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.ageGroups.includes(
+																	ageGroup
+																)
+																	? 'border-success bg-success/5'
+																	: 'border-base-300'}"
+															>
 																<input
 																	type="checkbox"
-																	class="checkbox checkbox-primary checkbox-sm mr-2"
+																	class="checkbox checkbox-success mr-3"
 																	bind:group={batchSettings.ageGroups}
 																	value={ageGroup}
 																/>
-																<span class="text-sm">{ageGroupLabels[ageGroup]}</span>
+																<div class="flex-1">
+																	<span class="font-medium">{ageGroupLabels[ageGroup]}</span>
+																	<div class="text-xs opacity-70">
+																		{ageGroup === 'all'
+																			? 'Für alle Altersstufen'
+																			: ageGroup === 'young'
+																				? '16-30 Jahre'
+																				: ageGroup === 'middle'
+																					? '30-60 Jahre'
+																					: '60+ Jahre'}
+																	</div>
+																</div>
 															</label>
 														{/each}
 													</div>
 												</div>
+											</div>
+										</div>
+									</div>
 
-												<!-- Specific Values -->
-												<div class="form-control">
-													<label class="label pb-1" for="batchSpecificValues">
-														<span class="label-text text-sm font-medium">Spezifische Werte</span>
-													</label>
-													<input
-														id="batchSpecificValues"
-														type="number"
-														min="1"
-														max="200"
-														placeholder="z.B. 18"
-														class="input-bordered input input-sm w-full"
-														bind:value={batchSettings.specificValues}
-													/>
-													<label class="label pt-1">
-														<span class="label-text-alt text-xs">
-															Einzelner Wert (z.B. 18, 25, 50)
-														</span>
-													</label>
+									<!-- Special Values -->
+									<div
+										class="card from-neutral/5 to-base-300/5 border-neutral/20 border bg-gradient-to-br shadow-lg"
+									>
+										<div class="card-body">
+											<h4 class="card-title flex items-center gap-2 text-base">
+												<div class="badge badge-neutral badge-sm">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														class="h-3 w-3"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+														/>
+													</svg>
 												</div>
+												🎯 Spezielle Werte
+											</h4>
+											<div class="form-control">
+												<label class="label pb-2" for="batchSpecificValues">
+													<span class="label-text flex items-center gap-2 text-sm font-medium">
+														🔢 Spezifischer Wert
+													</span>
+												</label>
+												<input
+													id="batchSpecificValues"
+													type="number"
+													min="1"
+													max="200"
+													placeholder="z.B. 18, 25, 50..."
+													class="input input-bordered w-full"
+													bind:value={batchSettings.specificValues}
+												/>
+												<label class="label pt-2">
+													<span class="label-text-alt text-xs opacity-70">
+														💡 Meilenstein-Zahl für Geburtstage/Jubiläen
+													</span>
+												</label>
+											</div>
+											<div class="alert alert-info">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-4 w-4 shrink-0 stroke-current"
+													fill="none"
+													viewBox="0 0 24 24"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+													></path>
+												</svg>
+												<span class="text-xs">Wird in benutzerdefinierten Prompts verwendet</span>
 											</div>
 										</div>
 									</div>
 
 									<!-- Preview Stats -->
-									<div class="bg-primary/5 border-primary/20 card border">
-										<div class="card-body py-4">
-											<h5 class="mb-2 text-sm font-medium">Generierungs-Vorschau</h5>
-											<div class="grid grid-cols-2 gap-4 text-sm">
-												<div>
-													<span class="text-xs opacity-70">Stile:</span>
-													<div class="font-medium">{batchSettings.includeAlternatives ? 4 : 1}</div>
+									<div
+										class="card from-info/10 to-primary/10 border-info/30 border bg-gradient-to-br shadow-lg"
+									>
+										<div class="card-body">
+											<h5 class="card-title flex items-center gap-2 text-base">
+												<div class="badge badge-info badge-sm">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														class="h-3 w-3"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+														/>
+													</svg>
 												</div>
-												<div>
-													<span class="text-xs opacity-70">Typen:</span>
-													<div class="font-medium">{batchSettings.types.length || 1}</div>
+												📊 Generierungs-Statistik
+											</h5>
+											<div class="mt-4 grid grid-cols-2 gap-4">
+												<div class="stat bg-base-100 rounded-lg p-3 shadow-sm">
+													<div class="stat-title text-xs">Typen</div>
+													<div class="stat-value text-primary text-lg">
+														{batchSettings.types.length || '📋'}
+													</div>
+													<div class="stat-desc">
+														{batchSettings.types.length ? 'ausgewählt' : 'Hauptformular'}
+													</div>
 												</div>
-												<div>
-													<span class="text-xs opacity-70">Anlässe:</span>
-													<div class="font-medium">{batchSettings.eventTypes.length || 1}</div>
+												<div class="stat bg-base-100 rounded-lg p-3 shadow-sm">
+													<div class="stat-title text-xs">Anlässe</div>
+													<div class="stat-value text-secondary text-lg">
+														{batchSettings.eventTypes.length || '📋'}
+													</div>
+													<div class="stat-desc">
+														{batchSettings.eventTypes.length ? 'ausgewählt' : 'Hauptformular'}
+													</div>
 												</div>
-												<div>
-													<span class="text-xs opacity-70">Sprachen:</span>
-													<div class="font-medium">{batchSettings.languages.length || 1}</div>
+												<div class="stat bg-base-100 rounded-lg p-3 shadow-sm">
+													<div class="stat-title text-xs">Sprachen</div>
+													<div class="stat-value text-accent text-lg">
+														{batchSettings.languages.length || '📋'}
+													</div>
+													<div class="stat-desc">
+														{batchSettings.languages.length ? 'ausgewählt' : 'Hauptformular'}
+													</div>
+												</div>
+												<div class="stat bg-base-100 rounded-lg p-3 shadow-sm">
+													<div class="stat-title text-xs">Zu generieren</div>
+													<div class="stat-value text-warning text-lg">{batchSettings.count}</div>
+													<div class="stat-desc">Wünsche</div>
 												</div>
 											</div>
-											<div class="border-primary/20 mt-3 border-t pt-3">
-												<span class="text-xs opacity-70">Kombinationen:</span>
-												<div class="text-primary font-bold">
+											<div class="divider my-2"></div>
+											<div class="text-center">
+												<div class="mb-1 text-xs opacity-70">Potenzielle Variationen</div>
+												<div class="text-info text-2xl font-bold">
 													{(batchSettings.types.length || 1) *
 														(batchSettings.eventTypes.length || 1) *
-														(batchSettings.languages.length || 1) *
-														(batchSettings.includeAlternatives ? 4 : 1)}
+														(batchSettings.languages.length || 1)}
 												</div>
+												<div class="text-xs opacity-70">Kombinationen möglich</div>
 											</div>
 										</div>
 									</div>
+								</div>
+							</div>
+
+							<!-- Action Buttons -->
+							<div class="border-base-300 flex flex-col gap-4 border-t pt-6">
+								<div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
+									<div class="text-base-content/70 text-sm">
+										✨ Alles bereit? Starten Sie die KI-Generierung!
+									</div>
+									<div class="flex gap-2">
+										<button
+											type="button"
+											class="btn btn-ghost btn-sm"
+											onclick={() => (showAIBatchCreator = false)}
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M6 18L18 6M6 6l12 12"
+												/>
+											</svg>
+											Abbrechen
+										</button>
+										<button
+											type="button"
+											class="btn btn-primary"
+											onclick={() => {
+												currentStep = 2;
+												generateBatchWishes();
+											}}
+											disabled={isGenerating}
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 10V3L4 14h7v7l9-11h-7z"
+												/>
+											</svg>
+											{batchSettings.count} Wünsche generieren
+										</button>
+									</div>
+								</div>
+
+								<div class="alert alert-warning">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4 shrink-0 stroke-current"
+										fill="none"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+										></path>
+									</svg>
+									<span class="text-xs">
+										<strong>Hinweis:</strong> Je mehr Parameter ausgewählt sind, desto vielfältiger werden
+										die generierten Wünsche. Die KI wählt für jeden Wunsch automatisch passende Kombinationen
+										aus.
+									</span>
 								</div>
 							</div>
 						</div>
@@ -1731,7 +2106,9 @@
 								</div>
 								<div class="stat-sm stat">
 									<div class="stat-title">Stile</div>
-									<div class="stat-value text-secondary">{batchSettings.includeAlternatives ? 4 : 1}</div>
+									<div class="stat-value text-secondary">
+										{batchSettings.includeAlternatives ? 4 : 1}
+									</div>
 								</div>
 								<div class="stat-sm stat">
 									<div class="stat-title">Typen</div>
