@@ -12,6 +12,7 @@
 	let showPasswordModal = $state(false);
 	let isSubmitting = $state(false);
 	let isAgeSpecificPromptsCollapsed = $state(true);
+	let isRelationSpecificPromptsCollapsed = $state(true);
 	let isSpecificValuesCollapsed = $state(true);
 	let isAdvancedParametersCollapsed = $state(true);
 	let isTemplateVariablesCollapsed = $state(true);
@@ -1836,71 +1837,144 @@
 												value={(data.settings as any)?.ai?.promptAgeSenior || ''}
 											></textarea>
 										</div>
+									</div>
+								{/if}
+							</div>
 
-										<!-- Relation-specific Prompts -->
-										<div class="mt-6 space-y-4">
-											<h4 class="text-lg font-semibold text-base-content">
-												🤝 Beziehungsspezifische Prompts
-											</h4>
-											<p class="text-sm text-base-content/70">
-												Definiere spezifische Prompts für verschiedene Beziehungsarten
-											</p>
+							<!-- Relation-Specific Prompts Section -->
+							<div class="bg-base-200 mb-6 rounded-lg p-6">
+								<div class="mb-6 flex items-center justify-between">
+									<button
+										type="button"
+										class="hover:text-primary flex cursor-pointer items-center gap-3 text-xl font-bold transition-colors"
+										onclick={() =>
+											(isRelationSpecificPromptsCollapsed = !isRelationSpecificPromptsCollapsed)}
+									>
+										<div class="badge badge-secondary badge-lg">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+												/>
+											</svg>
+										</div>
+										Beziehungsspezifische Prompts
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-5 w-5 transition-transform {isRelationSpecificPromptsCollapsed
+												? 'rotate-0'
+												: 'rotate-180'}"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 9l-7 7-7-7"
+											/>
+										</svg>
+									</button>
+									<div class="badge badge-info badge-sm">Optional</div>
+								</div>
 
-											<div class="form-control">
-												<label class="label" for="promptRelationFriend">
-													<span class="label-text font-medium">👥 Prompt für Freunde</span>
-													<span class="label-text-alt">Zusätzliche Anweisungen für Freundschaften</span>
-												</label>
-												<textarea
-													id="promptRelationFriend"
-													name="promptRelationFriend"
-													class="textarea textarea-bordered h-20 w-full font-mono text-sm"
-													placeholder="z.B. Verwende freundlichen, vertrauten Ton. Nutze persönliche Ansprache..."
-													value={(data.settings as any)?.ai?.promptRelationFriend || ''}
-												></textarea>
+								{#if !isRelationSpecificPromptsCollapsed}
+									<div class="space-y-6 transition-all duration-300">
+										<div class="alert alert-info">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												fill="none"
+												viewBox="0 0 24 24"
+												class="h-6 w-6 shrink-0 stroke-current"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+											<div>
+												<p>
+													<strong>Zusätzliche Anweisungen für spezifische Beziehungsarten:</strong>
+													Diese Prompts werden zusätzlich zum Hauptprompt verwendet, wenn eine bestimmte
+													Beziehung ausgewählt wird. Sie ermöglichen eine personalisierte Tonalität je
+													nach Beziehungskontext.
+												</p>
 											</div>
+										</div>
 
-											<div class="form-control">
-												<label class="label" for="promptRelationFamily">
-													<span class="label-text font-medium">👪 Prompt für Familie</span>
-													<span class="label-text-alt">Zusätzliche Anweisungen für Familienmitglieder</span>
-												</label>
-												<textarea
-													id="promptRelationFamily"
-													name="promptRelationFamily"
-													class="textarea textarea-bordered h-20 w-full font-mono text-sm"
-													placeholder="z.B. Verwende herzlichen, familiären Ton. Betone Verbundenheit..."
-													value={(data.settings as any)?.ai?.promptRelationFamily || ''}
-												></textarea>
-											</div>
+										<div class="form-control">
+											<label class="label" for="promptRelationFriend">
+												<span class="label-text font-medium">👥 Prompt für Freunde</span>
+												<span class="label-text-alt"
+													>Zusätzliche Anweisungen für Freundschaften</span
+												>
+											</label>
+											<textarea
+												id="promptRelationFriend"
+												name="promptRelationFriend"
+												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+												placeholder="z.B. Verwende freundlichen, vertrauten Ton. Nutze persönliche Ansprache..."
+												value={(data.settings as any)?.ai?.promptRelationFriend || ''}
+											></textarea>
+										</div>
 
-											<div class="form-control">
-												<label class="label" for="promptRelationPartner">
-													<span class="label-text font-medium">💕 Prompt für Partner</span>
-													<span class="label-text-alt">Zusätzliche Anweisungen für romantische Partner</span>
-												</label>
-												<textarea
-													id="promptRelationPartner"
-													name="promptRelationPartner"
-													class="textarea textarea-bordered h-20 w-full font-mono text-sm"
-													placeholder="z.B. Verwende liebevollen, romantischen Ton. Nutze intime Sprache..."
-													value={(data.settings as any)?.ai?.promptRelationPartner || ''}
-												></textarea>
-											</div>
+										<div class="form-control">
+											<label class="label" for="promptRelationFamily">
+												<span class="label-text font-medium">👪 Prompt für Familie</span>
+												<span class="label-text-alt"
+													>Zusätzliche Anweisungen für Familienmitglieder</span
+												>
+											</label>
+											<textarea
+												id="promptRelationFamily"
+												name="promptRelationFamily"
+												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+												placeholder="z.B. Verwende herzlichen, familiären Ton. Betone Verbundenheit..."
+												value={(data.settings as any)?.ai?.promptRelationFamily || ''}
+											></textarea>
+										</div>
 
-											<div class="form-control">
-												<label class="label" for="promptRelationColleague">
-													<span class="label-text font-medium">💼 Prompt für Kollegen</span>
-													<span class="label-text-alt">Zusätzliche Anweisungen für Arbeitskolleg*innen</span>
-												</label>
-												<textarea
-													id="promptRelationColleague"
-													name="promptRelationColleague"
-													class="textarea textarea-bordered h-20 w-full font-mono text-sm"
-													placeholder="z.B. Verwende professionellen, respektvollen Ton. Achte auf Förmlichkeit..."
-													value={(data.settings as any)?.ai?.promptRelationColleague || ''}
-												></textarea>
-											</div>
+										<div class="form-control">
+											<label class="label" for="promptRelationPartner">
+												<span class="label-text font-medium">💕 Prompt für Partner</span>
+												<span class="label-text-alt"
+													>Zusätzliche Anweisungen für romantische Partner</span
+												>
+											</label>
+											<textarea
+												id="promptRelationPartner"
+												name="promptRelationPartner"
+												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+												placeholder="z.B. Verwende liebevollen, romantischen Ton. Nutze intime Sprache..."
+												value={(data.settings as any)?.ai?.promptRelationPartner || ''}
+											></textarea>
+										</div>
+
+										<div class="form-control">
+											<label class="label" for="promptRelationColleague">
+												<span class="label-text font-medium">💼 Prompt für Kollegen</span>
+												<span class="label-text-alt"
+													>Zusätzliche Anweisungen für Arbeitskolleg*innen</span
+												>
+											</label>
+											<textarea
+												id="promptRelationColleague"
+												name="promptRelationColleague"
+												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+												placeholder="z.B. Verwende professionellen, respektvollen Ton. Achte auf Förmlichkeit..."
+												value={(data.settings as any)?.ai?.promptRelationColleague || ''}
+											></textarea>
 										</div>
 									</div>
 								{/if}
@@ -2004,7 +2078,8 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Beschreiben Sie wichtige Geburtstage und ihre Bedeutung, z.B.: 16 Jahre (Sweet Sixteen), 18 Jahre (Volljährigkeit), 21 Jahre (Erwachsenwerden), 30 Jahre (Lebensmitte), 50 Jahre (Goldenes Jubiläum)..."
-														>{data.settings.specificValues.birthdayDe || ''}</textarea>
+															>{data.settings.specificValues.birthdayDe || ''}</textarea
+														>
 														<label class="label">
 															<span class="label-text-alt"
 																>Beschreibung wichtiger Geburtstage mit Bedeutung</span
@@ -2033,7 +2108,8 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Beschreiben Sie wichtige Hochzeitstage und ihre Bedeutung, z.B.: 1 Jahr (Papierhochzeit), 5 Jahre (Holzhochzeit), 10 Jahre (Rosenhochzeit), 25 Jahre (Silberhochzeit), 50 Jahre (Goldene Hochzeit)..."
-														>{data.settings.specificValues.anniversaryDe || ''}</textarea>
+															>{data.settings.specificValues.anniversaryDe || ''}</textarea
+														>
 														<label class="label">
 															<span class="label-text-alt"
 																>Beschreibung wichtiger Hochzeitstage mit Bedeutung</span
@@ -2062,7 +2138,8 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Beschreiben Sie wichtige Meilensteine und ihre Bedeutung, z.B.: 5 Jahre (Lustrum), 10 Jahre (Dekade), 25 Jahre (Vierteljahrhundert), 50 Jahre (Halbes Jahrhundert)..."
-														>{data.settings.specificValues.customDe || ''}</textarea>
+															>{data.settings.specificValues.customDe || ''}</textarea
+														>
 														<label class="label">
 															<span class="label-text-alt"
 																>Beschreibung wichtiger Meilensteine mit Bedeutung</span
@@ -2096,7 +2173,8 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Describe important birthdays and their meanings, e.g.: 16 years (Sweet Sixteen), 18 years (Coming of age), 21 years (Legal adulthood), 30 years (Milestone birthday), 50 years (Golden birthday)..."
-														>{data.settings.specificValues.birthdayEn || ''}</textarea>
+															>{data.settings.specificValues.birthdayEn || ''}</textarea
+														>
 														<label class="label">
 															<span class="label-text-alt"
 																>Significant birthdays (comma-separated)</span
@@ -2125,7 +2203,8 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Describe important wedding anniversaries and their meanings, e.g.: 1 year (Paper), 5 years (Wood), 10 years (Tin), 25 years (Silver), 50 years (Golden)..."
-														>{data.settings.specificValues.anniversaryEn || ''}</textarea>
+															>{data.settings.specificValues.anniversaryEn || ''}</textarea
+														>
 														<label class="label">
 															<span class="label-text-alt"
 																>Wedding anniversaries (comma-separated)</span
@@ -2154,7 +2233,8 @@
 															class="textarea textarea-bordered w-full"
 															rows="4"
 															placeholder="Describe important milestones and their meanings, e.g.: 5 years (Lustrum), 10 years (Decade), 25 years (Quarter century), 50 years (Half century)..."
-														>{data.settings.specificValues.customEn || ''}</textarea>
+															>{data.settings.specificValues.customEn || ''}</textarea
+														>
 														<label class="label">
 															<span class="label-text-alt"
 																>General milestones (comma-separated)</span
