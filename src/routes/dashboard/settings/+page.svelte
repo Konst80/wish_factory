@@ -1836,6 +1836,72 @@
 												value={(data.settings as any)?.ai?.promptAgeSenior || ''}
 											></textarea>
 										</div>
+
+										<!-- Relation-specific Prompts -->
+										<div class="mt-6 space-y-4">
+											<h4 class="text-lg font-semibold text-base-content">
+												🤝 Beziehungsspezifische Prompts
+											</h4>
+											<p class="text-sm text-base-content/70">
+												Definiere spezifische Prompts für verschiedene Beziehungsarten
+											</p>
+
+											<div class="form-control">
+												<label class="label" for="promptRelationFriend">
+													<span class="label-text font-medium">👥 Prompt für Freunde</span>
+													<span class="label-text-alt">Zusätzliche Anweisungen für Freundschaften</span>
+												</label>
+												<textarea
+													id="promptRelationFriend"
+													name="promptRelationFriend"
+													class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+													placeholder="z.B. Verwende freundlichen, vertrauten Ton. Nutze persönliche Ansprache..."
+													value={(data.settings as any)?.ai?.promptRelationFriend || ''}
+												></textarea>
+											</div>
+
+											<div class="form-control">
+												<label class="label" for="promptRelationFamily">
+													<span class="label-text font-medium">👪 Prompt für Familie</span>
+													<span class="label-text-alt">Zusätzliche Anweisungen für Familienmitglieder</span>
+												</label>
+												<textarea
+													id="promptRelationFamily"
+													name="promptRelationFamily"
+													class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+													placeholder="z.B. Verwende herzlichen, familiären Ton. Betone Verbundenheit..."
+													value={(data.settings as any)?.ai?.promptRelationFamily || ''}
+												></textarea>
+											</div>
+
+											<div class="form-control">
+												<label class="label" for="promptRelationPartner">
+													<span class="label-text font-medium">💕 Prompt für Partner</span>
+													<span class="label-text-alt">Zusätzliche Anweisungen für romantische Partner</span>
+												</label>
+												<textarea
+													id="promptRelationPartner"
+													name="promptRelationPartner"
+													class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+													placeholder="z.B. Verwende liebevollen, romantischen Ton. Nutze intime Sprache..."
+													value={(data.settings as any)?.ai?.promptRelationPartner || ''}
+												></textarea>
+											</div>
+
+											<div class="form-control">
+												<label class="label" for="promptRelationColleague">
+													<span class="label-text font-medium">💼 Prompt für Kollegen</span>
+													<span class="label-text-alt">Zusätzliche Anweisungen für Arbeitskolleg*innen</span>
+												</label>
+												<textarea
+													id="promptRelationColleague"
+													name="promptRelationColleague"
+													class="textarea textarea-bordered h-20 w-full font-mono text-sm"
+													placeholder="z.B. Verwende professionellen, respektvollen Ton. Achte auf Förmlichkeit..."
+													value={(data.settings as any)?.ai?.promptRelationColleague || ''}
+												></textarea>
+											</div>
+										</div>
 									</div>
 								{/if}
 							</div>

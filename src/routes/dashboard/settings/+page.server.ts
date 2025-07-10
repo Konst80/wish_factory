@@ -27,6 +27,11 @@ interface UserSettingsWithAI {
 	ai_prompt_age_young?: string;
 	ai_prompt_age_middle?: string;
 	ai_prompt_age_senior?: string;
+	// Relation-specific prompts
+	ai_prompt_relation_friend?: string;
+	ai_prompt_relation_family?: string;
+	ai_prompt_relation_partner?: string;
+	ai_prompt_relation_colleague?: string;
 	ai_model?: string;
 	ai_temperature?: number;
 	ai_max_tokens?: number;
@@ -110,6 +115,11 @@ Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträgl
 	ai_top_p: 0.9,
 	ai_frequency_penalty: 0.1,
 	ai_presence_penalty: 0.1,
+	// Relation-specific prompts
+	ai_prompt_relation_friend: 'Schreibe freundliche, persönliche Wünsche für Freunde. Verwende einen warmen, vertrauten Ton.',
+	ai_prompt_relation_family: 'Schreibe herzliche, familiäre Wünsche. Verwende einen liebevollen, persönlichen Ton.',
+	ai_prompt_relation_partner: 'Schreibe romantische, liebevolle Wünsche für Partner. Verwende einen intimen, zärtlichen Ton.',
+	ai_prompt_relation_colleague: 'Schreibe respektvolle, professionelle Wünsche für Kollegen. Verwende einen höflichen, aber freundlichen Ton.',
 	// Specific Values
 	specific_values_birthday_de: '16,18,21,30,40,50,60,65,70,80,90,100',
 	specific_values_birthday_en: '16,18,21,30,40,50,60,65,70,80,90,100',
@@ -215,6 +225,10 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					promptAgeYoung: settings?.ai_prompt_age_young || defaultSettings.ai_prompt_age_young,
 					promptAgeMiddle: settings?.ai_prompt_age_middle || defaultSettings.ai_prompt_age_middle,
 					promptAgeSenior: settings?.ai_prompt_age_senior || defaultSettings.ai_prompt_age_senior,
+					promptRelationFriend: settings?.ai_prompt_relation_friend || defaultSettings.ai_prompt_relation_friend,
+					promptRelationFamily: settings?.ai_prompt_relation_family || defaultSettings.ai_prompt_relation_family,
+					promptRelationPartner: settings?.ai_prompt_relation_partner || defaultSettings.ai_prompt_relation_partner,
+					promptRelationColleague: settings?.ai_prompt_relation_colleague || defaultSettings.ai_prompt_relation_colleague,
 					model: settings?.ai_model || defaultSettings.ai_model,
 					temperature: settings?.ai_temperature ?? defaultSettings.ai_temperature,
 					maxTokens: settings?.ai_max_tokens || defaultSettings.ai_max_tokens,
@@ -310,6 +324,10 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					promptAgeYoung: defaultSettings.ai_prompt_age_young,
 					promptAgeMiddle: defaultSettings.ai_prompt_age_middle,
 					promptAgeSenior: defaultSettings.ai_prompt_age_senior,
+					promptRelationFriend: defaultSettings.ai_prompt_relation_friend,
+					promptRelationFamily: defaultSettings.ai_prompt_relation_family,
+					promptRelationPartner: defaultSettings.ai_prompt_relation_partner,
+					promptRelationColleague: defaultSettings.ai_prompt_relation_colleague,
 					model: defaultSettings.ai_model,
 					temperature: defaultSettings.ai_temperature,
 					maxTokens: defaultSettings.ai_max_tokens,
@@ -623,7 +641,7 @@ export const actions: Actions = {
 			}
 
 			// Build update object with only non-null values
-			const updateData: any = {
+			const updateData: Partial<UserSettingsWithAI> = {
 				ai_model: formData.get('model') as string,
 				ai_temperature: temperature,
 				ai_max_tokens: maxTokens,
@@ -654,6 +672,25 @@ export const actions: Actions = {
 			}
 			if (promptAgeSenior !== null && promptAgeSenior !== undefined) {
 				updateData.ai_prompt_age_senior = promptAgeSenior;
+			}
+
+			// Only update relation prompts if they are provided
+			const promptRelationFriend = formData.get('promptRelationFriend') as string;
+			const promptRelationFamily = formData.get('promptRelationFamily') as string;
+			const promptRelationPartner = formData.get('promptRelationPartner') as string;
+			const promptRelationColleague = formData.get('promptRelationColleague') as string;
+
+			if (promptRelationFriend !== null && promptRelationFriend !== undefined) {
+				updateData.ai_prompt_relation_friend = promptRelationFriend;
+			}
+			if (promptRelationFamily !== null && promptRelationFamily !== undefined) {
+				updateData.ai_prompt_relation_family = promptRelationFamily;
+			}
+			if (promptRelationPartner !== null && promptRelationPartner !== undefined) {
+				updateData.ai_prompt_relation_partner = promptRelationPartner;
+			}
+			if (promptRelationColleague !== null && promptRelationColleague !== undefined) {
+				updateData.ai_prompt_relation_colleague = promptRelationColleague;
 			}
 
 			// Only update specific values if they are provided
