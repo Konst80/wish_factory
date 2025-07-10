@@ -57,7 +57,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			specificValues,
 			style = 'normal',
 			count = 1,
-			additionalInstructions
+			additionalInstructions,
+			isBatch = false
 		} = body;
 
 		// Validierung der Eingaben
@@ -106,13 +107,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Count limitieren
 		const limitedCount = Math.min(Math.max(1, count), 10); // Zwischen 1 und 10
 		console.log(`📊 Anzahl Wünsche: ${limitedCount}`);
+		console.log(`📦 Batch-Modus: ${isBatch ? 'JA' : 'NEIN'}`);
 
 		// Lade AI-Settings und spezifische Werte aus der Datenbank
 		console.log('🔧 Lade KI-Einstellungen und spezifische Werte...');
 		const { data: userSettings, error: settingsError } = await locals.supabase
 			.from('user_settings')
 			.select(
-				'ai_prompt_system, ai_prompt_template, ai_prompt_age_young, ai_prompt_age_middle, ai_prompt_age_senior, ai_prompt_relation_friend, ai_prompt_relation_family, ai_prompt_relation_partner, ai_prompt_relation_colleague, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty, specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
+				'ai_prompt_system, ai_prompt_template, ai_prompt_age_young, ai_prompt_age_middle, ai_prompt_age_senior, ai_prompt_relation_friend, ai_prompt_relation_family, ai_prompt_relation_partner, ai_prompt_relation_colleague, ai_prompt_batch, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty, specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
 			)
 			.eq('user_id', user.id)
 			.single();
@@ -125,7 +127,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Erstelle AI-Settings mit benutzerdefinierten Werten oder Fallbacks
-		const aiSettings = userSettings as any
+		const aiSettings = (userSettings as any)
 			? {
 					promptSystem:
 						(userSettings as any).ai_prompt_system ||
@@ -138,6 +140,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					promptRelationFamily: (userSettings as any).ai_prompt_relation_family || undefined,
 					promptRelationPartner: (userSettings as any).ai_prompt_relation_partner || undefined,
 					promptRelationColleague: (userSettings as any).ai_prompt_relation_colleague || undefined,
+					promptBatch: (userSettings as any).ai_prompt_batch || undefined,
 					model: (userSettings as any).ai_model || 'anthropic/claude-sonnet-4',
 					temperature: (userSettings as any).ai_temperature ?? 0.8,
 					maxTokens: (userSettings as any).ai_max_tokens || 2000,
@@ -172,11 +175,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		console.log('🤖 Finale AI Settings:', aiSettings);
 		console.log(`🎯 Verwende benutzerdefiniertes Template: ${!!aiSettings?.promptTemplate}`);
+		console.log(`📦 Verwende Batch-Prompt: ${!!aiSettings?.promptBatch && isBatch}`);
 		if (aiSettings?.promptTemplate) {
 			console.log(
 				'📝 Custom Template Vorschau:',
 				aiSettings.promptTemplate.substring(0, 150) + '...'
 			);
+		}
+		if (aiSettings?.promptBatch && isBatch) {
+			console.log('📦 Batch-Prompt Vorschau:', aiSettings.promptBatch.substring(0, 150) + '...');
 		}
 		console.log('🤖 Starte KI-Generierung...');
 

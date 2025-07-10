@@ -13,6 +13,7 @@
 	let isSubmitting = $state(false);
 	let isAgeSpecificPromptsCollapsed = $state(true);
 	let isRelationSpecificPromptsCollapsed = $state(true);
+	let isBatchPromptsCollapsed = $state(true);
 	let isSpecificValuesCollapsed = $state(true);
 	let isAdvancedParametersCollapsed = $state(true);
 	let isTemplateVariablesCollapsed = $state(true);
@@ -1447,9 +1448,10 @@
 										<textarea
 											id="promptTemplate"
 											name="promptTemplate"
-											class="textarea textarea-bordered h-96 w-full font-mono text-sm"
+											class="textarea textarea-bordered h-96 w-full font-mono text-sm overflow-y-auto"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen. Generiere &#123;count&#125; &#123;countText&#125; in der Sprache &#123;language&#125;..."
 											value={(data.settings as any)?.ai?.promptTemplate || ''}
+											onwheel={(e) => e.stopPropagation()}
 										></textarea>
 										<div
 											class="from-info/5 to-primary/5 border-info/20 mt-4 rounded-lg border bg-gradient-to-br p-4"
@@ -1975,6 +1977,102 @@
 												placeholder="z.B. Verwende professionellen, respektvollen Ton. Achte auf Förmlichkeit..."
 												value={(data.settings as any)?.ai?.promptRelationColleague || ''}
 											></textarea>
+										</div>
+									</div>
+								{/if}
+							</div>
+
+							<!-- Batch-specific Prompt Section -->
+							<div class="bg-base-200 mb-6 rounded-lg p-6">
+								<div class="mb-6 flex items-center justify-between">
+									<button
+										type="button"
+										class="hover:text-primary flex cursor-pointer items-center gap-3 text-xl font-bold transition-colors"
+										onclick={() => (isBatchPromptsCollapsed = !isBatchPromptsCollapsed)}
+									>
+										<div class="badge badge-primary badge-lg">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+												/>
+											</svg>
+										</div>
+										Batch-Generierung Prompts
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-5 w-5 transition-transform {isBatchPromptsCollapsed
+												? 'rotate-0'
+												: 'rotate-180'}"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 9l-7 7-7-7"
+											/>
+										</svg>
+									</button>
+									<div class="badge badge-info badge-sm">Optional</div>
+								</div>
+
+								{#if !isBatchPromptsCollapsed}
+									<div class="space-y-6 transition-all duration-300">
+										<div class="alert alert-info">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												fill="none"
+												viewBox="0 0 24 24"
+												class="h-6 w-6 shrink-0 stroke-current"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+											<div>
+												<strong>Spezielle Anweisungen für Batch-Generierung:</strong>
+												Dieser Prompt wird nur bei der Batch-Erstellung von mehreren Wünschen verwendet.
+												Definiere hier die Verteilung und Gewichtung verschiedener Wunschtypen.
+												<br />
+												<strong>Platzhalter {'{count}'}</strong> wird durch die Anzahl der zu generierenden
+												Wünsche ersetzt.
+											</div>
+										</div>
+
+										<div class="form-control">
+											<label class="label" for="promptBatch">
+												<span class="label-text font-medium">🔄 Batch-Generierung Prompt</span>
+												<span class="label-text-alt"
+													>Anweisungen für Massenproduktion von Wünschen</span
+												>
+											</label>
+											<textarea
+												id="promptBatch"
+												name="promptBatch"
+												class="textarea textarea-bordered h-32 w-full font-mono text-sm"
+												placeholder="z.B. Generiere {'{count}'} ausgewogene Wünsche: 70% Geburtstag, 20% Jubiläum, 10% Sonstiges. Achte auf Vielfalt in Stil und Tonalität..."
+												value={(data.settings as any)?.ai?.promptBatch || ''}
+											></textarea>
+											<label class="label">
+												<span class="label-text-alt"
+													>Platzhalter: {'{count}'} für Anzahl der Wünsche</span
+												>
+												<span class="label-text-alt text-info">Für optimale Batch-Ergebnisse</span>
+											</label>
 										</div>
 									</div>
 								{/if}
