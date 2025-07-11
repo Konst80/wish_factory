@@ -864,14 +864,6 @@
 								<div class="text-base-content text-sm leading-relaxed font-medium">
 									{truncateText(wish.text, 120)}
 								</div>
-								{#if wish.belated && wish.belated.length > 0}
-									<div class="text-base-content/60 mt-1.5 text-xs italic">
-										<span class="text-warning">•</span> Nachträglich: {truncateText(
-											wish.belated,
-											60
-										)}
-									</div>
-								{/if}
 							</div>
 						</td>
 						<td class="px-3 py-3">

@@ -277,10 +277,27 @@
 						/>
 					</svg>
 					Wunsch-Text
+					{#if data.wish.belated}
+						<span class="badge badge-warning ml-2 gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								class="inline-block h-4 w-4 stroke-current"
+								><path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+								></path></svg
+							>
+							Nachträglich
+						</span>
+					{/if}
 				</h3>
 				<div class="divider my-2"></div>
 				<div class="bg-base-200 rounded-lg p-4">
-					<p class="text-base leading-relaxed whitespace-pre-wrap">
+					<p class="font-serif text-lg leading-relaxed whitespace-pre-wrap">
 						{data.wish.text}
 					</p>
 				</div>
@@ -307,7 +324,8 @@
 			</div>
 		</div>
 
-		<!-- Belated Text -->
+		<!-- Belated Wish Info - This is now redundant -->
+		<!--
 		{#if data.wish.belated}
 			<div class="card bg-base-100 mb-6 shadow-xl">
 				<div class="card-body">
@@ -326,13 +344,27 @@
 								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 							/>
 						</svg>
-						Nachträglicher Text
+						Nachträglicher Wunsch
 					</h3>
 					<div class="divider my-2"></div>
 					<div class="bg-warning/10 border-warning rounded-lg border-l-4 p-4">
-						<p class="text-base leading-relaxed whitespace-pre-wrap">
-							{data.wish.belated}
-						</p>
+						<div class="badge badge-warning gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-3 w-3"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+							Ja, dieser Wunsch ist nachträglich
+						</div>
 					</div>
 					<button
 						class="btn btn-outline btn-sm mt-4 self-start"
@@ -352,11 +384,11 @@
 								d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
 							/>
 						</svg>
-						Nachträglichen Text kopieren
 					</button>
 				</div>
 			</div>
 		{/if}
+    -->
 	</div>
 
 	<!-- Sidebar -->

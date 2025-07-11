@@ -13,7 +13,7 @@
 		ageGroups: [...data.wish.ageGroups],
 		specificValues: data.wish.specificValues?.join(', ') || '',
 		text: data.wish.text,
-		belated: data.wish.belated || '',
+		belated: data.wish.belated || false,
 		language: data.wish.language,
 		status: data.wish.status
 	});
@@ -201,7 +201,7 @@
 			!arraysEqual(formData.ageGroups, data.wish.ageGroups) ||
 			!specificValuesEqual(formData.specificValues, data.wish.specificValues) ||
 			formData.text !== data.wish.text ||
-			formData.belated !== (data.wish.belated ?? '') ||
+			formData.belated !== (data.wish.belated ?? false) ||
 			formData.language !== data.wish.language ||
 			formData.status !== data.wish.status
 		);
@@ -493,25 +493,34 @@
 						</label>
 					</div>
 
-					<!-- Nachträglicher Text -->
+					<!-- Nachträglicher Wunsch Status -->
 					<div class="form-control mt-6">
-						<label class="label" for="belated">
-							<span class="label-text font-medium">Nachträglicher Text</span>
-							<span class="label-text-alt">{formData.belated.length}/1000</span>
-						</label>
-						<textarea
-							id="belated"
-							name="belated"
-							rows="4"
-							placeholder="Liebe/r [Name], auch wenn ich zu spät dran bin..."
-							class="textarea-bordered textarea w-full"
-							bind:value={formData.belated}
-						></textarea>
-						<label class="label">
-							<span class="label-text-alt">
-								Text für verspätete Glückwünsche mit Platzhaltern
+						<div class="flex items-center justify-between">
+							<span class="label-text font-medium">Nachträglicher Wunsch</span>
+							<div class="flex items-center gap-2">
+								{#if formData.belated}
+									<div class="badge badge-warning gap-2">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+										</svg>
+										Nachträglich
+									</div>
+								{:else}
+									<div class="badge badge-neutral gap-2">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+										</svg>
+										Normal
+									</div>
+								{/if}
+							</div>
+						</div>
+						<input type="hidden" name="belated" value={formData.belated} />
+						<div class="mt-2">
+							<span class="text-base-content/60 text-sm">
+								{formData.belated ? 'Dieser Wunsch ist als nachträglich markiert' : 'Dieser Wunsch ist als regulärer Wunsch markiert'}
 							</span>
-						</label>
+						</div>
 					</div>
 
 					<!-- Action Buttons -->
@@ -705,8 +714,14 @@
 							<h4 class="text-primary font-medium">Haupttext:</h4>
 							<p class="mb-4 text-sm">{formData.text}</p>
 							{#if formData.belated}
-								<h4 class="text-secondary font-medium">Nachträglich:</h4>
-								<p class="text-sm">{formData.belated}</p>
+								<div class="mt-3 flex items-center gap-2">
+									<div class="badge badge-warning gap-2">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+										</svg>
+										Nachträglicher Wunsch
+									</div>
+								</div>
 							{/if}
 						</div>
 					</div>
