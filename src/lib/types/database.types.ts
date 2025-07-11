@@ -13,7 +13,7 @@ export interface Database {
 					age_groups: string[];
 					specific_values: number[];
 					text: string;
-					belated: string;
+					belated: boolean;
 					status: 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert';
 					language: 'de' | 'en';
 					created_at: string;
@@ -28,7 +28,7 @@ export interface Database {
 					age_groups: string[];
 					specific_values?: number[];
 					text: string;
-					belated: string;
+					belated: boolean;
 					status?: 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert';
 					language: 'de' | 'en';
 					created_at?: string;
@@ -43,7 +43,7 @@ export interface Database {
 					age_groups?: string[];
 					specific_values?: number[];
 					text?: string;
-					belated?: string;
+					belated?: boolean;
 					status?: 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert';
 					language?: 'de' | 'en';
 					created_at?: string;

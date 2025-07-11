@@ -147,7 +147,7 @@ export interface WishFilters {
 	relations?: Relation[];
 	ageGroups?: AgeGroup[];
 	search?: string;
-	belated?: string;
+	belated?: boolean;
 }
 
 /**
@@ -164,6 +164,7 @@ export function buildWishQueryString(filters: WishFilters): string {
 	if (filters.relations?.length) params.append('relations', filters.relations.join(','));
 	if (filters.ageGroups?.length) params.append('ageGroups', filters.ageGroups.join(','));
 	if (filters.search) params.append('search', filters.search);
+	if (filters.belated !== undefined) params.append('belated', filters.belated.toString());
 
 	return params.toString();
 }

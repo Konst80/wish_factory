@@ -38,7 +38,7 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		eventType: eventType || undefined,
 		relations: relations.length > 0 ? relations : undefined,
 		ageGroups: ageGroups.length > 0 ? ageGroups : undefined,
-		belated: belated || undefined
+		belated: belated ? belated === 'true' : undefined
 	};
 
 	// Define sortable columns mapping
@@ -73,9 +73,8 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 	if (ageGroups.length > 0) {
 		query = query.overlaps('age_groups', ageGroups);
 	}
-	if (belated) {
-		const isBelated = belated === 'true';
-		query = query.eq('belated', isBelated);
+	if (belated !== undefined) {
+		query = query.eq('belated', belated);
 	}
 
 	// Apply sorting with validation
