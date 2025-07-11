@@ -48,7 +48,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		ageGroups: wish.age_groups || [],
 		specificValues: wish.specific_values || [],
 		text: wish.text,
-		belated: wish.belated || false, // Ensure belated is always a boolean
+		belated: wish.belated === 'true', // Convert string to boolean
 		status: wish.status,
 		language: wish.language,
 		createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),
@@ -125,7 +125,7 @@ export const actions: Actions = {
 					age_groups: validatedData.ageGroups,
 					specific_values: validatedData.specificValues,
 					text: validatedData.text,
-					belated: validatedData.belated,
+					belated: validatedData.belated.toString(),
 					status: validatedData.status,
 					language: validatedData.language,
 					updated_at: new Date().toISOString()

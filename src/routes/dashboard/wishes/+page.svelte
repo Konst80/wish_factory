@@ -56,7 +56,7 @@
 		if (selectedEventType) params.set('eventType', selectedEventType);
 		if (selectedRelations.length) params.set('relations', selectedRelations.join(','));
 		if (selectedAgeGroups.length) params.set('ageGroups', selectedAgeGroups.join(','));
-		if (selectedBelated) params.set('belated', selectedBelated);
+		if (selectedBelated) params.set('belated', String(selectedBelated));
 
 		// Preserve current sorting
 		if (currentSortBy !== 'created_at') params.set('sortBy', currentSortBy);

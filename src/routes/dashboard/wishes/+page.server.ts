@@ -73,8 +73,8 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 	if (ageGroups.length > 0) {
 		query = query.overlaps('age_groups', ageGroups);
 	}
-	if (belated !== undefined) {
-		query = query.eq('belated', belated);
+	if (filters.belated !== undefined) {
+		query = query.eq('belated', filters.belated.toString());
 	}
 
 	// Apply sorting with validation
@@ -110,7 +110,7 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		ageGroups: wish.age_groups,
 		specificValues: wish.specific_values,
 		text: wish.text,
-		belated: wish.belated,
+		belated: wish.belated === 'true',
 		status: wish.status,
 		language: wish.language,
 		createdAt: wish.created_at,
