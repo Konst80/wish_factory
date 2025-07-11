@@ -13,7 +13,7 @@
 	let selectedEventType = $state(data.filters.eventType || '');
 	let selectedRelations = $state(data.filters.relations || []);
 	let selectedAgeGroups = $state(data.filters.ageGroups || []);
-	let selectedBelated = $state(data.filters.belated || '');
+	let selectedBelated = $state(data.filters.belated !== undefined ? data.filters.belated : '');
 
 	// Sorting State
 	let currentSortBy = $state(data.sorting?.sortBy || 'created_at');
@@ -66,6 +66,9 @@
 		saveFiltersToSession();
 
 		goto(`?${params.toString()}`, { replaceState: true });
+
+		// Collapse the filter section after applying
+		showFilters = false;
 	}
 
 	// Sorting function
@@ -575,11 +578,7 @@
 					<label class="label" for="belated">
 						<span class="label-text">Nachträglich</span>
 					</label>
-					<select
-						id="belated"
-						class="select-bordered select w-full"
-						bind:value={selectedBelated}
-					>
+					<select id="belated" class="select-bordered select w-full" bind:value={selectedBelated}>
 						<option value="">Alle</option>
 						<option value="true">Nur nachträgliche</option>
 						<option value="false">Nur reguläre</option>
