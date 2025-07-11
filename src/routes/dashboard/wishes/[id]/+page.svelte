@@ -297,7 +297,7 @@
 				</h3>
 				<div class="divider my-2"></div>
 				<div class="bg-base-200 rounded-lg p-4">
-					<p class="font-serif text-lg leading-relaxed whitespace-pre-wrap">
+					<p class="font-medium text-lg leading-relaxed whitespace-pre-wrap">
 						{data.wish.text}
 					</p>
 				</div>

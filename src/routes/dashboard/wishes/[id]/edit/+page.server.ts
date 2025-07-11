@@ -48,7 +48,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		ageGroups: wish.age_groups || [],
 		specificValues: wish.specific_values || [],
 		text: wish.text,
-		belated: wish.belated === 'true', // Convert string to boolean
+		belated: typeof wish.belated === 'boolean' ? wish.belated : wish.belated === 'true', // Convert string to boolean
 		status: wish.status,
 		language: wish.language,
 		createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),

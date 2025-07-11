@@ -97,8 +97,12 @@
 		}
 	}
 
-	function handleAgeGroupChange(ageGroup: string) {
-		formData.ageGroups = [ageGroup];
+	function handleAgeGroupChange(ageGroup: string, checked: boolean) {
+		if (checked) {
+			formData.ageGroups = [...formData.ageGroups, ageGroup];
+		} else {
+			formData.ageGroups = formData.ageGroups.filter((ag: string) => ag !== ageGroup);
+		}
 	}
 
 	function validateSpecificValues(value: string): boolean {
@@ -160,7 +164,7 @@
 			relations: formData.relations,
 			ageGroups: formData.ageGroups,
 			specificValues: formData.specificValues,
-			style: formData.type
+			belated: formData.belated
 		});
 
 		try {
@@ -190,7 +194,6 @@
 					specificValues: formData.specificValues
 						? [parseInt(formData.specificValues.toString())]
 						: [],
-					style: formData.type,
 					count: 1,
 					belated: formData.belated
 				})
@@ -990,11 +993,11 @@
 									</svg>
 									Altersgruppe *
 								</span>
-								<span class="label-text-alt badge badge-neutral badge-sm">Eine Auswahl treffen</span
+								<span class="label-text-alt badge badge-neutral badge-sm">Mehrere Auswahl möglich</span
 								>
 							</label>
-							<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-								{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
+							<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+								{#each Object.values(AgeGroup).filter(ag => ag !== 'all') as ageGroup (ageGroup)}
 									<label
 										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {formData.ageGroups.includes(
 											ageGroup
@@ -1003,13 +1006,13 @@
 											: 'border-base-300'}"
 									>
 										<input
-											type="radio"
+											type="checkbox"
 											name="ageGroups"
 											value={ageGroup}
-											class="radio radio-primary"
-											class:radio-error={errors.ageGroups}
+											class="checkbox checkbox-primary"
+											class:checkbox-error={errors.ageGroups}
 											checked={formData.ageGroups.includes(ageGroup)}
-											onchange={() => handleAgeGroupChange(ageGroup)}
+											onchange={(e) => handleAgeGroupChange(ageGroup, e.currentTarget.checked)}
 										/>
 										<span class="label-text ml-3 font-medium">{ageGroupLabels[ageGroup]}</span>
 									</label>

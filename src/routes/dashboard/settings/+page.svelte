@@ -1542,29 +1542,29 @@
 																	</div>
 																	<div
 																		class="tooltip tooltip-bottom"
-																		data-tip="Zielsprache (z.B. 'de', 'en')"
+																		data-tip="Übersetzte Sprache (z.B. 'Deutsch', 'Englisch')"
 																	>
 																		<button
 																			type="button"
 																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
 																			onclick={() =>
-																				insertPlaceholder('promptTemplate', '{language}')}
+																				insertPlaceholder('promptTemplate', '{languageTexts}')}
 																		>
-																			<code class="text-primary font-bold">{`{language}`}</code>
+																			<code class="text-primary font-bold">{`{languageTexts}`}</code>
 																			<span class="ml-2 text-xs opacity-70">Sprache</span>
 																		</button>
 																	</div>
 																	<div
 																		class="tooltip tooltip-bottom"
-																		data-tip="Gewünschter Stil (z.B. 'normal', 'herzlich', 'humorvoll')"
+																		data-tip="Übersetzter Wunsch-Typ/Stil (z.B. 'Normal', 'Herzlich', 'Humorvoll')"
 																	>
 																		<button
 																			type="button"
 																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
-																			onclick={() => insertPlaceholder('promptTemplate', '{style}')}
+																			onclick={() => insertPlaceholder('promptTemplate', '{typeTexts}')}
 																		>
-																			<code class="text-primary font-bold">{`{style}`}</code>
-																			<span class="ml-2 text-xs opacity-70">Stil</span>
+																			<code class="text-primary font-bold">{`{typeTexts}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Typ/Stil</span>
 																		</button>
 																	</div>
 																</div>
@@ -1587,24 +1587,24 @@
 																			type="button"
 																			class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
 																			onclick={() =>
-																				insertPlaceholder('promptTemplate', '{eventText}')}
+																				insertPlaceholder('promptTemplate', '{eventTexts}')}
 																		>
-																			<code class="text-secondary font-bold">{`{eventText}`}</code>
+																			<code class="text-secondary font-bold">{`{eventTexts}`}</code>
 																			<span class="ml-2 text-xs opacity-70">Anlass (DE)</span>
 																		</button>
 																	</div>
 																	<div
 																		class="tooltip tooltip-bottom"
-																		data-tip="Roher Event-Typ (z.B. 'birthday', 'anniversary')"
+																		data-tip="Rohe Event-Typen (z.B. 'birthday, anniversary')"
 																	>
 																		<button
 																			type="button"
 																			class="btn btn-ghost btn-sm hover:bg-secondary hover:text-secondary-content w-full justify-start font-mono"
 																			onclick={() =>
-																				insertPlaceholder('promptTemplate', '{eventType}')}
+																				insertPlaceholder('promptTemplate', '{eventTypes}')}
 																		>
-																			<code class="text-secondary font-bold">{`{eventType}`}</code>
-																			<span class="ml-2 text-xs opacity-70">Event-Typ</span>
+																			<code class="text-secondary font-bold">{`{eventTypes}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Event-Typen</span>
 																		</button>
 																	</div>
 																	<div
@@ -2141,7 +2141,7 @@
 																	</div>
 																	<div
 																		class="tooltip tooltip-bottom"
-																		data-tip="Ausgewählte Wunschtypen (übersetzt)"
+																		data-tip="Übersetzte Wunschtypen (z.B. 'Normal, Herzlich')"
 																	>
 																		<button
 																			type="button"
@@ -2150,12 +2150,26 @@
 																				insertPlaceholder('promptBatch', '{wishTypes}')}
 																		>
 																			<code class="text-primary font-bold">{'{wishTypes}'}</code>
-																			<span class="ml-2 text-xs opacity-70">Typen</span>
+																			<span class="ml-2 text-xs opacity-70">Typen (DE)</span>
 																		</button>
 																	</div>
 																	<div
 																		class="tooltip tooltip-bottom"
-																		data-tip="Ausgewählte Anlässe (übersetzt)"
+																		data-tip="Rohe Wunschtypen (z.B. 'normal, herzlich')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptBatch', '{wishTypesRaw}')}
+																		>
+																			<code class="text-primary font-bold">{'{wishTypesRaw}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Typen (Raw)</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Übersetzte Anlässe (z.B. 'Geburtstag, Hochzeitstag')"
 																	>
 																		<button
 																			type="button"
@@ -2164,12 +2178,26 @@
 																				insertPlaceholder('promptBatch', '{eventTypes}')}
 																		>
 																			<code class="text-primary font-bold">{'{eventTypes}'}</code>
-																			<span class="ml-2 text-xs opacity-70">Anlässe</span>
+																			<span class="ml-2 text-xs opacity-70">Anlässe (DE)</span>
 																		</button>
 																	</div>
 																	<div
 																		class="tooltip tooltip-bottom"
-																		data-tip="Ausgewählte Sprachen (übersetzt)"
+																		data-tip="Rohe Anlässe (z.B. 'birthday, anniversary')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptBatch', '{eventTypesRaw}')}
+																		>
+																			<code class="text-primary font-bold">{'{eventTypesRaw}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Anlässe (Raw)</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Übersetzte Sprachen (z.B. 'Deutsch, Englisch')"
 																	>
 																		<button
 																			type="button"
@@ -2178,7 +2206,21 @@
 																				insertPlaceholder('promptBatch', '{languages}')}
 																		>
 																			<code class="text-primary font-bold">{'{languages}'}</code>
-																			<span class="ml-2 text-xs opacity-70">Sprachen</span>
+																			<span class="ml-2 text-xs opacity-70">Sprachen (DE)</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Rohe Sprachen (z.B. 'de, en')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptBatch', '{languagesRaw}')}
+																		>
+																			<code class="text-primary font-bold">{'{languagesRaw}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Sprachen (Raw)</span>
 																		</button>
 																	</div>
 																	<div

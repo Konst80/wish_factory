@@ -58,7 +58,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			relations,
 			ageGroups,
 			specificValues,
-			style = 'normal',
 			count = 1,
 			additionalInstructions,
 			isBatch = false,

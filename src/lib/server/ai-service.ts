@@ -526,7 +526,7 @@ class OpenRouterAIService {
 
 		// Übersetze Enums für bessere Prompts
 		const typeMap = { normal: 'Normal', herzlich: 'Herzlich', humorvoll: 'Humorvoll' };
-		const eventMap = { birthday: 'Geburtstag', anniversary: 'Jubiläum', custom: 'individuell' };
+		const eventMap = { birthday: 'Geburtstag', anniversary: 'Hochzeitstag', custom: 'individuell' };
 		const languageMap = { de: 'Deutsch', en: 'Englisch' };
 		const relationMap = {
 			friend: 'Freund/in',
@@ -690,13 +690,16 @@ class OpenRouterAIService {
 			.replace(/\{typeTexts\}/g, typeTexts)
 			.replace(/\{types\}/g, types.join(', '))
 			.replace(/\{eventTexts\}/g, eventTexts)
+			.replace(/\{eventText\}/g, eventTexts) // Zusätzlich für Legacy-Kompatibilität
 			.replace(/\{eventTypes\}/g, eventTypes.join(', '))
 			.replace(/\{languageTexts\}/g, languageTexts)
+			.replace(/\{language\}/g, languageTexts) // Zusätzlich für Legacy-Kompatibilität
 			.replace(/\{languages\}/g, languages.join(', '))
 			.replace(/\{relationTexts\}/g, relationTexts)
 			.replace(/\{relations\}/g, relations.join(', '))
 			.replace(/\{ageGroupTexts\}/g, ageGroupTexts)
 			.replace(/\{ageGroups\}/g, ageGroups.join(', '))
+			.replace(/\{style\}/g, typeTexts) // Map style to typeTexts
 			.replace(/\{specificValues\}/g, specificValuesText)
 			.replace(/\{additionalInstructions\}/g, additionalInstructionsText);
 
@@ -717,7 +720,7 @@ class OpenRouterAIService {
 			'  "wishes": [\n' +
 			'    {\n' +
 			'      "text": "Haupttext des Glückwunsches hier",\n' +
-			'      "belated": "Nachträglicher Text hier",\n' +
+			'      "belated": true,\n' +
 			'      "metadata": {\n' +
 			'        "type": "normal|herzlich|humorvoll",\n' +
 			'        "eventType": "birthday|anniversary|custom",\n' +
@@ -780,13 +783,13 @@ class OpenRouterAIService {
 	}
 
 	private getDefaultTemplate(): string {
-		return `Du bist ein Experte für das Schreiben von Glückwünschen. Generiere {count} {countText} in der Sprache "{language}" basierend auf folgenden Kriterien:
+		return `Du bist ein Experte für das Schreiben von Glückwünschen. Generiere {count} {countText} in der Sprache "{languageTexts}" basierend auf folgenden Kriterien:
 
 **Wichtige Regeln:**
 - Verwende IMMER geschlechtsneutrale Sprache (keine "er/sie" Annahmen)
 - Nutze die Platzhalter [Name], [Alter], [Anlass] wo sinnvoll
-- Der Stil soll "{style}" sein
-- Anlass: {eventText}
+- Der Stil soll "{typeTexts}" sein
+- Anlass: {eventTexts}
 - Beziehung: {relationTexts}
 - Zielgruppe: {ageGroupTexts}
 {specificValues}
@@ -806,9 +809,9 @@ Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträgl
   "wishes": [
     {
       "text": "Haupttext des Glückwunsches hier",
-      "belated": "Nachträglicher Text hier", 
+      "belated": true, 
       "metadata": {
-        "style": "{style}",
+        "style": "{typeTexts}",
         "confidence": 0.95
       }
     }
@@ -847,7 +850,7 @@ Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträgl
       "text": "Haupttext des Glückwunsches",
       "belated": "Nachträglicher Text",
       "metadata": {
-        "style": "{style}",
+        "style": "{typeTexts}",
         "confidence": 0.95
       }
     }
@@ -884,7 +887,7 @@ Generate both a regular text and a belated text for each wish.
       "text": "Main greeting text",
       "belated": "Belated greeting text",
       "metadata": {
-        "style": "{style}",
+        "style": "{typeTexts}",
         "confidence": 0.95
       }
     }
@@ -1224,11 +1227,9 @@ Generate both a regular text and a belated text for each wish.
 					result.warnings.push(`${wishPath}.text ist sehr lang (${wish.text.length} Zeichen)`);
 				}
 
-				if (!wish.belated || typeof wish.belated !== 'string') {
+				if (wish.belated === undefined || typeof wish.belated !== 'boolean') {
 					result.valid = false;
-					result.errors.push(`${wishPath}.belated fehlt oder ist kein String`);
-				} else if (wish.belated.trim().length === 0) {
-					result.warnings.push(`${wishPath}.belated ist leer`);
+					result.errors.push(`${wishPath}.belated fehlt oder ist kein Boolean`);
 				}
 
 				// Prüfe metadata

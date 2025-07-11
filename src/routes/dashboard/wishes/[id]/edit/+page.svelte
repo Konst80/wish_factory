@@ -69,7 +69,7 @@
 
 	const eventTypeLabels = {
 		[EventType.BIRTHDAY]: 'Geburtstag',
-		[EventType.ANNIVERSARY]: 'Jubiläum',
+		[EventType.ANNIVERSARY]: 'Hochzeitstag',
 		[EventType.CUSTOM]: 'Individuell'
 	};
 
@@ -328,129 +328,294 @@
 					<!-- Hidden ID field -->
 					<input type="hidden" name="id" value={data.wish.id} />
 
-					<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-						<!-- Wunsch-Typ -->
-						<div class="form-control">
-							<label class="label" for="type">
-								<span class="label-text font-medium">Wunsch-Typ *</span>
-							</label>
-							<select
-								id="type"
-								name="type"
-								class="select-bordered select w-full"
-								bind:value={formData.type}
-								required
+					<!-- Basis-Informationen -->
+					<div class="bg-base-50 mb-6 rounded-lg p-6">
+						<h3 class="text-primary mb-4 flex items-center gap-2 text-lg font-semibold">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-primary h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
 							>
-								{#each Object.values(WishType) as type (type)}
-									<option value={type}>{typeLabels[type]}</option>
-								{/each}
-							</select>
-						</div>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+							Basis-Informationen
+						</h3>
+						<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+							<!-- Stil -->
+							<div class="form-control">
+								<label class="label" for="type">
+									<span class="label-text flex items-center gap-2 text-base font-medium">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+											/>
+										</svg>
+										Stil *
+									</span>
+								</label>
+								<select
+									id="type"
+									name="type"
+									class="select-bordered select select-lg w-full"
+									bind:value={formData.type}
+									required
+								>
+									{#each Object.values(WishType) as wishType (wishType)}
+										<option value={wishType}>{typeLabels[wishType]}</option>
+									{/each}
+								</select>
+							</div>
 
-						<!-- Anlass -->
-						<div class="form-control">
-							<label class="label" for="eventType">
-								<span class="label-text font-medium">Anlass *</span>
-							</label>
-							<select
-								id="eventType"
-								name="eventType"
-								class="select-bordered select w-full"
-								bind:value={formData.eventType}
-								required
-							>
-								{#each Object.values(EventType) as eventType (eventType)}
-									<option value={eventType}>{eventTypeLabels[eventType]}</option>
-								{/each}
-							</select>
-						</div>
+							<!-- Anlass -->
+							<div class="form-control">
+								<label class="label" for="eventType">
+									<span class="label-text flex items-center gap-2 text-base font-medium">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+											/>
+										</svg>
+										Anlass *
+									</span>
+								</label>
+								<select
+									id="eventType"
+									name="eventType"
+									class="select-bordered select select-lg w-full"
+									bind:value={formData.eventType}
+									required
+								>
+									{#each Object.values(EventType) as eventType (eventType)}
+										<option value={eventType}>{eventTypeLabels[eventType]}</option>
+									{/each}
+								</select>
+							</div>
 
-						<!-- Sprache -->
-						<div class="form-control">
-							<label class="label" for="language">
-								<span class="label-text font-medium">Sprache *</span>
-							</label>
-							<select
-								id="language"
-								name="language"
-								class="select-bordered select w-full"
-								bind:value={formData.language}
-								required
-							>
-								{#each Object.values(Language) as language (language)}
-									<option value={language}>{languageLabels[language]}</option>
-								{/each}
-							</select>
-						</div>
+							<!-- Sprache -->
+							<div class="form-control">
+								<label class="label" for="language">
+									<span class="label-text flex items-center gap-2 text-base font-medium">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+											/>
+										</svg>
+										Sprache *
+									</span>
+								</label>
+								<select
+									id="language"
+									name="language"
+									class="select-bordered select select-lg w-full"
+									bind:value={formData.language}
+									required
+								>
+									{#each Object.values(Language) as language (language)}
+										<option value={language}>{languageLabels[language]}</option>
+									{/each}
+								</select>
+							</div>
 
-						<!-- Status -->
-						<div class="form-control">
-							<label class="label" for="status">
-								<span class="label-text font-medium">Status</span>
-							</label>
-							<select
-								id="status"
-								name="status"
-								class="select-bordered select w-full"
-								bind:value={formData.status}
-							>
-								{#each Object.values(WishStatus) as status (status)}
-									<option value={status}>{statusLabels[status]}</option>
-								{/each}
-							</select>
+							<!-- Status -->
+							<div class="form-control">
+								<label class="label" for="status">
+									<span class="label-text flex items-center gap-2 text-base font-medium">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
+										Status
+									</span>
+								</label>
+								<select
+									id="status"
+									name="status"
+									class="select-bordered select select-lg w-full"
+									bind:value={formData.status}
+								>
+									{#each Object.values(WishStatus) as status (status)}
+										<option value={status}>{statusLabels[status]}</option>
+									{/each}
+								</select>
+							</div>
 						</div>
 					</div>
 
-					<!-- Beziehungen -->
-					<div class="form-control mt-6">
-						<label class="label">
-							<span class="label-text font-medium">Ziel-Beziehungen *</span>
-							<span class="label-text-alt">Mindestens eine auswählen</span>
-						</label>
-						<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-							{#each Object.values(Relation) as relation (relation)}
-								<label class="label cursor-pointer justify-start">
-									<input
-										type="checkbox"
-										name="relations"
-										value={relation}
-										class="checkbox checkbox-primary"
-										checked={formData.relations.includes(relation)}
-										onchange={(e) => handleRelationChange(relation, e.currentTarget.checked)}
-									/>
-									<span class="label-text ml-3">{relationLabels[relation]}</span>
-								</label>
-							{/each}
-						</div>
-					</div>
+					<!-- Zielgruppe -->
+					<div class="bg-base-50 mb-6 rounded-lg p-6">
+						<h3 class="text-secondary mb-4 flex items-center gap-2 text-lg font-semibold">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-secondary h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+								/>
+							</svg>
+							Zielgruppe
+						</h3>
 
-					<!-- Altersgruppen -->
-					<div class="form-control mt-6">
-						<label class="label">
-							<span class="label-text font-medium">Ziel-Altersgruppen *</span>
-							<span class="label-text-alt">Mindestens eine auswählen</span>
-						</label>
-						<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-							{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
-								<label class="label cursor-pointer justify-start">
-									<input
-										type="checkbox"
-										name="ageGroups"
-										value={ageGroup}
-										class="checkbox checkbox-primary"
-										checked={formData.ageGroups.includes(ageGroup)}
-										onchange={(e) => handleAgeGroupChange(ageGroup, e.currentTarget.checked)}
-									/>
-									<span class="label-text ml-3">{ageGroupLabels[ageGroup]}</span>
-								</label>
-							{/each}
+						<!-- Beziehungen -->
+						<div class="form-control mb-6">
+							<label class="label">
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+										/>
+									</svg>
+									Beziehung *
+								</span>
+								<span class="label-text-alt badge badge-neutral badge-sm">Mehrere Auswahl möglich</span>
+							</label>
+							<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+								{#each Object.values(Relation) as relation (relation)}
+									<label
+										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {formData.relations.includes(
+											relation
+										)
+											? 'border-secondary bg-secondary/5'
+											: 'border-base-300'}"
+									>
+										<input
+											type="checkbox"
+											name="relations"
+											value={relation}
+											class="checkbox checkbox-secondary"
+											checked={formData.relations.includes(relation)}
+											onchange={(e) => handleRelationChange(relation, e.currentTarget.checked)}
+										/>
+										<span class="label-text ml-3 font-medium">{relationLabels[relation]}</span>
+									</label>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Altersgruppen -->
+						<div class="form-control mb-6">
+							<label class="label">
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+										/>
+									</svg>
+									Altersgruppe *
+								</span>
+								<span class="label-text-alt badge badge-neutral badge-sm">Mehrere Auswahl möglich</span>
+							</label>
+							<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+								{#each Object.values(AgeGroup).filter(ag => ag !== 'all') as ageGroup (ageGroup)}
+									<label
+										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {formData.ageGroups.includes(
+											ageGroup
+										)
+											? 'border-primary bg-primary/5'
+											: 'border-base-300'}"
+									>
+										<input
+											type="checkbox"
+											name="ageGroups"
+											value={ageGroup}
+											class="checkbox checkbox-primary"
+											checked={formData.ageGroups.includes(ageGroup)}
+											onchange={(e) => handleAgeGroupChange(ageGroup, e.currentTarget.checked)}
+										/>
+										<span class="label-text ml-3 font-medium">{ageGroupLabels[ageGroup]}</span>
+									</label>
+								{/each}
+							</div>
 						</div>
 					</div>
 
 					<!-- Spezifische Werte -->
-					<div class="form-control mt-6">
+					<div class="form-control">
 						<label class="label" for="specificValues">
-							<span class="label-text font-medium">Spezifische Werte</span>
+							<span class="label-text flex items-center gap-2 text-base font-medium">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+									/>
+								</svg>
+								Spezifische Werte
+							</span>
 							<span class="label-text-alt">z.B. 18, 30, 50 (durch Komma getrennt)</span>
 						</label>
 						<input
@@ -458,7 +623,7 @@
 							name="specificValues"
 							type="text"
 							placeholder="18, 30, 50, 65"
-							class="input-bordered input w-full"
+							class="input-bordered input input-lg w-full"
 							class:input-error={!validateSpecificValues(formData.specificValues)}
 							bind:value={formData.specificValues}
 						/>
@@ -471,55 +636,150 @@
 						{/if}
 					</div>
 
-					<!-- Haupttext -->
-					<div class="form-control mt-6">
-						<label class="label" for="text">
-							<span class="label-text font-medium">Wunsch-Text *</span>
-							<span class="label-text-alt">{formData.text.length}/1000</span>
-						</label>
-						<textarea
-							id="text"
-							name="text"
-							rows="6"
-							placeholder="Liebe/r [Name], zu deinem [Anlass] wünsche ich dir..."
-							class="textarea-bordered textarea w-full"
-							bind:value={formData.text}
-							required
-						></textarea>
-						<label class="label">
-							<span class="label-text-alt">
-								Verwenden Sie Platzhalter wie [Name], [Anlass], [Alter] für dynamische Inhalte
-							</span>
-						</label>
-					</div>
-
-					<!-- Nachträglicher Wunsch Status -->
-					<div class="form-control mt-6">
-						<div class="flex items-center justify-between">
-							<span class="label-text font-medium">Nachträglicher Wunsch</span>
-							<div class="flex items-center gap-2">
-								{#if formData.belated}
-									<div class="badge badge-warning gap-2">
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-										</svg>
-										Nachträglich
+					<!-- Wunsch-Art -->
+					<div class="bg-base-50 mb-6 rounded-lg p-6">
+						<h3 class="text-accent mb-4 flex items-center gap-2 text-lg font-semibold">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-accent h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+								></path>
+							</svg>
+							Wunsch-Art
+						</h3>
+						<div class="form-control mb-6">
+							<label class="label">
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									Wunsch-Art *
+								</span>
+							</label>
+							<div class="grid grid-cols-2 gap-4">
+								<label
+									class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
+									false
+										? 'border-primary bg-primary/5'
+										: 'border-base-300'}"
+								>
+									<input
+										type="radio"
+										name="belated"
+										value="false"
+										bind:group={formData.belated}
+										class="radio radio-primary"
+										required
+									/>
+									<div class="flex flex-col">
+										<span class="font-medium">Normal</span>
+										<span class="text-base-content/60 text-sm">Regulärer Wunsch</span>
 									</div>
-								{:else}
-									<div class="badge badge-neutral gap-2">
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-										</svg>
-										Normal
+								</label>
+								<label
+									class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
+									true
+										? 'border-primary bg-primary/5'
+										: 'border-base-300'}"
+								>
+									<input
+										type="radio"
+										name="belated"
+										value="true"
+										bind:group={formData.belated}
+										class="radio radio-primary"
+										required
+									/>
+									<div class="flex flex-col">
+										<span class="font-medium">Nachträglich</span>
+										<span class="text-base-content/60 text-sm">Verspäteter Wunsch</span>
 									</div>
-								{/if}
+								</label>
 							</div>
 						</div>
-						<input type="hidden" name="belated" value={formData.belated} />
-						<div class="mt-2">
-							<span class="text-base-content/60 text-sm">
-								{formData.belated ? 'Dieser Wunsch ist als nachträglich markiert' : 'Dieser Wunsch ist als regulärer Wunsch markiert'}
-							</span>
+
+						<!-- Content Creation Section -->
+						<div class="form-control">
+							<label class="label" for="text">
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+										/>
+									</svg>
+									Wunsch-Text *
+								</span>
+								<div class="flex items-center gap-2">
+									<span class="label-text-alt">{formData.text.length}/1000</span>
+									<div class="badge badge-primary badge-sm">KI-unterstützt</div>
+								</div>
+							</label>
+							<div class="relative">
+								<textarea
+									id="text"
+									name="text"
+									rows="6"
+									placeholder="Liebe/r [Name], zu deinem [Anlass] wünsche ich dir..."
+									class="textarea-bordered textarea textarea-lg w-full pr-32"
+									bind:value={formData.text}
+									required
+								></textarea>
+								<button
+									type="button"
+									class="btn btn-primary btn-sm absolute top-2 right-2 gap-1"
+									onclick={() => (showAIGenerator = true)}
+									title="Text mit KI basierend auf aktuellen Einstellungen generieren"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 10V3L4 14h7v7l9-11h-7z"
+										/>
+									</svg>
+									KI
+								</button>
+							</div>
+							<label class="label">
+								<span class="label-text-alt flex items-center gap-2">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-3 w-3"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+									Verwenden Sie Platzhalter wie [Name], [Anlass], [Alter] für dynamische Inhalte
+								</span>
+							</label>
 						</div>
 					</div>
 

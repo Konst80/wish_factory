@@ -36,8 +36,33 @@
 
 	const categoryColors: Record<string, string> = {
 		Geburtstag: 'bg-primary',
-		Jubiläum: 'bg-secondary',
+		Hochzeitstag: 'bg-secondary',
 		Individuell: 'bg-accent'
+	};
+
+	const typeColors: Record<string, string> = {
+		Normal: 'bg-blue-500',
+		Herzlich: 'bg-pink-500',
+		Humorvoll: 'bg-yellow-500'
+	};
+
+	const relationColors: Record<string, string> = {
+		'Freund/in': 'bg-green-500',
+		Familie: 'bg-red-500',
+		'Partner/in': 'bg-purple-500',
+		'Kollege/in': 'bg-orange-500'
+	};
+
+	const ageGroupColors: Record<string, string> = {
+		'Junge Menschen': 'bg-cyan-500',
+		'Mittleres Alter': 'bg-indigo-500',
+		Senioren: 'bg-gray-500',
+		'Alle Altersgruppen': 'bg-emerald-500'
+	};
+
+	const belatedColors: Record<string, string> = {
+		Normal: 'bg-blue-600',
+		Nachträglich: 'bg-amber-600'
 	};
 
 	function exportData() {
@@ -343,6 +368,111 @@
 					<div class="text-right">
 						<div class="text-lg font-bold">{lang.count}</div>
 						<div class="text-sm opacity-70">{lang.percentage}%</div>
+					</div>
+				</div>
+			{/each}
+		</div>
+	</div>
+</div>
+
+<!-- Additional Distributions -->
+<div class="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-2 xl:grid-cols-3">
+	<!-- Type/Style Distribution -->
+	<div class="card bg-base-100 shadow-xl">
+		<div class="card-body">
+			<h2 class="card-title">Stil-Verteilung</h2>
+			<div class="space-y-3">
+				{#each data.typeDistribution as type}
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<div class="h-4 w-4 rounded {typeColors[type.type]}"></div>
+							<span class="text-sm">{type.type}</span>
+						</div>
+						<div class="text-right">
+							<div class="text-sm font-medium">{type.count}</div>
+							<div class="text-xs opacity-70">{type.percentage}%</div>
+						</div>
+					</div>
+					<div class="bg-base-200 h-2 w-full rounded-full">
+						<div
+							class="h-2 rounded-full {typeColors[type.type]}"
+							style="width: {type.percentage}%"
+						></div>
+					</div>
+				{/each}
+			</div>
+		</div>
+	</div>
+
+	<!-- Relations Distribution -->
+	<div class="card bg-base-100 shadow-xl">
+		<div class="card-body">
+			<h2 class="card-title">Beziehungs-Verteilung</h2>
+			<div class="space-y-3">
+				{#each data.relationsDistribution as relation}
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<div class="h-4 w-4 rounded {relationColors[relation.relation]}"></div>
+							<span class="text-sm">{relation.relation}</span>
+						</div>
+						<div class="text-right">
+							<div class="text-sm font-medium">{relation.count}</div>
+							<div class="text-xs opacity-70">{relation.percentage}%</div>
+						</div>
+					</div>
+					<div class="bg-base-200 h-2 w-full rounded-full">
+						<div
+							class="h-2 rounded-full {relationColors[relation.relation]}"
+							style="width: {relation.percentage}%"
+						></div>
+					</div>
+				{/each}
+			</div>
+		</div>
+	</div>
+
+	<!-- Age Groups Distribution -->
+	<div class="card bg-base-100 shadow-xl">
+		<div class="card-body">
+			<h2 class="card-title">Altersgruppen-Verteilung</h2>
+			<div class="space-y-3">
+				{#each data.ageGroupsDistribution as ageGroup}
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<div class="h-4 w-4 rounded {ageGroupColors[ageGroup.ageGroup]}"></div>
+							<span class="text-sm">{ageGroup.ageGroup}</span>
+						</div>
+						<div class="text-right">
+							<div class="text-sm font-medium">{ageGroup.count}</div>
+							<div class="text-xs opacity-70">{ageGroup.percentage}%</div>
+						</div>
+					</div>
+					<div class="bg-base-200 h-2 w-full rounded-full">
+						<div
+							class="h-2 rounded-full {ageGroupColors[ageGroup.ageGroup]}"
+							style="width: {ageGroup.percentage}%"
+						></div>
+					</div>
+				{/each}
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Belated Distribution -->
+<div class="card bg-base-100 mt-6 shadow-xl">
+	<div class="card-body">
+		<h2 class="card-title">Nachträgliche Wünsche</h2>
+		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+			{#each data.belatedDistribution as belated}
+				<div class="flex items-center justify-between rounded-lg border p-4">
+					<div class="flex items-center gap-3">
+						<div class="h-6 w-6 rounded {belatedColors[belated.belated]}"></div>
+						<span class="font-medium">{belated.belated}</span>
+					</div>
+					<div class="text-right">
+						<div class="text-lg font-bold">{belated.count}</div>
+						<div class="text-sm opacity-70">{belated.percentage}%</div>
 					</div>
 				</div>
 			{/each}

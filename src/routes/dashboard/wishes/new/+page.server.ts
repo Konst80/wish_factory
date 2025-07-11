@@ -102,7 +102,7 @@ export const actions: Actions = {
 					age_groups: validatedData.ageGroups,
 					specific_values: validatedData.specificValues,
 					text: validatedData.text,
-					belated: validatedData.belated ? 'true' : '',
+					belated: validatedData.belated.toString(),
 					status: validatedData.status,
 					language: validatedData.language,
 					created_by: validatedData.createdBy
@@ -201,7 +201,7 @@ export const actions: Actions = {
 						age_groups: validatedData.ageGroups,
 						specific_values: validatedData.specificValues || [],
 						text: validatedData.text,
-						belated: validatedData.belated ? 'true' : '',
+						belated: validatedData.belated.toString(),
 						status: validatedData.status,
 						language: validatedData.language,
 						created_by: validatedData.createdBy
