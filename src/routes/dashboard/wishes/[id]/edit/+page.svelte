@@ -167,14 +167,41 @@
 
 	// Check if form has changes
 	function hasChanges() {
+		// Helper function to normalize array comparison
+		const arraysEqual = (a: string[], b: string[]) => {
+			if (a.length !== b.length) return false;
+			const sortedA = [...a].sort();
+			const sortedB = [...b].sort();
+			return sortedA.every((val, index) => val === sortedB[index]);
+		};
+
+		// Helper function to normalize specific values comparison
+		const specificValuesEqual = (formString: string, dbArray: number[] | undefined | null) => {
+			const formArray = formString
+				.split(',')
+				.map((v) => v.trim())
+				.filter((v) => v !== '')
+				.map((v) => parseInt(v))
+				.filter((v) => !isNaN(v));
+
+			const dbNormalized = dbArray || [];
+
+			if (formArray.length !== dbNormalized.length) return false;
+
+			const sortedForm = [...formArray].sort((a, b) => a - b);
+			const sortedDb = [...dbNormalized].sort((a, b) => a - b);
+
+			return sortedForm.every((val, index) => val === sortedDb[index]);
+		};
+
 		return (
 			formData.type !== data.wish.type ||
 			formData.eventType !== data.wish.eventType ||
-			JSON.stringify(formData.relations.sort()) !== JSON.stringify(data.wish.relations.sort()) ||
-			JSON.stringify(formData.ageGroups.sort()) !== JSON.stringify(data.wish.ageGroups.sort()) ||
-			formData.specificValues !== (data.wish.specificValues?.join(', ') || '') ||
+			!arraysEqual(formData.relations, data.wish.relations) ||
+			!arraysEqual(formData.ageGroups, data.wish.ageGroups) ||
+			!specificValuesEqual(formData.specificValues, data.wish.specificValues) ||
 			formData.text !== data.wish.text ||
-			formData.belated !== (data.wish.belated || '') ||
+			formData.belated !== (data.wish.belated ?? '') ||
 			formData.language !== data.wish.language ||
 			formData.status !== data.wish.status
 		);

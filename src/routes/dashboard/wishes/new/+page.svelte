@@ -13,7 +13,7 @@
 			ageGroups?: string[];
 			specificValues?: number;
 			text?: string;
-			belated?: string;
+			belated?: boolean;
 			language?: string;
 			status?: string;
 		};
@@ -29,7 +29,7 @@
 		ageGroups: form?.values?.ageGroups || [],
 		specificValues: form?.values?.specificValues || '',
 		text: form?.values?.text || '',
-		belated: form?.values?.belated || '',
+		belated: form?.values?.belated || false,
 		language: form?.values?.language || Language.DE,
 		status: form?.values?.status || WishStatus.ENTWURF
 	});
@@ -50,7 +50,7 @@
 		ageGroups: AgeGroup[];
 		specificValues: number;
 		text: string;
-		belated: string;
+		belated: boolean;
 		language: Language;
 		status: WishStatus;
 		metadata: {
@@ -221,7 +221,7 @@
 				const wish = data.wishes[0];
 				console.log('🎉 Generierter Wunsch:', wish);
 				formData.text = wish.text;
-				formData.belated = wish.belated;
+				// belated is now a boolean, not a string
 				console.log('✅ Formular aktualisiert');
 			} else {
 				console.error('❌ Keine Wünsche in Response:', data);
@@ -478,9 +478,7 @@
 								if (generatedWishes.length >= batchSettings.count) break;
 
 								const text = texts[idCounter % texts.length];
-								const belated = batchSettings.includeAlternatives
-									? `Liebe/r [Name], auch wenn ich etwas spät dran bin - ${text.toLowerCase().replace(/^[a-z]/, (match) => match.toUpperCase())}`
-									: '';
+								const belated = batchSettings.includeAlternatives && Math.random() > 0.5;
 
 								generatedWishes.push({
 									id: `template-generated-${idCounter++}`,
@@ -804,6 +802,77 @@
 										<span
 											class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
 											>{errors.type}</span
+										>
+									</label>
+								{/if}
+							</div>
+
+							<!-- Wunsch-Art -->
+							<div class="form-control">
+								<label class="label">
+									<span class="label-text flex items-center gap-2 text-base font-medium">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
+										Wunsch-Art *
+									</span>
+								</label>
+								<div class="grid grid-cols-2 gap-4">
+									<label
+										class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
+										false
+											? 'border-primary bg-primary/5'
+											: 'border-base-300'}"
+									>
+										<input
+											type="radio"
+											name="belated"
+											value="false"
+											bind:group={formData.belated}
+											class="radio radio-primary"
+											required
+										/>
+										<div class="flex flex-col">
+											<span class="font-medium">Normal</span>
+											<span class="text-base-content/60 text-sm">Regulärer Wunsch</span>
+										</div>
+									</label>
+									<label
+										class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
+										true
+											? 'border-primary bg-primary/5'
+											: 'border-base-300'}"
+									>
+										<input
+											type="radio"
+											name="belated"
+											value="true"
+											bind:group={formData.belated}
+											class="radio radio-primary"
+											required
+										/>
+										<div class="flex flex-col">
+											<span class="font-medium">Nachträglich</span>
+											<span class="text-base-content/60 text-sm">Verspäteter Wunsch</span>
+										</div>
+									</label>
+								</div>
+								{#if errors.belated}
+									<label class="label">
+										<span
+											class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+											>{errors.belated}</span
 										>
 									</label>
 								{/if}
@@ -1196,102 +1265,6 @@
 									<span
 										class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
 										>{errors.text}</span
-									>
-								</label>
-							{/if}
-						</div>
-
-						<!-- Nachträglicher Text -->
-						<div class="form-control">
-							<label class="label" for="belated">
-								<span class="label-text flex items-center gap-2 text-base font-medium">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-										/>
-									</svg>
-									Nachträglicher Text *
-								</span>
-								<div class="flex items-center gap-2">
-									<span class="label-text-alt">{formData.belated.length}/1000</span>
-									<div class="badge badge-secondary badge-sm">Verspätet</div>
-								</div>
-							</label>
-							<div class="relative">
-								<textarea
-									id="belated"
-									name="belated"
-									rows="4"
-									placeholder="Liebe/r [Name], auch wenn ich zu spät dran bin..."
-									class="textarea-bordered textarea textarea-lg w-full pr-32"
-									class:textarea-error={errors.belated}
-									bind:value={formData.belated}
-									required
-								></textarea>
-								<button
-									type="button"
-									class="btn btn-secondary btn-sm absolute top-2 right-2 gap-1"
-									onclick={generateWithAI}
-									disabled={isGenerating ||
-										!formData.eventType ||
-										formData.relations.length === 0 ||
-										formData.ageGroups.length === 0}
-									title="Nachträglichen Text mit KI generieren"
-								>
-									{#if isGenerating}
-										<span class="loading loading-spinner loading-xs"></span>
-									{:else}
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											class="h-4 w-4"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M13 10V3L4 14h7v7l9-11h-7z"
-											/>
-										</svg>
-									{/if}
-									KI
-								</button>
-							</div>
-							<label class="label">
-								<span class="label-text-alt flex items-center gap-2">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-3 w-3"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-										/>
-									</svg>
-									Text für verspätete Glückwünsche mit Platzhaltern
-								</span>
-							</label>
-							{#if errors.belated}
-								<label class="label">
-									<span
-										class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
-										>{errors.belated}</span
 									>
 								</label>
 							{/if}
@@ -2364,11 +2337,10 @@
 																		d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 																	/>
 																</svg>
-																<span class="text-base-content/70 text-sm font-medium"
-																	>Nachträglich:</span
+																<span class="text-warning text-sm font-medium"
+																	>Nachträglicher Wunsch</span
 																>
 															</div>
-															<p class="text-sm leading-relaxed opacity-80">{wish.belated}</p>
 														</div>
 													{/if}
 												</div>
@@ -2563,12 +2535,11 @@
 									<div class="divider my-2"></div>
 									<div>
 										<div class="mb-2 flex items-center gap-2">
-											<div class="badge badge-secondary badge-sm">Nachträglich</div>
-											<div class="badge badge-outline badge-sm">
-												{formData.belated.length} Zeichen
-											</div>
+											<div class="badge badge-warning badge-sm">Nachträglicher Wunsch</div>
 										</div>
-										<p class="text-sm leading-relaxed">{formData.belated}</p>
+										<p class="text-sm leading-relaxed opacity-80">
+											Dieser Wunsch ist als nachträglich markiert
+										</p>
 									</div>
 								{/if}
 							</div>

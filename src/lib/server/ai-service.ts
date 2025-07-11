@@ -14,7 +14,7 @@ interface WishGenerationParams {
 
 interface GeneratedWish {
 	text: string;
-	belated: string;
+	belated: boolean;
 	metadata: {
 		type: WishType;
 		eventType: EventType;
@@ -85,7 +85,7 @@ class OpenRouterAIService {
 		try {
 			const prompt = this.generatePrompt(params, aiSettings);
 			const model = aiSettings?.model || 'anthropic/claude-sonnet-4';
-			
+
 			// Dynamisch maxTokens basierend auf der Anzahl der Wünsche anpassen
 			const baseTokens = aiSettings?.maxTokens || 2000;
 			const wishCount = params.count || 1;
@@ -180,18 +180,18 @@ class OpenRouterAIService {
 
 				// Fallback 1: Entferne Markdown-Formatierung und extrahiere JSON
 				let cleanedContent = content;
-				
+
 				// Entferne ```json und ``` Wrapper
 				cleanedContent = cleanedContent.replace(/```json\s*/g, '');
 				cleanedContent = cleanedContent.replace(/```\s*$/g, '');
 				cleanedContent = cleanedContent.trim();
-				
+
 				try {
 					parsedResponse = JSON.parse(cleanedContent);
 					console.log('✅ Parsed cleaned JSON:', parsedResponse);
 				} catch (cleanError) {
 					console.log('❌ Cleaned JSON parse failed, trying regex extraction...');
-					
+
 					// Fallback 2: Versuche JSON aus dem Text zu extrahieren
 					const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/);
 					if (jsonMatch) {
@@ -227,8 +227,8 @@ class OpenRouterAIService {
 									type: params.types[0] || 'normal',
 									eventType: params.eventTypes[0] || 'birthday',
 									language: params.languages[0] || 'de',
-									relations: params.relations || [],
-									ageGroups: params.ageGroups || [],
+									relations: (params.relations || []) as Relation[],
+									ageGroups: (params.ageGroups || []) as AgeGroup[],
 									style: 'normal',
 									confidence: 0.95
 								}
@@ -300,13 +300,13 @@ class OpenRouterAIService {
 					wishes: [
 						{
 							text: text,
-							belated: belated,
+							belated: belated.toLowerCase() === 'true' || belated === '1' || belated === 'yes',
 							metadata: {
 								type: params.types[0] || 'normal',
 								eventType: params.eventTypes[0] || 'birthday',
 								language: params.languages[0] || 'de',
-								relations: params.relations || [],
-								ageGroups: params.ageGroups || [],
+								relations: (params.relations || []) as Relation[],
+								ageGroups: (params.ageGroups || []) as AgeGroup[],
 								style: 'normal',
 								confidence: 0.9
 							}
@@ -322,7 +322,7 @@ class OpenRouterAIService {
 				wishes: [
 					{
 						text: content.trim(),
-						belated: `Nachträglich ${content.trim()}`,
+						belated: false,
 						metadata: {
 							type: params.types[0] || 'normal',
 							eventType: params.eventTypes[0] || 'birthday',
@@ -346,27 +346,32 @@ class OpenRouterAIService {
 	private repairIncompleteJSON(content: string, params: WishGenerationParams): AIResponse {
 		console.log('🔧 Attempting to repair incomplete JSON...');
 		console.log('🔍 Content preview:', content.substring(0, 500) + '...');
-		
+
 		try {
 			// Strategie 1: Versuche unvollständigen JSON zu vervollständigen
 			let repairedContent = content;
-			
+
 			// Finde den letzten vollständigen Wunsch
 			const lastCompleteWishMatch = content.lastIndexOf('},\n    {');
 			const lastIncompleteWishMatch = content.lastIndexOf('"language":');
-			
+
 			if (lastIncompleteWishMatch > lastCompleteWishMatch) {
 				// Es gibt einen unvollständigen letzten Wunsch - schneide ihn ab
 				const cutOffPoint = content.lastIndexOf('},\n    {', lastIncompleteWishMatch);
 				if (cutOffPoint > 0) {
-					repairedContent = content.substring(0, cutOffPoint + 1) + '\n  ],\n  "totalGenerated": ' + 
-						Math.min(params.count || 1, (content.match(/\{\s*"text":/g) || []).length) + '\n}';
+					repairedContent =
+						content.substring(0, cutOffPoint + 1) +
+						'\n  ],\n  "totalGenerated": ' +
+						Math.min(params.count || 1, (content.match(/\{\s*"text":/g) || []).length) +
+						'\n}';
 					console.log('🔧 Truncated incomplete wish, trying to parse...');
-					
+
 					try {
 						const parsedResponse = JSON.parse(repairedContent);
 						if (parsedResponse.wishes && Array.isArray(parsedResponse.wishes)) {
-							console.log(`✅ Successfully repaired JSON with ${parsedResponse.wishes.length} wishes`);
+							console.log(
+								`✅ Successfully repaired JSON with ${parsedResponse.wishes.length} wishes`
+							);
 							return parsedResponse;
 						}
 					} catch (parseError) {
@@ -374,37 +379,46 @@ class OpenRouterAIService {
 					}
 				}
 			}
-			
+
 			// Strategie 2: Extrahiere vollständige Wunsch-Objekte einzeln
 			const wishes = [];
 			// Verbesserte Regex für vollständige Wunsch-Objekte
-			const wishRegex = /\{\s*"text":\s*"([^"]*)",\s*"belated":\s*"([^"]*)",\s*"metadata":\s*\{[^}]*"type":\s*"([^"]*)"[^}]*"eventType":\s*"([^"]*)"[^}]*"language":\s*"([^"]*)"[^}]*"relations":\s*\[([^\]]*)\][^}]*"ageGroups":\s*\[([^\]]*)\][^}]*\}/g;
-			
+			const wishRegex =
+				/\{\s*"text":\s*"([^"]*)",\s*"belated":\s*"([^"]*)",\s*"metadata":\s*\{[^}]*"type":\s*"([^"]*)"[^}]*"eventType":\s*"([^"]*)"[^}]*"language":\s*"([^"]*)"[^}]*"relations":\s*\[([^\]]*)\][^}]*"ageGroups":\s*\[([^\]]*)\][^}]*\}/g;
+
 			let match;
 			while ((match = wishRegex.exec(content)) !== null && wishes.length < (params.count || 1)) {
 				const [, text, belated, type, eventType, language, relationsStr, ageGroupsStr] = match;
-				
+
 				// Parse relations and ageGroups arrays
-				const relations = relationsStr.split(',').map(r => r.trim().replace(/['"]/g, '')).filter(r => r);
-				const ageGroups = ageGroupsStr.split(',').map(a => a.trim().replace(/['"]/g, '')).filter(a => a);
-				
+				const relations = relationsStr
+					.split(',')
+					.map((r) => r.trim().replace(/['"]/g, ''))
+					.filter((r) => r);
+				const ageGroups = ageGroupsStr
+					.split(',')
+					.map((a) => a.trim().replace(/['"]/g, ''))
+					.filter((a) => a);
+
 				const metadata = {
 					type: (type || params.types[0] || 'normal') as WishType,
 					eventType: (eventType || params.eventTypes[0] || 'birthday') as EventType,
 					language: (language || params.languages[0] || 'de') as Language,
-					relations: relations.length > 0 ? relations : (params.relations || ['friend']),
-					ageGroups: ageGroups.length > 0 ? ageGroups : (params.ageGroups || ['all']),
+					relations: (relations.length > 0
+						? relations
+						: params.relations || ['friend']) as Relation[],
+					ageGroups: (ageGroups.length > 0 ? ageGroups : params.ageGroups || ['all']) as AgeGroup[],
 					style: 'normal',
 					confidence: 0.9
 				};
-				
+
 				wishes.push({
 					text: text.replace(/\\"/g, '"'),
-					belated: belated.replace(/\\"/g, '"'),
+					belated: belated.toLowerCase() === 'true' || belated === '1' || belated === 'yes',
 					metadata
 				});
 			}
-			
+
 			if (wishes.length > 0) {
 				console.log(`✅ Extracted ${wishes.length} complete wishes using regex`);
 				return {
@@ -412,35 +426,35 @@ class OpenRouterAIService {
 					totalGenerated: wishes.length
 				};
 			}
-			
+
 			// Strategie 3: Einfachere Extraktion für den Fall, dass komplexe Regex versagt
 			console.log('🔍 Trying simpler extraction method...');
 			const simpleWishMatches = content.match(/"text":\s*"([^"]+)"/g);
 			const simpleBelatedMatches = content.match(/"belated":\s*"([^"]*)"/g);
-			
+
 			if (simpleWishMatches && simpleWishMatches.length > 0) {
 				const extractedWishes = [];
 				for (let i = 0; i < Math.min(simpleWishMatches.length, params.count || 1); i++) {
 					const textMatch = simpleWishMatches[i].match(/"text":\s*"([^"]+)"/);
 					const belatedMatch = simpleBelatedMatches?.[i]?.match(/"belated":\s*"([^"]*)"/);
-					
+
 					if (textMatch) {
 						extractedWishes.push({
 							text: textMatch[1],
-							belated: belatedMatch?.[1] || 'Nachträglich alles Gute!',
+							belated: Boolean(belatedMatch?.[1]) && belatedMatch?.[1]?.trim() !== '',
 							metadata: {
 								type: (params.types[0] || 'normal') as WishType,
 								eventType: (params.eventTypes[0] || 'birthday') as EventType,
 								language: (params.languages[0] || 'de') as Language,
-								relations: params.relations || ['friend'],
-								ageGroups: params.ageGroups || ['all'],
+								relations: (params.relations || ['friend']) as Relation[],
+								ageGroups: (params.ageGroups || ['all']) as AgeGroup[],
 								style: 'normal',
 								confidence: 0.85
 							}
 						});
 					}
 				}
-				
+
 				if (extractedWishes.length > 0) {
 					console.log(`✅ Simple extraction found ${extractedWishes.length} wishes`);
 					return {
@@ -449,11 +463,10 @@ class OpenRouterAIService {
 					};
 				}
 			}
-			
+
 			// Falls alle Strategien versagen, nutze Fallback
 			console.log('⚠️ All repair strategies failed, using text conversion fallback');
 			return this.convertTextToJSON(content, params);
-			
 		} catch (error) {
 			console.error('❌ JSON repair failed:', error);
 			return this.convertTextToJSON(content, params);
@@ -591,7 +604,7 @@ class OpenRouterAIService {
 				.replace(/\{languagesRaw\}/g, languages.join(', '))
 				.replace(/\{relationsRaw\}/g, relations.join(', '))
 				.replace(/\{ageGroupsRaw\}/g, ageGroups.join(', '));
-			
+
 			batchPromptText = `\n\n**Batch-Generierung Anweisungen:**\n${batchPrompt}`;
 		}
 
@@ -687,9 +700,21 @@ class OpenRouterAIService {
 			'\n' +
 			'}\n\n' +
 			'PARAMETER-AUSWAHL-LOGIK:\n' +
-			'- **Typ/Anlass/Sprache**: Wähle EINEN Wert pro Wunsch aus: ' + types.join(', ') + ' / ' + eventTypes.join(', ') + ' / ' + languages.join(', ') + '\n' +
-			'- **Zielgruppen**: Ein Wunsch kann für MEHRERE Gruppen geeignet sein aus: ' + relations.join(', ') + ' / ' + ageGroups.join(', ') + '\n' +
-			'- Verteile die Auswahl gleichmäßig über alle ' + count + ' Wünsche\n\n' +
+			'- **Typ/Anlass/Sprache**: Wähle EINEN Wert pro Wunsch aus: ' +
+			types.join(', ') +
+			' / ' +
+			eventTypes.join(', ') +
+			' / ' +
+			languages.join(', ') +
+			'\n' +
+			'- **Zielgruppen**: Ein Wunsch kann für MEHRERE Gruppen geeignet sein aus: ' +
+			relations.join(', ') +
+			' / ' +
+			ageGroups.join(', ') +
+			'\n' +
+			'- Verteile die Auswahl gleichmäßig über alle ' +
+			count +
+			' Wünsche\n\n' +
 			'WICHTIGE REGELN:\n' +
 			'- Antworte AUSSCHLIESSLICH mit diesem JSON-Objekt\n' +
 			'- KEIN zusätzlicher Text vor oder nach dem JSON\n' +

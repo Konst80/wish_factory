@@ -70,8 +70,8 @@ export interface Wish {
 	/** Der Haupttext des Wunsches mit Platzhaltern */
 	text: string;
 
-	/** Der nachträgliche Text des Wunsches mit Platzhaltern */
-	belated: string;
+	/** Gibt an, ob es sich um einen nachträglichen Wunsch handelt */
+	belated: boolean;
 
 	/** Der aktuelle Workflow-Status */
 	status: WishStatus;
@@ -109,10 +109,7 @@ export const wishSchema = z.object({
 		.string()
 		.min(10, 'Text muss mindestens 10 Zeichen haben')
 		.max(1000, 'Text darf nicht länger als 1000 Zeichen sein'),
-	belated: z
-		.string()
-		.max(1000, 'Belated-Text darf nicht länger als 1000 Zeichen sein')
-		.default(''),
+	belated: z.boolean().default(false),
 	status: wishStatusSchema.default('Entwurf'),
 	language: languageSchema,
 	createdAt: z.date().default(() => new Date()),

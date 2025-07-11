@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		(url.searchParams.get('relations')?.split(',').filter(Boolean) as Relation[]) || [];
 	const ageGroups =
 		(url.searchParams.get('ageGroups')?.split(',').filter(Boolean) as AgeGroup[]) || [];
-	
+
 	// Extract sorting parameters
 	const sortBy = url.searchParams.get('sortBy') || 'created_at';
 	const sortOrder = url.searchParams.get('sortOrder') || 'desc';
@@ -41,12 +41,12 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 
 	// Define sortable columns mapping
 	const sortableColumns: Record<string, string> = {
-		'created_at': 'created_at',
-		'updated_at': 'updated_at',
-		'status': 'status',
-		'language': 'language',
-		'event_type': 'event_type',
-		'text': 'text'
+		created_at: 'created_at',
+		updated_at: 'updated_at',
+		status: 'status',
+		language: 'language',
+		event_type: 'event_type',
+		text: 'text'
 	};
 
 	// Build query
@@ -75,7 +75,7 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 	// Apply sorting with validation
 	const validSortBy = sortableColumns[sortBy] || 'created_at';
 	const ascending = sortOrder === 'asc';
-	
+
 	const { data: wishes = [], error: wishError } = await query.order(validSortBy, {
 		ascending
 	});

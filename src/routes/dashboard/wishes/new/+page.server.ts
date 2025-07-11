@@ -57,7 +57,7 @@ export const actions: Actions = {
 		const ageGroups = formData.getAll('ageGroups');
 		const specificValuesStr = formData.get('specificValues');
 		const text = formData.get('text');
-		const belated = formData.get('belated');
+		const belated = formData.get('belated') === 'true';
 		const language = formData.get('language');
 		const status = formData.get('status') || WishStatus.ENTWURF;
 
@@ -102,7 +102,7 @@ export const actions: Actions = {
 					age_groups: validatedData.ageGroups,
 					specific_values: validatedData.specificValues,
 					text: validatedData.text,
-					belated: validatedData.belated,
+					belated: validatedData.belated ? 'true' : '',
 					status: validatedData.status,
 					language: validatedData.language,
 					created_by: validatedData.createdBy
@@ -169,7 +169,7 @@ export const actions: Actions = {
 
 		try {
 			const wishes = JSON.parse(wishesData);
-			
+
 			if (!Array.isArray(wishes) || wishes.length === 0) {
 				return fail(400, { message: 'Ungültige Wunsch-Daten' });
 			}
@@ -183,15 +183,17 @@ export const actions: Actions = {
 						...wish,
 						createdBy: session.user.id,
 						// Convert single specificValues to array if needed
-						specificValues: Array.isArray(wish.specificValues) 
-							? wish.specificValues 
-							: (wish.specificValues ? [wish.specificValues] : []),
-						// Ensure belated is a string
-						belated: wish.belated || ''
+						specificValues: Array.isArray(wish.specificValues)
+							? wish.specificValues
+							: wish.specificValues
+								? [wish.specificValues]
+								: [],
+						// Ensure belated is a boolean
+						belated: Boolean(wish.belated)
 					};
-					
+
 					const validatedData = createWishSchema.parse(normalizedWish);
-					
+
 					validatedWishes.push({
 						type: validatedData.type,
 						event_type: validatedData.eventType,
@@ -199,14 +201,14 @@ export const actions: Actions = {
 						age_groups: validatedData.ageGroups,
 						specific_values: validatedData.specificValues || [],
 						text: validatedData.text,
-						belated: validatedData.belated || '',
+						belated: validatedData.belated ? 'true' : '',
 						status: validatedData.status,
 						language: validatedData.language,
 						created_by: validatedData.createdBy
 					});
 				} catch (validationError) {
 					console.error('Validation error for wish:', validationError);
-					return fail(400, { 
+					return fail(400, {
 						message: 'Validierungsfehler bei einem der Wünsche',
 						error: validationError instanceof z.ZodError ? validationError.issues : validationError
 					});
@@ -228,7 +230,6 @@ export const actions: Actions = {
 
 			// Erfolgreiche Weiterleitung
 			throw redirect(303, `/dashboard/wishes?created=${createdWishes?.length || wishes.length}`);
-
 		} catch (error) {
 			// Check if it's a redirect (which is expected)
 			if (error && typeof error === 'object' && 'status' in error && error.status === 303) {
