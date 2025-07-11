@@ -2228,6 +2228,26 @@
 								{/if}
 							</div>
 
+							<!-- Belated Prompt Section -->
+							<div class="form-control">
+								<label class="label" for="promptBelated">
+									<span class="label-text font-medium">⏰ Nachträgliche Wünsche Prompt</span>
+									<span class="label-text-alt">Anweisungen für verspätete Glückwünsche</span>
+								</label>
+								<textarea
+									id="promptBelated"
+									name="promptBelated"
+									class="textarea textarea-bordered h-32 w-full font-mono text-sm"
+									placeholder="z.B. Formuliere den Wunsch als nachträglichen Glückwunsch. Beginne mit einer höflichen Entschuldigung für die Verspätung..."
+									value={(data.settings as any)?.ai?.promptBelated || ''}
+								></textarea>
+								<label class="label">
+									<span class="label-text-alt text-info"
+										>Wird verwendet wenn 'Nachträglich' ausgewählt ist</span
+									>
+								</label>
+							</div>
+
 							<!-- Specific Values Section -->
 							<div class="bg-base-200 mb-6 rounded-lg p-6">
 								<div class="mb-6 flex items-center justify-between">

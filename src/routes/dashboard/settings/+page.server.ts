@@ -34,6 +34,8 @@ interface UserSettingsWithAI {
 	ai_prompt_relation_colleague?: string;
 	// Batch-specific prompt
 	ai_prompt_batch?: string;
+	// Belated-specific prompt
+	ai_prompt_belated?: string;
 	ai_model?: string;
 	ai_temperature?: number;
 	ai_max_tokens?: number;
@@ -129,6 +131,9 @@ Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträgl
 	// Batch-specific prompt
 	ai_prompt_batch:
 		'Generiere eine ausgewogene Mischung von Wünschen für die Batch-Erstellung. Verteilung: 70% Geburtstag, 20% Jubiläum, 10% Sonstiges. Achte auf Vielfalt in Stil und Tonalität innerhalb jeder Kategorie. Berücksichtige verschiedene Altersgruppen und Beziehungsarten für eine repräsentative Sammlung.',
+	// Belated-specific prompt
+	ai_prompt_belated:
+		'Formuliere den Wunsch als nachträglichen Glückwunsch. Beginne mit einer höflichen Entschuldigung für die Verspätung (z.B. "Auch wenn ich etwas spät dran bin..." oder "Nachträglich aber von Herzen..."). Der Ton sollte dennoch warm und herzlich bleiben, ohne übermäßig entschuldigend zu wirken.',
 	// Specific Values
 	specific_values_birthday_de: '16,18,21,30,40,50,60,65,70,80,90,100',
 	specific_values_birthday_en: '16,18,21,30,40,50,60,65,70,80,90,100',
@@ -243,6 +248,7 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					promptRelationColleague:
 						settings?.ai_prompt_relation_colleague || defaultSettings.ai_prompt_relation_colleague,
 					promptBatch: settings?.ai_prompt_batch || defaultSettings.ai_prompt_batch,
+					promptBelated: settings?.ai_prompt_belated || defaultSettings.ai_prompt_belated,
 					model: settings?.ai_model || defaultSettings.ai_model,
 					temperature: settings?.ai_temperature ?? defaultSettings.ai_temperature,
 					maxTokens: settings?.ai_max_tokens || defaultSettings.ai_max_tokens,
@@ -343,6 +349,7 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 					promptRelationPartner: defaultSettings.ai_prompt_relation_partner,
 					promptRelationColleague: defaultSettings.ai_prompt_relation_colleague,
 					promptBatch: defaultSettings.ai_prompt_batch,
+					promptBelated: defaultSettings.ai_prompt_belated,
 					model: defaultSettings.ai_model,
 					temperature: defaultSettings.ai_temperature,
 					maxTokens: defaultSettings.ai_max_tokens,
@@ -695,6 +702,7 @@ export const actions: Actions = {
 			const promptRelationPartner = formData.get('promptRelationPartner') as string;
 			const promptRelationColleague = formData.get('promptRelationColleague') as string;
 			const promptBatch = formData.get('promptBatch') as string;
+			const promptBelated = formData.get('promptBelated') as string;
 
 			if (promptRelationFriend !== null && promptRelationFriend !== undefined) {
 				updateData.ai_prompt_relation_friend = promptRelationFriend;
@@ -710,6 +718,9 @@ export const actions: Actions = {
 			}
 			if (promptBatch !== null && promptBatch !== undefined) {
 				updateData.ai_prompt_batch = promptBatch;
+			}
+			if (promptBelated !== null && promptBelated !== undefined) {
+				updateData.ai_prompt_belated = promptBelated;
 			}
 
 			// Only update specific values if they are provided

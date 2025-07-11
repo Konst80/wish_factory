@@ -61,8 +61,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			style = 'normal',
 			count = 1,
 			additionalInstructions,
-			isBatch = false
+			isBatch = false,
+			belated = false
 		} = body;
+
+		console.log('🔍 API Debug - Received belated:', belated, typeof belated);
 
 		// Handle backward compatibility and new array format
 		const finalTypes = types || (type ? [type] : []);
@@ -144,7 +147,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const { data: userSettings, error: settingsError } = await locals.supabase
 			.from('user_settings')
 			.select(
-				'ai_prompt_system, ai_prompt_template, ai_prompt_age_young, ai_prompt_age_middle, ai_prompt_age_senior, ai_prompt_relation_friend, ai_prompt_relation_family, ai_prompt_relation_partner, ai_prompt_relation_colleague, ai_prompt_batch, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty, specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
+				'ai_prompt_system, ai_prompt_template, ai_prompt_age_young, ai_prompt_age_middle, ai_prompt_age_senior, ai_prompt_relation_friend, ai_prompt_relation_family, ai_prompt_relation_partner, ai_prompt_relation_colleague, ai_prompt_batch, ai_prompt_belated, ai_model, ai_temperature, ai_max_tokens, ai_top_p, ai_frequency_penalty, ai_presence_penalty, specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
 			)
 			.eq('user_id', user.id)
 			.single();
@@ -171,6 +174,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					promptRelationPartner: (userSettings as any).ai_prompt_relation_partner || undefined,
 					promptRelationColleague: (userSettings as any).ai_prompt_relation_colleague || undefined,
 					promptBatch: (userSettings as any).ai_prompt_batch || undefined,
+					promptBelated: (userSettings as any).ai_prompt_belated || undefined,
 					model: (userSettings as any).ai_model || 'anthropic/claude-sonnet-4',
 					temperature: (userSettings as any).ai_temperature ?? 0.8,
 					maxTokens: (userSettings as any).ai_max_tokens || 2000,
@@ -229,7 +233,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				count: limitedCount,
 				additionalInstructions: specificValuesDescription
 					? `${additionalInstructions ? additionalInstructions + '\n\n' : ''}Spezifische Werte und Bedeutungen:\n${specificValuesDescription}`
-					: additionalInstructions
+					: additionalInstructions,
+				belated
 			},
 			user.id,
 			aiSettings

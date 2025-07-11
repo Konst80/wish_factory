@@ -10,6 +10,7 @@ interface WishGenerationParams {
 	specificValues?: number[];
 	count?: number;
 	additionalInstructions?: string;
+	belated?: boolean; // Whether this is for belated wishes
 }
 
 interface GeneratedWish {
@@ -58,6 +59,8 @@ interface AISettings {
 	promptRelationColleague?: string; // Optional - zusätzliche Anweisungen für Kollegen
 	// Batch-specific prompt
 	promptBatch?: string; // Optional - zusätzliche Anweisungen für Batch-Generierung
+	// Belated-specific prompt
+	promptBelated?: string; // Optional - zusätzliche Anweisungen für nachträgliche Wünsche
 	model: string;
 	temperature: number;
 	maxTokens: number;
@@ -482,7 +485,8 @@ class OpenRouterAIService {
 			ageGroups,
 			specificValues,
 			count = 1,
-			additionalInstructions
+			additionalInstructions,
+			belated
 		} = params;
 
 		// Priorisiere benutzerdefiniertes Template
@@ -608,6 +612,31 @@ class OpenRouterAIService {
 			batchPromptText = `\n\n**Batch-Generierung Anweisungen:**\n${batchPrompt}`;
 		}
 
+		// Build belated-specific prompt if belated wishes are requested
+		let belatedPromptText = '';
+		console.log('🔍 Belated Debug:', {
+			belated,
+			hasAiSettings: !!aiSettings,
+			hasPromptBelated: !!(aiSettings?.promptBelated),
+			promptBelatedValue: aiSettings?.promptBelated
+		});
+		if (belated && aiSettings?.promptBelated) {
+			let belatedPrompt = aiSettings.promptBelated
+				.replace(/\{count\}/g, count.toString())
+				.replace(/\{wishTypes\}/g, typeTexts)
+				.replace(/\{eventTypes\}/g, eventTexts)
+				.replace(/\{languages\}/g, languageTexts)
+				.replace(/\{relations\}/g, relationTexts)
+				.replace(/\{ageGroups\}/g, ageGroupTexts)
+				.replace(/\{wishTypesRaw\}/g, types.join(', '))
+				.replace(/\{eventTypesRaw\}/g, eventTypes.join(', '))
+				.replace(/\{languagesRaw\}/g, languages.join(', '))
+				.replace(/\{relationsRaw\}/g, relations.join(', '))
+				.replace(/\{ageGroupsRaw\}/g, ageGroups.join(', '));
+
+			belatedPromptText = `\n\n**Nachträgliche Wünsche Anweisungen:**\n${belatedPrompt}`;
+		}
+
 		const countText = count === 1 ? 'Glückwunsch' : 'Glückwünsche';
 		const specificValuesText =
 			specificValues && specificValues.length > 0
@@ -635,7 +664,8 @@ class OpenRouterAIService {
 			additionalInstructionsText,
 			ageGroupPromptsText: ageGroupPromptsText ? 'SET' : 'EMPTY',
 			relationPromptsText: relationPromptsText ? 'SET' : 'EMPTY',
-			batchPromptText: batchPromptText ? 'SET' : 'EMPTY'
+			batchPromptText: batchPromptText ? 'SET' : 'EMPTY',
+			belatedPromptText: belatedPromptText ? 'SET' : 'EMPTY'
 		});
 
 		// Log detailed prompts for debugging
@@ -647,6 +677,9 @@ class OpenRouterAIService {
 		}
 		if (batchPromptText) {
 			console.log('📦 Batch-spezifische Prompts:', batchPromptText);
+		}
+		if (belatedPromptText) {
+			console.log('⏰ Nachträgliche Wünsche Prompts:', belatedPromptText);
 		}
 
 		// Template-Variablen ersetzen
@@ -667,10 +700,11 @@ class OpenRouterAIService {
 			.replace(/\{specificValues\}/g, specificValuesText)
 			.replace(/\{additionalInstructions\}/g, additionalInstructionsText);
 
-		// Age group prompts, relation prompts und batch prompts an das Ende des Templates anhängen
+		// Age group prompts, relation prompts, batch prompts und belated prompts an das Ende des Templates anhängen
 		finalPrompt += ageGroupPromptsText;
 		finalPrompt += relationPromptsText;
 		finalPrompt += batchPromptText;
+		finalPrompt += belatedPromptText;
 
 		// HARDCODIERTE JSON-FORMAT-ANWEISUNG - IMMER ANHÄNGEN
 		const mandatoryJsonInstructions =

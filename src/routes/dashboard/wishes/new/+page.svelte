@@ -191,7 +191,8 @@
 						? [parseInt(formData.specificValues.toString())]
 						: [],
 					style: formData.type,
-					count: 1
+					count: 1,
+					belated: formData.belated
 				})
 			});
 
@@ -329,7 +330,8 @@
 						ageGroups: ageGroupsToGenerate as AgeGroup[],
 						specificValues: specificValuesToUse ? [parseInt(specificValuesToUse.toString())] : [],
 						count: batchSettings.count, // Request multiple wishes at once
-						isBatch: true // Flag to indicate this is a batch request
+						isBatch: true, // Flag to indicate this is a batch request
+						belated: formData.belated // Include belated parameter from main form
 					})
 				});
 
@@ -738,7 +740,7 @@
 						};
 					}}
 				>
-					<!-- Basic Settings Section -->
+					<!-- Basic Information Section -->
 					<div class="bg-base-50 mb-6 rounded-lg p-6">
 						<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
 							<svg
@@ -752,19 +754,13 @@
 									stroke-linecap="round"
 									stroke-linejoin="round"
 									stroke-width="2"
-									d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-								/>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+									d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 								/>
 							</svg>
-							Grundeinstellungen
+							Basis-Informationen
 						</h3>
-						<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-							<!-- Wunsch-Typ -->
+						<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+							<!-- Stil -->
 							<div class="form-control">
 								<label class="label" for="type">
 									<span class="label-text flex items-center gap-2 text-base font-medium">
@@ -779,10 +775,10 @@
 												stroke-linecap="round"
 												stroke-linejoin="round"
 												stroke-width="2"
-												d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+												d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
 											/>
 										</svg>
-										Wunsch-Typ *
+										Stil *
 									</span>
 								</label>
 								<select
@@ -793,8 +789,8 @@
 									bind:value={formData.type}
 									required
 								>
-									{#each Object.values(WishType) as type (type)}
-										<option value={type}>{typeLabels[type]}</option>
+									{#each Object.values(WishType) as wishType (wishType)}
+										<option value={wishType}>{typeLabels[wishType]}</option>
 									{/each}
 								</select>
 								{#if errors.type}
@@ -802,77 +798,6 @@
 										<span
 											class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
 											>{errors.type}</span
-										>
-									</label>
-								{/if}
-							</div>
-
-							<!-- Wunsch-Art -->
-							<div class="form-control">
-								<label class="label">
-									<span class="label-text flex items-center gap-2 text-base font-medium">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											class="h-4 w-4"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-											/>
-										</svg>
-										Wunsch-Art *
-									</span>
-								</label>
-								<div class="grid grid-cols-2 gap-4">
-									<label
-										class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
-										false
-											? 'border-primary bg-primary/5'
-											: 'border-base-300'}"
-									>
-										<input
-											type="radio"
-											name="belated"
-											value="false"
-											bind:group={formData.belated}
-											class="radio radio-primary"
-											required
-										/>
-										<div class="flex flex-col">
-											<span class="font-medium">Normal</span>
-											<span class="text-base-content/60 text-sm">Regulärer Wunsch</span>
-										</div>
-									</label>
-									<label
-										class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
-										true
-											? 'border-primary bg-primary/5'
-											: 'border-base-300'}"
-									>
-										<input
-											type="radio"
-											name="belated"
-											value="true"
-											bind:group={formData.belated}
-											class="radio radio-primary"
-											required
-										/>
-										<div class="flex flex-col">
-											<span class="font-medium">Nachträglich</span>
-											<span class="text-base-content/60 text-sm">Verspäteter Wunsch</span>
-										</div>
-									</label>
-								</div>
-								{#if errors.belated}
-									<label class="label">
-										<span
-											class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
-											>{errors.belated}</span
 										>
 									</label>
 								{/if}
@@ -1138,6 +1063,82 @@
 									<span
 										class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
 										>{errors.specificValues}</span
+									>
+								</label>
+							{/if}
+						</div>
+					</div>
+
+					<!-- Wunsch-Art -->
+					<div class="bg-base-50 mb-6 rounded-lg p-6">
+						<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="text-primary h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+								></path>
+							</svg>
+							Wunsch-Art
+						</h3>
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text flex items-center gap-2 text-base font-medium">
+									Wunsch-Art *
+								</span>
+							</label>
+							<div class="grid grid-cols-2 gap-4">
+								<label
+									class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
+									false
+										? 'border-primary bg-primary/5'
+										: 'border-base-300'}"
+								>
+									<input
+										type="radio"
+										name="belated"
+										value={false}
+										bind:group={formData.belated}
+										class="radio radio-primary"
+										required
+									/>
+									<div class="flex flex-col">
+										<span class="font-medium">Normal</span>
+										<span class="text-base-content/60 text-sm">Regulärer Wunsch</span>
+									</div>
+								</label>
+								<label
+									class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
+									true
+										? 'border-primary bg-primary/5'
+										: 'border-base-300'}"
+								>
+									<input
+										type="radio"
+										name="belated"
+										value={true}
+										bind:group={formData.belated}
+										class="radio radio-primary"
+										required
+									/>
+									<div class="flex flex-col">
+										<span class="font-medium">Nachträglich</span>
+										<span class="text-base-content/60 text-sm">Verspäteter Wunsch</span>
+									</div>
+								</label>
+							</div>
+							{#if errors.belated}
+								<label class="label">
+									<span
+										class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+										>{errors.belated}</span
 									>
 								</label>
 							{/if}
