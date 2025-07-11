@@ -147,6 +147,7 @@ export interface WishFilters {
 	relations?: Relation[];
 	ageGroups?: AgeGroup[];
 	search?: string;
+	belated?: string;
 }
 
 /**

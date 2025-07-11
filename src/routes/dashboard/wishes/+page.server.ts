@@ -21,6 +21,7 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		(url.searchParams.get('relations')?.split(',').filter(Boolean) as Relation[]) || [];
 	const ageGroups =
 		(url.searchParams.get('ageGroups')?.split(',').filter(Boolean) as AgeGroup[]) || [];
+	const belated = url.searchParams.get('belated') || '';
 
 	// Extract sorting parameters
 	const sortBy = url.searchParams.get('sortBy') || 'created_at';
@@ -36,7 +37,8 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		status: status || undefined,
 		eventType: eventType || undefined,
 		relations: relations.length > 0 ? relations : undefined,
-		ageGroups: ageGroups.length > 0 ? ageGroups : undefined
+		ageGroups: ageGroups.length > 0 ? ageGroups : undefined,
+		belated: belated || undefined
 	};
 
 	// Define sortable columns mapping
@@ -70,6 +72,10 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 	}
 	if (ageGroups.length > 0) {
 		query = query.overlaps('age_groups', ageGroups);
+	}
+	if (belated) {
+		const isBelated = belated === 'true';
+		query = query.eq('belated', isBelated);
 	}
 
 	// Apply sorting with validation

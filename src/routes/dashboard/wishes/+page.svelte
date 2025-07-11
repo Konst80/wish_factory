@@ -13,6 +13,7 @@
 	let selectedEventType = $state(data.filters.eventType || '');
 	let selectedRelations = $state(data.filters.relations || []);
 	let selectedAgeGroups = $state(data.filters.ageGroups || []);
+	let selectedBelated = $state(data.filters.belated || '');
 
 	// Sorting State
 	let currentSortBy = $state(data.sorting?.sortBy || 'created_at');
@@ -55,6 +56,7 @@
 		if (selectedEventType) params.set('eventType', selectedEventType);
 		if (selectedRelations.length) params.set('relations', selectedRelations.join(','));
 		if (selectedAgeGroups.length) params.set('ageGroups', selectedAgeGroups.join(','));
+		if (selectedBelated) params.set('belated', selectedBelated);
 
 		// Preserve current sorting
 		if (currentSortBy !== 'created_at') params.set('sortBy', currentSortBy);
@@ -92,6 +94,7 @@
 		selectedEventType = '';
 		selectedRelations = [];
 		selectedAgeGroups = [];
+		selectedBelated = '';
 
 		// Clear filters from session storage
 		if (typeof sessionStorage !== 'undefined') {
@@ -110,7 +113,8 @@
 				selectedStatus,
 				selectedEventType,
 				selectedRelations,
-				selectedAgeGroups
+				selectedAgeGroups,
+				selectedBelated
 			};
 			sessionStorage.setItem('wishFilters', JSON.stringify(filters));
 		}
@@ -131,7 +135,8 @@
 						urlParams.has('status') ||
 						urlParams.has('eventType') ||
 						urlParams.has('relations') ||
-						urlParams.has('ageGroups');
+						urlParams.has('ageGroups') ||
+						urlParams.has('belated');
 
 					if (!hasUrlFilters) {
 						searchTerm = filters.searchTerm || '';
@@ -140,6 +145,7 @@
 						selectedEventType = filters.selectedEventType || '';
 						selectedRelations = filters.selectedRelations || [];
 						selectedAgeGroups = filters.selectedAgeGroups || [];
+						selectedBelated = filters.selectedBelated || '';
 
 						// Apply the loaded filters
 						const hasFilters =
@@ -148,7 +154,8 @@
 							selectedStatus ||
 							selectedEventType ||
 							selectedRelations.length ||
-							selectedAgeGroups.length;
+							selectedAgeGroups.length ||
+							selectedBelated;
 
 						if (hasFilters) {
 							setTimeout(() => applyFilters(), 0);
@@ -561,6 +568,22 @@
 							</label>
 						{/each}
 					</div>
+				</div>
+
+				<!-- Belated -->
+				<div class="form-control">
+					<label class="label" for="belated">
+						<span class="label-text">Nachträglich</span>
+					</label>
+					<select
+						id="belated"
+						class="select-bordered select w-full"
+						bind:value={selectedBelated}
+					>
+						<option value="">Alle</option>
+						<option value="true">Nur nachträgliche</option>
+						<option value="false">Nur reguläre</option>
+					</select>
 				</div>
 			</div>
 
