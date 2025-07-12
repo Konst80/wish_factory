@@ -156,6 +156,61 @@ export function isValidLanguage(value: string): value is Language {
 	return Object.values(Language).includes(value as Language);
 }
 
+// Released Wish Interface für öffentliche API
+export interface ReleasedWish {
+	/** UUID des released wish */
+	id: string;
+	
+	/** UUID des ursprünglichen Wunsches */
+	originalWishId: string;
+	
+	/** Art des Wunsches */
+	type: WishType;
+	
+	/** Anlass */
+	eventType: EventType;
+	
+	/** Ziel-Beziehung(en) */
+	relations: Relation[];
+	
+	/** Ziel-Altersgruppe(n) */
+	ageGroups: AgeGroup[];
+	
+	/** Array mit Zahlen für Meilensteine */
+	specificValues: number[];
+	
+	/** Der Haupttext des Wunsches mit Platzhaltern */
+	text: string;
+	
+	/** Gibt an, ob es sich um einen nachträglichen Wunsch handelt */
+	belated: boolean;
+	
+	/** Sprache des Wunsches */
+	language: Language;
+	
+	/** Gewünschte Länge des Wunsches */
+	length: WishLength;
+	
+	/** Zeitpunkt der Freigabe */
+	releasedAt: Date;
+}
+
+// Validation Schema für ReleasedWish
+export const releasedWishSchema = z.object({
+	id: z.string().uuid(),
+	originalWishId: z.string().uuid(),
+	type: wishTypeSchema,
+	eventType: eventTypeSchema,
+	relations: z.array(relationSchema).min(1),
+	ageGroups: z.array(ageGroupSchema).min(1),
+	specificValues: z.array(z.number().int().positive()).default([]),
+	text: z.string().min(10).max(1000),
+	belated: z.boolean(),
+	language: languageSchema,
+	length: wishLengthSchema,
+	releasedAt: z.date()
+});
+
 // Helper Types für Formulare
 export type WishFormData = z.infer<typeof createWishSchema>;
 export type WishUpdateData = z.infer<typeof updateWishSchema>;

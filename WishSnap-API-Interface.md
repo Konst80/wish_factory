@@ -1,8 +1,8 @@
-# WishSnapp API Interface Documentation
+# WishSnap API Interface Documentation
 
 ## Übersicht
 
-Diese Dokumentation beschreibt das öffentliche REST API Interface für die WishSnapp Mobile App, um auf freigegebene Wünsche von Wish-Factory zuzugreifen.
+Diese Dokumentation beschreibt das öffentliche REST API Interface für die WishSnap Mobile App, um auf freigegebene Wünsche von Wish-Factory zuzugreifen.
 
 ## Basis-URL
 ```
@@ -127,7 +127,7 @@ Der `text` kann folgende Platzhalter enthalten:
 - `{name}` - Name der Person (von der App zu ersetzen)
 - `{relation}` - Beziehung (von der App zu ersetzen)
 
-## Offline-Synchronisation für WishSnapp
+## Offline-Synchronisation für WishSnap
 
 ### Empfohlener Sync-Prozess:
 1. **Initial Sync**: Alle Wishes mit `GET /api/public/wishes?limit=500` laden
@@ -174,7 +174,7 @@ GET /api/public/wishes?since=2025-01-15T10:30:00Z&limit=500
 ## Beispiel-Integration für KI
 
 ```typescript
-// Für KI-Prompting in WishSnapp
+// Für KI-Prompting in WishSnap
 const wishContext = {
   availableWishes: wishes,
   userRequest: {

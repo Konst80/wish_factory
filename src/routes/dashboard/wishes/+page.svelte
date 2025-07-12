@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { WishStatus, EventType, Relation, AgeGroup } from '$lib/types/Wish';
 	import type { PageData } from './$types';
+	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -25,6 +26,7 @@
 	let showDeleteModal = $state(false);
 	let showExportModal = $state(false);
 	let isDeleting = $state(false);
+	let showWorkflowHelp = $state(false);
 
 	// Load saved filters on page mount
 	$effect(() => {
@@ -222,6 +224,29 @@
 		showExportModal = false;
 		clearSelection();
 	}
+
+	// Release wish for WishSnap
+	async function releaseWish(wishId: string) {
+		if (!confirm('Möchten Sie diesen Wunsch für WishSnap freigeben?')) {
+			return;
+		}
+		
+		try {
+			const response = await fetch(`/api/wishes/${wishId}/release`, {
+				method: 'POST'
+			});
+			
+			if (response.ok) {
+				const result = await response.json();
+				alert(`Wunsch erfolgreich für WishSnap freigegeben!`);
+			} else {
+				const error = await response.json();
+				alert(`Fehler: ${error.error}`);
+			}
+		} catch (error) {
+			alert('Ein Fehler ist aufgetreten');
+		}
+	}
 </script>
 
 <svelte:head>
@@ -238,6 +263,23 @@
 			</p>
 		</div>
 		<div class="flex gap-2">
+			<button class="btn btn-outline btn-sm" onclick={() => (showWorkflowHelp = true)}>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-4 w-4"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
+				</svg>
+				Hilfe
+			</button>
 			<button class="btn btn-outline btn-sm" onclick={() => (showFilters = !showFilters)}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -1063,6 +1105,29 @@
 										/>
 									</svg>
 								</a>
+								{#if wish.status === 'Freigegeben'}
+									<button
+										class="btn btn-ghost text-accent hover:bg-accent/10"
+										title="Für WishSnap freigeben"
+										aria-label="Wunsch für WishSnap freigeben"
+										onclick={() => releaseWish(wish.id)}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-5 w-5"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+											/>
+										</svg>
+									</button>
+								{/if}
 							</div>
 						</td>
 					</tr>
@@ -1194,3 +1259,6 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Workflow Help Modal -->
+<WorkflowHelp bind:isOpen={showWorkflowHelp} />

@@ -35,7 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_released_wishes_age_groups ON released_wishes USI
 CREATE INDEX IF NOT EXISTS idx_released_wishes_specific_values ON released_wishes USING GIN(specific_values);
 
 -- Add comment to table
-COMMENT ON TABLE released_wishes IS 'Immutable snapshots of wishes released for public access by WishSnapp';
+COMMENT ON TABLE released_wishes IS 'Immutable snapshots of wishes released for public access by WishSnap';
 COMMENT ON COLUMN released_wishes.original_wish_id IS 'Reference to the original wish that was released';
 COMMENT ON COLUMN released_wishes.released_at IS 'Timestamp when the wish was released';
 COMMENT ON COLUMN released_wishes.released_by IS 'User who released the wish';
