@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { WishType, EventType, WishStatus, Language, Relation, AgeGroup } from '$lib/types/Wish';
+	import { WishType, EventType, WishStatus, Language, Relation, AgeGroup, WishLength } from '$lib/types/Wish';
 
 	// Erweiterte ActionData Type Definition
 	type ActionData = {
@@ -16,6 +16,7 @@
 			belated?: boolean;
 			language?: string;
 			status?: string;
+			length?: string;
 		};
 	} | null;
 
@@ -31,7 +32,8 @@
 		text: form?.values?.text || '',
 		belated: form?.values?.belated || false,
 		language: form?.values?.language || Language.DE,
-		status: form?.values?.status || WishStatus.ENTWURF
+		status: form?.values?.status || WishStatus.ENTWURF,
+		length: form?.values?.length || WishLength.MEDIUM
 	});
 
 	// UI state
@@ -152,6 +154,11 @@
 		[Language.DE]: 'Deutsch',
 		[Language.EN]: 'English'
 	};
+	const lengthLabels = {
+		[WishLength.SHORT]: 'Kurz (50-100 Zeichen)',
+		[WishLength.MEDIUM]: 'Mittel (100-200 Zeichen)',
+		[WishLength.LONG]: 'Lang (200-400 Zeichen)'
+	};
 
 	async function generateWithAI() {
 		isGenerating = true;
@@ -195,7 +202,8 @@
 						? [parseInt(formData.specificValues.toString())]
 						: [],
 					count: 1,
-					belated: formData.belated
+					belated: formData.belated,
+					length: formData.length
 				})
 			});
 
@@ -334,7 +342,8 @@
 						specificValues: specificValuesToUse ? [parseInt(specificValuesToUse.toString())] : [],
 						count: batchSettings.count, // Request multiple wishes at once
 						isBatch: true, // Flag to indicate this is a batch request
-						belated: formData.belated // Include belated parameter from main form
+						belated: formData.belated, // Include belated parameter from main form
+						length: formData.length // Include length parameter from main form
 					})
 				});
 
@@ -887,6 +896,48 @@
 										<span
 											class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
 											>{errors.language}</span
+										>
+									</label>
+								{/if}
+							</div>
+							<!-- Länge -->
+							<div class="form-control">
+								<label class="label" for="length">
+									<span class="label-text flex items-center gap-2 text-base font-medium">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M4 8h16M4 16h8"
+											/>
+										</svg>
+										Länge *
+									</span>
+								</label>
+								<select
+									id="length"
+									name="length"
+									class="select-bordered select select-lg w-full"
+									class:select-error={errors.length}
+									bind:value={formData.length}
+									required
+								>
+									{#each Object.values(WishLength) as length (length)}
+										<option value={length}>{lengthLabels[length]}</option>
+									{/each}
+								</select>
+								{#if errors.length}
+									<label class="label">
+										<span
+											class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
+											>{errors.length}</span
 										>
 									</label>
 								{/if}

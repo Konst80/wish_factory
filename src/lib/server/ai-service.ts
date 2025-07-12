@@ -1,5 +1,5 @@
 import { env } from '$env/dynamic/private';
-import type { WishType, EventType, Language, Relation, AgeGroup } from '../types/Wish';
+import type { WishType, EventType, Language, Relation, AgeGroup, WishLength } from '../types/Wish';
 
 interface WishGenerationParams {
 	types: WishType[]; // Changed to array - AI picks one per wish
@@ -11,6 +11,7 @@ interface WishGenerationParams {
 	count?: number;
 	additionalInstructions?: string;
 	belated?: boolean; // Whether this is for belated wishes
+	length?: WishLength; // Desired length of the wish
 }
 
 interface GeneratedWish {
@@ -486,7 +487,8 @@ class OpenRouterAIService {
 			specificValues,
 			count = 1,
 			additionalInstructions,
-			belated
+			belated,
+			length = 'medium'
 		} = params;
 
 		// Priorisiere benutzerdefiniertes Template
@@ -546,6 +548,14 @@ class OpenRouterAIService {
 		const languageTexts = languages.map((l) => languageMap[l] || l).join(', ');
 		const relationTexts = relations.map((r) => relationMap[r] || r).join(', ');
 		const ageGroupTexts = ageGroups.map((a) => ageGroupMap[a] || a).join(', ');
+
+		// Length mapping for prompt text
+		const lengthMap: { [key: string]: string } = {
+			short: 'kurz (50-100 Zeichen)',
+			medium: 'mittel (100-200 Zeichen)',  
+			long: 'lang (200-400 Zeichen)'
+		};
+		const lengthText = lengthMap[length] || length;
 
 		// Build age group prompts based on selection
 		const ageGroupPrompts = [];
@@ -607,7 +617,9 @@ class OpenRouterAIService {
 				.replace(/\{eventTypesRaw\}/g, eventTypes.join(', '))
 				.replace(/\{languagesRaw\}/g, languages.join(', '))
 				.replace(/\{relationsRaw\}/g, relations.join(', '))
-				.replace(/\{ageGroupsRaw\}/g, ageGroups.join(', '));
+				.replace(/\{ageGroupsRaw\}/g, ageGroups.join(', '))
+				.replace(/\{length\}/g, lengthText)
+				.replace(/\{wishLength\}/g, lengthText);
 
 			batchPromptText = `\n\n**Batch-Generierung Anweisungen:**\n${batchPrompt}`;
 		}
@@ -632,7 +644,9 @@ class OpenRouterAIService {
 				.replace(/\{eventTypesRaw\}/g, eventTypes.join(', '))
 				.replace(/\{languagesRaw\}/g, languages.join(', '))
 				.replace(/\{relationsRaw\}/g, relations.join(', '))
-				.replace(/\{ageGroupsRaw\}/g, ageGroups.join(', '));
+				.replace(/\{ageGroupsRaw\}/g, ageGroups.join(', '))
+				.replace(/\{length\}/g, lengthText)
+				.replace(/\{wishLength\}/g, lengthText);
 
 			belatedPromptText = `\n\n**Nachträgliche Wünsche Anweisungen:**\n${belatedPrompt}`;
 		}
@@ -701,7 +715,9 @@ class OpenRouterAIService {
 			.replace(/\{ageGroups\}/g, ageGroups.join(', '))
 			.replace(/\{style\}/g, typeTexts) // Map style to typeTexts
 			.replace(/\{specificValues\}/g, specificValuesText)
-			.replace(/\{additionalInstructions\}/g, additionalInstructionsText);
+			.replace(/\{additionalInstructions\}/g, additionalInstructionsText)
+			.replace(/\{length\}/g, lengthText)
+			.replace(/\{wishLength\}/g, lengthText);
 
 		// Age group prompts, relation prompts, batch prompts und belated prompts an das Ende des Templates anhängen
 		finalPrompt += ageGroupPromptsText;

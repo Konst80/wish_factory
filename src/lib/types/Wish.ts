@@ -39,6 +39,12 @@ export const AgeGroup = {
 	SENIOR: 'senior'
 } as const;
 
+export const WishLength = {
+	SHORT: 'short',
+	MEDIUM: 'medium',
+	LONG: 'long'
+} as const;
+
 // TypeScript Typen
 export type WishType = (typeof WishType)[keyof typeof WishType];
 export type EventType = (typeof EventType)[keyof typeof EventType];
@@ -46,6 +52,7 @@ export type WishStatus = (typeof WishStatus)[keyof typeof WishStatus];
 export type Language = (typeof Language)[keyof typeof Language];
 export type Relation = (typeof Relation)[keyof typeof Relation];
 export type AgeGroup = (typeof AgeGroup)[keyof typeof AgeGroup];
+export type WishLength = (typeof WishLength)[keyof typeof WishLength];
 
 // Wish Interface basierend auf FRS Spezifikation
 export interface Wish {
@@ -79,6 +86,9 @@ export interface Wish {
 	/** Sprache des Wunsches */
 	language: Language;
 
+	/** Gewünschte Länge des Wunsches */
+	length: WishLength;
+
 	/** Erstellungsdatum */
 	createdAt: Date;
 
@@ -96,6 +106,7 @@ export const wishStatusSchema = z.enum(['Entwurf', 'Zur Freigabe', 'Freigegeben'
 export const languageSchema = z.enum(['de', 'en']);
 export const relationSchema = z.enum(['friend', 'family', 'partner', 'colleague']);
 export const ageGroupSchema = z.enum(['all', 'young', 'middle', 'senior']);
+export const wishLengthSchema = z.enum(['short', 'medium', 'long']);
 
 // Validation Schema für komplette Wish-Objekte
 export const wishSchema = z.object({
@@ -112,6 +123,7 @@ export const wishSchema = z.object({
 	belated: z.boolean().default(false),
 	status: wishStatusSchema.default('Entwurf'),
 	language: languageSchema,
+	length: wishLengthSchema.default('medium'),
 	createdAt: z.date().default(() => new Date()),
 	updatedAt: z.date().default(() => new Date()),
 	createdBy: z.string().uuid('Creator muss eine gültige UUID sein')

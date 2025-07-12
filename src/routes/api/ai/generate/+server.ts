@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { aiService } from '$lib/server/ai-service';
-import { WishType, EventType, Language, Relation, AgeGroup } from '$lib/types/Wish';
+import { WishType, EventType, Language, Relation, AgeGroup, WishLength } from '$lib/types/Wish';
 import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -61,7 +61,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			count = 1,
 			additionalInstructions,
 			isBatch = false,
-			belated = false
+			belated = false,
+			length = WishLength.MEDIUM
 		} = body;
 
 		console.log('🔍 API Debug - Received belated:', belated, typeof belated);
@@ -233,7 +234,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				additionalInstructions: specificValuesDescription
 					? `${additionalInstructions ? additionalInstructions + '\n\n' : ''}Spezifische Werte und Bedeutungen:\n${specificValuesDescription}`
 					: additionalInstructions,
-				belated
+				belated,
+				length
 			},
 			user.id,
 			aiSettings

@@ -240,20 +240,38 @@
 		<div class="card-body">
 			<h2 class="card-title">Wünsche über Zeit</h2>
 			<div class="h-64 w-full">
-				<!-- Simple bar chart representation -->
-				<div class="flex h-full items-end justify-around gap-2">
-					{#each data.wishesOverTime as monthData (monthData.month)}
-						{@const maxCount = Math.max(...data.wishesOverTime.map((d) => d.count)) || 1}
-						<div class="flex flex-col items-center">
-							<div
-								class="bg-primary w-8 rounded-t"
-								style="height: {Math.max((monthData.count / maxCount) * 100, 5)}%"
-							></div>
-							<span class="mt-2 text-xs">{monthData.month}</span>
-							<span class="text-xs opacity-60">{monthData.count}</span>
+				{#if data.wishesOverTime.length > 0}
+					<!-- Simple bar chart representation -->
+					<div class="flex h-full items-end justify-center gap-1 px-4">
+						{#each data.wishesOverTime as dayData (dayData.month)}
+							{@const maxCount = Math.max(...data.wishesOverTime.map((d) => d.count)) || 1}
+							<div class="flex flex-col items-center flex-1 max-w-12">
+								<span class="mb-1 text-xs opacity-60 font-mono">{dayData.count}</span>
+								<div class="relative w-full flex justify-center">
+									<div
+										class="bg-primary rounded-t transition-all duration-300 hover:bg-primary-focus"
+										style="width: {Math.min(data.wishesOverTime.length <= 7 ? 32 : 24, 48)}px; height: {Math.max((dayData.count / maxCount) * 180, dayData.count > 0 ? 8 : 2)}px; min-height: 2px;"
+										title="{dayData.month}: {dayData.count} Wünsche"
+									></div>
+								</div>
+								<span class="mt-2 text-xs text-center font-medium">{dayData.month}</span>
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<!-- Empty state -->
+					<div class="flex h-full items-center justify-center">
+						<div class="text-center">
+							<div class="text-base-content/50 mb-2">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+								</svg>
+							</div>
+							<p class="text-base-content/70 text-sm">Keine Daten verfügbar</p>
+							<p class="text-base-content/50 text-xs">Erstellen Sie Wünsche, um Statistiken zu sehen</p>
 						</div>
-					{/each}
-				</div>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>

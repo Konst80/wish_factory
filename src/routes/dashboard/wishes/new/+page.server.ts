@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { createWishSchema, WishStatus } from '$lib/types/Wish.js';
+import { createWishSchema, WishStatus, WishLength } from '$lib/types/Wish.js';
 import type { Actions, PageServerLoad } from './$types.js';
 import { z } from 'zod';
 
@@ -60,6 +60,7 @@ export const actions: Actions = {
 		const belated = formData.get('belated') === 'true';
 		const language = formData.get('language');
 		const status = formData.get('status') || WishStatus.ENTWURF;
+		const length = formData.get('length') || WishLength.MEDIUM;
 
 		// Specific Values parsen - jetzt nur noch ein einzelner Wert
 		let specificValues: number[] = [];
@@ -85,6 +86,7 @@ export const actions: Actions = {
 			belated,
 			status,
 			language,
+			length,
 			createdBy: session.user.id
 		};
 
@@ -105,6 +107,7 @@ export const actions: Actions = {
 					belated: validatedData.belated.toString(),
 					status: validatedData.status,
 					language: validatedData.language,
+					length: validatedData.length,
 					created_by: validatedData.createdBy
 				})
 				.select('id')
@@ -189,7 +192,9 @@ export const actions: Actions = {
 								? [wish.specificValues]
 								: [],
 						// Ensure belated is a boolean
-						belated: Boolean(wish.belated)
+						belated: Boolean(wish.belated),
+						// Ensure length has a default value
+						length: wish.length || WishLength.MEDIUM
 					};
 
 					const validatedData = createWishSchema.parse(normalizedWish);
@@ -204,6 +209,7 @@ export const actions: Actions = {
 						belated: validatedData.belated.toString(),
 						status: validatedData.status,
 						language: validatedData.language,
+						length: validatedData.length,
 						created_by: validatedData.createdBy
 					});
 				} catch (validationError) {

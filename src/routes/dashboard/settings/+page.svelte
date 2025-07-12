@@ -1556,6 +1556,20 @@
 																	</div>
 																	<div
 																		class="tooltip tooltip-bottom"
+																		data-tip="Gewünschte Länge des Wunsches (z.B. 'kurz (50-100 Zeichen)', 'mittel (100-200 Zeichen)', 'lang (200-400 Zeichen)')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{length}')}
+																		>
+																			<code class="text-primary font-bold">{`{length}`}</code>
+																			<span class="ml-2 text-xs opacity-70">Länge</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
 																		data-tip="Übersetzter Wunsch-Typ/Stil (z.B. 'Normal', 'Herzlich', 'Humorvoll')"
 																	>
 																		<button
@@ -2221,6 +2235,20 @@
 																		>
 																			<code class="text-primary font-bold">{'{languagesRaw}'}</code>
 																			<span class="ml-2 text-xs opacity-70">Sprachen (Raw)</span>
+																		</button>
+																	</div>
+																	<div
+																		class="tooltip tooltip-bottom"
+																		data-tip="Gewünschte Länge des Wunsches (z.B. 'kurz (50-100 Zeichen)', 'mittel (100-200 Zeichen)', 'lang (200-400 Zeichen)')"
+																	>
+																		<button
+																			type="button"
+																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
+																			onclick={() =>
+																				insertPlaceholder('promptBatch', '{length}')}
+																		>
+																			<code class="text-primary font-bold">{'{length}'}</code>
+																			<span class="ml-2 text-xs opacity-70">Länge</span>
 																		</button>
 																	</div>
 																	<div

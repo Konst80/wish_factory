@@ -434,160 +434,264 @@
 	</div>
 </div>
 
-<!-- Filter Panel -->
+<!-- Enhanced Filter Panel -->
 {#if showFilters}
-	<div class="card border-primary bg-base-100 mb-6 border-l-4 shadow-xl">
-		<div class="card-body">
-			<div class="mb-4 flex items-center justify-between">
-				<h3 class="card-title text-primary">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
+	<div class="mb-8 overflow-hidden rounded-xl bg-gradient-to-br from-base-100 to-base-200/50 shadow-lg ring-1 ring-base-300/20">
+		<!-- Header -->
+		<div class="border-b border-base-300/30 bg-gradient-to-r from-primary/5 to-secondary/5 px-6 py-4">
+			<div class="flex items-center justify-between">
+				<div class="flex items-center gap-3">
+					<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary shadow-sm">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+						</svg>
+					</div>
+					<div>
+						<h3 class="text-lg font-semibold text-base-content">Filter & Suche</h3>
+						<p class="text-sm text-base-content/60">Finden Sie schnell die gewünschten Wünsche</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-2">
+					<button 
+						class="btn btn-outline btn-sm gap-2 hover:btn-error"
+						onclick={clearFilters}
 					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"
-						/>
-					</svg>
-					🔍 Erweiterte Filter & Suche
-				</h3>
-				<button class="btn btn-ghost btn-sm" onclick={clearFilters}>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-4 w-4"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-						/>
-					</svg>
-					Zurücksetzen
-				</button>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+						</svg>
+						Zurücksetzen
+					</button>
+				</div>
 			</div>
+		</div>
 
-			<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-				<!-- Search -->
-				<div class="form-control">
-					<label class="label" for="search">
-						<span class="label-text">Suche</span>
-					</label>
+		<!-- Filter Content -->
+		<div class="p-6">
+			<!-- Primary Search -->
+			<div class="mb-8">
+				<div class="relative">
 					<input
 						id="search"
 						type="text"
-						placeholder="ID oder Text durchsuchen..."
-						class="input-bordered input w-full"
+						placeholder="Durchsuchen Sie Wünsche nach ID, Text oder Inhalt..."
+						class="input input-lg input-bordered w-full pl-14 pr-28 text-base shadow-sm transition-all duration-300 focus:border-primary focus:shadow-lg focus:shadow-primary/10"
 						bind:value={searchTerm}
 						onkeydown={(e) => e.key === 'Enter' && applyFilters()}
 					/>
-				</div>
-
-				<!-- Language -->
-				<div class="form-control">
-					<label class="label" for="language">
-						<span class="label-text">Sprache</span>
-					</label>
-					<select id="language" class="select-bordered select w-full" bind:value={selectedLanguage}>
-						<option value="">Alle Sprachen</option>
-						<option value="de">Deutsch</option>
-						<option value="en">English</option>
-					</select>
-				</div>
-
-				<!-- Status -->
-				<div class="form-control">
-					<label class="label" for="status">
-						<span class="label-text">Status</span>
-					</label>
-					<select id="status" class="select-bordered select w-full" bind:value={selectedStatus}>
-						<option value="">Alle Status</option>
-						{#each Object.values(WishStatus) as status (status)}
-							<option value={status}>{status}</option>
-						{/each}
-					</select>
-				</div>
-
-				<!-- Event Type -->
-				<div class="form-control">
-					<label class="label" for="eventType">
-						<span class="label-text">Anlass</span>
-					</label>
-					<select
-						id="eventType"
-						class="select-bordered select w-full"
-						bind:value={selectedEventType}
+					<div class="absolute left-4 top-1/2 -translate-y-1/2">
+						<div class="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+							</svg>
+						</div>
+					</div>
+					<button 
+						class="btn btn-primary btn-sm absolute right-2 top-1/2 -translate-y-1/2"
+						onclick={applyFilters}
 					>
-						<option value="">Alle Anlässe</option>
-						<option value="birthday">Geburtstag</option>
-						<option value="anniversary">Jubiläum</option>
-						<option value="custom">Individuell</option>
-					</select>
-				</div>
-
-				<!-- Relations -->
-				<div class="form-control">
-					<label class="label">
-						<span class="label-text">Beziehungen</span>
-					</label>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.values(Relation) as relation (relation)}
-							<label class="label cursor-pointer">
-								<input
-									type="checkbox"
-									class="checkbox checkbox-sm"
-									bind:group={selectedRelations}
-									value={relation}
-								/>
-								<span class="label-text ml-2 capitalize">{relation}</span>
-							</label>
-						{/each}
-					</div>
-				</div>
-
-				<!-- Age Groups -->
-				<div class="form-control">
-					<label class="label">
-						<span class="label-text">Altersgruppen</span>
-					</label>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
-							<label class="label cursor-pointer">
-								<input
-									type="checkbox"
-									class="checkbox checkbox-sm"
-									bind:group={selectedAgeGroups}
-									value={ageGroup}
-								/>
-								<span class="label-text ml-2 capitalize">{ageGroup}</span>
-							</label>
-						{/each}
-					</div>
-				</div>
-
-				<!-- Belated -->
-				<div class="form-control">
-					<label class="label" for="belated">
-						<span class="label-text">Nachträglich</span>
-					</label>
-					<select id="belated" class="select-bordered select w-full" bind:value={selectedBelated}>
-						<option value="">Alle</option>
-						<option value="true">Nur nachträgliche</option>
-						<option value="false">Nur reguläre</option>
-					</select>
+						Suchen
+					</button>
 				</div>
 			</div>
 
-			<div class="card-actions mt-6 justify-end">
-				<button class="btn btn-primary" onclick={applyFilters}> Filter anwenden </button>
+			<!-- Filter Categories -->
+			<div class="space-y-8">
+				<!-- Basic Filters -->
+				<div>
+					<h4 class="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-base-content/70">
+						<div class="h-2 w-2 rounded-full bg-primary"></div>
+						Grundlegende Filter
+					</h4>
+					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+						<!-- Language Filter -->
+						<div class="group">
+							<label class="label pb-2" for="language">
+								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
+									<span class="flex h-5 w-5 items-center justify-center rounded bg-secondary/15 text-secondary">
+										🌐
+									</span>
+									Sprache
+								</span>
+							</label>
+							<select 
+								id="language" 
+								class="select select-bordered w-full bg-base-50 transition-all duration-200 hover:bg-base-100 focus:border-secondary focus:bg-base-100 focus:shadow-lg focus:shadow-secondary/10" 
+								bind:value={selectedLanguage}
+							>
+								<option value="">Alle Sprachen</option>
+								<option value="de">🇩🇪 Deutsch</option>
+								<option value="en">🇺🇸 English</option>
+							</select>
+						</div>
+
+						<!-- Status Filter -->
+						<div class="group">
+							<label class="label pb-2" for="status">
+								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
+									<span class="flex h-5 w-5 items-center justify-center rounded bg-accent/15 text-accent">
+										⚡
+									</span>
+									Status
+								</span>
+							</label>
+							<select 
+								id="status" 
+								class="select select-bordered w-full bg-base-50 transition-all duration-200 hover:bg-base-100 focus:border-accent focus:bg-base-100 focus:shadow-lg focus:shadow-accent/10" 
+								bind:value={selectedStatus}
+							>
+								<option value="">Alle Status</option>
+								{#each Object.values(WishStatus) as status (status)}
+									<option value={status}>
+										{#if status === 'Entwurf'}✏️ {status}
+										{:else if status === 'Zur Freigabe'}⏳ {status}
+										{:else if status === 'Freigegeben'}✅ {status}
+										{:else if status === 'Archiviert'}📁 {status}
+										{:else}{status}{/if}
+									</option>
+								{/each}
+							</select>
+						</div>
+
+						<!-- Event Type Filter -->
+						<div class="group">
+							<label class="label pb-2" for="eventType">
+								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
+									<span class="flex h-5 w-5 items-center justify-center rounded bg-info/15 text-info">
+										🎉
+									</span>
+									Anlass
+								</span>
+							</label>
+							<select 
+								id="eventType" 
+								class="select select-bordered w-full bg-base-50 transition-all duration-200 hover:bg-base-100 focus:border-info focus:bg-base-100 focus:shadow-lg focus:shadow-info/10" 
+								bind:value={selectedEventType}
+							>
+								<option value="">Alle Anlässe</option>
+								<option value="birthday">🎂 Geburtstag</option>
+								<option value="anniversary">💐 Hochzeitstag</option>
+								<option value="custom">🎊 Individuell</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<!-- Advanced Filters -->
+				<div>
+					<h4 class="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-base-content/70">
+						<div class="h-2 w-2 rounded-full bg-secondary"></div>
+						Erweiterte Filter
+					</h4>
+					<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+						<!-- Relations -->
+						<div class="space-y-3">
+							<label class="label pb-1">
+								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
+									<span class="flex h-5 w-5 items-center justify-center rounded bg-warning/15 text-warning">
+										👥
+									</span>
+									Beziehungen
+								</span>
+							</label>
+							<div class="space-y-2">
+								{#each Object.values(Relation) as relation (relation)}
+									<label class="flex cursor-pointer items-center gap-3 rounded-lg border border-base-300 bg-base-50 p-3 transition-all hover:border-warning hover:bg-warning/5">
+										<input
+											type="checkbox"
+											class="checkbox checkbox-warning checkbox-sm"
+											bind:group={selectedRelations}
+											value={relation}
+										/>
+										<span class="flex-1 text-sm font-medium capitalize">
+											{#if relation === 'friend'}👋 Freund/in
+											{:else if relation === 'family'}👨‍👩‍👧‍👦 Familie
+											{:else if relation === 'partner'}💕 Partner/in
+											{:else if relation === 'colleague'}💼 Kollege/in
+											{:else}{relation}{/if}
+										</span>
+									</label>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Age Groups -->
+						<div class="space-y-3">
+							<label class="label pb-1">
+								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
+									<span class="flex h-5 w-5 items-center justify-center rounded bg-success/15 text-success">
+										🎯
+									</span>
+									Altersgruppen
+								</span>
+							</label>
+							<div class="space-y-2">
+								{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
+									<label class="flex cursor-pointer items-center gap-3 rounded-lg border border-base-300 bg-base-50 p-3 transition-all hover:border-success hover:bg-success/5">
+										<input
+											type="checkbox"
+											class="checkbox checkbox-success checkbox-sm"
+											bind:group={selectedAgeGroups}
+											value={ageGroup}
+										/>
+										<span class="flex-1 text-sm font-medium capitalize">
+											{#if ageGroup === 'young'}🧒 Jung (bis 30)
+											{:else if ageGroup === 'middle'}👤 Mittel (30-60)
+											{:else if ageGroup === 'senior'}👴 Senior (60+)
+											{:else if ageGroup === 'all'}🌟 Alle Altersgruppen
+											{:else}{ageGroup}{/if}
+										</span>
+									</label>
+								{/each}
+							</div>
+						</div>
+					</div>
+
+					<!-- Belated Filter -->
+					<div class="pt-4">
+						<label class="label pb-2" for="belated">
+							<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
+								<span class="flex h-5 w-5 items-center justify-center rounded bg-error/15 text-error">
+									⏰
+								</span>
+								Nachträgliche Wünsche
+							</span>
+						</label>
+						<select 
+							id="belated" 
+							class="select select-bordered w-full max-w-xs bg-base-50 transition-all duration-200 hover:bg-base-100 focus:border-error focus:bg-base-100 focus:shadow-lg focus:shadow-error/10" 
+							bind:value={selectedBelated}
+						>
+							<option value="">Alle Wünsche</option>
+							<option value="true">⏰ Nur nachträgliche</option>
+							<option value="false">✨ Nur reguläre</option>
+						</select>
+					</div>
+				</div>
+
+				<!-- Filter Actions -->
+				<div class="border-t border-base-300/30 bg-base-50/50 px-6 py-4">
+					<div class="flex items-center justify-between">
+						<div class="text-sm text-base-content/60">
+							{#if searchTerm || selectedLanguage || selectedStatus || selectedEventType || selectedRelations.length > 0 || selectedAgeGroups.length > 0 || selectedBelated}
+								<span class="flex items-center gap-2">
+									<div class="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
+									Filter aktiv
+								</span>
+							{:else}
+								Keine Filter angewendet
+							{/if}
+						</div>
+						<button 
+							class="btn btn-primary gap-2 shadow-lg"
+							onclick={applyFilters}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+							</svg>
+							Filter anwenden
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
