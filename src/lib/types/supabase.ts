@@ -8,6 +8,131 @@ export type Database = {
 	};
 	public: {
 		Tables: {
+			api_keys: {
+				Row: {
+					id: string;
+					name: string;
+					key_hash: string;
+					key_prefix: string;
+					description: string | null;
+					is_active: boolean;
+					rate_limit_per_hour: number;
+					allowed_endpoints: string[];
+					last_used_at: string | null;
+					total_requests: number;
+					created_by: string | null;
+					created_at: string;
+					updated_at: string;
+					expires_at: string | null;
+				};
+				Insert: {
+					id?: string;
+					name: string;
+					key_hash: string;
+					key_prefix: string;
+					description?: string | null;
+					is_active?: boolean;
+					rate_limit_per_hour?: number;
+					allowed_endpoints?: string[];
+					last_used_at?: string | null;
+					total_requests?: number;
+					created_by?: string | null;
+					created_at?: string;
+					updated_at?: string;
+					expires_at?: string | null;
+				};
+				Update: {
+					id?: string;
+					name?: string;
+					key_hash?: string;
+					key_prefix?: string;
+					description?: string | null;
+					is_active?: boolean;
+					rate_limit_per_hour?: number;
+					allowed_endpoints?: string[];
+					last_used_at?: string | null;
+					total_requests?: number;
+					created_by?: string | null;
+					created_at?: string;
+					updated_at?: string;
+					expires_at?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "api_keys_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					}
+				];
+			};
+			released_wishes: {
+				Row: {
+					id: string;
+					original_wish_id: string;
+					type: string;
+					event_type: string;
+					relations: string[];
+					age_groups: string[];
+					specific_values: number[];
+					text: string;
+					belated: boolean;
+					language: string;
+					length: string;
+					released_by: string;
+					released_at: string;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					original_wish_id: string;
+					type: string;
+					event_type: string;
+					relations: string[];
+					age_groups: string[];
+					specific_values?: number[];
+					text: string;
+					belated?: boolean;
+					language: string;
+					length: string;
+					released_by: string;
+					released_at?: string;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					original_wish_id?: string;
+					type?: string;
+					event_type?: string;
+					relations?: string[];
+					age_groups?: string[];
+					specific_values?: number[];
+					text?: string;
+					belated?: boolean;
+					language?: string;
+					length?: string;
+					released_by?: string;
+					released_at?: string;
+					created_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "released_wishes_original_wish_id_fkey";
+						columns: ["original_wish_id"];
+						isOneToOne: false;
+						referencedRelation: "wishes";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "released_wishes_released_by_fkey";
+						columns: ["released_by"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					}
+				];
+			};
 			profiles: {
 				Row: {
 					avatar_url: string | null;

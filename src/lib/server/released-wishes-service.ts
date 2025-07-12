@@ -42,9 +42,9 @@ export class ReleasedWishesService {
 				age_groups: wish.age_groups,
 				specific_values: wish.specific_values || [],
 				text: wish.text,
-				belated: wish.belated,
+				belated: wish.belated === 'true',
 				language: wish.language,
-				length: wish.length,
+				length: 'medium', // Default length since wishes table doesn't have this field yet
 				released_by: releasedBy
 			})
 			.select()

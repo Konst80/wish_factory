@@ -10,7 +10,28 @@ https://your-wish-factory.com/api/public
 ```
 
 ## Authentifizierung
-Keine Authentifizierung erforderlich. Alle Endpoints sind öffentlich zugänglich.
+
+### API Key Authentifizierung (Erforderlich)
+Die API ist mit API Key-basierter Authentifizierung gesichert. Sie benötigen einen gültigen API Key um auf die Endpoints zuzugreifen.
+
+**Header-Optionen:**
+```http
+# Option 1: X-API-Key Header (Empfohlen)
+X-API-Key: wsk_abcd1234567890abcdef1234567890abcdef12
+
+# Option 2: Authorization Header
+Authorization: Bearer wsk_abcd1234567890abcdef1234567890abcdef12
+```
+
+**API Key Format:**
+- Prefix: `wsk_` (WishSnap Key)
+- Length: 48 Zeichen total
+- Beispiel: `wsk_a1b2c3d4567890abcdef1234567890abcdef12`
+
+**API Key erhalten:**
+- Kontaktieren Sie den Administrator der Wish-Factory Instanz
+- API Keys werden über das Admin Dashboard verwaltet
+- Jeder API Key hat individuelle Rate Limits und Berechtigungen
 
 ## Datenmodell: Released Wish
 
@@ -37,6 +58,7 @@ interface ReleasedWish {
 ### 1. Alle freigegebenen Wünsche abrufen
 ```http
 GET /api/public/wishes
+X-API-Key: wsk_your_api_key_here
 ```
 
 **Query Parameter:**
@@ -51,6 +73,17 @@ GET /api/public/wishes
 - `limit` (optional): Anzahl der Ergebnisse (default: 100, max: 500)
 - `offset` (optional): Offset für Pagination (default: 0)
 - `since` (optional): ISO 8601 Timestamp - Nur Wishes seit diesem Datum
+
+**Response Headers:**
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-RateLimit-Limit: 2000
+X-RateLimit-Remaining: 1999
+X-RateLimit-Reset: 2025-01-15T11:30:00Z
+X-API-Key-Name: WishSnap Mobile App
+Cache-Control: public, max-age=300
+```
 
 **Response:**
 ```json
@@ -153,14 +186,40 @@ GET /api/public/wishes?since=2025-01-15T10:30:00Z&limit=500
 ```
 
 **Error Codes:**
+- `MISSING_API_KEY` (401) - Fehlender API Key
+- `INVALID_API_KEY` (401) - Ungültiger oder abgelaufener API Key
+- `RATE_LIMIT_EXCEEDED` (429) - Rate Limit überschritten
 - `WISH_NOT_FOUND` (404) - Wunsch nicht gefunden
 - `INVALID_PARAMETER` (400) - Ungültiger Query Parameter
-- `RATE_LIMIT_EXCEEDED` (429) - Rate Limit überschritten
 - `INTERNAL_ERROR` (500) - Server-Fehler
 
+**Authentifizierung Error Beispiele:**
+```json
+{
+  "error": {
+    "code": "MISSING_API_KEY",
+    "message": "API key is required. Please provide it via X-API-Key header or Authorization header.",
+    "timestamp": "2025-01-15T10:30:00Z"
+  }
+}
+```
+
+```json
+{
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Rate limit exceeded. Please try again later.",
+    "rateLimitReset": "2025-01-15T11:30:00Z",
+    "timestamp": "2025-01-15T10:30:00Z"
+  }
+}
+```
+
 ## Rate Limiting
-- 1000 Requests pro Stunde pro IP
-- Header: `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+- **Per API Key**: Individuell konfigurierbar (Standard: 1000 Requests/Stunde)
+- **Headers**: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+- **Überschreitung**: HTTP 429 mit `rateLimitReset` Timestamp
+- **Reset**: Rate Limit wird stündlich zurückgesetzt
 
 ## Caching
 - Response wird 5 Minuten gecacht
@@ -168,12 +227,40 @@ GET /api/public/wishes?since=2025-01-15T10:30:00Z&limit=500
 - ETag Support für effizientes Caching
 
 ## CORS
-- Alle Origins erlaubt für öffentliche API
-- Methoden: GET, HEAD, OPTIONS
+- **Origins**: Alle Origins erlaubt (`*`)
+- **Methoden**: GET, HEAD, OPTIONS
+- **Headers**: Content-Type, X-API-Key, Authorization
+- **Preflight**: OPTIONS Request wird unterstützt
 
 ## Beispiel-Integration für KI
 
 ```typescript
+// WishSnap API Client Beispiel
+class WishSnapAPI {
+  constructor(private apiKey: string, private baseUrl: string) {}
+
+  async getWishes(filters?: WishFilters): Promise<WishResponse> {
+    const params = new URLSearchParams();
+    if (filters?.language) params.set('language', filters.language);
+    if (filters?.type) params.set('type', filters.type);
+    if (filters?.eventType) params.set('eventType', filters.eventType);
+    
+    const response = await fetch(`${this.baseUrl}/api/public/wishes?${params}`, {
+      headers: {
+        'X-API-Key': this.apiKey,
+        'User-Agent': 'WishSnap-App/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new APIError(error.error.code, error.error.message);
+    }
+
+    return await response.json();
+  }
+}
+
 // Für KI-Prompting in WishSnap
 const wishContext = {
   availableWishes: wishes,
@@ -197,5 +284,19 @@ const wishContext = {
 // KI kann dann passende Wishes auswählen und Platzhalter ersetzen
 ```
 
+## Sicherheitshinweise
+
+### API Key Sicherheit
+- **Niemals** API Keys in Client-Code einbetten
+- Verwenden Sie sichere Speicherung (Keychain/Keystore)
+- Rotieren Sie API Keys regelmäßig
+- Überwachen Sie die Nutzung im Admin Dashboard
+
+### Rate Limiting Best Practices
+- Implementieren Sie exponential backoff bei 429 Responses
+- Cachen Sie Responses lokal wenn möglich
+- Verwenden Sie `since` Parameter für inkrementelle Updates
+
 ## Änderungshistorie
+- v1.1: API Key Authentifizierung hinzugefügt (2025-01-15)
 - v1.0: Initial Release (2025-01-15)
