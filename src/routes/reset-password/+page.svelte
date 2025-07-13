@@ -34,7 +34,12 @@
 		error = '';
 
 		try {
-			const { error: resetError } = await supabase.auth.updateUser({
+			if (!supabase) {
+				error = 'Supabase nicht verfügbar';
+				return;
+			}
+
+			const { error: resetError } = await supabase!.auth.updateUser({
 				password: newPassword
 			});
 
@@ -46,7 +51,7 @@
 					goto('/dashboard');
 				}, 2000);
 			}
-		} catch (err) {
+		} catch {
 			error = 'Ein Fehler ist aufgetreten';
 		} finally {
 			loading = false;
@@ -81,7 +86,7 @@
 					<span>Passwort erfolgreich geändert! Weiterleitung zum Dashboard...</span>
 				</div>
 			{:else}
-				<form on:submit|preventDefault={handleResetPassword} class="space-y-4">
+				<form onsubmit={handleResetPassword} class="space-y-4">
 					<div class="form-control">
 						<label class="label">
 							<span class="label-text">Neues Passwort</span>
