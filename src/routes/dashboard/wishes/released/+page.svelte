@@ -14,12 +14,21 @@
 	const currentPage = $derived(data.currentPage);
 	const totalPages = $derived(Math.ceil(data.total / 50));
 
-	// Filter state
-	let selectedLanguage = $state(filters.language || '');
-	let selectedType = $state(filters.type || '');
-	let selectedEventType = $state(filters.eventType || '');
-	let selectedLength = $state(filters.length || '');
-	let selectedBelated = $state(filters.belated?.toString() || '');
+	// Filter state - use derived for initial values, state for user changes
+	let selectedLanguage = $state('');
+	let selectedType = $state('');
+	let selectedEventType = $state('');
+	let selectedLength = $state('');
+	let selectedBelated = $state('');
+	
+	// Initialize filter values from URL params
+	$effect(() => {
+		if (filters.language && !selectedLanguage) selectedLanguage = filters.language;
+		if (filters.type && !selectedType) selectedType = filters.type;
+		if (filters.eventType && !selectedEventType) selectedEventType = filters.eventType;
+		if (filters.length && !selectedLength) selectedLength = filters.length;
+		if (filters.belated !== undefined && !selectedBelated) selectedBelated = filters.belated.toString();
+	});
 
 	// UI State
 	let showFilters = $state(false);

@@ -6,7 +6,7 @@
 
 	let authStatus = $state('Lade...');
 	let storageInfo = $state('');
-	let userInfo = $state(null);
+	let userInfo = $state<any>(null);
 	let envInfo = $state('');
 	let dbConnectionStatus = $state('Nicht getestet');
 	let deploymentInfo = $state('');
@@ -55,7 +55,8 @@
 				setTimeout(() => reject(new Error('Session check timeout')), 5000)
 			);
 			
-			const { data: { session }, error: sessionError } = await Promise.race([sessionPromise, timeoutPromise]);
+			const result = await Promise.race([sessionPromise, timeoutPromise]) as any;
+			const { data: { session }, error: sessionError } = result;
 			
 			if (sessionError) {
 				authStatus = 'Session Fehler: ' + sessionError.message;
@@ -69,7 +70,8 @@
 				setTimeout(() => reject(new Error('User check timeout')), 5000)
 			);
 			
-			const { data: { user }, error: userError } = await Promise.race([userPromise, userTimeoutPromise]);
+			const userResult = await Promise.race([userPromise, userTimeoutPromise]) as any;
+			const { data: { user }, error: userError } = userResult;
 			
 			if (userError) {
 				authStatus = 'User Fehler: ' + userError.message;
@@ -97,7 +99,7 @@
 
 		} catch (error) {
 			console.error('Auth status error:', error);
-			authStatus = 'Fehler: ' + error.message;
+			authStatus = 'Fehler: ' + (error instanceof Error ? error.message : 'Unknown error');
 		}
 	});
 
@@ -110,10 +112,11 @@
 				return;
 			}
 
-			const { data, error } = await Promise.race([
+			const dbResult = await Promise.race([
 				supabase.from('profiles').select('count').limit(1),
 				new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-			]);
+			]) as any;
+			const { data, error } = dbResult;
 
 			if (error) {
 				dbConnectionStatus = `❌ DB Fehler: ${error.message}`;
@@ -121,7 +124,7 @@
 				dbConnectionStatus = '✅ Datenbank erreichbar';
 			}
 		} catch (error) {
-			dbConnectionStatus = `❌ Connection Timeout: ${error.message}`;
+			dbConnectionStatus = `❌ Connection Timeout: ${error instanceof Error ? error.message : 'Unknown error'}`;
 		}
 	}
 
@@ -154,7 +157,7 @@
 			).join(' | ');
 
 		} catch (error) {
-			apiStatus = `❌ API Tests fehlgeschlagen: ${error.message}`;
+			apiStatus = `❌ API Tests fehlgeschlagen: ${error instanceof Error ? error.message : 'Unknown error'}`;
 		}
 	}
 
