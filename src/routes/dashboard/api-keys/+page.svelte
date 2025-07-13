@@ -171,12 +171,12 @@
 <div class="card bg-base-100 shadow-xl">
 	<div class="card-body">
 		<h2 class="card-title">API Keys</h2>
-		
+
 		{#if data.apiKeys.length === 0}
-			<div class="text-center py-12">
+			<div class="py-12 text-center">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
-					class="mx-auto h-16 w-16 text-base-300"
+					class="text-base-300 mx-auto h-16 w-16"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
@@ -188,8 +188,8 @@
 						d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
 					/>
 				</svg>
-				<h3 class="text-lg font-medium mt-4">Keine API Keys vorhanden</h3>
-				<p class="text-sm opacity-70 mt-2">
+				<h3 class="mt-4 text-lg font-medium">Keine API Keys vorhanden</h3>
+				<p class="mt-2 text-sm opacity-70">
 					Erstellen Sie Ihren ersten API Key für den Zugriff auf die öffentlichen Endpoints.
 				</p>
 				<button class="btn btn-primary mt-4" onclick={() => (showCreateModal = true)}>
@@ -223,7 +223,7 @@
 									</div>
 								</td>
 								<td>
-									<code class="bg-base-200 px-2 py-1 rounded text-sm">
+									<code class="bg-base-200 rounded px-2 py-1 text-sm">
 										{apiKey.keyPrefix}***
 									</code>
 								</td>
@@ -232,7 +232,7 @@
 										{getStatusText(apiKey)}
 									</div>
 									{#if apiKey.expiresAt}
-										<div class="text-xs opacity-70 mt-1">
+										<div class="mt-1 text-xs opacity-70">
 											Läuft ab: {formatDate(apiKey.expiresAt)}
 										</div>
 									{/if}
@@ -243,7 +243,7 @@
 									</div>
 								</td>
 								<td>
-									<div class="text-sm font-mono">
+									<div class="font-mono text-sm">
 										{apiKey.totalRequests.toLocaleString()}
 									</div>
 								</td>
@@ -281,9 +281,29 @@
 <!-- Create API Key Modal -->
 {#if showCreateModal}
 	<div class="modal modal-open">
-		<div class="modal-box w-11/12 max-w-2xl">
-			<h3 class="text-lg font-bold mb-4">Neuen API Key erstellen</h3>
-			
+		<div class="modal-box w-11/12 max-w-3xl">
+			<!-- Modal Header -->
+			<div class="flex items-center justify-between border-b border-base-200 pb-4 mb-6">
+				<div class="flex items-center gap-3">
+					<div class="avatar placeholder">
+						<div class="bg-primary text-primary-content w-12 rounded-xl">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z" />
+							</svg>
+						</div>
+					</div>
+					<div>
+						<h3 class="text-xl font-bold">Neuen API Key erstellen</h3>
+						<p class="text-base-content/70 text-sm">Erstellen Sie einen sicheren Zugangsschlüssel für Ihre Anwendung</p>
+					</div>
+				</div>
+				<button class="btn btn-sm btn-circle btn-ghost" onclick={closeCreateModal}>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
+
 			<form
 				method="POST"
 				action="?/create"
@@ -295,83 +315,129 @@
 					};
 				}}
 			>
-				<div class="space-y-4">
-					<!-- Name -->
-					<div class="form-control">
-						<label class="label" for="name">
-							<span class="label-text">Name *</span>
-						</label>
-						<input
-							type="text"
-							id="name"
-							name="name"
-							class="input input-bordered"
-							placeholder="z.B. WishSnap Mobile App"
-							bind:value={createForm.name}
-							required
-						/>
+				<div class="grid gap-6">
+					<!-- Basic Information -->
+					<div class="card bg-base-50 border border-base-200">
+						<div class="card-body p-4">
+							<h4 class="card-title text-base mb-3 flex items-center gap-2">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+								</svg>
+								Grundinformationen
+							</h4>
+							
+							<div class="grid gap-4">
+								<div class="form-control">
+									<label class="label" for="name">
+										<span class="label-text font-medium">Name *</span>
+										<span class="label-text-alt">Eindeutiger Bezeichner</span>
+									</label>
+									<input
+										type="text"
+										id="name"
+										name="name"
+										bind:value={createForm.name}
+										placeholder="z.B. WishSnap Mobile App"
+										class="input input-bordered focus:input-primary"
+										required
+									/>
+								</div>
+
+								<div class="form-control">
+									<label class="label" for="description">
+										<span class="label-text font-medium">Beschreibung</span>
+										<span class="label-text-alt">Optional</span>
+									</label>
+									<textarea
+										id="description"
+										name="description"
+										bind:value={createForm.description}
+										placeholder="Beschreiben Sie den Verwendungszweck dieses API Keys..."
+										class="textarea textarea-bordered focus:textarea-primary h-20"
+									></textarea>
+								</div>
+							</div>
+						</div>
 					</div>
 
-					<!-- Description -->
-					<div class="form-control">
-						<label class="label" for="description">
-							<span class="label-text">Beschreibung</span>
-						</label>
-						<textarea
-							id="description"
-							name="description"
-							class="textarea textarea-bordered"
-							placeholder="Optionale Beschreibung des API Keys"
-							bind:value={createForm.description}
-						></textarea>
+					<!-- Security Settings -->
+					<div class="card bg-base-50 border border-base-200">
+						<div class="card-body p-4">
+							<h4 class="card-title text-base mb-3 flex items-center gap-2">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+								</svg>
+								Sicherheitseinstellungen
+							</h4>
+							
+							<div class="grid md:grid-cols-2 gap-4">
+								<div class="form-control">
+									<label class="label" for="rateLimitPerHour">
+										<span class="label-text font-medium">Rate Limit (pro Stunde)</span>
+									</label>
+									<div class="join">
+										<input
+											type="number"
+											id="rateLimitPerHour"
+											name="rateLimitPerHour"
+											bind:value={createForm.rateLimitPerHour}
+											min="1"
+											max="10000"
+											class="input input-bordered join-item flex-1 focus:input-primary"
+										/>
+										<span class="btn btn-outline join-item">Req/h</span>
+									</div>
+									<label class="label">
+										<span class="label-text-alt text-info">💡 Standard: 1000 Anfragen pro Stunde</span>
+									</label>
+								</div>
+
+								<div class="form-control">
+									<label class="label" for="expiresAt">
+										<span class="label-text font-medium">Ablaufdatum</span>
+									</label>
+									<input
+										type="datetime-local"
+										id="expiresAt"
+										name="expiresAt"
+										bind:value={createForm.expiresAt}
+										class="input input-bordered focus:input-primary"
+									/>
+									<label class="label">
+										<span class="label-text-alt text-info">⏰ Leer lassen für unbegrenzten API Key</span>
+									</label>
+								</div>
+							</div>
+						</div>
 					</div>
 
-					<!-- Rate Limit -->
-					<div class="form-control">
-						<label class="label" for="rateLimitPerHour">
-							<span class="label-text">Rate Limit (pro Stunde)</span>
-						</label>
-						<input
-							type="number"
-							id="rateLimitPerHour"
-							name="rateLimitPerHour"
-							class="input input-bordered"
-							min="1"
-							max="10000"
-							bind:value={createForm.rateLimitPerHour}
-						/>
-						<label class="label">
-							<span class="label-text-alt">Standard: 1000 Anfragen pro Stunde</span>
-						</label>
-					</div>
-
-					<!-- Expiration -->
-					<div class="form-control">
-						<label class="label" for="expiresAt">
-							<span class="label-text">Ablaufdatum (optional)</span>
-						</label>
-						<input
-							type="datetime-local"
-							id="expiresAt"
-							name="expiresAt"
-							class="input input-bordered"
-							bind:value={createForm.expiresAt}
-						/>
-						<label class="label">
-							<span class="label-text-alt">Leer lassen für unbegrenzten API Key</span>
-						</label>
+					<!-- Info Banner -->
+					<div class="alert alert-info">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						<div class="text-sm">
+							<strong>Hinweis:</strong> Der API Key wird nur einmal angezeigt und kann nicht wiederhergestellt werden. 
+							Speichern Sie ihn an einem sicheren Ort.
+						</div>
 					</div>
 				</div>
 
-				<div class="modal-action">
+				<div class="modal-action pt-6 border-t border-base-200 mt-6">
 					<button type="button" class="btn btn-ghost" onclick={closeCreateModal}>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
 						Abbrechen
 					</button>
-					<button type="submit" class="btn btn-primary" disabled={isSubmitting}>
+					<button type="submit" class="btn btn-primary min-w-32" disabled={isSubmitting}>
 						{#if isSubmitting}
 							<span class="loading loading-spinner loading-sm"></span>
-							Erstellen...
+							Erstelle...
 						{:else}
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z" />
+							</svg>
 							API Key erstellen
 						{/if}
 					</button>
@@ -385,8 +451,8 @@
 {#if showKeyModal && newApiKeyData}
 	<div class="modal modal-open">
 		<div class="modal-box w-11/12 max-w-2xl">
-			<h3 class="text-lg font-bold mb-4">API Key erfolgreich erstellt</h3>
-			
+			<h3 class="mb-4 text-lg font-bold">API Key erfolgreich erstellt</h3>
+
 			<div class="alert alert-warning mb-4">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -402,8 +468,8 @@
 					/>
 				</svg>
 				<div>
-					<strong>Wichtig:</strong> Speichern Sie diesen API Key sicher ab! 
-					Er wird nur einmal angezeigt und kann nicht wiederhergestellt werden.
+					<strong>Wichtig:</strong> Speichern Sie diesen API Key sicher ab! Er wird nur einmal angezeigt
+					und kann nicht wiederhergestellt werden.
 				</div>
 			</div>
 
@@ -451,8 +517,8 @@
 					</div>
 				</div>
 
-				<div class="bg-base-200 p-4 rounded-lg">
-					<h4 class="font-medium mb-2">Verwendung:</h4>
+				<div class="bg-base-200 rounded-lg p-4">
+					<h4 class="mb-2 font-medium">Verwendung:</h4>
 					<div class="space-y-2 text-sm">
 						<div>
 							<strong>Header:</strong> <code>X-API-Key: {newApiKeyData.plainKey}</code>
@@ -468,11 +534,14 @@
 			</div>
 
 			<div class="modal-action">
-				<button class="btn btn-primary" onclick={() => {
-					showKeyModal = false;
-					newApiKeyData = null;
-					window.location.reload(); // Refresh to show new key in list
-				}}>
+				<button
+					class="btn btn-primary"
+					onclick={() => {
+						showKeyModal = false;
+						newApiKeyData = null;
+						window.location.reload(); // Refresh to show new key in list
+					}}
+				>
 					Verstanden
 				</button>
 			</div>
@@ -484,19 +553,23 @@
 {#if selectedKeyForDeactivation}
 	<div class="modal modal-open">
 		<div class="modal-box">
-			<h3 class="text-lg font-bold mb-4">API Key deaktivieren</h3>
+			<h3 class="mb-4 text-lg font-bold">API Key deaktivieren</h3>
 			<p class="mb-4">
-				Sind Sie sicher, dass Sie diesen API Key deaktivieren möchten? 
-				Apps, die diesen Key verwenden, können danach nicht mehr auf die API zugreifen.
+				Sind Sie sicher, dass Sie diesen API Key deaktivieren möchten? Apps, die diesen Key
+				verwenden, können danach nicht mehr auf die API zugreifen.
 			</p>
-			
+
 			<div class="modal-action">
 				<button class="btn btn-ghost" onclick={() => (selectedKeyForDeactivation = null)}>
 					Abbrechen
 				</button>
 				<form method="POST" action="?/deactivate" use:enhance>
 					<input type="hidden" name="keyId" value={selectedKeyForDeactivation} />
-					<button type="submit" class="btn btn-error" onclick={() => (selectedKeyForDeactivation = null)}>
+					<button
+						type="submit"
+						class="btn btn-error"
+						onclick={() => (selectedKeyForDeactivation = null)}
+					>
 						Deaktivieren
 					</button>
 				</form>

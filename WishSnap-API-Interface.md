@@ -30,8 +30,36 @@ Authorization: Bearer wsk_abcd1234567890abcdef1234567890abcdef12
 
 **API Key erhalten:**
 - Kontaktieren Sie den Administrator der Wish-Factory Instanz
-- API Keys werden über das Admin Dashboard verwaltet
+- API Keys werden über das Admin Dashboard verwaltet (`/dashboard/api-keys`)
 - Jeder API Key hat individuelle Rate Limits und Berechtigungen
+
+### API Key Management
+
+**Für Administratoren:**
+- API Keys können über das Admin Dashboard unter `/dashboard/api-keys` verwaltet werden
+- Jeder API Key hat folgende Eigenschaften:
+  - **Name**: Eindeutiger Bezeichner (z.B. "WishSnap Mobile App")
+  - **Beschreibung**: Optionale Beschreibung des Verwendungszwecks
+  - **Rate Limit**: Anfragen pro Stunde (Standard: 1000)
+  - **Ablaufdatum**: Optionales Verfallsdatum
+  - **Status**: Aktiv/Inaktiv
+  - **Erlaubte Endpoints**: Standardmäßig `/api/public/wishes`
+
+**API Key Erstellung:**
+```bash
+# Über Admin Dashboard:
+1. Anmeldung als Administrator
+2. Navigation zu /dashboard/api-keys
+3. "API Key erstellen" anklicken
+4. Formular ausfüllen und bestätigen
+5. API Key sicher speichern (wird nur einmal angezeigt!)
+```
+
+**API Key Sicherheit:**
+- API Keys werden mit bcrypt gehasht in der Datenbank gespeichert
+- Nur der Key-Prefix ist im Klartext sichtbar
+- Keys können jederzeit deaktiviert werden
+- Verwendungsstatistiken werden getrackt (Anzahl Anfragen, letzte Nutzung)
 
 ## Datenmodell: Released Wish
 
@@ -283,6 +311,40 @@ const wishContext = {
 
 // KI kann dann passende Wishes auswählen und Platzhalter ersetzen
 ```
+
+## Admin Interface für API Key Management
+
+Wish-Factory stellt ein webbasiertes Admin Interface zur Verwaltung von API Keys bereit:
+
+### Dashboard-Zugang
+```
+URL: https://your-wish-factory.com/dashboard/api-keys
+Berechtigung: Nur Administratoren
+```
+
+### Verfügbare Aktionen
+
+**API Key Übersicht:**
+- Liste aller erstellten API Keys mit Status
+- Anzeige von Verwendungsstatistiken (Gesamtanfragen, letzte Nutzung)
+- Filter nach Status (Aktiv/Inaktiv)
+
+**API Key Erstellung:**
+- Formular zur Erstellung neuer API Keys
+- Konfiguration von Name, Beschreibung, Rate Limits
+- Optionale Ablaufzeit-Einstellung
+- Einmalige Anzeige des vollständigen API Keys
+
+**API Key Verwaltung:**
+- Deaktivierung von API Keys
+- Anzeige der Verwendungsstatistiken
+- Monitoring von Rate Limit Überschreitungen
+
+### Interface-Features
+- **Sicherheitswarnung**: API Keys werden nur einmal vollständig angezeigt
+- **Copy-to-Clipboard**: Einfaches Kopieren der generierten Keys
+- **Responsive Design**: Optimiert für Desktop und Mobile
+- **Echtzeit-Updates**: Sofortige Aktualisierung nach Änderungen
 
 ## Sicherheitshinweise
 
