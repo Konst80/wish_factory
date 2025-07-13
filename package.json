@@ -13,7 +13,11 @@
 		"lint": "prettier --check . && eslint .",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
-		"test:run": "vitest run"
+		"test:run": "vitest run",
+		"supabase:status": "./scripts/supabase-setup.sh status",
+		"supabase:dev": "./scripts/supabase-setup.sh login-dev",
+		"supabase:prod": "./scripts/supabase-setup.sh login-prod",
+		"supabase:migrate": "./scripts/supabase-setup.sh migrate"
 	},
 	"lint-staged": {
 		"*.{js,ts,svelte}": [
