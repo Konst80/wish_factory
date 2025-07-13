@@ -4,8 +4,17 @@
 	import { auth } from '$lib/stores/auth';
 
 	onMount(async () => {
-		await auth.signOut();
-		goto('/auth/login');
+		try {
+			await auth.signOut();
+			// Wait a bit for the auth state to clear
+			setTimeout(() => {
+				goto('/auth/login');
+			}, 500);
+		} catch (error) {
+			console.error('Logout error:', error);
+			// Force redirect even if logout fails
+			goto('/auth/login');
+		}
 	});
 </script>
 

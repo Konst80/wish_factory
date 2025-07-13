@@ -176,11 +176,25 @@ function createAuthStore() {
 		try {
 			setLoading(true);
 			await supabase.auth.signOut();
-			// State will be cleared automatically by the auth state listener
+			
+			// Manually clear state to ensure immediate logout
+			set({
+				user: null,
+				session: null,
+				profile: null,
+				loading: false,
+				error: null
+			});
 		} catch (err) {
 			console.error('Error signing out:', err);
-			setError(err instanceof Error ? err.message : 'Unknown error');
-			setLoading(false);
+			// Even if signOut fails, clear the local state
+			set({
+				user: null,
+				session: null,
+				profile: null,
+				loading: false,
+				error: err instanceof Error ? err.message : 'Unknown error'
+			});
 		}
 	};
 
