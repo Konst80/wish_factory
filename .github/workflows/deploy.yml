@@ -45,6 +45,11 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 4e19556f50aaf4e6b2f8cdcdbb5df0eb
           command: pages deploy .svelte-kit/cloudflare --project-name=wish-factory-dev --branch=develop
+        env:
+          PUBLIC_SUPABASE_URL: ${{ secrets.DEV_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.DEV_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.DEV_SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.DEV_OPENAI_API_KEY }}
 
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -53,6 +58,11 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 4e19556f50aaf4e6b2f8cdcdbb5df0eb
           command: pages deploy .svelte-kit/cloudflare --project-name=wish-factory
+        env:
+          PUBLIC_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PROD_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.PROD_OPENAI_API_KEY }}
 
       - name: Comment PR
         if: github.event_name == 'pull_request'
