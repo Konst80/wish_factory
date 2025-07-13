@@ -54,6 +54,7 @@ jobs:
           echo "PUBLIC_SUPABASE_URL=${{ secrets.PROD_SUPABASE_URL }}" >> .env
           echo "PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PROD_SUPABASE_ANON_KEY }}" >> .env
           echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}" >> .env
+          echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}" >> .env
           echo "Using Production Supabase (separate account)"
 
       - name: Build application
