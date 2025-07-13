@@ -6,7 +6,7 @@ export const GET: RequestHandler = async () => {
 	try {
 		// Get metadata from service
 		const metadata = await releasedWishesService.getMetadata();
-		
+
 		// Format response for API
 		const apiResponse = {
 			types: metadata.types,
@@ -18,7 +18,7 @@ export const GET: RequestHandler = async () => {
 			totalCount: metadata.totalCount,
 			lastUpdated: metadata.lastUpdated.toISOString()
 		};
-		
+
 		// Set CORS headers for public API
 		const headers = {
 			'Access-Control-Allow-Origin': '*',
@@ -27,12 +27,11 @@ export const GET: RequestHandler = async () => {
 			'Cache-Control': 'public, max-age=600', // 10 minutes cache for metadata
 			'Content-Type': 'application/json'
 		};
-		
+
 		return json(apiResponse, { headers });
-		
 	} catch (error) {
 		console.error('Public API metadata error:', error);
-		
+
 		const errorResponse = {
 			error: {
 				code: 'INTERNAL_ERROR',
@@ -40,8 +39,8 @@ export const GET: RequestHandler = async () => {
 				timestamp: new Date().toISOString()
 			}
 		};
-		
-		return json(errorResponse, { 
+
+		return json(errorResponse, {
 			status: 500,
 			headers: {
 				'Access-Control-Allow-Origin': '*',
@@ -57,7 +56,7 @@ export const OPTIONS: RequestHandler = async () => {
 		headers: {
 			'Access-Control-Allow-Origin': '*',
 			'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-			'Access-Control-Allow-Headers': 'Content-Type',
+			'Access-Control-Allow-Headers': 'Content-Type'
 		}
 	});
 };

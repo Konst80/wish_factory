@@ -230,12 +230,12 @@
 		if (!confirm('Möchten Sie diesen Wunsch für WishSnap freigeben?')) {
 			return;
 		}
-		
+
 		try {
 			const response = await fetch(`/api/wishes/${wishId}/release`, {
 				method: 'POST'
 			});
-			
+
 			if (response.ok) {
 				const result = await response.json();
 				alert(`Wunsch erfolgreich für WishSnap freigegeben!`);
@@ -478,28 +478,53 @@
 
 <!-- Enhanced Filter Panel -->
 {#if showFilters}
-	<div class="mb-8 overflow-hidden rounded-xl bg-gradient-to-br from-base-100 to-base-200/50 shadow-lg ring-1 ring-base-300/20">
+	<div
+		class="from-base-100 to-base-200/50 ring-base-300/20 mb-8 overflow-hidden rounded-xl bg-gradient-to-br shadow-lg ring-1"
+	>
 		<!-- Header -->
-		<div class="border-b border-base-300/30 bg-gradient-to-r from-primary/5 to-secondary/5 px-6 py-4">
+		<div
+			class="border-base-300/30 from-primary/5 to-secondary/5 border-b bg-gradient-to-r px-6 py-4"
+		>
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-3">
-					<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary shadow-sm">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+					<div
+						class="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg shadow-sm"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-5 w-5"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"
+							/>
 						</svg>
 					</div>
 					<div>
-						<h3 class="text-lg font-semibold text-base-content">Filter & Suche</h3>
-						<p class="text-sm text-base-content/60">Finden Sie schnell die gewünschten Wünsche</p>
+						<h3 class="text-base-content text-lg font-semibold">Filter & Suche</h3>
+						<p class="text-base-content/60 text-sm">Finden Sie schnell die gewünschten Wünsche</p>
 					</div>
 				</div>
 				<div class="flex items-center gap-2">
-					<button 
-						class="btn btn-outline btn-sm gap-2 hover:btn-error"
-						onclick={clearFilters}
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+					<button class="btn btn-outline btn-sm hover:btn-error gap-2" onclick={clearFilters}>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+							/>
 						</svg>
 						Zurücksetzen
 					</button>
@@ -516,19 +541,32 @@
 						id="search"
 						type="text"
 						placeholder="Durchsuchen Sie Wünsche nach ID, Text oder Inhalt..."
-						class="input input-lg input-bordered w-full pl-14 pr-28 text-base shadow-sm transition-all duration-300 focus:border-primary focus:shadow-lg focus:shadow-primary/10"
+						class="input input-lg input-bordered focus:border-primary focus:shadow-primary/10 w-full pr-28 pl-14 text-base shadow-sm transition-all duration-300 focus:shadow-lg"
 						bind:value={searchTerm}
 						onkeydown={(e) => e.key === 'Enter' && applyFilters()}
 					/>
-					<div class="absolute left-4 top-1/2 -translate-y-1/2">
-						<div class="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+					<div class="absolute top-1/2 left-4 -translate-y-1/2">
+						<div
+							class="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-md"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+								/>
 							</svg>
 						</div>
 					</div>
-					<button 
-						class="btn btn-primary btn-sm absolute right-2 top-1/2 -translate-y-1/2"
+					<button
+						class="btn btn-primary btn-sm absolute top-1/2 right-2 -translate-y-1/2"
 						onclick={applyFilters}
 					>
 						Suchen
@@ -540,24 +578,30 @@
 			<div class="space-y-8">
 				<!-- Basic Filters -->
 				<div>
-					<h4 class="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-base-content/70">
-						<div class="h-2 w-2 rounded-full bg-primary"></div>
+					<h4
+						class="text-base-content/70 mb-4 flex items-center gap-2 text-sm font-semibold tracking-wide uppercase"
+					>
+						<div class="bg-primary h-2 w-2 rounded-full"></div>
 						Grundlegende Filter
 					</h4>
 					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						<!-- Language Filter -->
 						<div class="group">
 							<label class="label pb-2" for="language">
-								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
-									<span class="flex h-5 w-5 items-center justify-center rounded bg-secondary/15 text-secondary">
+								<span
+									class="label-text text-base-content/80 flex items-center gap-2 text-sm font-medium"
+								>
+									<span
+										class="bg-secondary/15 text-secondary flex h-5 w-5 items-center justify-center rounded"
+									>
 										🌐
 									</span>
 									Sprache
 								</span>
 							</label>
-							<select 
-								id="language" 
-								class="select select-bordered w-full bg-base-50 transition-all duration-200 hover:bg-base-100 focus:border-secondary focus:bg-base-100 focus:shadow-lg focus:shadow-secondary/10" 
+							<select
+								id="language"
+								class="select select-bordered bg-base-50 hover:bg-base-100 focus:border-secondary focus:bg-base-100 focus:shadow-secondary/10 w-full transition-all duration-200 focus:shadow-lg"
 								bind:value={selectedLanguage}
 							>
 								<option value="">Alle Sprachen</option>
@@ -569,16 +613,20 @@
 						<!-- Status Filter -->
 						<div class="group">
 							<label class="label pb-2" for="status">
-								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
-									<span class="flex h-5 w-5 items-center justify-center rounded bg-accent/15 text-accent">
+								<span
+									class="label-text text-base-content/80 flex items-center gap-2 text-sm font-medium"
+								>
+									<span
+										class="bg-accent/15 text-accent flex h-5 w-5 items-center justify-center rounded"
+									>
 										⚡
 									</span>
 									Status
 								</span>
 							</label>
-							<select 
-								id="status" 
-								class="select select-bordered w-full bg-base-50 transition-all duration-200 hover:bg-base-100 focus:border-accent focus:bg-base-100 focus:shadow-lg focus:shadow-accent/10" 
+							<select
+								id="status"
+								class="select select-bordered bg-base-50 hover:bg-base-100 focus:border-accent focus:bg-base-100 focus:shadow-accent/10 w-full transition-all duration-200 focus:shadow-lg"
 								bind:value={selectedStatus}
 							>
 								<option value="">Alle Status</option>
@@ -597,16 +645,20 @@
 						<!-- Event Type Filter -->
 						<div class="group">
 							<label class="label pb-2" for="eventType">
-								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
-									<span class="flex h-5 w-5 items-center justify-center rounded bg-info/15 text-info">
+								<span
+									class="label-text text-base-content/80 flex items-center gap-2 text-sm font-medium"
+								>
+									<span
+										class="bg-info/15 text-info flex h-5 w-5 items-center justify-center rounded"
+									>
 										🎉
 									</span>
 									Anlass
 								</span>
 							</label>
-							<select 
-								id="eventType" 
-								class="select select-bordered w-full bg-base-50 transition-all duration-200 hover:bg-base-100 focus:border-info focus:bg-base-100 focus:shadow-lg focus:shadow-info/10" 
+							<select
+								id="eventType"
+								class="select select-bordered bg-base-50 hover:bg-base-100 focus:border-info focus:bg-base-100 focus:shadow-info/10 w-full transition-all duration-200 focus:shadow-lg"
 								bind:value={selectedEventType}
 							>
 								<option value="">Alle Anlässe</option>
@@ -620,16 +672,22 @@
 
 				<!-- Advanced Filters -->
 				<div>
-					<h4 class="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-base-content/70">
-						<div class="h-2 w-2 rounded-full bg-secondary"></div>
+					<h4
+						class="text-base-content/70 mb-4 flex items-center gap-2 text-sm font-semibold tracking-wide uppercase"
+					>
+						<div class="bg-secondary h-2 w-2 rounded-full"></div>
 						Erweiterte Filter
 					</h4>
 					<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 						<!-- Relations -->
 						<div class="space-y-3">
 							<label class="label pb-1">
-								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
-									<span class="flex h-5 w-5 items-center justify-center rounded bg-warning/15 text-warning">
+								<span
+									class="label-text text-base-content/80 flex items-center gap-2 text-sm font-medium"
+								>
+									<span
+										class="bg-warning/15 text-warning flex h-5 w-5 items-center justify-center rounded"
+									>
 										👥
 									</span>
 									Beziehungen
@@ -637,7 +695,9 @@
 							</label>
 							<div class="space-y-2">
 								{#each Object.values(Relation) as relation (relation)}
-									<label class="flex cursor-pointer items-center gap-3 rounded-lg border border-base-300 bg-base-50 p-3 transition-all hover:border-warning hover:bg-warning/5">
+									<label
+										class="border-base-300 bg-base-50 hover:border-warning hover:bg-warning/5 flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all"
+									>
 										<input
 											type="checkbox"
 											class="checkbox checkbox-warning checkbox-sm"
@@ -659,8 +719,12 @@
 						<!-- Age Groups -->
 						<div class="space-y-3">
 							<label class="label pb-1">
-								<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
-									<span class="flex h-5 w-5 items-center justify-center rounded bg-success/15 text-success">
+								<span
+									class="label-text text-base-content/80 flex items-center gap-2 text-sm font-medium"
+								>
+									<span
+										class="bg-success/15 text-success flex h-5 w-5 items-center justify-center rounded"
+									>
 										🎯
 									</span>
 									Altersgruppen
@@ -668,7 +732,9 @@
 							</label>
 							<div class="space-y-2">
 								{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
-									<label class="flex cursor-pointer items-center gap-3 rounded-lg border border-base-300 bg-base-50 p-3 transition-all hover:border-success hover:bg-success/5">
+									<label
+										class="border-base-300 bg-base-50 hover:border-success hover:bg-success/5 flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all"
+									>
 										<input
 											type="checkbox"
 											class="checkbox checkbox-success checkbox-sm"
@@ -691,16 +757,20 @@
 					<!-- Belated Filter -->
 					<div class="pt-4">
 						<label class="label pb-2" for="belated">
-							<span class="label-text flex items-center gap-2 text-sm font-medium text-base-content/80">
-								<span class="flex h-5 w-5 items-center justify-center rounded bg-error/15 text-error">
+							<span
+								class="label-text text-base-content/80 flex items-center gap-2 text-sm font-medium"
+							>
+								<span
+									class="bg-error/15 text-error flex h-5 w-5 items-center justify-center rounded"
+								>
 									⏰
 								</span>
 								Nachträgliche Wünsche
 							</span>
 						</label>
-						<select 
-							id="belated" 
-							class="select select-bordered w-full max-w-xs bg-base-50 transition-all duration-200 hover:bg-base-100 focus:border-error focus:bg-base-100 focus:shadow-lg focus:shadow-error/10" 
+						<select
+							id="belated"
+							class="select select-bordered bg-base-50 hover:bg-base-100 focus:border-error focus:bg-base-100 focus:shadow-error/10 w-full max-w-xs transition-all duration-200 focus:shadow-lg"
 							bind:value={selectedBelated}
 						>
 							<option value="">Alle Wünsche</option>
@@ -711,24 +781,32 @@
 				</div>
 
 				<!-- Filter Actions -->
-				<div class="border-t border-base-300/30 bg-base-50/50 px-6 py-4">
+				<div class="border-base-300/30 bg-base-50/50 border-t px-6 py-4">
 					<div class="flex items-center justify-between">
-						<div class="text-sm text-base-content/60">
+						<div class="text-base-content/60 text-sm">
 							{#if searchTerm || selectedLanguage || selectedStatus || selectedEventType || selectedRelations.length > 0 || selectedAgeGroups.length > 0 || selectedBelated}
 								<span class="flex items-center gap-2">
-									<div class="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
+									<div class="bg-primary h-2 w-2 animate-pulse rounded-full"></div>
 									Filter aktiv
 								</span>
 							{:else}
 								Keine Filter angewendet
 							{/if}
 						</div>
-						<button 
-							class="btn btn-primary gap-2 shadow-lg"
-							onclick={applyFilters}
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+						<button class="btn btn-primary gap-2 shadow-lg" onclick={applyFilters}>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"
+								/>
 							</svg>
 							Filter anwenden
 						</button>

@@ -6,12 +6,13 @@ Das Wish Factory Projekt verwendet eine **Dual-Environment Deployment-Strategie*
 
 ## Environment-Struktur
 
-| Environment | Branch | URL | Zweck |
-|-------------|--------|-----|-------|
+| Environment     | Branch    | URL                                   | Zweck               |
+| --------------- | --------- | ------------------------------------- | ------------------- |
 | **Development** | `develop` | `https://wish-factory-dev.pages.dev/` | Entwicklung & Tests |
-| **Production** | `main` | `https://wish-factory.pages.dev/` | Live-Anwendung |
+| **Production**  | `main`    | `https://wish-factory.pages.dev/`     | Live-Anwendung      |
 
 ### Custom Domains (manuell einzurichten)
+
 - **Development**: `dev.factory.wishsnap.app`
 - **Production**: `factory.wishsnap.app`
 
@@ -56,6 +57,7 @@ git push origin main
 ### Automatische Prozesse
 
 **Bei Push auf `develop`:**
+
 1. ✅ Dependencies installieren
 2. ✅ TypeScript-Prüfung (`npm run check`)
 3. ✅ Linting (`npm run lint`)
@@ -63,6 +65,7 @@ git push origin main
 5. 🚀 Deployment auf Development-Environment
 
 **Bei Push auf `main`:**
+
 1. ✅ Dependencies installieren
 2. ✅ TypeScript-Prüfung (`npm run check`)
 3. ✅ Linting (`npm run lint`)
@@ -70,12 +73,14 @@ git push origin main
 5. 🚀 Deployment auf Production-Environment
 
 **Bei Pull Request:**
+
 - Führt Tests und Build durch
 - Kommentiert PR mit Deployment-Info
 
 ### Setup Requirements
 
 #### 1. Cloudflare API Token erstellen
+
 1. Besuche [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens)
 2. Erstelle Token mit folgenden Permissions:
    - Zone:Zone:Read
@@ -83,6 +88,7 @@ git push origin main
    - Account:Cloudflare Pages:Edit
 
 #### 2. GitHub Secret hinzufügen
+
 1. Repository → Settings → Secrets and variables → Actions
 2. Neues Secret: `CLOUDFLARE_API_TOKEN`
 3. Wert: Der erstellte API Token
@@ -90,12 +96,14 @@ git push origin main
 ## Manuelle Deployments
 
 ### Development Deployment
+
 ```bash
 npm run build
 wrangler pages deploy .svelte-kit/output/client --project-name=wish-factory-dev
 ```
 
 ### Production Deployment
+
 ```bash
 npm run build
 wrangler pages deploy .svelte-kit/output/client --project-name=wish-factory
@@ -119,10 +127,10 @@ wrangler pages deploy .svelte-kit/output/client --project-name=wish-factory
 
 ### Cloudflare Pages Projekte
 
-| Projekt | Cloudflare Project Name | Production Branch | URL |
-|---------|------------------------|-------------------|-----|
-| Development | `wish-factory-dev` | `develop` | https://wish-factory-dev.pages.dev |
-| Production | `wish-factory` | `main` | https://wish-factory.pages.dev |
+| Projekt     | Cloudflare Project Name | Production Branch | URL                                |
+| ----------- | ----------------------- | ----------------- | ---------------------------------- |
+| Development | `wish-factory-dev`      | `develop`         | https://wish-factory-dev.pages.dev |
+| Production  | `wish-factory`          | `main`            | https://wish-factory.pages.dev     |
 
 ### Build-Einstellungen
 
@@ -139,10 +147,12 @@ Node.js version: 18
 ### Häufige Probleme
 
 #### 1. Deployment schlägt fehl
+
 - **Prüfen:** GitHub Actions Logs
 - **Lösung:** `npm run check` und `npm run lint` lokal ausführen
 
 #### 2. Build-Fehler
+
 ```bash
 # Lokal testen
 npm ci
@@ -152,11 +162,13 @@ npm run build
 ```
 
 #### 3. Cloudflare API Token Probleme
+
 - Token-Permissions prüfen
 - Neuen Token erstellen
 - GitHub Secret aktualisieren
 
 #### 4. Branch-Synchronisation
+
 ```bash
 # Branches synchronisieren
 git checkout develop
@@ -168,29 +180,34 @@ git pull origin main
 ## Monitoring
 
 ### Deployment Status prüfen
+
 1. **GitHub Actions**: Repository → Actions Tab
 2. **Cloudflare Dashboard**: Pages → Projektstatus
 3. **Live-URLs**: Websites direkt besuchen
 
 ### Logs einsehen
+
 - **GitHub Actions**: Detailed Workflow-Logs
 - **Cloudflare Pages**: Function/Build Logs im Dashboard
 
 ## Best Practices
 
 ### Development
+
 - ✅ Immer auf `develop` branch entwickeln
 - ✅ Features vor Merge ausgiebig testen
 - ✅ Descriptive Commit-Messages verwenden
 - ✅ Pull Requests für größere Features
 
 ### Production
+
 - ✅ Nur stabile Versionen auf `main` mergen
 - ✅ Release-Notes für wichtige Updates
 - ✅ Rollback-Plan bei kritischen Fehlern
 - ✅ Monitoring nach Production-Deployments
 
 ### Sicherheit
+
 - 🔒 API Tokens sicher verwalten
 - 🔒 Secrets nie in Code committen
 - 🔒 Regular Token-Rotation

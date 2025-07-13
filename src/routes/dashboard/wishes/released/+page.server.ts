@@ -6,8 +6,11 @@ import { redirect } from '@sveltejs/kit';
 export const load: PageServerLoad = async ({ cookies, url }) => {
 	// Check authentication
 	const supabase = createSupabaseServerClientFromSvelteKit(cookies);
-	const { data: { user }, error: authError } = await supabase.auth.getUser();
-	
+	const {
+		data: { user },
+		error: authError
+	} = await supabase.auth.getUser();
+
 	if (authError || !user) {
 		throw redirect(302, '/auth/login');
 	}
@@ -22,7 +25,10 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
 			length: searchParams.get('length') || undefined,
 			belated: searchParams.get('belated') ? searchParams.get('belated') === 'true' : undefined,
 			limit: 50, // Reasonable limit for dashboard
-			offset: parseInt(searchParams.get('page') || '1') <= 1 ? 0 : (parseInt(searchParams.get('page') || '1') - 1) * 50
+			offset:
+				parseInt(searchParams.get('page') || '1') <= 1
+					? 0
+					: (parseInt(searchParams.get('page') || '1') - 1) * 50
 		};
 
 		// Get released wishes and metadata

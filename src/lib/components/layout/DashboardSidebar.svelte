@@ -90,7 +90,7 @@
 
 	function hasActiveSubmenu(item: MenuItem): boolean {
 		if (!item.submenu) return false;
-		return item.submenu.some(submenuItem => isActiveRoute(submenuItem.href));
+		return item.submenu.some((submenuItem) => isActiveRoute(submenuItem.href));
 	}
 
 	const handleSignOut = async () => {
@@ -131,7 +131,10 @@
 			{#each visibleMenuItems as item (item.href)}
 				<li>
 					{#if item.submenu}
-						<a href={item.href} class="{isActiveRoute(item.href) || hasActiveSubmenu(item) ? 'active' : ''}">
+						<a
+							href={item.href}
+							class={isActiveRoute(item.href) || hasActiveSubmenu(item) ? 'active' : ''}
+						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
@@ -149,7 +152,7 @@
 								<li>
 									<a
 										href={submenuItem.href}
-										class="{isActiveRoute(submenuItem.href) ? 'active' : ''}"
+										class={isActiveRoute(submenuItem.href) ? 'active' : ''}
 									>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
@@ -167,10 +170,7 @@
 							{/each}
 						</ul>
 					{:else}
-						<a
-							href={item.href}
-							class="{isActiveRoute(item.href) ? 'active' : ''}"
-						>
+						<a href={item.href} class={isActiveRoute(item.href) ? 'active' : ''}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"

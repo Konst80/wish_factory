@@ -6,67 +6,79 @@ import { ApiKeyService } from '$lib/server/api-key-service';
 export const GET: RequestHandler = async ({ url, request }) => {
 	try {
 		// API Key Authentication
-		const apiKey = request.headers.get('X-API-Key') || request.headers.get('Authorization')?.replace('Bearer ', '');
-		
+		const apiKey =
+			request.headers.get('X-API-Key') ||
+			request.headers.get('Authorization')?.replace('Bearer ', '');
+
 		if (!apiKey) {
-			return json({
-				error: {
-					code: 'MISSING_API_KEY',
-					message: 'API key is required. Please provide it via X-API-Key header or Authorization header.',
-					timestamp: new Date().toISOString()
+			return json(
+				{
+					error: {
+						code: 'MISSING_API_KEY',
+						message:
+							'API key is required. Please provide it via X-API-Key header or Authorization header.',
+						timestamp: new Date().toISOString()
+					}
+				},
+				{
+					status: 401,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Content-Type': 'application/json'
+					}
 				}
-			}, { 
-				status: 401,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Content-Type': 'application/json'
-				}
-			});
+			);
 		}
 
 		// Validate API key
 		const validation = await ApiKeyService.validateApiKey(apiKey, '/api/public/wishes');
-		
+
 		if (!validation.isValid) {
-			return json({
-				error: {
-					code: 'INVALID_API_KEY',
-					message: validation.error || 'Invalid API key',
-					timestamp: new Date().toISOString()
+			return json(
+				{
+					error: {
+						code: 'INVALID_API_KEY',
+						message: validation.error || 'Invalid API key',
+						timestamp: new Date().toISOString()
+					}
+				},
+				{
+					status: 401,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Content-Type': 'application/json'
+					}
 				}
-			}, { 
-				status: 401,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Content-Type': 'application/json'
-				}
-			});
+			);
 		}
 
 		// Check rate limiting
 		const rateLimit = await ApiKeyService.checkRateLimit(validation.apiKey!);
 		if (!rateLimit.allowed) {
-			return json({
-				error: {
-					code: 'RATE_LIMIT_EXCEEDED',
-					message: 'Rate limit exceeded. Please try again later.',
-					rateLimitReset: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-					timestamp: new Date().toISOString()
+			return json(
+				{
+					error: {
+						code: 'RATE_LIMIT_EXCEEDED',
+						message: 'Rate limit exceeded. Please try again later.',
+						rateLimitReset: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+						timestamp: new Date().toISOString()
+					}
+				},
+				{
+					status: 429,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Content-Type': 'application/json',
+						'X-RateLimit-Limit': validation.apiKey!.rateLimitPerHour.toString(),
+						'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+						'X-RateLimit-Reset': new Date(Date.now() + 60 * 60 * 1000).toISOString()
+					}
 				}
-			}, { 
-				status: 429,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Content-Type': 'application/json',
-					'X-RateLimit-Limit': validation.apiKey!.rateLimitPerHour.toString(),
-					'X-RateLimit-Remaining': rateLimit.remaining.toString(),
-					'X-RateLimit-Reset': new Date(Date.now() + 60 * 60 * 1000).toISOString()
-				}
-			});
+			);
 		}
-		
+
 		const searchParams = url.searchParams;
-		
+
 		// Parse query parameters
 		const options = {
 			language: searchParams.get('language') || undefined,
@@ -76,7 +88,12 @@ export const GET: RequestHandler = async ({ url, request }) => {
 			belated: searchParams.get('belated') ? searchParams.get('belated') === 'true' : undefined,
 			relations: searchParams.get('relations')?.split(',').filter(Boolean) || undefined,
 			ageGroups: searchParams.get('ageGroups')?.split(',').filter(Boolean) || undefined,
-			specificValues: searchParams.get('specificValues')?.split(',').map(Number).filter(n => !isNaN(n)) || undefined,
+			specificValues:
+				searchParams
+					.get('specificValues')
+					?.split(',')
+					.map(Number)
+					.filter((n) => !isNaN(n)) || undefined,
 			limit: Math.min(parseInt(searchParams.get('limit') || '100'), 500),
 			offset: parseInt(searchParams.get('offset') || '0'),
 			since: searchParams.get('since') ? new Date(searchParams.get('since')!) : undefined
@@ -84,10 +101,10 @@ export const GET: RequestHandler = async ({ url, request }) => {
 
 		// Get released wishes
 		const result = await releasedWishesService.getReleasedWishes(options);
-		
+
 		// Format response for API
 		const apiResponse = {
-			wishes: result.wishes.map(wish => ({
+			wishes: result.wishes.map((wish) => ({
 				id: wish.id,
 				originalWishId: wish.originalWishId,
 				type: wish.type,
@@ -106,7 +123,7 @@ export const GET: RequestHandler = async ({ url, request }) => {
 			offset: options.offset,
 			hasMore: result.hasMore
 		};
-		
+
 		// Set CORS headers for public API
 		const headers = {
 			'Access-Control-Allow-Origin': '*',
@@ -119,12 +136,11 @@ export const GET: RequestHandler = async ({ url, request }) => {
 			'X-RateLimit-Reset': new Date(Date.now() + 60 * 60 * 1000).toISOString(),
 			'X-API-Key-Name': validation.apiKey!.name
 		};
-		
+
 		return json(apiResponse, { headers });
-		
 	} catch (error) {
 		console.error('Public API error:', error);
-		
+
 		const errorResponse = {
 			error: {
 				code: 'INTERNAL_ERROR',
@@ -132,8 +148,8 @@ export const GET: RequestHandler = async ({ url, request }) => {
 				timestamp: new Date().toISOString()
 			}
 		};
-		
-		return json(errorResponse, { 
+
+		return json(errorResponse, {
 			status: 500,
 			headers: {
 				'Access-Control-Allow-Origin': '*',
@@ -149,7 +165,7 @@ export const OPTIONS: RequestHandler = async () => {
 		headers: {
 			'Access-Control-Allow-Origin': '*',
 			'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-			'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization',
+			'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization'
 		}
 	});
 };

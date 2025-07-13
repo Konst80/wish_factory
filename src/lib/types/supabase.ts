@@ -59,11 +59,11 @@ export type Database = {
 				};
 				Relationships: [
 					{
-						foreignKeyName: "api_keys_created_by_fkey";
-						columns: ["created_by"];
+						foreignKeyName: 'api_keys_created_by_fkey';
+						columns: ['created_by'];
 						isOneToOne: false;
-						referencedRelation: "users";
-						referencedColumns: ["id"];
+						referencedRelation: 'users';
+						referencedColumns: ['id'];
 					}
 				];
 			};
@@ -118,18 +118,18 @@ export type Database = {
 				};
 				Relationships: [
 					{
-						foreignKeyName: "released_wishes_original_wish_id_fkey";
-						columns: ["original_wish_id"];
+						foreignKeyName: 'released_wishes_original_wish_id_fkey';
+						columns: ['original_wish_id'];
 						isOneToOne: false;
-						referencedRelation: "wishes";
-						referencedColumns: ["id"];
+						referencedRelation: 'wishes';
+						referencedColumns: ['id'];
 					},
 					{
-						foreignKeyName: "released_wishes_released_by_fkey";
-						columns: ["released_by"];
+						foreignKeyName: 'released_wishes_released_by_fkey';
+						columns: ['released_by'];
 						isOneToOne: false;
-						referencedRelation: "users";
-						referencedColumns: ["id"];
+						referencedRelation: 'users';
+						referencedColumns: ['id'];
 					}
 				];
 			};

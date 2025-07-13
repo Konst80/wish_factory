@@ -5,10 +5,10 @@ import { releasedWishesService } from '$lib/server/released-wishes-service';
 export const GET: RequestHandler = async ({ params }) => {
 	try {
 		const { id } = params;
-		
+
 		// Get released wish by ID
 		const wish = await releasedWishesService.getReleasedWish(id);
-		
+
 		if (!wish) {
 			const errorResponse = {
 				error: {
@@ -17,8 +17,8 @@ export const GET: RequestHandler = async ({ params }) => {
 					timestamp: new Date().toISOString()
 				}
 			};
-			
-			return json(errorResponse, { 
+
+			return json(errorResponse, {
 				status: 404,
 				headers: {
 					'Access-Control-Allow-Origin': '*',
@@ -26,7 +26,7 @@ export const GET: RequestHandler = async ({ params }) => {
 				}
 			});
 		}
-		
+
 		// Format response for API
 		const apiResponse = {
 			id: wish.id,
@@ -42,7 +42,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			length: wish.length,
 			releasedAt: wish.releasedAt.toISOString()
 		};
-		
+
 		// Set CORS headers for public API
 		const headers = {
 			'Access-Control-Allow-Origin': '*',
@@ -51,12 +51,11 @@ export const GET: RequestHandler = async ({ params }) => {
 			'Cache-Control': 'public, max-age=300', // 5 minutes cache
 			'Content-Type': 'application/json'
 		};
-		
+
 		return json(apiResponse, { headers });
-		
 	} catch (error) {
 		console.error('Public API error:', error);
-		
+
 		const errorResponse = {
 			error: {
 				code: 'INTERNAL_ERROR',
@@ -64,8 +63,8 @@ export const GET: RequestHandler = async ({ params }) => {
 				timestamp: new Date().toISOString()
 			}
 		};
-		
-		return json(errorResponse, { 
+
+		return json(errorResponse, {
 			status: 500,
 			headers: {
 				'Access-Control-Allow-Origin': '*',
@@ -81,7 +80,7 @@ export const OPTIONS: RequestHandler = async () => {
 		headers: {
 			'Access-Control-Allow-Origin': '*',
 			'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-			'Access-Control-Allow-Headers': 'Content-Type',
+			'Access-Control-Allow-Headers': 'Content-Type'
 		}
 	});
 };

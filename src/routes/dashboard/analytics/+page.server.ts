@@ -67,7 +67,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		// Get wishes by status for distribution
 		const { data: allWishes } = await locals.supabase
 			.from('wishes')
-			.select('status, event_type, language, created_at, created_by, type, relations, age_groups, belated');
+			.select(
+				'status, event_type, language, created_at, created_by, type, relations, age_groups, belated'
+			);
 
 		if (!allWishes) {
 			throw new Error('Fehler beim Laden der Wunsch-Daten');
@@ -128,9 +130,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		// Calculate type/style distribution
 		const typeCounts = allWishes.reduce(
 			(acc, wish) => {
-				const type = wish.type === 'normal' ? 'Normal' : 
-							 wish.type === 'herzlich' ? 'Herzlich' : 
-							 wish.type === 'humorvoll' ? 'Humorvoll' : 'Normal';
+				const type =
+					wish.type === 'normal'
+						? 'Normal'
+						: wish.type === 'herzlich'
+							? 'Herzlich'
+							: wish.type === 'humorvoll'
+								? 'Humorvoll'
+								: 'Normal';
 				acc[type] = (acc[type] || 0) + 1;
 				return acc;
 			},
@@ -147,11 +154,17 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const relationsCounts = allWishes.reduce(
 			(acc, wish) => {
 				if (wish.relations && Array.isArray(wish.relations)) {
-					wish.relations.forEach(relation => {
-						const relationLabel = relation === 'friend' ? 'Freund/in' :
-											  relation === 'family' ? 'Familie' :
-											  relation === 'partner' ? 'Partner/in' :
-											  relation === 'colleague' ? 'Kollege/in' : relation;
+					wish.relations.forEach((relation) => {
+						const relationLabel =
+							relation === 'friend'
+								? 'Freund/in'
+								: relation === 'family'
+									? 'Familie'
+									: relation === 'partner'
+										? 'Partner/in'
+										: relation === 'colleague'
+											? 'Kollege/in'
+											: relation;
 						acc[relationLabel] = (acc[relationLabel] || 0) + 1;
 					});
 				}
@@ -163,18 +176,26 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const relationsDistribution = Object.entries(relationsCounts).map(([relation, count]) => ({
 			relation,
 			count,
-			percentage: Math.round((count / Object.values(relationsCounts).reduce((a, b) => a + b, 0)) * 100 * 10) / 10
+			percentage:
+				Math.round((count / Object.values(relationsCounts).reduce((a, b) => a + b, 0)) * 100 * 10) /
+				10
 		}));
 
 		// Calculate age groups distribution (flatten arrays)
 		const ageGroupsCounts = allWishes.reduce(
 			(acc, wish) => {
 				if (wish.age_groups && Array.isArray(wish.age_groups)) {
-					wish.age_groups.forEach(ageGroup => {
-						const ageGroupLabel = ageGroup === 'young' ? 'Junge Menschen' :
-											   ageGroup === 'middle' ? 'Mittleres Alter' :
-											   ageGroup === 'senior' ? 'Senioren' :
-											   ageGroup === 'all' ? 'Alle Altersgruppen' : ageGroup;
+					wish.age_groups.forEach((ageGroup) => {
+						const ageGroupLabel =
+							ageGroup === 'young'
+								? 'Junge Menschen'
+								: ageGroup === 'middle'
+									? 'Mittleres Alter'
+									: ageGroup === 'senior'
+										? 'Senioren'
+										: ageGroup === 'all'
+											? 'Alle Altersgruppen'
+											: ageGroup;
 						acc[ageGroupLabel] = (acc[ageGroupLabel] || 0) + 1;
 					});
 				}
@@ -186,13 +207,19 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const ageGroupsDistribution = Object.entries(ageGroupsCounts).map(([ageGroup, count]) => ({
 			ageGroup,
 			count,
-			percentage: Math.round((count / Object.values(ageGroupsCounts).reduce((a, b) => a + b, 0)) * 100 * 10) / 10
+			percentage:
+				Math.round((count / Object.values(ageGroupsCounts).reduce((a, b) => a + b, 0)) * 100 * 10) /
+				10
 		}));
 
 		// Calculate belated distribution
 		const belatedCounts = allWishes.reduce(
 			(acc, wish) => {
-				const belatedLabel = (typeof wish.belated === 'boolean' ? wish.belated : wish.belated === 'true') ? 'Nachträglich' : 'Normal';
+				const belatedLabel = (
+					typeof wish.belated === 'boolean' ? wish.belated : wish.belated === 'true'
+				)
+					? 'Nachträglich'
+					: 'Normal';
 				acc[belatedLabel] = (acc[belatedLabel] || 0) + 1;
 				return acc;
 			},
@@ -207,21 +234,21 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 		// Get wishes over time (daily for 7/30 days, monthly for longer periods)
 		const wishesOverTime = [];
-		
+
 		if (timeRange === 'last-7-days' || timeRange === 'last-30-days') {
 			// Daily grouping for shorter periods
 			const days = timeRange === 'last-7-days' ? 7 : 15;
-			
+
 			for (let i = days - 1; i >= 0; i--) {
 				const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
 				const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i + 1);
-				
+
 				const dayWishes = allWishes.filter((wish) => {
 					if (!wish.created_at) return false;
 					const wishDate = new Date(wish.created_at);
 					return wishDate >= dayStart && wishDate < dayEnd;
 				});
-				
+
 				wishesOverTime.push({
 					month: `${dayStart.getDate()}.${dayStart.getMonth() + 1}`,
 					count: dayWishes.length
@@ -230,25 +257,35 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		} else {
 			// Monthly grouping for longer periods
 			const monthNames = [
-				'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
-				'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
+				'Jan',
+				'Feb',
+				'Mär',
+				'Apr',
+				'Mai',
+				'Jun',
+				'Jul',
+				'Aug',
+				'Sep',
+				'Okt',
+				'Nov',
+				'Dez'
 			];
-			
+
 			const months = Math.min(
 				12,
 				Math.ceil((now.getTime() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000))
 			);
-			
+
 			for (let i = months - 1; i >= 0; i--) {
 				const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
 				const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
-				
+
 				const monthWishes = allWishes.filter((wish) => {
 					if (!wish.created_at) return false;
 					const wishDate = new Date(wish.created_at);
 					return wishDate >= monthStart && wishDate <= monthEnd;
 				});
-				
+
 				wishesOverTime.push({
 					month: monthNames[monthStart.getMonth()],
 					count: monthWishes.length

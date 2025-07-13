@@ -71,12 +71,15 @@ export const actions: Actions = {
 				return fail(400, { error: 'Name is required' });
 			}
 
-			const result = await ApiKeyService.createApiKey({
-				name: name.trim(),
-				description: description?.trim() || undefined,
-				rateLimitPerHour,
-				expiresAt: expiresAt ? new Date(expiresAt) : undefined
-			}, profile.id);
+			const result = await ApiKeyService.createApiKey(
+				{
+					name: name.trim(),
+					description: description?.trim() || undefined,
+					rateLimitPerHour,
+					expiresAt: expiresAt ? new Date(expiresAt) : undefined
+				},
+				profile.id
+			);
 
 			if ('error' in result) {
 				return fail(500, { error: result.error });

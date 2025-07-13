@@ -283,23 +283,47 @@
 	<div class="modal modal-open">
 		<div class="modal-box w-11/12 max-w-3xl">
 			<!-- Modal Header -->
-			<div class="flex items-center justify-between border-b border-base-200 pb-4 mb-6">
+			<div class="border-base-200 mb-6 flex items-center justify-between border-b pb-4">
 				<div class="flex items-center gap-3">
 					<div class="avatar placeholder">
 						<div class="bg-primary text-primary-content w-12 rounded-xl">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z" />
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-6 w-6"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z"
+								/>
 							</svg>
 						</div>
 					</div>
 					<div>
 						<h3 class="text-xl font-bold">Neuen API Key erstellen</h3>
-						<p class="text-base-content/70 text-sm">Erstellen Sie einen sicheren Zugangsschlüssel für Ihre Anwendung</p>
+						<p class="text-base-content/70 text-sm">
+							Erstellen Sie einen sicheren Zugangsschlüssel für Ihre Anwendung
+						</p>
 					</div>
 				</div>
 				<button class="btn btn-sm btn-circle btn-ghost" onclick={closeCreateModal}>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
 					</svg>
 				</button>
 			</div>
@@ -317,15 +341,26 @@
 			>
 				<div class="grid gap-6">
 					<!-- Basic Information -->
-					<div class="card bg-base-50 border border-base-200">
+					<div class="card bg-base-50 border-base-200 border">
 						<div class="card-body p-4">
-							<h4 class="card-title text-base mb-3 flex items-center gap-2">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+							<h4 class="card-title mb-3 flex items-center gap-2 text-base">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
 								</svg>
 								Grundinformationen
 							</h4>
-							
+
 							<div class="grid gap-4">
 								<div class="form-control">
 									<label class="label" for="name">
@@ -361,16 +396,27 @@
 					</div>
 
 					<!-- Security Settings -->
-					<div class="card bg-base-50 border border-base-200">
+					<div class="card bg-base-50 border-base-200 border">
 						<div class="card-body p-4">
-							<h4 class="card-title text-base mb-3 flex items-center gap-2">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+							<h4 class="card-title mb-3 flex items-center gap-2 text-base">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+									/>
 								</svg>
 								Sicherheitseinstellungen
 							</h4>
-							
-							<div class="grid md:grid-cols-2 gap-4">
+
+							<div class="grid gap-4 md:grid-cols-2">
 								<div class="form-control">
 									<label class="label" for="rateLimitPerHour">
 										<span class="label-text font-medium">Rate Limit (pro Stunde)</span>
@@ -383,12 +429,14 @@
 											bind:value={createForm.rateLimitPerHour}
 											min="1"
 											max="10000"
-											class="input input-bordered join-item flex-1 focus:input-primary"
+											class="input input-bordered join-item focus:input-primary flex-1"
 										/>
 										<span class="btn btn-outline join-item">Req/h</span>
 									</div>
 									<label class="label">
-										<span class="label-text-alt text-info">💡 Standard: 1000 Anfragen pro Stunde</span>
+										<span class="label-text-alt text-info"
+											>💡 Standard: 1000 Anfragen pro Stunde</span
+										>
 									</label>
 								</div>
 
@@ -404,7 +452,9 @@
 										class="input input-bordered focus:input-primary"
 									/>
 									<label class="label">
-										<span class="label-text-alt text-info">⏰ Leer lassen für unbegrenzten API Key</span>
+										<span class="label-text-alt text-info"
+											>⏰ Leer lassen für unbegrenzten API Key</span
+										>
 									</label>
 								</div>
 							</div>
@@ -413,20 +463,42 @@
 
 					<!-- Info Banner -->
 					<div class="alert alert-info">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-5 w-5"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
 						</svg>
 						<div class="text-sm">
-							<strong>Hinweis:</strong> Der API Key wird nur einmal angezeigt und kann nicht wiederhergestellt werden. 
-							Speichern Sie ihn an einem sicheren Ort.
+							<strong>Hinweis:</strong> Der API Key wird nur einmal angezeigt und kann nicht wiederhergestellt
+							werden. Speichern Sie ihn an einem sicheren Ort.
 						</div>
 					</div>
 				</div>
 
-				<div class="modal-action pt-6 border-t border-base-200 mt-6">
+				<div class="modal-action border-base-200 mt-6 border-t pt-6">
 					<button type="button" class="btn btn-ghost" onclick={closeCreateModal}>
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="mr-2 h-4 w-4"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 						Abbrechen
 					</button>
@@ -435,8 +507,19 @@
 							<span class="loading loading-spinner loading-sm"></span>
 							Erstelle...
 						{:else}
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z" />
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="mr-2 h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z"
+								/>
 							</svg>
 							API Key erstellen
 						{/if}

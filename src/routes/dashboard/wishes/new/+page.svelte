@@ -1,6 +1,14 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { WishType, EventType, WishStatus, Language, Relation, AgeGroup, WishLength } from '$lib/types/Wish';
+	import {
+		WishType,
+		EventType,
+		WishStatus,
+		Language,
+		Relation,
+		AgeGroup,
+		WishLength
+	} from '$lib/types/Wish';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
 
 	// Erweiterte ActionData Type Definition
@@ -1063,11 +1071,12 @@
 									</svg>
 									Altersgruppe *
 								</span>
-								<span class="label-text-alt badge badge-neutral badge-sm">Mehrere Auswahl möglich</span
+								<span class="label-text-alt badge badge-neutral badge-sm"
+									>Mehrere Auswahl möglich</span
 								>
 							</label>
 							<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
-								{#each Object.values(AgeGroup).filter(ag => ag !== 'all') as ageGroup (ageGroup)}
+								{#each Object.values(AgeGroup).filter((ag) => ag !== 'all') as ageGroup (ageGroup)}
 									<label
 										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {formData.ageGroups.includes(
 											ageGroup

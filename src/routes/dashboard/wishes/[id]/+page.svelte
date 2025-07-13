@@ -151,7 +151,7 @@
 				</svg>
 				Hilfe
 			</button>
-			
+
 			<!-- Status Workflow Buttons -->
 			{#each getAvailableStatusTransitions() as transition}
 				<form
@@ -317,7 +317,7 @@
 				</h3>
 				<div class="divider my-2"></div>
 				<div class="bg-base-200 rounded-lg p-4">
-					<p class="font-medium text-lg leading-relaxed whitespace-pre-wrap">
+					<p class="text-lg leading-relaxed font-medium whitespace-pre-wrap">
 						{data.wish.text}
 					</p>
 				</div>

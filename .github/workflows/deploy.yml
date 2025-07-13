@@ -38,7 +38,7 @@ jobs:
           cp .env.development .env
           echo "Using Development Supabase (current instance)"
 
-      - name: Setup Production Environment  
+      - name: Setup Production Environment
         if: github.ref == 'refs/heads/main'
         run: |
           cp .env.production .env

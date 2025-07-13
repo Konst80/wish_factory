@@ -1550,7 +1550,8 @@
 																			onclick={() =>
 																				insertPlaceholder('promptTemplate', '{languageTexts}')}
 																		>
-																			<code class="text-primary font-bold">{`{languageTexts}`}</code>
+																			<code class="text-primary font-bold">{`{languageTexts}`}</code
+																			>
 																			<span class="ml-2 text-xs opacity-70">Sprache</span>
 																		</button>
 																	</div>
@@ -1575,7 +1576,8 @@
 																		<button
 																			type="button"
 																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
-																			onclick={() => insertPlaceholder('promptTemplate', '{typeTexts}')}
+																			onclick={() =>
+																				insertPlaceholder('promptTemplate', '{typeTexts}')}
 																		>
 																			<code class="text-primary font-bold">{`{typeTexts}`}</code>
 																			<span class="ml-2 text-xs opacity-70">Typ/Stil</span>
@@ -2205,7 +2207,8 @@
 																			onclick={() =>
 																				insertPlaceholder('promptBatch', '{eventTypesRaw}')}
 																		>
-																			<code class="text-primary font-bold">{'{eventTypesRaw}'}</code>
+																			<code class="text-primary font-bold">{'{eventTypesRaw}'}</code
+																			>
 																			<span class="ml-2 text-xs opacity-70">Anlässe (Raw)</span>
 																		</button>
 																	</div>
@@ -2244,8 +2247,7 @@
 																		<button
 																			type="button"
 																			class="btn btn-ghost btn-sm hover:bg-primary hover:text-primary-content w-full justify-start font-mono"
-																			onclick={() =>
-																				insertPlaceholder('promptBatch', '{length}')}
+																			onclick={() => insertPlaceholder('promptBatch', '{length}')}
 																		>
 																			<code class="text-primary font-bold">{'{length}'}</code>
 																			<span class="ml-2 text-xs opacity-70">Länge</span>

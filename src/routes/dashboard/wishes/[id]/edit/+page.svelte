@@ -544,7 +544,9 @@
 									</svg>
 									Beziehung *
 								</span>
-								<span class="label-text-alt badge badge-neutral badge-sm">Mehrere Auswahl möglich</span>
+								<span class="label-text-alt badge badge-neutral badge-sm"
+									>Mehrere Auswahl möglich</span
+								>
 							</label>
 							<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
 								{#each Object.values(Relation) as relation (relation)}
@@ -589,10 +591,12 @@
 									</svg>
 									Altersgruppe *
 								</span>
-								<span class="label-text-alt badge badge-neutral badge-sm">Mehrere Auswahl möglich</span>
+								<span class="label-text-alt badge badge-neutral badge-sm"
+									>Mehrere Auswahl möglich</span
+								>
 							</label>
 							<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
-								{#each Object.values(AgeGroup).filter(ag => ag !== 'all') as ageGroup (ageGroup)}
+								{#each Object.values(AgeGroup).filter((ag) => ag !== 'all') as ageGroup (ageGroup)}
 									<label
 										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {formData.ageGroups.includes(
 											ageGroup
@@ -995,8 +999,19 @@
 							{#if formData.belated}
 								<div class="mt-3 flex items-center gap-2">
 									<div class="badge badge-warning gap-2">
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-3 w-3"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
 										</svg>
 										Nachträglicher Wunsch
 									</div>

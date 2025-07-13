@@ -14,6 +14,7 @@ supabase --version
 ```
 
 **Falls erneute Installation benötigt:**
+
 ```bash
 brew install supabase/tap/supabase
 ```
@@ -35,7 +36,7 @@ brew install supabase/tap/supabase
 # Login zu Development Account
 ./scripts/supabase-setup.sh login-dev
 
-# Login zu Production Account  
+# Login zu Production Account
 ./scripts/supabase-setup.sh login-prod
 
 # Alle verfügbaren Projekte auflisten
@@ -53,7 +54,7 @@ Development Environment:
 ├── URL: https://kgowrcgwzqfeiqitavdc.supabase.co
 └── Status: ✅ Konfiguriert
 
-Production Environment:  
+Production Environment:
 ├── Project ID: [Noch zu erstellen]
 ├── URL: [Wird nach Account-Erstellung verfügbar]
 └── Status: ❌ Pending
@@ -103,11 +104,13 @@ supabase stop
 ### 1. Account Setup (einmalig)
 
 **Schritt 1: Neuen Supabase Account erstellen**
+
 1. Neue E-Mail verwenden (z.B. `konstantin+prod@example.com`)
 2. Bei [supabase.com](https://supabase.com) registrieren
 3. Neues Projekt erstellen: `wish-factory-production`
 
 **Schritt 2: Script konfigurieren**
+
 ```bash
 # scripts/supabase-setup.sh editieren
 # Zeile 21 ändern:
@@ -115,6 +118,7 @@ PROD_PROJECT_ID="your_new_prod_project_id"
 ```
 
 **Schritt 3: Production Setup**
+
 ```bash
 ./scripts/supabase-setup.sh login-prod
 ./scripts/supabase-setup.sh setup-prod
@@ -239,6 +243,7 @@ supabase auth logout
 ### CI/CD Integration
 
 **GitHub Actions Beispiel:**
+
 ```yaml
 - name: Setup Supabase CLI
   run: |
@@ -259,7 +264,7 @@ supabase auth logout
 ./scripts/supabase-setup.sh login-dev
 supabase db dump --linked > temp_schema.sql
 
-./scripts/supabase-setup.sh login-prod  
+./scripts/supabase-setup.sh login-prod
 supabase link --project-ref $PROD_PROJECT_ID
 supabase db push --file temp_schema.sql
 ```
@@ -269,6 +274,7 @@ supabase db push --file temp_schema.sql
 ### Häufige Probleme
 
 **1. Docker Daemon nicht verfügbar**
+
 ```bash
 # Problem: "Cannot connect to Docker daemon"
 # Lösung: Docker Desktop starten oder ohne lokale Instanz arbeiten
@@ -276,6 +282,7 @@ supabase status --remote
 ```
 
 **2. Authentifizierung fehlgeschlagen**
+
 ```bash
 # Problem: "Invalid access token"
 # Lösung: Erneut einloggen
@@ -284,6 +291,7 @@ supabase auth logout
 ```
 
 **3. Projekt nicht gefunden**
+
 ```bash
 # Problem: "Project not found"
 # Lösung: Korrekte Project-ID prüfen
@@ -292,6 +300,7 @@ supabase link --project-ref CORRECT_PROJECT_ID
 ```
 
 **4. Schema-Konflikte**
+
 ```bash
 # Problem: Migration conflicts
 # Lösung: Reset und clean migration
@@ -310,18 +319,21 @@ supabase --debug db push
 ## Best Practices
 
 ### Development
+
 - ✅ Immer zuerst lokal testen mit `supabase start`
 - ✅ Migrations vor Remote-Push validieren
 - ✅ Regelmäßige Schema-Backups erstellen
 - ✅ Feature-Branches für große DB-Änderungen
 
 ### Production
+
 - ✅ Nie direkt in Production experimentieren
 - ✅ Staging-Umgebung für Pre-Production Tests
 - ✅ Rollback-Plan für kritische Migrations
 - ✅ Monitoring nach Schema-Änderungen
 
 ### Sicherheit
+
 - 🔒 Access Tokens sicher verwalten
 - 🔒 Separate Tokens für Dev/Prod
 - 🔒 Regelmäßige Token-Rotation
@@ -356,18 +368,21 @@ supabase db diff --linked --schema public | supabase db push --linked
 ### Regelmäßige Aufgaben
 
 **Täglich:**
+
 ```bash
 # Projekt-Status prüfen
 ./scripts/supabase-setup.sh status
 ```
 
 **Wöchentlich:**
+
 ```bash
 # Schema-Drift überprüfen
 supabase db diff --linked
 ```
 
 **Monatlich:**
+
 ```bash
 # Backups erstellen
 supabase db dump --linked > backup_$(date +%Y%m%d).sql
@@ -385,7 +400,7 @@ supabase db dump --linked > backup_$(date +%Y%m%d).sql
 ./scripts/supabase-setup.sh login-dev
 supabase db push
 
-# Production  
+# Production
 ./scripts/supabase-setup.sh login-prod
 supabase db push
 

@@ -552,7 +552,7 @@ class OpenRouterAIService {
 		// Length mapping for prompt text
 		const lengthMap: { [key: string]: string } = {
 			short: 'kurz (50-100 Zeichen)',
-			medium: 'mittel (100-200 Zeichen)',  
+			medium: 'mittel (100-200 Zeichen)',
 			long: 'lang (200-400 Zeichen)'
 		};
 		const lengthText = lengthMap[length] || length;
@@ -629,7 +629,7 @@ class OpenRouterAIService {
 		console.log('🔍 Belated Debug:', {
 			belated,
 			hasAiSettings: !!aiSettings,
-			hasPromptBelated: !!(aiSettings?.promptBelated),
+			hasPromptBelated: !!aiSettings?.promptBelated,
 			promptBelatedValue: aiSettings?.promptBelated
 		});
 		if (belated && aiSettings?.promptBelated) {

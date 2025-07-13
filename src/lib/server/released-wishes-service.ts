@@ -73,26 +73,26 @@ export class ReleasedWishesService {
 	/**
 	 * Gets all released wishes with optional filtering
 	 */
-	async getReleasedWishes(options: {
-		language?: string;
-		type?: string;
-		eventType?: string;
-		length?: string;
-		belated?: boolean;
-		relations?: string[];
-		ageGroups?: string[];
-		specificValues?: number[];
-		limit?: number;
-		offset?: number;
-		since?: Date;
-	} = {}): Promise<{
+	async getReleasedWishes(
+		options: {
+			language?: string;
+			type?: string;
+			eventType?: string;
+			length?: string;
+			belated?: boolean;
+			relations?: string[];
+			ageGroups?: string[];
+			specificValues?: number[];
+			limit?: number;
+			offset?: number;
+			since?: Date;
+		} = {}
+	): Promise<{
 		wishes: ReleasedWish[];
 		total: number;
 		hasMore: boolean;
 	}> {
-		let query = this.supabase
-			.from('released_wishes')
-			.select('*', { count: 'exact' });
+		let query = this.supabase.from('released_wishes').select('*', { count: 'exact' });
 
 		// Apply filters
 		if (options.language) {
@@ -137,7 +137,7 @@ export class ReleasedWishesService {
 			throw new Error(`Failed to fetch released wishes: ${error.message}`);
 		}
 
-		const wishes: ReleasedWish[] = (data || []).map(row => ({
+		const wishes: ReleasedWish[] = (data || []).map((row) => ({
 			id: row.id,
 			originalWishId: row.original_wish_id,
 			type: row.type as any,
@@ -232,15 +232,15 @@ export class ReleasedWishesService {
 		const lengths = new Set<string>();
 		let lastUpdated = new Date(0);
 
-		(allWishes || []).forEach(wish => {
+		(allWishes || []).forEach((wish) => {
 			types.add(wish.type);
 			eventTypes.add(wish.event_type);
 			languages.add(wish.language);
 			lengths.add(wish.length);
-			
+
 			wish.relations?.forEach((rel: string) => relations.add(rel));
 			wish.age_groups?.forEach((age: string) => ageGroups.add(age));
-			
+
 			const releaseDate = new Date(wish.released_at);
 			if (releaseDate > lastUpdated) {
 				lastUpdated = releaseDate;

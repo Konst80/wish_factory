@@ -46,10 +46,10 @@ export class ApiKeyService {
 		const prefix = crypto.randomBytes(4).toString('hex'); // 8 characters
 		const secret = crypto.randomBytes(16).toString('hex'); // 32 characters
 		const key = `wsk_${prefix}${secret}`;
-		
+
 		// Hash the full key for storage
 		const hash = bcrypt.hashSync(key, 10);
-		
+
 		return {
 			key,
 			prefix: `wsk_${prefix}`,
@@ -100,10 +100,7 @@ export class ApiKeyService {
 	/**
 	 * Validate an API key and check permissions
 	 */
-	static async validateApiKey(
-		apiKey: string,
-		endpoint: string
-	): Promise<ApiKeyValidationResult> {
+	static async validateApiKey(apiKey: string, endpoint: string): Promise<ApiKeyValidationResult> {
 		try {
 			// Extract prefix from key for faster lookup
 			if (!apiKey.startsWith('wsk_') || apiKey.length !== 48) {
