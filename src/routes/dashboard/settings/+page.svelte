@@ -3,7 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 
-	let { data, form }: { data: PageData; form: import('$app/forms').ActionData } = $props();
+	let { data, form }: { data: PageData; form: import('./$types.js').ActionData } = $props();
 
 	let activeTab = $state('profile');
 	let showSuccessMessage = $state(false);

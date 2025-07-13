@@ -501,7 +501,7 @@
 	<div class="card-body">
 		<h2 class="card-title">Nachträgliche Wünsche</h2>
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-			{#each data.belatedDistribution as belated (belated.type)}
+			{#each data.belatedDistribution as belated (belated.belated)}
 				<div class="flex items-center justify-between rounded-lg border p-4">
 					<div class="flex items-center gap-3">
 						<div class="h-6 w-6 rounded {belatedColors[belated.belated]}"></div>

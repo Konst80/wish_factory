@@ -245,19 +245,19 @@ export class ApiKeyService {
 	 */
 	private static mapDbToApiKey(data: Record<string, unknown>): ApiKey {
 		return {
-			id: data.id,
-			name: data.name,
-			keyPrefix: data.key_prefix,
-			description: data.description,
-			isActive: data.is_active,
-			rateLimitPerHour: data.rate_limit_per_hour,
-			allowedEndpoints: data.allowed_endpoints || [],
-			lastUsedAt: data.last_used_at ? new Date(data.last_used_at) : undefined,
-			totalRequests: data.total_requests || 0,
-			createdBy: data.created_by,
-			createdAt: new Date(data.created_at),
-			updatedAt: new Date(data.updated_at),
-			expiresAt: data.expires_at ? new Date(data.expires_at) : undefined
+			id: data.id as string,
+			name: data.name as string,
+			keyPrefix: data.key_prefix as string,
+			description: data.description as string | undefined,
+			isActive: data.is_active as boolean,
+			rateLimitPerHour: data.rate_limit_per_hour as number,
+			allowedEndpoints: (data.allowed_endpoints as string[]) || [],
+			lastUsedAt: data.last_used_at ? new Date(data.last_used_at as string) : undefined,
+			totalRequests: (data.total_requests as number) || 0,
+			createdBy: data.created_by as string | undefined,
+			createdAt: new Date(data.created_at as string),
+			updatedAt: new Date(data.updated_at as string),
+			expiresAt: data.expires_at ? new Date(data.expires_at as string) : undefined
 		};
 	}
 }
