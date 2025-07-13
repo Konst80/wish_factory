@@ -20,14 +20,15 @@
 	let selectedEventType = $state('');
 	let selectedLength = $state('');
 	let selectedBelated = $state('');
-	
+
 	// Initialize filter values from URL params
 	$effect(() => {
 		if (filters.language && !selectedLanguage) selectedLanguage = filters.language;
 		if (filters.type && !selectedType) selectedType = filters.type;
 		if (filters.eventType && !selectedEventType) selectedEventType = filters.eventType;
 		if (filters.length && !selectedLength) selectedLength = filters.length;
-		if (filters.belated !== undefined && !selectedBelated) selectedBelated = filters.belated.toString();
+		if (filters.belated !== undefined && !selectedBelated)
+			selectedBelated = filters.belated.toString();
 	});
 
 	// UI State

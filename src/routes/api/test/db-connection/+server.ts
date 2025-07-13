@@ -5,20 +5,20 @@ import { createSupabaseAdminClient } from '$lib/server/supabase-admin';
 export const GET: RequestHandler = async () => {
 	try {
 		const supabase = createSupabaseAdminClient();
-		
+
 		// Simple test query to check connection
-		const { error } = await supabase
-			.from('api_keys')
-			.select('count(*)')
-			.limit(1);
+		const { error } = await supabase.from('api_keys').select('count(*)').limit(1);
 
 		if (error) {
-			return json({
-				status: 'error',
-				message: 'Database connection failed',
-				error: error.message,
-				timestamp: new Date().toISOString()
-			}, { status: 500 });
+			return json(
+				{
+					status: 'error',
+					message: 'Database connection failed',
+					error: error.message,
+					timestamp: new Date().toISOString()
+				},
+				{ status: 500 }
+			);
 		}
 
 		return json({
@@ -32,11 +32,14 @@ export const GET: RequestHandler = async () => {
 			}
 		});
 	} catch (error) {
-		return json({
-			status: 'error',
-			message: 'Connection test failed',
-			error: error instanceof Error ? error.message : 'Unknown error',
-			timestamp: new Date().toISOString()
-		}, { status: 500 });
+		return json(
+			{
+				status: 'error',
+				message: 'Connection test failed',
+				error: error instanceof Error ? error.message : 'Unknown error',
+				timestamp: new Date().toISOString()
+			},
+			{ status: 500 }
+		);
 	}
 };

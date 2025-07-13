@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { supabase } from '$lib/supabase';
 	import { browser } from '$app/environment';
 
@@ -24,10 +23,10 @@
 			if (supabase) {
 				await supabase.auth.signOut({ scope: 'global' });
 			}
-			
+
 			logoutStatus = 'Weiterleitung...';
 			clearTimeout(forceRedirectTimer);
-			
+
 			// Force a complete page reload to clear all state
 			window.location.href = '/auth/login';
 		} catch (error) {
@@ -44,15 +43,15 @@
 			// Clear all possible storage locations
 			localStorage.clear();
 			sessionStorage.clear();
-			
+
 			// Clear specific Supabase keys if they exist
 			const keysToRemove = [
 				'supabase.auth.token',
 				'sb-' + 'kgowrcgwzqfeiqitavdc' + '-auth-token',
 				'sb-' + 'bnbzkfwowcqnecrdqdas' + '-auth-token'
 			];
-			
-			keysToRemove.forEach(key => {
+
+			keysToRemove.forEach((key) => {
 				localStorage.removeItem(key);
 				sessionStorage.removeItem(key);
 			});
@@ -72,10 +71,10 @@
 			<h1 class="card-title mb-6 text-2xl font-bold">Abmelden</h1>
 			<div class="loading loading-spinner loading-lg"></div>
 			<p class="mt-4">{logoutStatus}</p>
-			
+
 			<!-- Debug info -->
-			<div class="text-xs text-gray-500 mt-2">
-				Falls die Weiterleitung nicht funktioniert: 
+			<div class="mt-2 text-xs text-gray-500">
+				Falls die Weiterleitung nicht funktioniert:
 				<a href="/auth/login" class="link">Hier klicken</a>
 			</div>
 		</div>

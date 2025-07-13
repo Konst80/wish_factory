@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 	} catch (error) {
 		console.error('Server-side logout error:', error);
 	}
-	
+
 	return {};
 };
 

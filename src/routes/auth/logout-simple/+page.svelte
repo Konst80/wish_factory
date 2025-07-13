@@ -11,7 +11,7 @@
 			} catch (e) {
 				console.log('Storage clear failed:', e);
 			}
-			
+
 			// Immediate redirect
 			window.location.href = '/auth/login';
 		}

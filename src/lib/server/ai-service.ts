@@ -1270,7 +1270,11 @@ Generate both a regular text and a belated text for each wish.
 		// Prüfe totalGenerated
 		if (typeof responseObj.totalGenerated !== 'number') {
 			result.warnings.push('totalGenerated fehlt oder ist keine Zahl');
-		} else if (responseObj.wishes && Array.isArray(responseObj.wishes) && responseObj.totalGenerated !== responseObj.wishes.length) {
+		} else if (
+			responseObj.wishes &&
+			Array.isArray(responseObj.wishes) &&
+			responseObj.totalGenerated !== responseObj.wishes.length
+		) {
 			result.warnings.push(
 				`totalGenerated (${responseObj.totalGenerated}) stimmt nicht mit wishes.length (${responseObj.wishes.length}) überein`
 			);

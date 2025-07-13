@@ -1379,7 +1379,7 @@
 										id="model"
 										name="model"
 										class="select select-bordered w-full"
-										value={(data.settings as Record<string, unknown>)?.ai_model as string ||
+										value={((data.settings as Record<string, unknown>)?.ai_model as string) ||
 											'anthropic/claude-sonnet-4'}
 									>
 										<option value="anthropic/claude-sonnet-4"
@@ -1435,7 +1435,8 @@
 											name="promptSystem"
 											class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen..."
-											value={(data.settings as Record<string, unknown>)?.ai_prompt_system as string ||
+											value={((data.settings as Record<string, unknown>)
+												?.ai_prompt_system as string) ||
 												'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'}
 										></textarea>
 									</div>
@@ -1452,7 +1453,8 @@
 											name="promptTemplate"
 											class="textarea textarea-bordered h-96 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen. Generiere &#123;count&#125; &#123;countText&#125; in der Sprache &#123;language&#125;..."
-											value={(data.settings as Record<string, unknown>)?.ai_promptTemplate as string || ''}
+											value={((data.settings as Record<string, unknown>)
+												?.ai_promptTemplate as string) || ''}
 										></textarea>
 										<div
 											class="from-info/5 to-primary/5 border-info/20 mt-4 rounded-lg border bg-gradient-to-br p-4"
@@ -1821,7 +1823,8 @@
 												name="promptAgeYoung"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende modernen, lockeren Ton. Nutze aktuelle Trends und Ausdrücke..."
-												value={(data.settings as Record<string, unknown>)?.ai_promptAgeYoung as string || ''}
+												value={((data.settings as Record<string, unknown>)
+													?.ai_promptAgeYoung as string) || ''}
 											></textarea>
 										</div>
 
@@ -1837,8 +1840,8 @@
 												name="promptAgeMiddle"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende ausgewogenen, respektvollen Ton. Berücksichtige Lebenserfahrung..."
-												value={(data.settings as Record<string, unknown>)?.ai_promptAgeMiddle as string ||
-													''}
+												value={((data.settings as Record<string, unknown>)
+													?.ai_promptAgeMiddle as string) || ''}
 											></textarea>
 										</div>
 
@@ -1854,8 +1857,8 @@
 												name="promptAgeSenior"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende ehrfürchtigen, würdevollen Ton. Betone Weisheit und Erfahrung..."
-												value={(data.settings as Record<string, unknown>)?.ai_promptAgeSenior as string ||
-													''}
+												value={((data.settings as Record<string, unknown>)
+													?.ai_promptAgeSenior as string) || ''}
 											></textarea>
 										</div>
 									</div>
@@ -1946,7 +1949,8 @@
 												name="promptRelationFriend"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende freundlichen, vertrauten Ton. Nutze persönliche Ansprache..."
-												value={(data.settings as Record<string, unknown>)?.ai_prompt_relation_friend as string || ''}
+												value={((data.settings as Record<string, unknown>)
+													?.ai_prompt_relation_friend as string) || ''}
 											></textarea>
 										</div>
 
@@ -1962,7 +1966,8 @@
 												name="promptRelationFamily"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende herzlichen, familiären Ton. Betone Verbundenheit..."
-												value={(data.settings as Record<string, unknown>)?.ai_prompt_relation_family as string || ''}
+												value={((data.settings as Record<string, unknown>)
+													?.ai_prompt_relation_family as string) || ''}
 											></textarea>
 										</div>
 
@@ -1978,7 +1983,8 @@
 												name="promptRelationPartner"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende liebevollen, romantischen Ton. Nutze intime Sprache..."
-												value={(data.settings as Record<string, unknown>)?.ai_prompt_relation_partner as string || ''}
+												value={((data.settings as Record<string, unknown>)
+													?.ai_prompt_relation_partner as string) || ''}
 											></textarea>
 										</div>
 
@@ -1994,7 +2000,8 @@
 												name="promptRelationColleague"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende professionellen, respektvollen Ton. Achte auf Förmlichkeit..."
-												value={(data.settings as Record<string, unknown>)?.ai_prompt_relation_colleague as string || ''}
+												value={((data.settings as Record<string, unknown>)
+													?.ai_prompt_relation_colleague as string) || ''}
 											></textarea>
 										</div>
 									</div>
@@ -2084,7 +2091,8 @@
 												name="promptBatch"
 												class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 												placeholder="z.B. Generiere {'{count}'} ausgewogene Wünsche: 70% Geburtstag, 20% Jubiläum, 10% Sonstiges. Achte auf Vielfalt in Stil und Tonalität..."
-												value={(data.settings as Record<string, unknown>)?.ai_promptBatch as string || ''}
+												value={((data.settings as Record<string, unknown>)
+													?.ai_promptBatch as string) || ''}
 											></textarea>
 											<label class="label">
 												<span class="label-text-alt text-info">Für optimale Batch-Ergebnisse</span>
@@ -2314,7 +2322,8 @@
 									name="promptBelated"
 									class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 									placeholder="z.B. Formuliere den Wunsch als nachträglichen Glückwunsch. Beginne mit einer höflichen Entschuldigung für die Verspätung..."
-									value={(data.settings as Record<string, unknown>)?.ai_promptBelated as string || ''}
+									value={((data.settings as Record<string, unknown>)?.ai_promptBelated as string) ||
+										''}
 								></textarea>
 								<label class="label">
 									<span class="label-text-alt text-info"
@@ -2651,7 +2660,8 @@
 																>🌡️ Temperature</label
 															>
 															<div class="badge badge-outline badge-lg">
-																{(data.settings as Record<string, unknown>)?.ai_temperature as number || 0.8}
+																{((data.settings as Record<string, unknown>)
+																	?.ai_temperature as number) || 0.8}
 															</div>
 														</div>
 														<input
@@ -2662,8 +2672,8 @@
 															max="2"
 															step="0.1"
 															class="range range-primary w-full"
-															value={(data.settings as Record<string, unknown>)?.ai_temperature as number ||
-																0.8}
+															value={((data.settings as Record<string, unknown>)
+																?.ai_temperature as number) || 0.8}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>Deterministisch</span>
@@ -2682,7 +2692,8 @@
 																>🎯 Top P</label
 															>
 															<div class="badge badge-outline badge-lg">
-																{(data.settings as Record<string, unknown>)?.ai_topP as string || 0.9}
+																{((data.settings as Record<string, unknown>)?.ai_topP as string) ||
+																	0.9}
 															</div>
 														</div>
 														<input
@@ -2693,7 +2704,8 @@
 															max="1"
 															step="0.1"
 															class="range range-secondary w-full"
-															value={(data.settings as Record<string, unknown>)?.ai_topP as string || 0.9}
+															value={((data.settings as Record<string, unknown>)
+																?.ai_topP as string) || 0.9}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>Fokussiert</span>
@@ -2721,7 +2733,8 @@
 														<label class="label mb-4" for="maxTokens">
 															<span class="label-text text-lg font-semibold">📏 Max Tokens</span>
 															<span class="badge badge-ghost badge-lg">
-																{(data.settings as Record<string, unknown>)?.ai_maxTokens as string || 2000}
+																{((data.settings as Record<string, unknown>)
+																	?.ai_maxTokens as string) || 2000}
 															</span>
 														</label>
 														<input
@@ -2732,8 +2745,8 @@
 															max="4000"
 															step="100"
 															class="range range-accent w-full"
-															value={(data.settings as Record<string, unknown>)?.ai_maxTokens as string ||
-																2000}
+															value={((data.settings as Record<string, unknown>)
+																?.ai_maxTokens as string) || 2000}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>500</span>
@@ -2751,8 +2764,8 @@
 																>🔄 Frequency Penalty</span
 															>
 															<span class="badge badge-ghost badge-lg">
-																{(data.settings as Record<string, unknown>)?.ai_frequencyPenalty as string ||
-																	0.1}
+																{((data.settings as Record<string, unknown>)
+																	?.ai_frequencyPenalty as string) || 0.1}
 															</span>
 														</label>
 														<input
@@ -2763,7 +2776,8 @@
 															max="1"
 															step="0.1"
 															class="range range-warning w-full"
-															value={(data.settings as Record<string, unknown>)?.ai_frequency_penalty as number || 0.1}
+															value={((data.settings as Record<string, unknown>)
+																?.ai_frequency_penalty as number) || 0.1}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>Wiederholungen</span>

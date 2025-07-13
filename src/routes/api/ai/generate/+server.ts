@@ -161,7 +161,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Erstelle AI-Settings mit benutzerdefinierten Werten oder Fallbacks
 		type UserSettingsRecord = Record<string, unknown>;
-		const settings = userSettings && typeof userSettings === 'object' ? userSettings as UserSettingsRecord : null;
+		const settings =
+			userSettings && typeof userSettings === 'object'
+				? (userSettings as UserSettingsRecord)
+				: null;
 		const aiSettings = settings
 			? {
 					promptSystem:

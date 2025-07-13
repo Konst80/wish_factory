@@ -176,7 +176,7 @@ function createAuthStore() {
 		try {
 			setLoading(true);
 			await supabase.auth.signOut();
-			
+
 			// Manually clear state to ensure immediate logout
 			set({
 				user: null,
