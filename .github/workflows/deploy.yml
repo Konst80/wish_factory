@@ -23,6 +23,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate i18n files
+        run: npx paraglide-js compile
+
       - name: Run type checking
         run: npm run check
 
@@ -44,9 +47,6 @@ jobs:
           echo "PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PROD_SUPABASE_ANON_KEY }}" >> .env
           echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}" >> .env
           echo "Using Production Supabase (separate account)"
-
-      - name: Generate i18n files
-        run: npx paraglide-js compile
 
       - name: Build application
         run: npm run build
