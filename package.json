@@ -63,6 +63,7 @@
 		"@inlang/paraglide-js": "^2.0.0",
 		"@supabase/ssr": "^0.6.1",
 		"@supabase/supabase-js": "^2.50.3",
+		"@sveltejs/adapter-cloudflare": "^7.0.5",
 		"@tailwindcss/vite": "^4.1.11",
 		"@types/bcrypt": "^5.0.2",
 		"bcrypt": "^6.0.0",

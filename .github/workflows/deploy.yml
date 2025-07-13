@@ -53,14 +53,14 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages deploy .svelte-kit/output/client --project-name=wish-factory-dev --branch=develop
+          command: pages deploy .svelte-kit/cloudflare --project-name=wish-factory-dev --branch=develop
 
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages deploy .svelte-kit/output/client --project-name=wish-factory --branch=main
+          command: pages deploy .svelte-kit/cloudflare --project-name=wish-factory --branch=main
 
       - name: Comment PR
         if: github.event_name == 'pull_request'
