@@ -39,6 +39,11 @@ jobs:
         if: github.ref == 'refs/heads/develop'
         run: |
           cp .env.development .env
+          # Override with GitHub Secrets for Development
+          echo "PUBLIC_SUPABASE_URL=${{ secrets.DEV_SUPABASE_URL }}" >> .env
+          echo "PUBLIC_SUPABASE_ANON_KEY=${{ secrets.DEV_SUPABASE_ANON_KEY }}" >> .env
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.DEV_SUPABASE_SERVICE_ROLE_KEY }}" >> .env
+          echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}" >> .env
           echo "Using Development Supabase (current instance)"
 
       - name: Setup Production Environment
