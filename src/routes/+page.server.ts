@@ -2,6 +2,11 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals: { supabase } }) => {
+	// Only handle root path, not sub-routes
+	if (url.pathname !== '/') {
+		return {};
+	}
+
 	// Handle email confirmation codes from Supabase
 	const code = url.searchParams.get('code');
 
