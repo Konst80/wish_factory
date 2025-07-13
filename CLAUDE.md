@@ -108,3 +108,7 @@ The system centers around a "Wish" object with the following structure:
 - TypeScript is strictly configured (mandatory per rules)
 - ESLint and Prettier are set up for code quality (required)
 - The project follows SvelteKit conventions for file structure and routing (mandatory)
+
+## Deployment Standards
+
+- Quality Gates: Type check, lint, build must pass before deployment
