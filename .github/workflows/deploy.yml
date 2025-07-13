@@ -26,6 +26,9 @@ jobs:
       - name: Generate i18n files
         run: npx paraglide-js compile
 
+      - name: Format generated files
+        run: npm run format
+
       - name: Run type checking
         run: npm run check
 
