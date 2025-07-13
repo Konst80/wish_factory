@@ -17,7 +17,9 @@
 		"supabase:status": "./scripts/supabase-setup.sh status",
 		"supabase:dev": "./scripts/supabase-setup.sh login-dev",
 		"supabase:prod": "./scripts/supabase-setup.sh login-prod",
-		"supabase:migrate": "./scripts/supabase-setup.sh migrate"
+		"supabase:migrate": "./scripts/supabase-setup.sh migrate",
+		"supabase:setup-prod": "./scripts/setup-production-env.sh",
+		"supabase:list": "./scripts/supabase-setup.sh list"
 	},
 	"lint-staged": {
 		"*.{js,ts,svelte}": [

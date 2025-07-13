@@ -34,7 +34,7 @@ log_error() {
 
 # Configuration
 DEV_PROJECT_ID="kgowrcgwzqfeiqitavdc"
-PROD_PROJECT_ID="YOUR_PROD_PROJECT_ID" # To be updated when created
+PROD_PROJECT_ID="bnbzkfwowcqnecrdqdas" # Production account project
 
 show_help() {
     cat << EOF
