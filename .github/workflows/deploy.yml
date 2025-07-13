@@ -59,6 +59,7 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 4e19556f50aaf4e6b2f8cdcdbb5df0eb
           command: pages deploy .svelte-kit/cloudflare --project-name=wish-factory-dev --branch=develop
 
       - name: Deploy to Production
