@@ -45,6 +45,9 @@ jobs:
           echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}" >> .env
           echo "Using Production Supabase (separate account)"
 
+      - name: Generate i18n files
+        run: npx paraglide-js compile
+
       - name: Build application
         run: npm run build
 
