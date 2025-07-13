@@ -7,7 +7,7 @@ export const GET: RequestHandler = async () => {
 		const supabase = createSupabaseAdminClient();
 		
 		// Simple test query to check connection
-		const { data, error } = await supabase
+		const { error } = await supabase
 			.from('api_keys')
 			.select('count(*)')
 			.limit(1);
