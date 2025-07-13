@@ -193,7 +193,7 @@ class OpenRouterAIService {
 				try {
 					parsedResponse = JSON.parse(cleanedContent);
 					console.log('✅ Parsed cleaned JSON:', parsedResponse);
-				} catch (cleanError) {
+				} catch {
 					console.log('❌ Cleaned JSON parse failed, trying regex extraction...');
 
 					// Fallback 2: Versuche JSON aus dem Text zu extrahieren
@@ -606,7 +606,7 @@ class OpenRouterAIService {
 		// Build batch-specific prompt if multiple wishes are requested
 		let batchPromptText = '';
 		if (count > 1 && aiSettings?.promptBatch) {
-			let batchPrompt = aiSettings.promptBatch
+			const batchPrompt = aiSettings.promptBatch
 				.replace(/\{count\}/g, count.toString())
 				.replace(/\{wishTypes\}/g, typeTexts)
 				.replace(/\{eventTypes\}/g, eventTexts)
@@ -633,7 +633,7 @@ class OpenRouterAIService {
 			promptBelatedValue: aiSettings?.promptBelated
 		});
 		if (belated && aiSettings?.promptBelated) {
-			let belatedPrompt = aiSettings.promptBelated
+			const belatedPrompt = aiSettings.promptBelated
 				.replace(/\{count\}/g, count.toString())
 				.replace(/\{wishTypes\}/g, typeTexts)
 				.replace(/\{eventTypes\}/g, eventTexts)
@@ -1208,7 +1208,7 @@ Generate both a regular text and a belated text for each wish.
 		}
 
 		// Type guard für bessere TypeScript-Unterstützung
-		const responseObj = response as Record<string, any>;
+		const responseObj = response as Record<string, unknown>;
 
 		// Prüfe wishes Array
 		if (!responseObj.wishes) {

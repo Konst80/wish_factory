@@ -3,7 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 
-	let { data, form }: { data: PageData; form: any } = $props();
+	let { data, form }: { data: PageData; form: import('$app/forms').ActionData } = $props();
 
 	let activeTab = $state('profile');
 	let showSuccessMessage = $state(false);
@@ -371,7 +371,7 @@
 <!-- Settings Navigation -->
 <div class="bg-base-100 border-base-200 mb-6 rounded-lg border p-2 shadow-sm">
 	<div class="flex flex-wrap gap-1">
-		{#each tabs as tab}
+		{#each tabs as tab (tab.id)}
 			<button
 				class="btn btn-sm gap-2 {activeTab === tab.id
 					? 'btn-primary'
@@ -617,7 +617,7 @@
 											class="select-bordered select select-lg w-full"
 											value={data.settings.profile.language}
 										>
-											{#each languages as lang}
+											{#each languages as lang (lang.value)}
 												<option value={lang.value}>{lang.label}</option>
 											{/each}
 										</select>
@@ -649,7 +649,7 @@
 											class="select-bordered select select-lg w-full"
 											value={data.settings.profile.timezone}
 										>
-											{#each timezones as tz}
+											{#each timezones as tz (tz.value)}
 												<option value={tz.value}>{tz.label}</option>
 											{/each}
 										</select>
@@ -1225,7 +1225,7 @@
 									class="select-bordered select w-full"
 									value={data.settings.preferences.theme}
 								>
-									{#each themes as theme}
+									{#each themes as theme (theme.value)}
 										<option value={theme.value}>{theme.label}</option>
 									{/each}
 								</select>
@@ -1241,7 +1241,7 @@
 									class="select-bordered select w-full"
 									value={data.settings.preferences.defaultLanguage}
 								>
-									{#each languages as lang}
+									{#each languages as lang (lang.value)}
 										<option value={lang.value}>{lang.label}</option>
 									{/each}
 								</select>
@@ -1379,7 +1379,8 @@
 										id="model"
 										name="model"
 										class="select select-bordered w-full"
-										value={(data.settings as any)?.ai?.model || 'anthropic/claude-sonnet-4'}
+										value={(data.settings as Record<string, unknown>)?.ai?.model ||
+											'anthropic/claude-sonnet-4'}
 									>
 										<option value="anthropic/claude-sonnet-4"
 											>🚀 Claude Sonnet 4 (Neueste Version)</option
@@ -1434,7 +1435,7 @@
 											name="promptSystem"
 											class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen..."
-											value={(data.settings as any)?.ai?.promptSystem ||
+											value={(data.settings as Record<string, unknown>)?.ai?.promptSystem ||
 												'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'}
 										></textarea>
 									</div>
@@ -1451,7 +1452,7 @@
 											name="promptTemplate"
 											class="textarea textarea-bordered h-96 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen. Generiere &#123;count&#125; &#123;countText&#125; in der Sprache &#123;language&#125;..."
-											value={(data.settings as any)?.ai?.promptTemplate || ''}
+											value={(data.settings as Record<string, unknown>)?.ai?.promptTemplate || ''}
 										></textarea>
 										<div
 											class="from-info/5 to-primary/5 border-info/20 mt-4 rounded-lg border bg-gradient-to-br p-4"
@@ -1820,7 +1821,7 @@
 												name="promptAgeYoung"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende modernen, lockeren Ton. Nutze aktuelle Trends und Ausdrücke..."
-												value={(data.settings as any)?.ai?.promptAgeYoung || ''}
+												value={(data.settings as Record<string, unknown>)?.ai?.promptAgeYoung || ''}
 											></textarea>
 										</div>
 
@@ -1836,7 +1837,8 @@
 												name="promptAgeMiddle"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende ausgewogenen, respektvollen Ton. Berücksichtige Lebenserfahrung..."
-												value={(data.settings as any)?.ai?.promptAgeMiddle || ''}
+												value={(data.settings as Record<string, unknown>)?.ai?.promptAgeMiddle ||
+													''}
 											></textarea>
 										</div>
 
@@ -1852,7 +1854,8 @@
 												name="promptAgeSenior"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende ehrfürchtigen, würdevollen Ton. Betone Weisheit und Erfahrung..."
-												value={(data.settings as any)?.ai?.promptAgeSenior || ''}
+												value={(data.settings as Record<string, unknown>)?.ai?.promptAgeSenior ||
+													''}
 											></textarea>
 										</div>
 									</div>
@@ -1943,7 +1946,8 @@
 												name="promptRelationFriend"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende freundlichen, vertrauten Ton. Nutze persönliche Ansprache..."
-												value={(data.settings as any)?.ai?.promptRelationFriend || ''}
+												value={(data.settings as Record<string, unknown>)?.ai
+													?.promptRelationFriend || ''}
 											></textarea>
 										</div>
 
@@ -1959,7 +1963,8 @@
 												name="promptRelationFamily"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende herzlichen, familiären Ton. Betone Verbundenheit..."
-												value={(data.settings as any)?.ai?.promptRelationFamily || ''}
+												value={(data.settings as Record<string, unknown>)?.ai
+													?.promptRelationFamily || ''}
 											></textarea>
 										</div>
 
@@ -1975,7 +1980,8 @@
 												name="promptRelationPartner"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende liebevollen, romantischen Ton. Nutze intime Sprache..."
-												value={(data.settings as any)?.ai?.promptRelationPartner || ''}
+												value={(data.settings as Record<string, unknown>)?.ai
+													?.promptRelationPartner || ''}
 											></textarea>
 										</div>
 
@@ -1991,7 +1997,8 @@
 												name="promptRelationColleague"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende professionellen, respektvollen Ton. Achte auf Förmlichkeit..."
-												value={(data.settings as any)?.ai?.promptRelationColleague || ''}
+												value={(data.settings as Record<string, unknown>)?.ai
+													?.promptRelationColleague || ''}
 											></textarea>
 										</div>
 									</div>
@@ -2081,7 +2088,7 @@
 												name="promptBatch"
 												class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 												placeholder="z.B. Generiere {'{count}'} ausgewogene Wünsche: 70% Geburtstag, 20% Jubiläum, 10% Sonstiges. Achte auf Vielfalt in Stil und Tonalität..."
-												value={(data.settings as any)?.ai?.promptBatch || ''}
+												value={(data.settings as Record<string, unknown>)?.ai?.promptBatch || ''}
 											></textarea>
 											<label class="label">
 												<span class="label-text-alt text-info">Für optimale Batch-Ergebnisse</span>
@@ -2311,7 +2318,7 @@
 									name="promptBelated"
 									class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 									placeholder="z.B. Formuliere den Wunsch als nachträglichen Glückwunsch. Beginne mit einer höflichen Entschuldigung für die Verspätung..."
-									value={(data.settings as any)?.ai?.promptBelated || ''}
+									value={(data.settings as Record<string, unknown>)?.ai?.promptBelated || ''}
 								></textarea>
 								<label class="label">
 									<span class="label-text-alt text-info"
@@ -2648,7 +2655,7 @@
 																>🌡️ Temperature</label
 															>
 															<div class="badge badge-outline badge-lg">
-																{(data.settings as any)?.ai?.temperature || 0.8}
+																{(data.settings as Record<string, unknown>)?.ai?.temperature || 0.8}
 															</div>
 														</div>
 														<input
@@ -2659,7 +2666,8 @@
 															max="2"
 															step="0.1"
 															class="range range-primary w-full"
-															value={(data.settings as any)?.ai?.temperature || 0.8}
+															value={(data.settings as Record<string, unknown>)?.ai?.temperature ||
+																0.8}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>Deterministisch</span>
@@ -2678,7 +2686,7 @@
 																>🎯 Top P</label
 															>
 															<div class="badge badge-outline badge-lg">
-																{(data.settings as any)?.ai?.topP || 0.9}
+																{(data.settings as Record<string, unknown>)?.ai?.topP || 0.9}
 															</div>
 														</div>
 														<input
@@ -2689,7 +2697,7 @@
 															max="1"
 															step="0.1"
 															class="range range-secondary w-full"
-															value={(data.settings as any)?.ai?.topP || 0.9}
+															value={(data.settings as Record<string, unknown>)?.ai?.topP || 0.9}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>Fokussiert</span>
@@ -2717,7 +2725,7 @@
 														<label class="label mb-4" for="maxTokens">
 															<span class="label-text text-lg font-semibold">📏 Max Tokens</span>
 															<span class="badge badge-ghost badge-lg">
-																{(data.settings as any)?.ai?.maxTokens || 2000}
+																{(data.settings as Record<string, unknown>)?.ai?.maxTokens || 2000}
 															</span>
 														</label>
 														<input
@@ -2728,7 +2736,8 @@
 															max="4000"
 															step="100"
 															class="range range-accent w-full"
-															value={(data.settings as any)?.ai?.maxTokens || 2000}
+															value={(data.settings as Record<string, unknown>)?.ai?.maxTokens ||
+																2000}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>500</span>
@@ -2746,7 +2755,8 @@
 																>🔄 Frequency Penalty</span
 															>
 															<span class="badge badge-ghost badge-lg">
-																{(data.settings as any)?.ai?.frequencyPenalty || 0.1}
+																{(data.settings as Record<string, unknown>)?.ai?.frequencyPenalty ||
+																	0.1}
 															</span>
 														</label>
 														<input
@@ -2757,7 +2767,8 @@
 															max="1"
 															step="0.1"
 															class="range range-warning w-full"
-															value={(data.settings as any)?.ai?.frequencyPenalty || 0.1}
+															value={(data.settings as Record<string, unknown>)?.ai
+																?.frequencyPenalty || 0.1}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>Wiederholungen</span>
@@ -2904,7 +2915,7 @@
 									class="select-bordered select w-full"
 									value={data.settings.system.exportFormat}
 								>
-									{#each exportFormats as format}
+									{#each exportFormats as format (format.value)}
 										<option value={format.value}>{format.label}</option>
 									{/each}
 								</select>
@@ -2920,7 +2931,7 @@
 									class="select-bordered select w-full"
 									value={data.settings.system.backupFrequency}
 								>
-									{#each backupFrequencies as freq}
+									{#each backupFrequencies as freq (freq.value)}
 										<option value={freq.value}>{freq.label}</option>
 									{/each}
 								</select>

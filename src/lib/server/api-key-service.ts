@@ -226,9 +226,6 @@ export class ApiKeyService {
 	 */
 	static async checkRateLimit(apiKey: ApiKey): Promise<{ allowed: boolean; remaining: number }> {
 		try {
-			// Get requests from the last hour
-			const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-
 			// This is a simplified version - in production, you'd want to use Redis
 			// For now, we'll just check against the total requests (not time-based)
 			const requestsInLastHour = 0; // Placeholder - implement with proper time-based tracking
@@ -246,7 +243,7 @@ export class ApiKeyService {
 	/**
 	 * Map database row to ApiKey interface
 	 */
-	private static mapDbToApiKey(data: any): ApiKey {
+	private static mapDbToApiKey(data: Record<string, unknown>): ApiKey {
 		return {
 			id: data.id,
 			name: data.name,

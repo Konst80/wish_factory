@@ -1,5 +1,13 @@
 import { createSupabaseAdminClient } from './supabase-admin';
-import type { Wish, ReleasedWish } from '../types/Wish';
+import type {
+	ReleasedWish,
+	WishType,
+	EventType,
+	Relation,
+	AgeGroup,
+	Language,
+	WishLength
+} from '../types/Wish';
 
 export class ReleasedWishesService {
 	private supabase = createSupabaseAdminClient();
@@ -57,15 +65,15 @@ export class ReleasedWishesService {
 		return {
 			id: releasedWish.id,
 			originalWishId: releasedWish.original_wish_id,
-			type: releasedWish.type as any,
-			eventType: releasedWish.event_type as any,
-			relations: releasedWish.relations as any[],
-			ageGroups: releasedWish.age_groups as any[],
+			type: releasedWish.type as WishType,
+			eventType: releasedWish.event_type as EventType,
+			relations: releasedWish.relations as Relation[],
+			ageGroups: releasedWish.age_groups as AgeGroup[],
 			specificValues: releasedWish.specific_values || [],
 			text: releasedWish.text,
 			belated: releasedWish.belated,
-			language: releasedWish.language as any,
-			length: releasedWish.length as any,
+			language: releasedWish.language as Language,
+			length: releasedWish.length as WishLength,
 			releasedAt: new Date(releasedWish.released_at)
 		};
 	}
@@ -140,15 +148,15 @@ export class ReleasedWishesService {
 		const wishes: ReleasedWish[] = (data || []).map((row) => ({
 			id: row.id,
 			originalWishId: row.original_wish_id,
-			type: row.type as any,
-			eventType: row.event_type as any,
-			relations: row.relations as any[],
-			ageGroups: row.age_groups as any[],
+			type: row.type as WishType,
+			eventType: row.event_type as EventType,
+			relations: row.relations as Relation[],
+			ageGroups: row.age_groups as AgeGroup[],
 			specificValues: row.specific_values || [],
 			text: row.text,
 			belated: row.belated,
-			language: row.language as any,
-			length: row.length as any,
+			language: row.language as Language,
+			length: row.length as WishLength,
 			releasedAt: new Date(row.released_at)
 		}));
 
@@ -175,15 +183,15 @@ export class ReleasedWishesService {
 		return {
 			id: data.id,
 			originalWishId: data.original_wish_id,
-			type: data.type as any,
-			eventType: data.event_type as any,
-			relations: data.relations as any[],
-			ageGroups: data.age_groups as any[],
+			type: data.type as WishType,
+			eventType: data.event_type as EventType,
+			relations: data.relations as Relation[],
+			ageGroups: data.age_groups as AgeGroup[],
 			specificValues: data.specific_values || [],
 			text: data.text,
 			belated: data.belated,
-			language: data.language as any,
-			length: data.length as any,
+			language: data.language as Language,
+			length: data.length as WishLength,
 			releasedAt: new Date(data.released_at)
 		};
 	}

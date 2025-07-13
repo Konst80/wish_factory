@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { releasedWishesService } from '$lib/server/released-wishes-service';
 import { createSupabaseServerClientFromSvelteKit } from '$lib/supabase';
 
-export const POST: RequestHandler = async ({ params, request, cookies }) => {
+export const POST: RequestHandler = async ({ params, cookies }) => {
 	try {
 		const { id } = params;
 

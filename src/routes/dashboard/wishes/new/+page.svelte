@@ -29,7 +29,7 @@
 		};
 	} | null;
 
-	let { form, data }: { form: ActionData; data: any } = $props();
+	let { form }: { form: ActionData } = $props();
 
 	// Form state
 	let formData = $state({
@@ -117,14 +117,7 @@
 		}
 	}
 
-	function validateSpecificValues(value: string): boolean {
-		if (!value.trim()) return true;
-		const values = value.split(',');
-		return values.every((v) => {
-			const num = parseInt(v.trim());
-			return !isNaN(num) && num > 0;
-		});
-	}
+	// Function removed as it was unused
 
 	// German translations for display
 	const typeLabels = {
@@ -153,12 +146,7 @@
 		[AgeGroup.SENIOR]: 'Senior (60+)'
 	};
 
-	const statusLabels = {
-		[WishStatus.ENTWURF]: 'Entwurf',
-		[WishStatus.ZUR_FREIGABE]: 'Zur Freigabe',
-		[WishStatus.FREIGEGEBEN]: 'Freigegeben',
-		[WishStatus.ARCHIVIERT]: 'Archiviert'
-	};
+	// statusLabels removed as it was unused
 
 	const languageLabels = {
 		[Language.DE]: 'Deutsch',
@@ -1688,7 +1676,7 @@
 														</span>
 													</label>
 													<div class="grid grid-cols-1 gap-2">
-														{#each Object.values(WishType) as type}
+														{#each Object.values(WishType) as type (type)}
 															<label
 																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.types.includes(
 																	type
@@ -1728,7 +1716,7 @@
 														</span>
 													</label>
 													<div class="grid grid-cols-1 gap-2">
-														{#each Object.values(EventType) as eventType}
+														{#each Object.values(EventType) as eventType (eventType)}
 															<label
 																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.eventTypes.includes(
 																	eventType
@@ -1768,7 +1756,7 @@
 														</span>
 													</label>
 													<div class="grid grid-cols-2 gap-2">
-														{#each Object.values(Language) as language}
+														{#each Object.values(Language) as language (language)}
 															<label
 																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.languages.includes(
 																	language
@@ -1854,7 +1842,7 @@
 														</span>
 													</label>
 													<div class="grid grid-cols-2 gap-2">
-														{#each Object.values(Relation) as relation}
+														{#each Object.values(Relation) as relation (relation)}
 															<label
 																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.relations.includes(
 																	relation
@@ -1896,7 +1884,7 @@
 														</span>
 													</label>
 													<div class="grid grid-cols-2 gap-2">
-														{#each Object.values(AgeGroup) as ageGroup}
+														{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
 															<label
 																class="hover:bg-base-200 flex cursor-pointer items-center rounded-lg border-2 p-3 transition-all {batchSettings.ageGroups.includes(
 																	ageGroup
@@ -2359,12 +2347,12 @@
 												<!-- Target Information -->
 												<div class="mb-3 flex flex-wrap gap-1">
 													<span class="text-base-content/60 mr-2 text-xs">Für:</span>
-													{#each wish.relations as relation}
+													{#each wish.relations as relation (relation)}
 														<span class="badge badge-neutral badge-xs"
 															>{relationLabels[relation]}</span
 														>
 													{/each}
-													{#each wish.ageGroups as ageGroup}
+													{#each wish.ageGroups as ageGroup (ageGroup)}
 														<span class="badge badge-accent badge-xs"
 															>{ageGroupLabels[ageGroup]}</span
 														>
@@ -2433,7 +2421,8 @@
 													<div class="mt-3 flex items-center gap-2">
 														<span class="text-base-content/50 text-xs">Qualität:</span>
 														<div class="flex items-center gap-1">
-															{#each Array(5) as _, i}
+															<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+															{#each Array(5) as _, i (i)}
 																<svg
 																	xmlns="http://www.w3.org/2000/svg"
 																	class="h-3 w-3 {i < Math.round(wish.metadata.confidence * 5)

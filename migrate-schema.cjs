@@ -3,7 +3,7 @@
 // Schema migration using Supabase Management API
 const SUPABASE_ACCESS_TOKEN = 'sbp_da54d9d95a96494a426fb4358f6365801bccf3c3';
 
-const DEV_PROJECT_REF = 'kgowrcgwzqfeiqitavdc';
+// const DEV_PROJECT_REF = 'kgowrcgwzqfeiqitavdc'; // Currently not used
 const PROD_PROJECT_REF = 'bnbzkfwowcqnecrdqdas';
 
 // Basic schema SQL for the wish factory
@@ -206,7 +206,7 @@ async function main() {
 
 	try {
 		console.log('📊 Creating schema in production...');
-		const result = await executeSQL(PROD_PROJECT_REF, SCHEMA_SQL);
+		await executeSQL(PROD_PROJECT_REF, SCHEMA_SQL);
 		console.log('✅ Schema created successfully!');
 
 		console.log('');

@@ -160,40 +160,42 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Erstelle AI-Settings mit benutzerdefinierten Werten oder Fallbacks
-		const aiSettings = (userSettings as any)
+		type UserSettingsRecord = Record<string, unknown>;
+		const settings = userSettings as UserSettingsRecord;
+		const aiSettings = settings
 			? {
 					promptSystem:
-						(userSettings as any).ai_prompt_system ||
+						(settings.ai_prompt_system as string) ||
 						'Du bist ein Experte für das Schreiben von Glückwünschen. Du MUSST immer im exakten JSON-Format antworten, niemals als Text oder Markdown. Antworte NUR mit einem gültigen JSON-Objekt.',
-					promptTemplate: (userSettings as any).ai_prompt_template || undefined, // null zu undefined konvertieren
-					promptAgeYoung: (userSettings as any).ai_prompt_age_young || undefined,
-					promptAgeMiddle: (userSettings as any).ai_prompt_age_middle || undefined,
-					promptAgeSenior: (userSettings as any).ai_prompt_age_senior || undefined,
-					promptRelationFriend: (userSettings as any).ai_prompt_relation_friend || undefined,
-					promptRelationFamily: (userSettings as any).ai_prompt_relation_family || undefined,
-					promptRelationPartner: (userSettings as any).ai_prompt_relation_partner || undefined,
-					promptRelationColleague: (userSettings as any).ai_prompt_relation_colleague || undefined,
-					promptBatch: (userSettings as any).ai_prompt_batch || undefined,
-					promptBelated: (userSettings as any).ai_prompt_belated || undefined,
-					model: (userSettings as any).ai_model || 'anthropic/claude-sonnet-4',
-					temperature: (userSettings as any).ai_temperature ?? 0.8,
-					maxTokens: (userSettings as any).ai_max_tokens || 2000,
-					topP: (userSettings as any).ai_top_p ?? 0.9,
-					frequencyPenalty: (userSettings as any).ai_frequency_penalty ?? 0.1,
-					presencePenalty: (userSettings as any).ai_presence_penalty ?? 0.1
+					promptTemplate: (settings.ai_prompt_template as string) || undefined, // null zu undefined konvertieren
+					promptAgeYoung: (settings.ai_prompt_age_young as string) || undefined,
+					promptAgeMiddle: (settings.ai_prompt_age_middle as string) || undefined,
+					promptAgeSenior: (settings.ai_prompt_age_senior as string) || undefined,
+					promptRelationFriend: (settings.ai_prompt_relation_friend as string) || undefined,
+					promptRelationFamily: (settings.ai_prompt_relation_family as string) || undefined,
+					promptRelationPartner: (settings.ai_prompt_relation_partner as string) || undefined,
+					promptRelationColleague: (settings.ai_prompt_relation_colleague as string) || undefined,
+					promptBatch: (settings.ai_prompt_batch as string) || undefined,
+					promptBelated: (settings.ai_prompt_belated as string) || undefined,
+					model: (settings.ai_model as string) || 'anthropic/claude-sonnet-4',
+					temperature: (settings.ai_temperature as number) ?? 0.8,
+					maxTokens: (settings.ai_max_tokens as number) || 2000,
+					topP: (settings.ai_top_p as number) ?? 0.9,
+					frequencyPenalty: (settings.ai_frequency_penalty as number) ?? 0.1,
+					presencePenalty: (settings.ai_presence_penalty as number) ?? 0.1
 				}
 			: undefined;
 
 		// Verarbeite spezifische Werte und lade passende Beschreibung
-		let mergedSpecificValues = specificValues || [];
+		const mergedSpecificValues = specificValues || [];
 		let specificValuesDescription = '';
 
-		if ((userSettings as any) && specificValues && specificValues.length > 0) {
+		if (settings && specificValues && specificValues.length > 0) {
 			// Verwende den ersten Event-Typ und die erste Sprache für spezifische Werte
 			const eventKey = finalEventTypes[0].toLowerCase();
 			const languageKey = finalLanguages[0].toLowerCase();
-			const settingsKey = `specific_values_${eventKey}_${languageKey}` as keyof typeof userSettings;
-			const storedDescription = (userSettings as any)[settingsKey];
+			const settingsKey = `specific_values_${eventKey}_${languageKey}`;
+			const storedDescription = settings[settingsKey] as string;
 
 			if (storedDescription && typeof storedDescription === 'string' && storedDescription.trim()) {
 				specificValuesDescription = storedDescription;

@@ -4,7 +4,7 @@
 	import '../app.css';
 	import type { LayoutData } from './$types';
 
-	let { children, data }: { children: any; data: LayoutData } = $props();
+	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
 
 	// Apply user's saved theme on mount and handle theme changes
 	onMount(() => {

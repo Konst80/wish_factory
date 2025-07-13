@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const fs = require('fs').promises;
+// const fs = require('fs').promises; // Currently not used
 
 // Development Supabase configuration
 const DEV_CONFIG = {

@@ -42,6 +42,7 @@ async function insertToSupabase(config, table, data) {
 
 	// Remove user references for released wishes
 	const cleanedData = data.map((record) => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { released_by, ...rest } = record;
 		return rest; // Remove released_by since users don't exist in production
 	});

@@ -237,13 +237,13 @@
 			});
 
 			if (response.ok) {
-				const result = await response.json();
+				await response.json(); // Success response
 				alert(`Wunsch erfolgreich für WishSnap freigegeben!`);
 			} else {
-				const error = await response.json();
-				alert(`Fehler: ${error.error}`);
+				const errorData = await response.json();
+				alert(`Fehler: ${errorData.error}`);
 			}
-		} catch (error) {
+		} catch {
 			alert('Ein Fehler ist aufgetreten');
 		}
 	}
@@ -1321,7 +1321,7 @@
 						};
 					}}
 				>
-					{#each selectedWishes as wishId}
+					{#each selectedWishes as wishId (wishId)}
 						<input type="hidden" name="wishIds" value={wishId} />
 					{/each}
 					<button type="submit" class="btn btn-error" disabled={isDeleting}>

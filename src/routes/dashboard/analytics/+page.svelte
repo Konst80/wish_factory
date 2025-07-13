@@ -124,7 +124,7 @@
 			bind:value={selectedTimeRange}
 			onchange={updateTimeRange}
 		>
-			{#each timeRanges as range}
+			{#each timeRanges as range (range.value)}
 				<option value={range.value}>{range.label}</option>
 			{/each}
 		</select>
@@ -135,7 +135,7 @@
 			<span class="label-text">Metrik</span>
 		</label>
 		<select id="metric" class="select-bordered select w-full" bind:value={selectedMetric}>
-			{#each metrics as metric}
+			{#each metrics as metric (metric.value)}
 				<option value={metric.value}>{metric.label}</option>
 			{/each}
 		</select>
@@ -300,7 +300,7 @@
 		<div class="card-body">
 			<h2 class="card-title">Kategorieverteilung</h2>
 			<div class="space-y-3">
-				{#each data.categoryDistribution as category}
+				{#each data.categoryDistribution as category (category.category)}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3">
 							<div class="h-4 w-4 rounded {categoryColors[category.category]}"></div>
@@ -337,7 +337,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each data.userActivity as user}
+						{#each data.userActivity as user (user.user)}
 							<tr>
 								<td class="font-medium">{user.user}</td>
 								<td>{user.wishes}</td>
@@ -364,7 +364,7 @@
 		<div class="card-body">
 			<h2 class="card-title">Status-Verteilung</h2>
 			<div class="space-y-3">
-				{#each data.statusDistribution as status}
+				{#each data.statusDistribution as status (status.status)}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3">
 							<div class="h-4 w-4 rounded {statusColors[status.status]}"></div>
@@ -392,7 +392,7 @@
 	<div class="card-body">
 		<h2 class="card-title">Sprachverteilung</h2>
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-			{#each data.languageDistribution as lang}
+			{#each data.languageDistribution as lang (lang.language)}
 				<div class="flex items-center justify-between rounded-lg border p-4">
 					<div class="flex items-center gap-3">
 						<div
@@ -419,7 +419,7 @@
 		<div class="card-body">
 			<h2 class="card-title">Stil-Verteilung</h2>
 			<div class="space-y-3">
-				{#each data.typeDistribution as type}
+				{#each data.typeDistribution as type (type.type)}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3">
 							<div class="h-4 w-4 rounded {typeColors[type.type]}"></div>
@@ -446,7 +446,7 @@
 		<div class="card-body">
 			<h2 class="card-title">Beziehungs-Verteilung</h2>
 			<div class="space-y-3">
-				{#each data.relationsDistribution as relation}
+				{#each data.relationsDistribution as relation (relation.relation)}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3">
 							<div class="h-4 w-4 rounded {relationColors[relation.relation]}"></div>
@@ -473,7 +473,7 @@
 		<div class="card-body">
 			<h2 class="card-title">Altersgruppen-Verteilung</h2>
 			<div class="space-y-3">
-				{#each data.ageGroupsDistribution as ageGroup}
+				{#each data.ageGroupsDistribution as ageGroup (ageGroup.ageGroup)}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3">
 							<div class="h-4 w-4 rounded {ageGroupColors[ageGroup.ageGroup]}"></div>
@@ -501,7 +501,7 @@
 	<div class="card-body">
 		<h2 class="card-title">Nachträgliche Wünsche</h2>
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-			{#each data.belatedDistribution as belated}
+			{#each data.belatedDistribution as belated (belated.type)}
 				<div class="flex items-center justify-between rounded-lg border p-4">
 					<div class="flex items-center gap-3">
 						<div class="h-6 w-6 rounded {belatedColors[belated.belated]}"></div>

@@ -2,9 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import type { PageData, ActionData } from './$types';
+	import type { PageData } from './$types';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	let searchTerm = $state(data.filters.search || '');
 	let selectedRole = $state(data.filters.role || '');
@@ -273,7 +273,7 @@
 					onchange={updateFilters}
 				>
 					<option value="">Alle Rollen</option>
-					{#each roles as role}
+					{#each roles as role (role)}
 						<option value={role}>{role}</option>
 					{/each}
 				</select>
@@ -488,7 +488,7 @@
 						bind:value={userForm.role}
 						required
 					>
-						{#each roles as role}
+						{#each roles as role (role)}
 							<option value={role}>{role}</option>
 						{/each}
 					</select>
@@ -645,7 +645,7 @@
 						bind:value={userForm.role}
 						required
 					>
-						{#each roles as role}
+						{#each roles as role (role)}
 							<option value={role}>{role}</option>
 						{/each}
 					</select>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { WishType, EventType, WishLength } from '$lib/types/Wish';
+	import { EventType } from '$lib/types/Wish';
 	import type { PageData } from './$types';
 	import type { ReleasedWish } from '$lib/types/Wish';
 	import { page } from '$app/stores';
@@ -27,9 +27,9 @@
 	let showExportModal = $state(false);
 	let showWorkflowHelp = $state(false);
 
-	// Sorting State
-	let currentSortBy = $state('released_at');
-	let currentSortOrder = $state('desc');
+	// Sorting State - these are for future implementation
+	// let currentSortBy = $state('released_at');
+	// let currentSortOrder = $state('desc');
 
 	// Event type icons
 	const eventTypeIcons: Record<EventType, string> = {
@@ -143,10 +143,10 @@
 				// Reload page to refresh data
 				window.location.reload();
 			} else {
-				const error = await response.json();
-				alert(`Fehler: ${error.error}`);
+				const errorData = await response.json();
+				alert(`Fehler: ${errorData.error}`);
 			}
-		} catch (error) {
+		} catch {
 			alert('Ein Fehler ist aufgetreten');
 		}
 	}
@@ -302,7 +302,7 @@
 								bind:value={selectedLanguage}
 							>
 								<option value="">Alle Sprachen</option>
-								{#each metadata.languages as language}
+								{#each metadata.languages as language (language)}
 									<option value={language}>{language.toUpperCase()}</option>
 								{/each}
 							</select>
@@ -323,7 +323,7 @@
 								bind:value={selectedType}
 							>
 								<option value="">Alle Typen</option>
-								{#each metadata.types as type}
+								{#each metadata.types as type (type)}
 									<option value={type}>{type}</option>
 								{/each}
 							</select>
@@ -365,7 +365,7 @@
 								bind:value={selectedLength}
 							>
 								<option value="">Alle Längen</option>
-								{#each metadata.lengths as length}
+								{#each metadata.lengths as length (length)}
 									<option value={length}>{length}</option>
 								{/each}
 							</select>
@@ -641,7 +641,7 @@
 			{#each Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
 				const startPage = Math.max(1, currentPage - 2);
 				return startPage + i;
-			}) as pageNum}
+			}) as pageNum (pageNum)}
 				{#if pageNum <= totalPages}
 					<button
 						class="join-item btn"

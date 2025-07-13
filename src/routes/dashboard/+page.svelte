@@ -493,7 +493,7 @@
 				</div>
 
 				<div class="space-y-4">
-					{#each data.recentActivities as activity}
+					{#each data.recentActivities as activity (activity.id)}
 						<div class="flex items-start gap-3">
 							<div class="badge {getStatusBadgeClass(activity.status)} p-3">
 								<svg

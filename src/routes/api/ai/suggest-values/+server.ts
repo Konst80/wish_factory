@@ -138,15 +138,3 @@ For custom events: Describe general milestones, e.g.:
 Create a similar description with 10-15 important numbers and their meanings.`;
 	}
 }
-
-function extractValuesFromAIResponse(text: string): number[] {
-	// Extrahiere Zahlen aus der AI-Antwort
-	const numbers = text.match(/\d+/g);
-	if (!numbers) return [];
-
-	return numbers
-		.map((n) => parseInt(n))
-		.filter((n) => !isNaN(n) && n > 0 && n <= 200)
-		.sort((a, b) => a - b)
-		.slice(0, 20); // Max 20 Werte
-}

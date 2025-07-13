@@ -153,7 +153,7 @@
 			</button>
 
 			<!-- Status Workflow Buttons -->
-			{#each getAvailableStatusTransitions() as transition}
+			{#each getAvailableStatusTransitions() as transition (transition.to)}
 				<form
 					method="POST"
 					action="?/updateStatus"
