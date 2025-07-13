@@ -1,21 +1,65 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { auth } from '$lib/stores/auth';
+	import { supabase } from '$lib/supabase';
+	import { browser } from '$app/environment';
+
+	let logoutStatus = $state('Abmelden läuft...');
 
 	onMount(async () => {
+		if (!browser) return;
+
+		// Force redirect after maximum 5 seconds regardless of what happens
+		const forceRedirectTimer = setTimeout(() => {
+			console.log('Force redirect triggered');
+			clearAllStorage();
+			window.location.href = '/auth/login';
+		}, 5000);
+
 		try {
-			await auth.signOut();
-			// Wait a bit for the auth state to clear
-			setTimeout(() => {
-				goto('/auth/login');
-			}, 500);
+			logoutStatus = 'Lösche lokale Daten...';
+			clearAllStorage();
+
+			logoutStatus = 'Abmelden von Supabase...';
+			if (supabase) {
+				await supabase.auth.signOut({ scope: 'global' });
+			}
+			
+			logoutStatus = 'Weiterleitung...';
+			clearTimeout(forceRedirectTimer);
+			
+			// Force a complete page reload to clear all state
+			window.location.href = '/auth/login';
 		} catch (error) {
 			console.error('Logout error:', error);
-			// Force redirect even if logout fails
-			goto('/auth/login');
+			logoutStatus = 'Fehler beim Abmelden - erzwinge Weiterleitung...';
+			clearAllStorage();
+			clearTimeout(forceRedirectTimer);
+			window.location.href = '/auth/login';
 		}
 	});
+
+	function clearAllStorage() {
+		try {
+			// Clear all possible storage locations
+			localStorage.clear();
+			sessionStorage.clear();
+			
+			// Clear specific Supabase keys if they exist
+			const keysToRemove = [
+				'supabase.auth.token',
+				'sb-' + 'kgowrcgwzqfeiqitavdc' + '-auth-token',
+				'sb-' + 'bnbzkfwowcqnecrdqdas' + '-auth-token'
+			];
+			
+			keysToRemove.forEach(key => {
+				localStorage.removeItem(key);
+				sessionStorage.removeItem(key);
+			});
+		} catch (e) {
+			console.log('Storage clear failed:', e);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -27,9 +71,13 @@
 		<div class="card-body text-center">
 			<h1 class="card-title mb-6 text-2xl font-bold">Abmelden</h1>
 			<div class="loading loading-spinner loading-lg"></div>
-			<p class="mt-4">Sie werden abgemeldet...</p>
-
-			<!-- Hidden form removed since we're using client-side logout -->
+			<p class="mt-4">{logoutStatus}</p>
+			
+			<!-- Debug info -->
+			<div class="text-xs text-gray-500 mt-2">
+				Falls die Weiterleitung nicht funktioniert: 
+				<a href="/auth/login" class="link">Hier klicken</a>
+			</div>
 		</div>
 	</div>
 </div>
