@@ -2,7 +2,6 @@
 // File: src/lib/server/api-key-service.ts
 
 import { createSupabaseAdminClient } from './supabase-admin';
-import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
 export interface ApiKey {
@@ -47,8 +46,8 @@ export class ApiKeyService {
 		const secret = crypto.randomBytes(16).toString('hex'); // 32 characters
 		const key = `wsk_${prefix}${secret}`;
 
-		// Hash the full key for storage
-		const hash = bcrypt.hashSync(key, 10);
+		// Hash the full key for storage using crypto
+		const hash = crypto.createHash('sha256').update(key).digest('hex');
 
 		return {
 			key,
@@ -127,8 +126,9 @@ export class ApiKeyService {
 
 			// Check if any key matches the hash
 			let matchedKey = null;
+			const apiKeyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
 			for (const dbKey of apiKeys) {
-				if (bcrypt.compareSync(apiKey, dbKey.key_hash)) {
+				if (apiKeyHash === dbKey.key_hash) {
 					matchedKey = dbKey;
 					break;
 				}
