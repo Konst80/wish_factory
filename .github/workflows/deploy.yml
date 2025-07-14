@@ -1,8 +1,16 @@
 name: Deploy to Cloudflare Pages
 
 on:
-  push:
-    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - production
   pull_request:
     branches: [main]
 
@@ -36,7 +44,7 @@ jobs:
         run: npm run lint
 
       - name: Build application (Development)
-        if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+        if: github.event.inputs.environment == 'development'
         run: npm run build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.DEV_SUPABASE_URL }}
@@ -45,7 +53,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.DEV_OPENAI_API_KEY }}
 
       - name: Build application (Production)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.event.inputs.environment == 'production'
         run: npm run build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
@@ -58,7 +66,7 @@ jobs:
         run: npm run build
 
       - name: Deploy to Development
-        if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+        if: github.event.inputs.environment == 'development'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -66,7 +74,7 @@ jobs:
           command: pages deploy .svelte-kit/cloudflare --project-name=wish-factory-dev --branch=develop
 
       - name: Deploy to Production
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.event.inputs.environment == 'production'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
