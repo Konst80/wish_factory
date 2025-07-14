@@ -1360,7 +1360,7 @@
 										id="model"
 										name="model"
 										class="select select-bordered w-full"
-										value={((data.settings as Record<string, unknown>)?.ai_model as string) ||
+										value={(((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)?.model as string) ||
 											'anthropic/claude-sonnet-4'}
 									>
 										<option value="anthropic/claude-sonnet-4"
@@ -2641,8 +2641,8 @@
 																>🌡️ Temperature</label
 															>
 															<div class="badge badge-outline badge-lg">
-																{((data.settings as Record<string, unknown>)
-																	?.ai_temperature as number) || 0.8}
+																{(((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)
+																	?.temperature as number) || 0.8}
 															</div>
 														</div>
 														<input
@@ -2653,8 +2653,8 @@
 															max="2"
 															step="0.1"
 															class="range range-primary w-full"
-															value={((data.settings as Record<string, unknown>)
-																?.ai_temperature as number) || 0.8}
+															value={(((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)
+																?.temperature as number) || 0.8}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>Deterministisch</span>
@@ -2673,7 +2673,7 @@
 																>🎯 Top P</label
 															>
 															<div class="badge badge-outline badge-lg">
-																{((data.settings as Record<string, unknown>)?.ai_topP as string) ||
+																{(((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)?.topP as string) ||
 																	0.9}
 															</div>
 														</div>
@@ -2685,8 +2685,8 @@
 															max="1"
 															step="0.1"
 															class="range range-secondary w-full"
-															value={((data.settings as Record<string, unknown>)
-																?.ai_topP as string) || 0.9}
+															value={(((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)
+																?.topP as string) || 0.9}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>Fokussiert</span>
@@ -2714,8 +2714,8 @@
 														<label class="label mb-4" for="maxTokens">
 															<span class="label-text text-lg font-semibold">📏 Max Tokens</span>
 															<span class="badge badge-ghost badge-lg">
-																{((data.settings as Record<string, unknown>)
-																	?.ai_maxTokens as string) || 2000}
+																{(((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)
+																	?.maxTokens as string) || 2000}
 															</span>
 														</label>
 														<input
@@ -2726,8 +2726,8 @@
 															max="4000"
 															step="100"
 															class="range range-accent w-full"
-															value={((data.settings as Record<string, unknown>)
-																?.ai_maxTokens as string) || 2000}
+															value={(((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)
+																?.maxTokens as string) || 2000}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>500</span>
@@ -2745,8 +2745,8 @@
 																>🔄 Frequency Penalty</span
 															>
 															<span class="badge badge-ghost badge-lg">
-																{((data.settings as Record<string, unknown>)
-																	?.ai_frequencyPenalty as string) || 0.1}
+																{(((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)
+																	?.frequencyPenalty as string) || 0.1}
 															</span>
 														</label>
 														<input
@@ -2757,8 +2757,8 @@
 															max="1"
 															step="0.1"
 															class="range range-warning w-full"
-															value={((data.settings as Record<string, unknown>)
-																?.ai_frequency_penalty as number) || 0.1}
+															value={(((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)
+																?.frequencyPenalty as number) || 0.1}
 														/>
 														<div class="text-base-content/60 mt-3 flex justify-between text-sm">
 															<span>Wiederholungen</span>
