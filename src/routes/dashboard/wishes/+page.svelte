@@ -1356,9 +1356,7 @@
 	<div class="modal-open modal">
 		<div class="modal-box">
 			<h3 class="mb-4 text-lg font-bold">Wunsch für WishSnap freigeben</h3>
-			<p class="mb-4">
-				Möchten Sie diesen Wunsch für WishSnap freigeben?
-			</p>
+			<p class="mb-4">Möchten Sie diesen Wunsch für WishSnap freigeben?</p>
 			<div class="alert alert-info">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -1385,11 +1383,7 @@
 				>
 					Abbrechen
 				</button>
-				<button
-					class="btn btn-primary"
-					onclick={releaseWish}
-					disabled={isReleasing}
-				>
+				<button class="btn btn-primary" onclick={releaseWish} disabled={isReleasing}>
 					{#if isReleasing}
 						<span class="loading loading-spinner loading-sm"></span>
 						Freigeben...

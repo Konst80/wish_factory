@@ -723,9 +723,7 @@
 	<div class="modal-open modal">
 		<div class="modal-box">
 			<h3 class="mb-4 text-lg font-bold">Aus Release entfernen</h3>
-			<p class="mb-4">
-				Möchten Sie diesen Wunsch wirklich aus der Freigabe nehmen?
-			</p>
+			<p class="mb-4">Möchten Sie diesen Wunsch wirklich aus der Freigabe nehmen?</p>
 			<div class="alert alert-warning">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -752,11 +750,7 @@
 				>
 					Abbrechen
 				</button>
-				<button
-					class="btn btn-error"
-					onclick={unreleaseWish}
-					disabled={isUnreleasing}
-				>
+				<button class="btn btn-error" onclick={unreleaseWish} disabled={isUnreleasing}>
 					{#if isUnreleasing}
 						<span class="loading loading-spinner loading-sm"></span>
 						Entfernen...

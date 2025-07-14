@@ -264,7 +264,7 @@ export class ApiKeyService {
 		}
 	): Promise<boolean> {
 		try {
-			const updateData: Record<string, any> = {};
+			const updateData: Record<string, unknown> = {};
 
 			if (updates.rateLimitPerHour !== undefined) {
 				updateData.rate_limit_per_hour = updates.rateLimitPerHour;
@@ -287,20 +287,41 @@ export class ApiKeyService {
 
 	/**
 	 * Check rate limiting for an API key
+	 * TODO: Implement proper rate limiting with api_usage table once database schema is updated
 	 */
 	static async checkRateLimit(apiKey: ApiKey): Promise<{ allowed: boolean; remaining: number }> {
 		try {
-			// This is a simplified version - in production, you'd want to use Redis
-			// For now, we'll just check against the total requests (not time-based)
-			const requestsInLastHour = 0; // Placeholder - implement with proper time-based tracking
+			// Fallback implementation - always allow for now
+			// In production, this should be replaced with proper database-based rate limiting
+			console.log(`Rate limit check for API key ${apiKey.id} - allowing request (fallback mode)`);
 
-			const remaining = Math.max(0, apiKey.rateLimitPerHour - requestsInLastHour);
-			const allowed = requestsInLastHour < apiKey.rateLimitPerHour;
+			const remaining = Math.max(0, apiKey.rateLimitPerHour - 1); // Simulate 1 request used
+			const allowed = true; // Always allow for now
 
 			return { allowed, remaining };
 		} catch (error) {
 			console.error('Error checking rate limit:', error);
 			return { allowed: false, remaining: 0 };
+		}
+	}
+
+	/**
+	 * Increment usage counter for rate limiting
+	 * TODO: Implement proper usage tracking once api_usage table is added to database schema
+	 */
+	private static async incrementUsage(apiKeyId: string, hourTimestamp: number): Promise<void> {
+		try {
+			// Placeholder implementation - log usage for now
+			console.log(`Usage increment for API key ${apiKeyId} at ${hourTimestamp} (fallback mode)`);
+
+			// Update last_used_at timestamp for the API key
+			const supabase = createSupabaseAdminClient();
+			await supabase
+				.from('api_keys')
+				.update({ last_used_at: new Date().toISOString() })
+				.eq('id', apiKeyId);
+		} catch (error) {
+			console.error('Error incrementing usage:', error);
 		}
 	}
 

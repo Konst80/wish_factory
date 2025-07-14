@@ -112,3 +112,7 @@ The system centers around a "Wish" object with the following structure:
 ## Deployment Standards
 
 - Quality Gates: Type check, lint, build must pass before deployment
+
+## Additional Guidelines
+
+- Always use DaisyUI 5.x components (as far as applicable)

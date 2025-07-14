@@ -84,10 +84,22 @@
 			if (parts.length >= 2) {
 				const day = parseInt(parts[0]);
 				const month = parseInt(parts[1]);
-				
-				const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 
-								  'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-				
+
+				const monthNames = [
+					'Jan',
+					'Feb',
+					'Mär',
+					'Apr',
+					'Mai',
+					'Jun',
+					'Jul',
+					'Aug',
+					'Sep',
+					'Okt',
+					'Nov',
+					'Dez'
+				];
+
 				if (month >= 1 && month <= 12) {
 					return {
 						day: `${day}.`,
@@ -95,11 +107,11 @@
 					};
 				}
 			}
-		} catch (e) {
+		} catch {
 			// If parsing fails, return original string split
 			return { day: dateString, month: '' };
 		}
-		
+
 		// Fallback: return original string split
 		return { day: dateString, month: '' };
 	}
@@ -279,7 +291,7 @@
 								</div>
 							{/each}
 						</div>
-						
+
 						<!-- Bars row -->
 						<div class="flex items-end justify-center gap-1" style="height: 180px;">
 							{#each data.wishesOverTime as dayData (dayData.month)}
@@ -294,12 +306,13 @@
 											(dayData.count / maxCount) * 180,
 											dayData.count > 0 ? 8 : 2
 										)}px; min-height: 2px;"
-										title="{formatChartLabel(dayData.month).day} {formatChartLabel(dayData.month).month}: {dayData.count} Wünsche"
+										title="{formatChartLabel(dayData.month).day} {formatChartLabel(dayData.month)
+											.month}: {dayData.count} Wünsche"
 									></div>
 								</div>
 							{/each}
 						</div>
-						
+
 						<!-- Date labels row -->
 						<div class="flex justify-center gap-1">
 							{#each data.wishesOverTime as dayData (dayData.month)}

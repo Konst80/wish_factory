@@ -680,7 +680,7 @@
 								<div class="form-control">
 									<button
 										type="button"
-										class="btn btn-ghost btn-sm gap-2 text-base-content/70 hover:text-base-content"
+										class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content gap-2"
 										onclick={() => (showPasswordModal = true)}
 									>
 										<svg
@@ -1416,8 +1416,8 @@
 											name="promptSystem"
 											class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen..."
-											value={((data.settings as Record<string, unknown>)
-												?.ai_prompt_system as string) ||
+											value={((data.settings as Record<string, unknown>)?.ai
+												?.promptSystem as string) ||
 												'Du bist ein Experte für das Schreiben von Glückwünschen. Antworte immer im exakten JSON-Format ohne zusätzlichen Text.'}
 										></textarea>
 									</div>
@@ -1434,8 +1434,8 @@
 											name="promptTemplate"
 											class="textarea textarea-bordered h-96 w-full font-mono text-sm"
 											placeholder="Du bist ein Experte für das Schreiben von Glückwünschen. Generiere &#123;count&#125; &#123;countText&#125; in der Sprache &#123;language&#125;..."
-											value={((data.settings as Record<string, unknown>)
-												?.ai_promptTemplate as string) || ''}
+											value={((data.settings as Record<string, unknown>)?.ai
+												?.promptTemplate as string) || ''}
 										></textarea>
 										<div
 											class="from-info/5 to-primary/5 border-info/20 mt-4 rounded-lg border bg-gradient-to-br p-4"
@@ -1804,8 +1804,8 @@
 												name="promptAgeYoung"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende modernen, lockeren Ton. Nutze aktuelle Trends und Ausdrücke..."
-												value={((data.settings as Record<string, unknown>)
-													?.ai_promptAgeYoung as string) || ''}
+												value={((data.settings as Record<string, unknown>)?.ai
+													?.promptAgeYoung as string) || ''}
 											></textarea>
 										</div>
 
@@ -1821,8 +1821,8 @@
 												name="promptAgeMiddle"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende ausgewogenen, respektvollen Ton. Berücksichtige Lebenserfahrung..."
-												value={((data.settings as Record<string, unknown>)
-													?.ai_promptAgeMiddle as string) || ''}
+												value={((data.settings as Record<string, unknown>)?.ai
+													?.promptAgeMiddle as string) || ''}
 											></textarea>
 										</div>
 
@@ -1838,8 +1838,8 @@
 												name="promptAgeSenior"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende ehrfürchtigen, würdevollen Ton. Betone Weisheit und Erfahrung..."
-												value={((data.settings as Record<string, unknown>)
-													?.ai_promptAgeSenior as string) || ''}
+												value={((data.settings as Record<string, unknown>)?.ai
+													?.promptAgeSenior as string) || ''}
 											></textarea>
 										</div>
 									</div>
@@ -1930,8 +1930,8 @@
 												name="promptRelationFriend"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende freundlichen, vertrauten Ton. Nutze persönliche Ansprache..."
-												value={((data.settings as Record<string, unknown>)
-													?.ai_prompt_relation_friend as string) || ''}
+												value={((data.settings as Record<string, unknown>)?.ai
+													?.promptRelationFriend as string) || ''}
 											></textarea>
 										</div>
 
@@ -1947,8 +1947,8 @@
 												name="promptRelationFamily"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende herzlichen, familiären Ton. Betone Verbundenheit..."
-												value={((data.settings as Record<string, unknown>)
-													?.ai_prompt_relation_family as string) || ''}
+												value={((data.settings as Record<string, unknown>)?.ai
+													?.promptRelationFamily as string) || ''}
 											></textarea>
 										</div>
 
@@ -1964,8 +1964,8 @@
 												name="promptRelationPartner"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende liebevollen, romantischen Ton. Nutze intime Sprache..."
-												value={((data.settings as Record<string, unknown>)
-													?.ai_prompt_relation_partner as string) || ''}
+												value={((data.settings as Record<string, unknown>)?.ai
+													?.promptRelationPartner as string) || ''}
 											></textarea>
 										</div>
 
@@ -1981,8 +1981,8 @@
 												name="promptRelationColleague"
 												class="textarea textarea-bordered h-20 w-full font-mono text-sm"
 												placeholder="z.B. Verwende professionellen, respektvollen Ton. Achte auf Förmlichkeit..."
-												value={((data.settings as Record<string, unknown>)
-													?.ai_prompt_relation_colleague as string) || ''}
+												value={((data.settings as Record<string, unknown>)?.ai
+													?.promptRelationColleague as string) || ''}
 											></textarea>
 										</div>
 									</div>
@@ -2072,8 +2072,8 @@
 												name="promptBatch"
 												class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 												placeholder="z.B. Generiere {'{count}'} ausgewogene Wünsche: 70% Geburtstag, 20% Jubiläum, 10% Sonstiges. Achte auf Vielfalt in Stil und Tonalität..."
-												value={((data.settings as Record<string, unknown>)
-													?.ai_promptBatch as string) || ''}
+												value={((data.settings as Record<string, unknown>)?.ai
+													?.promptBatch as string) || ''}
 											></textarea>
 											<label class="label">
 												<span class="label-text-alt text-info">Für optimale Batch-Ergebnisse</span>
@@ -2303,8 +2303,8 @@
 									name="promptBelated"
 									class="textarea textarea-bordered h-32 w-full font-mono text-sm"
 									placeholder="z.B. Formuliere den Wunsch als nachträglichen Glückwunsch. Beginne mit einer höflichen Entschuldigung für die Verspätung..."
-									value={((data.settings as Record<string, unknown>)?.ai_promptBelated as string) ||
-										''}
+									value={((data.settings as Record<string, unknown>)?.ai
+										?.promptBelated as string) || ''}
 								></textarea>
 								<label class="label">
 									<span class="label-text-alt text-info"

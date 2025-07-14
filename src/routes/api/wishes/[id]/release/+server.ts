@@ -15,7 +15,16 @@ export const POST: RequestHandler = async ({ params, cookies }) => {
 		} = await supabase.auth.getUser();
 
 		if (authError || !user) {
-			return json({ error: 'Unauthorized' }, { status: 401 });
+			return json(
+				{
+					error: {
+						code: 'UNAUTHORIZED',
+						message: 'Authentication required',
+						timestamp: new Date().toISOString()
+					}
+				},
+				{ status: 401 }
+			);
 		}
 
 		// Release the wish
@@ -30,7 +39,11 @@ export const POST: RequestHandler = async ({ params, cookies }) => {
 		console.error('Release wish error:', error);
 		return json(
 			{
-				error: error instanceof Error ? error.message : 'Failed to release wish'
+				error: {
+					code: 'RELEASE_FAILED',
+					message: error instanceof Error ? error.message : 'Failed to release wish',
+					timestamp: new Date().toISOString()
+				}
 			},
 			{ status: 400 }
 		);
@@ -49,7 +62,16 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 		} = await supabase.auth.getUser();
 
 		if (authError || !user) {
-			return json({ error: 'Unauthorized' }, { status: 401 });
+			return json(
+				{
+					error: {
+						code: 'UNAUTHORIZED',
+						message: 'Authentication required',
+						timestamp: new Date().toISOString()
+					}
+				},
+				{ status: 401 }
+			);
 		}
 
 		// Unrelease the wish
@@ -63,7 +85,11 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 		console.error('Unrelease wish error:', error);
 		return json(
 			{
-				error: error instanceof Error ? error.message : 'Failed to unrelease wish'
+				error: {
+					code: 'UNRELEASE_FAILED',
+					message: error instanceof Error ? error.message : 'Failed to unrelease wish',
+					timestamp: new Date().toISOString()
+				}
 			},
 			{ status: 400 }
 		);
