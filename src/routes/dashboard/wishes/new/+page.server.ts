@@ -2,17 +2,20 @@ import { fail, redirect } from '@sveltejs/kit';
 import { createWishSchema, WishStatus, WishLength } from '$lib/types/Wish.js';
 import type { Actions, PageServerLoad } from './$types.js';
 import { z } from 'zod';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '$lib/types/supabase';
 
 // Utility function to generate wish IDs with fallback
 async function generateWishId(
-	supabase: any,
+	supabase: SupabaseClient<Database>,
 	language: string,
-	counter: number = 0
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	_counter?: number
 ): Promise<string> {
 	try {
 		// Try database function first
 		const { data: dbResult, error: dbError } = await supabase.rpc('generate_wish_id', {
-			wish_language: language
+			wish_language: language as 'de' | 'en'
 		});
 
 		if (dbError) {
