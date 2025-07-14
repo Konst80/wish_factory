@@ -112,10 +112,13 @@ function createAuthStore() {
 				return;
 			}
 
+			// Get actual session for completeness (but user is authoritative)
+			const { data: { session } } = await supabase!.auth.getSession();
+			
 			update((state) => ({
 				...state,
 				user,
-				session: { user } as Session,
+				session: session || { user } as Session,
 				profile,
 				loading: false,
 				error: null
