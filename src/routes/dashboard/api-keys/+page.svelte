@@ -646,12 +646,16 @@
 				<button class="btn btn-ghost" onclick={() => (selectedKeyForDeactivation = null)}>
 					Abbrechen
 				</button>
-				<form method="POST" action="?/deactivate" use:enhance>
+				<form method="POST" action="?/deactivate" use:enhance={() => {
+					return async ({ update }) => {
+						await update();
+						selectedKeyForDeactivation = null;
+					};
+				}}>
 					<input type="hidden" name="keyId" value={selectedKeyForDeactivation} />
 					<button
 						type="submit"
 						class="btn btn-error"
-						onclick={() => (selectedKeyForDeactivation = null)}
 					>
 						Deaktivieren
 					</button>
