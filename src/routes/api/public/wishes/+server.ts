@@ -141,21 +141,22 @@ export const GET: RequestHandler = async ({ url, request }) => {
 	} catch (error) {
 		console.error('Public API error:', error);
 
-		const errorResponse = {
-			error: {
-				code: 'INTERNAL_ERROR',
-				message: 'Internal server error',
-				timestamp: new Date().toISOString()
+		return json(
+			{
+				error: {
+					code: 'INTERNAL_ERROR',
+					message: 'Internal server error',
+					timestamp: new Date().toISOString()
+				}
+			},
+			{
+				status: 500,
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Content-Type': 'application/json'
+				}
 			}
-		};
-
-		return json(errorResponse, {
-			status: 500,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Content-Type': 'application/json'
-			}
-		});
+		);
 	}
 };
 
