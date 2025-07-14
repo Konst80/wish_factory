@@ -53,7 +53,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			throw error(500, 'Fehler beim Laden der Benutzerdaten');
 		}
 
-		// Get ALL invitations for statistics (unfiltered) 
+		// Get ALL invitations for statistics (unfiltered)
 		const { data: allInvitations, error: allInvitationsError } = await adminClient
 			.from('invitations')
 			.select(
@@ -103,7 +103,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}
 
 		// Build query for filtered invitations
-		let invitationQuery = adminClient.from('invitations').select(`
+		let invitationQuery = adminClient
+			.from('invitations')
+			.select(
+				`
 				id,
 				email,
 				full_name,
@@ -111,19 +114,26 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				created_at,
 				expires_at,
 				accepted_at
-			`).is('accepted_at', null);
+			`
+			)
+			.is('accepted_at', null);
 
 		// Apply filters to invitations
 		if (searchTerm) {
-			invitationQuery = invitationQuery.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+			invitationQuery = invitationQuery.or(
+				`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`
+			);
 		}
 		if (selectedRole === 'Administrator' || selectedRole === 'Redakteur') {
 			invitationQuery = invitationQuery.eq('role', selectedRole);
 		}
 
-		const { data: invitations, error: invitationsError } = await invitationQuery.order('created_at', {
-			ascending: false
-		});
+		const { data: invitations, error: invitationsError } = await invitationQuery.order(
+			'created_at',
+			{
+				ascending: false
+			}
+		);
 
 		if (invitationsError) {
 			console.error('Error fetching filtered invitations:', invitationsError);
@@ -200,10 +210,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			selectedStatus === 'active' || selectedStatus === 'inactive'
 				? allUsersAndInvitations.filter((user) => user.status === selectedStatus)
 				: selectedStatus === 'invited'
-				? allUsersAndInvitations.filter((user) => user.status === 'invited')
-				: selectedStatus === 'expired'
-				? allUsersAndInvitations.filter((user) => user.status === 'expired')
-				: allUsersAndInvitations;
+					? allUsersAndInvitations.filter((user) => user.status === 'invited')
+					: selectedStatus === 'expired'
+						? allUsersAndInvitations.filter((user) => user.status === 'expired')
+						: allUsersAndInvitations;
 
 		// Sort by creation date (newest first)
 		finalUsers.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());

@@ -49,13 +49,15 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 
 const handleInitialization: Handle = async ({ event, resolve }) => {
 	const url = new URL(event.request.url);
-	
+
 	// Skip initialization check for API routes, setup page, and static assets
-	if (url.pathname.startsWith('/api/') || 
+	if (
+		url.pathname.startsWith('/api/') ||
 		url.pathname.startsWith('/auth/setup-admin') ||
 		url.pathname.startsWith('/_app/') ||
 		url.pathname.startsWith('/favicon') ||
-		url.pathname.includes('.')) {
+		url.pathname.includes('.')
+	) {
 		return resolve(event);
 	}
 
@@ -105,12 +107,12 @@ const handleInitialization: Handle = async ({ event, resolve }) => {
 		if (error instanceof Response && error.status >= 300 && error.status < 400) {
 			throw error; // Re-throw redirect responses
 		}
-		
+
 		// Check if it's a redirect error object
 		if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
 			throw error; // Re-throw redirect objects
 		}
-		
+
 		console.error('Unexpected error in initialization check:', error);
 		return resolve(event);
 	}

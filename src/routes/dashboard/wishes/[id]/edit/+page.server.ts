@@ -125,7 +125,7 @@ export const actions: Actions = {
 					age_groups: validatedData.ageGroups,
 					specific_values: validatedData.specificValues,
 					text: validatedData.text,
-					belated: validatedData.belated.toString(),
+					belated: validatedData.belated,
 					status: validatedData.status,
 					language: validatedData.language,
 					updated_at: new Date().toISOString()

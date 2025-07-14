@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import * as m from '$lib/paraglide/messages';
+	// import * as m from '$lib/paraglide/messages';
 
 	let currentStep = $state(1);
 	let isLoading = $state(false);
@@ -22,7 +22,7 @@
 		try {
 			const response = await fetch('/api/system/init-status');
 			const data = await response.json();
-			
+
 			if (data.status === 'success' && !data.data.requiresSetup) {
 				// System already initialized, redirect to login
 				goto('/auth/login?message=already_initialized');
@@ -36,7 +36,7 @@
 	const handlePresetPasswordSubmit = async (e: Event) => {
 		e.preventDefault();
 		error = '';
-		
+
 		if (!presetPassword) {
 			error = 'Please enter the setup password';
 			return;
@@ -84,7 +84,7 @@
 			const response = await fetch('/api/system/setup-admin', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json',
+					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
 					presetPassword,
@@ -98,7 +98,7 @@
 
 			if (data.status === 'success') {
 				success = 'Admin user created successfully! Please check your email for verification.';
-				
+
 				// Redirect to login after 3 seconds
 				setTimeout(() => {
 					goto('/auth/login?message=admin_created');
@@ -127,9 +127,7 @@
 <div class="bg-base-200 flex min-h-screen items-center justify-center">
 	<div class="card bg-base-100 w-full max-w-md shadow-xl">
 		<div class="card-body">
-			<h1 class="card-title mb-6 text-center text-2xl font-bold">
-				🔧 System Setup
-			</h1>
+			<h1 class="card-title mb-6 text-center text-2xl font-bold">🔧 System Setup</h1>
 
 			<!-- Progress Steps -->
 			<div class="steps steps-horizontal mb-6">
@@ -139,8 +137,18 @@
 
 			{#if error}
 				<div class="alert alert-error mb-4">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6 shrink-0 stroke-current"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					<span>{error}</span>
 				</div>
@@ -148,8 +156,18 @@
 
 			{#if success}
 				<div class="alert alert-success mb-4">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6 shrink-0 stroke-current"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					<span>{success}</span>
 				</div>
@@ -158,8 +176,18 @@
 			{#if currentStep === 1}
 				<!-- Step 1: Preset Password -->
 				<div class="alert alert-info mb-4">
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						class="h-6 w-6 shrink-0 stroke-current"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						></path>
 					</svg>
 					<div>
 						<div class="font-bold">First-time Setup</div>
@@ -200,8 +228,18 @@
 			{:else if currentStep === 2}
 				<!-- Step 2: Admin Details -->
 				<div class="alert alert-success mb-4">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6 shrink-0 stroke-current"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
 					<div>
 						<div class="font-bold">Setup Password Verified</div>
@@ -284,8 +322,13 @@
 								Create Admin User
 							{/if}
 						</button>
-						
-						<button type="button" class="btn btn-ghost" onclick={goBackToStep1} disabled={isLoading}>
+
+						<button
+							type="button"
+							class="btn btn-ghost"
+							onclick={goBackToStep1}
+							disabled={isLoading}
+						>
 							Back
 						</button>
 					</div>
@@ -293,15 +336,27 @@
 			{/if}
 
 			<!-- Security Notice -->
-			<div class="mt-6 rounded-lg bg-base-200 p-4">
+			<div class="bg-base-200 mt-6 rounded-lg p-4">
 				<div class="flex items-center gap-2 text-sm">
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+						class="h-5 w-5"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+						/>
 					</svg>
 					<span class="font-medium">Security Notice</span>
 				</div>
 				<p class="mt-2 text-sm opacity-70">
-					This setup process can only be completed once. After creating the admin user, this page will no longer be accessible.
+					This setup process can only be completed once. After creating the admin user, this page
+					will no longer be accessible.
 				</p>
 			</div>
 		</div>

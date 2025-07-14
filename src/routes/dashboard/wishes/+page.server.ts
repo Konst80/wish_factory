@@ -74,7 +74,7 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		query = query.overlaps('age_groups', ageGroups);
 	}
 	if (filters.belated !== undefined) {
-		query = query.eq('belated', filters.belated.toString());
+		query = query.eq('belated', filters.belated);
 	}
 
 	// Apply sorting with validation

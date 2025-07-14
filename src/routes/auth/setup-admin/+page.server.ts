@@ -5,9 +5,10 @@ import { createSupabaseServerClient } from '$lib/supabase';
 export const load: PageServerLoad = async ({ cookies }) => {
 	const supabase = createSupabaseServerClient({
 		getAll: () => cookies.getAll(),
-		setAll: (cookies) => cookies.forEach(({ name, value, options }) => {
-			cookies.set(name, value, { ...options, path: '/' });
-		})
+		setAll: (cookieValues) =>
+			cookieValues.forEach(({ name, value, options }) => {
+				cookies.set(name, value, { ...options, path: '/' });
+			})
 	});
 
 	try {
@@ -48,12 +49,11 @@ export const load: PageServerLoad = async ({ cookies }) => {
 
 		// System needs setup, allow access to setup page
 		return {};
-
 	} catch (error) {
 		if (error instanceof Response) {
 			throw error; // Re-throw redirect responses
 		}
-		
+
 		console.error('Unexpected error in setup-admin load:', error);
 		// Allow access if unexpected error - better than blocking legitimate setup
 		return {};

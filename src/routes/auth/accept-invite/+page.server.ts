@@ -3,7 +3,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { getInvitationByToken, markInvitationAsAccepted } from '$lib/server/invitations';
 import { createSupabaseAdminClient } from '$lib/server/supabase-admin';
 
-export const load: PageServerLoad = async ({ url, locals }) => {
+export const load: PageServerLoad = async ({ url }) => {
 	const token = url.searchParams.get('token');
 
 	if (!token) {
@@ -127,10 +127,9 @@ export const actions: Actions = {
 			await markInvitationAsAccepted(adminClient, token);
 
 			// Sign in the user automatically
-			const { error: signInError } = await adminClient.auth.admin.updateUserById(
-				newUser.user.id,
-				{ email_confirm: true }
-			);
+			const { error: signInError } = await adminClient.auth.admin.updateUserById(newUser.user.id, {
+				email_confirm: true
+			});
 
 			if (signInError) {
 				console.error('Error confirming user email:', signInError);

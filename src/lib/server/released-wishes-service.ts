@@ -50,7 +50,7 @@ export class ReleasedWishesService {
 				age_groups: wish.age_groups,
 				specific_values: wish.specific_values || [],
 				text: wish.text,
-				belated: wish.belated === 'true',
+				belated: wish.belated,
 				language: wish.language,
 				length: 'medium', // Default length since wishes table doesn't have this field yet
 				released_by: releasedBy
@@ -74,7 +74,7 @@ export class ReleasedWishesService {
 			belated: releasedWish.belated,
 			language: releasedWish.language as Language,
 			length: releasedWish.length as WishLength,
-			releasedAt: new Date(releasedWish.released_at)
+			releasedAt: new Date(releasedWish.released_at || new Date())
 		};
 	}
 
@@ -157,7 +157,7 @@ export class ReleasedWishesService {
 			belated: row.belated,
 			language: row.language as Language,
 			length: row.length as WishLength,
-			releasedAt: new Date(row.released_at)
+			releasedAt: new Date(row.released_at || new Date())
 		}));
 
 		const total = count || 0;
@@ -192,7 +192,7 @@ export class ReleasedWishesService {
 			belated: data.belated,
 			language: data.language as Language,
 			length: data.length as WishLength,
-			releasedAt: new Date(data.released_at)
+			releasedAt: new Date(data.released_at || new Date())
 		};
 	}
 
@@ -249,7 +249,7 @@ export class ReleasedWishesService {
 			wish.relations?.forEach((rel: string) => relations.add(rel));
 			wish.age_groups?.forEach((age: string) => ageGroups.add(age));
 
-			const releaseDate = new Date(wish.released_at);
+			const releaseDate = new Date(wish.released_at || new Date());
 			if (releaseDate > lastUpdated) {
 				lastUpdated = releaseDate;
 			}

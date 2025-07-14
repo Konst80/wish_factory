@@ -6,9 +6,10 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	try {
 		const supabase = createSupabaseServerClient({
 			getAll: () => cookies.getAll(),
-			setAll: (cookies) => cookies.forEach(({ name, value, options }) => {
-				cookies.set(name, value, { ...options, path: '/' });
-			})
+			setAll: (cookieValues) =>
+				cookieValues.forEach(({ name, value, options }) => {
+					cookies.set(name, value, { ...options, path: '/' });
+				})
 		});
 
 		// Check if system has been initialized
@@ -19,11 +20,14 @@ export const GET: RequestHandler = async ({ cookies }) => {
 
 		if (initError) {
 			console.error('Error checking initialization status:', initError);
-			return json({
-				status: 'error',
-				message: 'Failed to check initialization status',
-				error: initError.message
-			}, { status: 500 });
+			return json(
+				{
+					status: 'error',
+					message: 'Failed to check initialization status',
+					error: initError.message
+				},
+				{ status: 500 }
+			);
 		}
 
 		const isInitialized = initData && initData.length > 0;
@@ -52,20 +56,24 @@ export const GET: RequestHandler = async ({ cookies }) => {
 				isInitialized,
 				hasAdminUsers,
 				requiresSetup: !isInitialized && !hasAdminUsers,
-				initializationInfo: isInitialized ? {
-					adminEmail: initData[0].admin_email,
-					completedAt: initData[0].created_at
-				} : null
+				initializationInfo: isInitialized
+					? {
+							adminEmail: initData[0].admin_email,
+							completedAt: initData[0].created_at
+						}
+					: null
 			},
 			timestamp: new Date().toISOString()
 		});
-
 	} catch (error) {
 		console.error('Unexpected error checking initialization status:', error);
-		return json({
-			status: 'error',
-			message: 'Unexpected error occurred',
-			error: error instanceof Error ? error.message : 'Unknown error'
-		}, { status: 500 });
+		return json(
+			{
+				status: 'error',
+				message: 'Unexpected error occurred',
+				error: error instanceof Error ? error.message : 'Unknown error'
+			},
+			{ status: 500 }
+		);
 	}
 };
