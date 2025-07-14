@@ -12,6 +12,7 @@
 	let showAddUserModal = $state(false);
 	let showEditUserModal = $state(false);
 	let showDeleteModal = $state(false);
+	let showResendModal = $state(false);
 	let selectedUser = $state<(typeof data.users)[0] | null>(null);
 
 	// Form data for new/edit user
@@ -104,6 +105,16 @@
 	function closeDeleteModal() {
 		selectedUser = null;
 		showDeleteModal = false;
+	}
+
+	function openResendModal(user: (typeof data.users)[0]) {
+		selectedUser = user;
+		showResendModal = true;
+	}
+
+	function closeResendModal() {
+		selectedUser = null;
+		showResendModal = false;
 	}
 
 	function closeEditModal() {
@@ -371,6 +382,7 @@
 											class="btn btn-ghost btn-xs text-warning"
 											title="Einladung erneut senden"
 											aria-label="Einladung erneut senden"
+											onclick={() => openResendModal(user)}
 										>
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
@@ -392,6 +404,7 @@
 										class="btn btn-ghost btn-xs text-error"
 										title="Einladung löschen"
 										aria-label="Einladung löschen"
+										onclick={() => openDeleteModal(user)}
 									>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
@@ -590,9 +603,12 @@
 {#if showDeleteModal && selectedUser}
 	<div class="modal-open modal">
 		<div class="modal-box">
-			<h3 class="mb-4 text-lg font-bold">Benutzer löschen</h3>
+			<h3 class="mb-4 text-lg font-bold">
+				{selectedUser.type === 'invitation' ? 'Einladung löschen' : 'Benutzer löschen'}
+			</h3>
 			<p class="mb-4">
-				Möchten Sie den Benutzer <strong>{selectedUser.full_name}</strong> wirklich löschen?
+				Möchten Sie {selectedUser.type === 'invitation' ? 'die Einladung für' : 'den Benutzer'}
+				<strong>{selectedUser.full_name}</strong> wirklich löschen?
 			</p>
 			<div class="alert alert-warning">
 				<svg
@@ -612,20 +628,26 @@
 			</div>
 			<form
 				method="POST"
-				action="?/deleteUser"
+				action={selectedUser.type === 'invitation' ? '?/deleteInvitation' : '?/deleteUser'}
 				use:enhance={() => {
 					return async ({ result }) => {
 						if (result.type === 'success') {
 							const userName = selectedUser?.full_name || 'Benutzer';
+							const isInvitation = selectedUser?.type === 'invitation';
 							showDeleteModal = false;
 							selectedUser = null;
-							showGlobalMessage('success', `${userName} erfolgreich gelöscht`);
-							// Reload page data to remove deleted user
+							showGlobalMessage(
+								'success',
+								`${isInvitation ? 'Einladung für ' : ''}${userName} erfolgreich gelöscht`
+							);
+							// Reload page data to remove deleted user/invitation
 							await invalidateAll();
 						} else if (result.type === 'failure') {
+							const isInvitation = selectedUser?.type === 'invitation';
 							showGlobalMessage(
 								'error',
-								(result.data?.message as string) || 'Fehler beim Löschen des Benutzers'
+								(result.data?.message as string) ||
+									`Fehler beim Löschen ${isInvitation ? 'der Einladung' : 'des Benutzers'}`
 							);
 						}
 					};
@@ -635,6 +657,62 @@
 				<div class="modal-action">
 					<button type="button" class="btn btn-ghost" onclick={closeDeleteModal}>Abbrechen</button>
 					<button type="submit" class="btn btn-error">Löschen</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+
+<!-- Resend Invitation Modal -->
+{#if showResendModal && selectedUser}
+	<div class="modal-open modal">
+		<div class="modal-box">
+			<h3 class="mb-4 text-lg font-bold">Einladung erneut senden</h3>
+			<p class="mb-4">
+				Möchten Sie die Einladung für <strong>{selectedUser.full_name}</strong>
+				({selectedUser.email}) erneut senden?
+			</p>
+			<div class="alert alert-info">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
+				</svg>
+				<span>Die Einladung wird mit einer neuen Gültigkeitsdauer von 7 Tagen versendet.</span>
+			</div>
+			<form
+				method="POST"
+				action="?/resendInvitation"
+				use:enhance={() => {
+					return async ({ result }) => {
+						if (result.type === 'success') {
+							const userName = selectedUser?.full_name || 'Benutzer';
+							showResendModal = false;
+							selectedUser = null;
+							showGlobalMessage('success', `Einladung für ${userName} erfolgreich erneut gesendet`);
+							// Reload page data to update invitation status
+							await invalidateAll();
+						} else if (result.type === 'failure') {
+							showGlobalMessage(
+								'error',
+								(result.data?.message as string) || 'Fehler beim erneuten Senden der Einladung'
+							);
+						}
+					};
+				}}
+			>
+				<input type="hidden" name="userId" value={selectedUser.id} />
+				<div class="modal-action">
+					<button type="button" class="btn btn-ghost" onclick={closeResendModal}>Abbrechen</button>
+					<button type="submit" class="btn btn-warning">Einladung senden</button>
 				</div>
 			</form>
 		</div>

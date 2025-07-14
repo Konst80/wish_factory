@@ -461,5 +461,122 @@ export const actions: Actions = {
 			console.error('Unexpected error during invitation:', error);
 			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
 		}
+	},
+
+	deleteInvitation: async ({ request, locals }) => {
+		const {
+			data: { user }
+		} = await locals.supabase.auth.getUser();
+		if (!user) {
+			return fail(401, { message: 'Nicht authentifiziert' });
+		}
+
+		// Check if current user is admin
+		const { data: currentUserProfile } = await locals.supabase
+			.from('profiles')
+			.select('role')
+			.eq('id', user.id)
+			.single();
+
+		if (!currentUserProfile || currentUserProfile.role !== 'Administrator') {
+			return fail(403, { message: 'Keine Berechtigung' });
+		}
+
+		const formData = await request.formData();
+		const invitationId = formData.get('userId') as string;
+
+		if (!invitationId) {
+			return fail(400, { message: 'Einladungs-ID fehlt' });
+		}
+
+		// Delete invitation
+		const adminClient = createSupabaseAdminClient();
+		const { error: deleteError } = await adminClient
+			.from('invitations')
+			.delete()
+			.eq('id', invitationId);
+
+		if (deleteError) {
+			console.error('Error deleting invitation:', deleteError);
+			return fail(500, { message: 'Fehler beim Löschen der Einladung' });
+		}
+
+		return { success: true, message: 'Einladung erfolgreich gelöscht' };
+	},
+
+	resendInvitation: async ({ request, locals }) => {
+		const {
+			data: { user }
+		} = await locals.supabase.auth.getUser();
+		if (!user) {
+			return fail(401, { message: 'Nicht authentifiziert' });
+		}
+
+		// Check if current user is admin
+		const { data: currentUserProfile } = await locals.supabase
+			.from('profiles')
+			.select('role, full_name')
+			.eq('id', user.id)
+			.single();
+
+		if (!currentUserProfile || currentUserProfile.role !== 'Administrator') {
+			return fail(403, { message: 'Keine Berechtigung' });
+		}
+
+		const formData = await request.formData();
+		const invitationId = formData.get('userId') as string;
+
+		if (!invitationId) {
+			return fail(400, { message: 'Einladungs-ID fehlt' });
+		}
+
+		const adminClient = createSupabaseAdminClient();
+
+		// Get the invitation details
+		const { data: invitation, error: invitationError } = await adminClient
+			.from('invitations')
+			.select('*')
+			.eq('id', invitationId)
+			.single();
+
+		if (invitationError || !invitation) {
+			console.error('Error fetching invitation:', invitationError);
+			return fail(404, { message: 'Einladung nicht gefunden' });
+		}
+
+		// Check if invitation is still valid (not accepted)
+		const now = new Date();
+
+		if (invitation.accepted_at) {
+			return fail(400, { message: 'Einladung wurde bereits angenommen' });
+		}
+
+		// Update the invitation with a new expiration date (7 days from now)
+		const newExpiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+		const { error: updateError } = await adminClient
+			.from('invitations')
+			.update({ expires_at: newExpiresAt.toISOString() })
+			.eq('id', invitationId);
+
+		if (updateError) {
+			console.error('Error updating invitation:', updateError);
+			return fail(500, { message: 'Fehler beim Aktualisieren der Einladung' });
+		}
+
+		// Send invitation email
+		const emailResult = await sendInvitationEmail({
+			to: invitation.email,
+			fullName: invitation.full_name,
+			inviterName: currentUserProfile.full_name,
+			role: invitation.role,
+			token: invitation.token
+		});
+
+		if (!emailResult.success) {
+			return fail(500, { message: 'Fehler beim Senden der Einladungs-E-Mail' });
+		}
+
+		return { success: true, message: 'Einladung erfolgreich erneut gesendet' };
 	}
 };
