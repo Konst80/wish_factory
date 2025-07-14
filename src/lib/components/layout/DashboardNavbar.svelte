@@ -8,14 +8,14 @@
 	};
 </script>
 
-<div class="navbar bg-base-300 lg:hidden">
+<div class="navbar bg-base-100 border-base-300 border-b lg:hidden">
 	<div class="flex-none">
-		<button class="btn btn-ghost btn-square" onclick={handleMenuToggle} aria-label="Menu öffnen">
+		<button class="btn btn-ghost btn-sm" onclick={handleMenuToggle} aria-label="Menu öffnen">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
 				viewBox="0 0 24 24"
-				class="inline-block h-6 w-6 stroke-current"
+				class="inline-block h-5 w-5 stroke-current"
 			>
 				<path
 					stroke-linecap="round"
@@ -28,26 +28,27 @@
 	</div>
 
 	<div class="flex-1">
-		<a href="/dashboard" class="text-xl font-bold">Wish Factory</a>
+		<a href="/dashboard" class="text-lg font-semibold">Wish Factory</a>
 	</div>
 
 	<div class="flex-none">
 		<div class="dropdown dropdown-end">
-			<div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+			<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm avatar">
 				<div class="placeholder avatar">
-					<div class="bg-primary text-primary-content w-10 rounded-full">
-						<span class="text-sm">{$currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
+					<div class="bg-primary text-primary-content w-8 rounded-full">
+						<span class="text-xs">{$currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
 					</div>
 				</div>
 			</div>
-			<ul class="menu dropdown-content rounded-box bg-base-100 z-[1] mt-3 w-52 p-2 shadow">
+			<ul
+				class="menu dropdown-content rounded-box bg-base-100 border-base-300 z-[1] mt-3 w-48 border p-2 shadow-lg"
+			>
 				<li class="menu-title">
-					<span>{$currentUserProfile?.full_name || 'User'}</span>
+					<span class="text-xs">{$currentUserProfile?.full_name || 'User'}</span>
 				</li>
-				<li><a href="/dashboard/profile">Profil bearbeiten</a></li>
-				<li><a href="/dashboard/settings">Einstellungen</a></li>
+				<li><a href="/dashboard/settings" class="text-sm">Einstellungen</a></li>
 				<div class="divider my-1"></div>
-				<li><a href="/auth/logout" class="text-error">Abmelden</a></li>
+				<li><a href="/auth/logout" class="text-error text-sm">Abmelden</a></li>
 			</ul>
 		</div>
 	</div>

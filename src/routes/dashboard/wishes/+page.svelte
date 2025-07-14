@@ -25,8 +25,11 @@
 	let selectedWishes = $state<string[]>([]);
 	let showDeleteModal = $state(false);
 	let showExportModal = $state(false);
+	let showReleaseModal = $state(false);
 	let isDeleting = $state(false);
+	let isReleasing = $state(false);
 	let showWorkflowHelp = $state(false);
+	let selectedWishForRelease = $state<string | null>(null);
 
 	// Load saved filters on page mount
 	$effect(() => {
@@ -225,26 +228,36 @@
 		clearSelection();
 	}
 
-	// Release wish for WishSnap
-	async function releaseWish(wishId: string) {
-		if (!confirm('Möchten Sie diesen Wunsch für WishSnap freigeben?')) {
-			return;
-		}
+	// Open release modal
+	function openReleaseModal(wishId: string) {
+		selectedWishForRelease = wishId;
+		showReleaseModal = true;
+	}
 
+	// Release wish for WishSnap
+	async function releaseWish() {
+		if (!selectedWishForRelease) return;
+
+		isReleasing = true;
 		try {
-			const response = await fetch(`/api/wishes/${wishId}/release`, {
+			const response = await fetch(`/api/wishes/${selectedWishForRelease}/release`, {
 				method: 'POST'
 			});
 
 			if (response.ok) {
 				await response.json(); // Success response
-				alert(`Wunsch erfolgreich für WishSnap freigegeben!`);
+				showReleaseModal = false;
+				selectedWishForRelease = null;
+				// You could add a success message here if needed
 			} else {
 				const errorData = await response.json();
-				alert(`Fehler: ${errorData.error}`);
+				// Handle error - you might want to show this in a different way
+				console.error('Release error:', errorData.error);
 			}
-		} catch {
-			alert('Ein Fehler ist aufgetreten');
+		} catch (error) {
+			console.error('Release error:', error);
+		} finally {
+			isReleasing = false;
 		}
 	}
 </script>
@@ -1188,7 +1201,7 @@
 										class="btn btn-ghost text-accent hover:bg-accent/10"
 										title="Für WishSnap freigeben"
 										aria-label="Wunsch für WishSnap freigeben"
-										onclick={() => releaseWish(wish.id)}
+										onclick={() => openReleaseModal(wish.id)}
 									>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
@@ -1333,6 +1346,57 @@
 						{/if}
 					</button>
 				</form>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Release Modal -->
+{#if showReleaseModal}
+	<div class="modal-open modal">
+		<div class="modal-box">
+			<h3 class="mb-4 text-lg font-bold">Wunsch für WishSnap freigeben</h3>
+			<p class="mb-4">
+				Möchten Sie diesen Wunsch für WishSnap freigeben?
+			</p>
+			<div class="alert alert-info">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
+				</svg>
+				<span>Der Wunsch wird für die WishSnap-Plattform verfügbar gemacht.</span>
+			</div>
+			<div class="modal-action">
+				<button
+					class="btn btn-ghost"
+					onclick={() => {
+						showReleaseModal = false;
+						selectedWishForRelease = null;
+					}}
+				>
+					Abbrechen
+				</button>
+				<button
+					class="btn btn-primary"
+					onclick={releaseWish}
+					disabled={isReleasing}
+				>
+					{#if isReleasing}
+						<span class="loading loading-spinner loading-sm"></span>
+						Freigeben...
+					{:else}
+						Freigeben
+					{/if}
+				</button>
 			</div>
 		</div>
 	</div>

@@ -98,36 +98,33 @@
 	};
 </script>
 
-<aside class="bg-base-200 text-base-content min-h-full w-80">
+<aside class="bg-base-100 text-base-content border-base-300 min-h-full w-64 border-r">
 	<!-- Sidebar header -->
 	<div class="border-base-300 border-b p-4">
 		<div class="flex items-center gap-3">
 			<div class="avatar">
-				<div class="bg-primary text-primary-content w-12 rounded-full">
-					<div class="flex h-12 items-center justify-center">
-						<span class="text-lg font-medium"
+				<div class="bg-primary text-primary-content w-8 rounded-full">
+					<div class="flex h-8 items-center justify-center">
+						<span class="text-sm font-medium"
 							>{currentUserProfile?.full_name?.charAt(0) || 'U'}</span
 						>
 					</div>
 				</div>
 			</div>
 			<div class="min-w-0 flex-1">
-				<div class="truncate font-bold">{currentUserProfile?.full_name || 'User'}</div>
-				<div class="truncate text-sm opacity-70">{currentUserProfile?.email || ''}</div>
-				<div class="mt-1">
-					{#if isAdmin}
-						<span class="badge badge-error badge-xs">Admin</span>
-					{:else}
-						<span class="badge badge-primary badge-xs">Redakteur</span>
-					{/if}
-				</div>
+				<div class="truncate text-sm font-medium">{currentUserProfile?.full_name || 'User'}</div>
+				{#if isAdmin}
+					<span class="badge badge-error badge-xs">Admin</span>
+				{:else}
+					<span class="badge badge-primary badge-xs">Editor</span>
+				{/if}
 			</div>
 		</div>
 	</div>
 
 	<!-- Navigation menu -->
-	<nav class="p-4">
-		<ul class="menu">
+	<nav class="p-3">
+		<ul class="menu menu-compact">
 			{#each visibleMenuItems as item (item.href)}
 				<li>
 					{#if item.submenu}
@@ -141,7 +138,7 @@
 								viewBox="0 0 24 24"
 								stroke-width="1.5"
 								stroke="currentColor"
-								class="h-5 w-5"
+								class="h-4 w-4"
 							>
 								<path stroke-linecap="round" stroke-linejoin="round" d={item.icon} />
 							</svg>
@@ -160,7 +157,7 @@
 											viewBox="0 0 24 24"
 											stroke-width="1.5"
 											stroke="currentColor"
-											class="h-4 w-4"
+											class="h-3 w-3"
 										>
 											<path stroke-linecap="round" stroke-linejoin="round" d={submenuItem.icon} />
 										</svg>
@@ -177,7 +174,7 @@
 								viewBox="0 0 24 24"
 								stroke-width="1.5"
 								stroke="currentColor"
-								class="h-5 w-5"
+								class="h-4 w-4"
 							>
 								<path stroke-linecap="round" stroke-linejoin="round" d={item.icon} />
 							</svg>
@@ -187,17 +184,17 @@
 				</li>
 			{/each}
 
-			<div class="divider my-4"></div>
+			<div class="divider my-2"></div>
 
 			<li>
-				<a href="/api" class="flex items-center gap-3">
+				<a href="/api">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke-width="1.5"
 						stroke="currentColor"
-						class="h-5 w-5"
+						class="h-4 w-4"
 					>
 						<path
 							stroke-linecap="round"
@@ -205,22 +202,19 @@
 							d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"
 						/>
 					</svg>
-					API Dokumentation
+					API Docs
 				</a>
 			</li>
 
 			<li>
-				<button
-					class="text-error hover:bg-error hover:text-error-content flex items-center gap-3"
-					onclick={handleSignOut}
-				>
+				<button class="text-error hover:bg-error hover:text-error-content" onclick={handleSignOut}>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke-width="1.5"
 						stroke="currentColor"
-						class="h-5 w-5"
+						class="h-4 w-4"
 					>
 						<path
 							stroke-linecap="round"

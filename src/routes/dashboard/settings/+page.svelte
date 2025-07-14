@@ -678,28 +678,9 @@
 								</h3>
 
 								<div class="form-control">
-									<label class="label">
-										<span class="label-text flex items-center gap-2 font-medium">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												class="h-4 w-4"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke="currentColor"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-												/>
-											</svg>
-											Passwort
-										</span>
-									</label>
 									<button
 										type="button"
-										class="btn btn-outline btn-lg gap-2"
+										class="btn btn-ghost btn-sm gap-2 text-base-content/70 hover:text-base-content"
 										onclick={() => (showPasswordModal = true)}
 									>
 										<svg

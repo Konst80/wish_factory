@@ -75,6 +75,34 @@
 		link.click();
 		URL.revokeObjectURL(url);
 	}
+
+	// Format date string to show day and month abbreviation split on two lines
+	function formatChartLabel(dateString: string): { day: string; month: string } {
+		try {
+			// Parse the date string - assuming it's in format like "30.6" or similar
+			const parts = dateString.split('.');
+			if (parts.length >= 2) {
+				const day = parseInt(parts[0]);
+				const month = parseInt(parts[1]);
+				
+				const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 
+								  'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+				
+				if (month >= 1 && month <= 12) {
+					return {
+						day: `${day}.`,
+						month: monthNames[month - 1]
+					};
+				}
+			}
+		} catch (e) {
+			// If parsing fails, return original string split
+			return { day: dateString, month: '' };
+		}
+		
+		// Fallback: return original string split
+		return { day: dateString, month: '' };
+	}
 </script>
 
 <svelte:head>
@@ -242,12 +270,21 @@
 			<div class="h-64 w-full">
 				{#if data.wishesOverTime.length > 0}
 					<!-- Simple bar chart representation -->
-					<div class="flex h-full items-end justify-center gap-1 px-4">
-						{#each data.wishesOverTime as dayData (dayData.month)}
-							{@const maxCount = Math.max(...data.wishesOverTime.map((d) => d.count)) || 1}
-							<div class="flex max-w-12 flex-1 flex-col items-center">
-								<span class="mb-1 font-mono text-xs opacity-60">{dayData.count}</span>
-								<div class="relative flex w-full justify-center">
+					<div class="flex h-full flex-col justify-center gap-1 px-4">
+						<!-- Count numbers row -->
+						<div class="flex justify-center gap-1">
+							{#each data.wishesOverTime as dayData (dayData.month)}
+								<div class="flex max-w-12 flex-1 justify-center">
+									<span class="font-mono text-xs opacity-60">{dayData.count}</span>
+								</div>
+							{/each}
+						</div>
+						
+						<!-- Bars row -->
+						<div class="flex items-end justify-center gap-1" style="height: 180px;">
+							{#each data.wishesOverTime as dayData (dayData.month)}
+								{@const maxCount = Math.max(...data.wishesOverTime.map((d) => d.count)) || 1}
+								<div class="flex max-w-12 flex-1 justify-center">
 									<div
 										class="bg-primary hover:bg-primary-focus rounded-t transition-all duration-300"
 										style="width: {Math.min(
@@ -257,12 +294,23 @@
 											(dayData.count / maxCount) * 180,
 											dayData.count > 0 ? 8 : 2
 										)}px; min-height: 2px;"
-										title="{dayData.month}: {dayData.count} Wünsche"
+										title="{formatChartLabel(dayData.month).day} {formatChartLabel(dayData.month).month}: {dayData.count} Wünsche"
 									></div>
 								</div>
-								<span class="mt-2 text-center text-xs font-medium">{dayData.month}</span>
-							</div>
-						{/each}
+							{/each}
+						</div>
+						
+						<!-- Date labels row -->
+						<div class="flex justify-center gap-1">
+							{#each data.wishesOverTime as dayData (dayData.month)}
+								<div class="flex max-w-12 flex-1 justify-center">
+									<div class="text-center text-xs font-medium">
+										<div>{formatChartLabel(dayData.month).day}</div>
+										<div>{formatChartLabel(dayData.month).month}</div>
+									</div>
+								</div>
+							{/each}
+						</div>
 					</div>
 				{:else}
 					<!-- Empty state -->

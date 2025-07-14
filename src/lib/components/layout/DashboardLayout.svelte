@@ -28,7 +28,7 @@
 		<DashboardNavbar onMenuToggle={toggleSidebar} />
 
 		<!-- Main content -->
-		<main class="flex-1 p-4 lg:p-6">
+		<main class="flex-1 p-3 lg:p-4">
 			{@render children()}
 		</main>
 	</div>

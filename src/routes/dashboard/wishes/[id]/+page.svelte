@@ -117,24 +117,10 @@
 </svelte:head>
 
 <!-- Page Header -->
-<div class="mb-8">
-	<div class="breadcrumbs mb-4 text-sm">
-		<ul>
-			<li><a href="/dashboard" class="link-hover">Dashboard</a></li>
-			<li><a href="/dashboard/wishes" class="link-hover">Wünsche</a></li>
-			<li>{data.wish.id}</li>
-		</ul>
-	</div>
-
-	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-		<div>
-			<h1 class="text-base-content text-3xl font-bold">Wunsch-Details</h1>
-			<p class="text-base-content/70 mt-2">
-				Vollständige Ansicht des Wunsches {data.wish.id}
-			</p>
-		</div>
-		<div class="flex gap-2">
-			<button class="btn btn-outline btn-sm" onclick={() => (showWorkflowHelp = true)}>
+<div class="mb-6">
+	<div class="flex items-center justify-between">
+		<div class="flex items-center gap-4">
+			<a href="/dashboard/wishes" class="btn btn-ghost btn-sm">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-4 w-4"
@@ -146,12 +132,17 @@
 						stroke-linecap="round"
 						stroke-linejoin="round"
 						stroke-width="2"
-						d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						d="M10 19l-7-7m0 0l7-7m-7 7h18"
 					/>
 				</svg>
-				Hilfe
-			</button>
+				Zurück
+			</a>
+			<div class="badge {statusStyles[data.wish.status]} badge-lg">
+				{data.wish.status}
+			</div>
+		</div>
 
+		<div class="flex items-center gap-2">
 			<!-- Status Workflow Buttons -->
 			{#each getAvailableStatusTransitions() as transition (transition.status)}
 				<form
@@ -177,40 +168,11 @@
 			{/each}
 
 			<a href="/dashboard/wishes/{data.wish.id}/edit" class="btn btn-primary btn-sm">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-4 w-4"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-					/>
-				</svg>
 				Bearbeiten
 			</a>
 
-			<!-- Delete Button (Admins only) -->
 			{#if data.profile?.role === 'Administrator'}
 				<button type="button" class="btn btn-error btn-sm" onclick={() => (showDeleteModal = true)}>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-4 w-4"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-						/>
-					</svg>
 					Löschen
 				</button>
 			{/if}
@@ -218,317 +180,92 @@
 	</div>
 </div>
 
-<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-	<!-- Main Content -->
-	<div class="lg:col-span-2">
-		<!-- Status and Meta Info -->
-		<div class="card bg-base-100 mb-6 shadow-xl">
-			<div class="card-body">
-				<div class="flex items-center justify-between">
-					<h2 class="card-title">
-						<span class="text-lg">
-							{eventTypeIcons[data.wish.eventType]}
-						</span>
-						{eventTypeLabels[data.wish.eventType]} - {typeLabels[data.wish.type]}
-					</h2>
-					<div class="badge {statusStyles[data.wish.status]} badge-lg">
-						{data.wish.status}
-					</div>
-				</div>
-
-				<div class="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
-					<div>
-						<div class="text-base-content/70 text-xs font-medium tracking-wide uppercase">
-							Sprache
-						</div>
-						<div class="font-mono text-lg uppercase">
-							{data.wish.language}
-						</div>
-					</div>
-					<div>
-						<div class="text-base-content/70 text-xs font-medium tracking-wide uppercase">
-							Erstellt
-						</div>
-						<div class="text-sm">
-							{formatDate(data.wish.createdAt)}
-						</div>
-					</div>
-					<div>
-						<div class="text-base-content/70 text-xs font-medium tracking-wide uppercase">
-							Aktualisiert
-						</div>
-						<div class="text-sm">
-							{formatDate(data.wish.updatedAt)}
-						</div>
-					</div>
-					<div>
-						<div class="text-base-content/70 text-xs font-medium tracking-wide uppercase">ID</div>
-						<div class="font-mono text-sm">
-							{data.wish.id}
-							<button
-								class="btn btn-ghost btn-xs ml-2"
-								onclick={() => copyToClipboard(data.wish.id)}
-								title="ID kopieren"
-							>
-								📋
-							</button>
-						</div>
-					</div>
-				</div>
+<!-- Main Content -->
+<div class="mx-auto max-w-4xl">
+	<!-- Wish Header -->
+	<div class="mb-8">
+		<div class="mb-6 flex items-start gap-4">
+			<div
+				class="bg-primary/10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg"
+			>
+				<span class="text-2xl">{eventTypeIcons[data.wish.eventType]}</span>
 			</div>
-		</div>
-
-		<!-- Main Text -->
-		<div class="card bg-base-100 mb-6 shadow-xl">
-			<div class="card-body">
-				<h3 class="card-title">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
+			<div class="min-w-0 flex-1">
+				<h1 class="mb-2 text-2xl leading-tight font-bold">
+					{eventTypeLabels[data.wish.eventType]}
+				</h1>
+				<div class="text-base-content/70 flex items-center gap-2 text-sm">
+					<span class="bg-base-200 rounded-md px-2 py-1 font-medium"
+						>{typeLabels[data.wish.type]}</span
 					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-1.586l-4 4z"
-						/>
-					</svg>
-					Wunsch-Text
+					<span class="bg-base-200 rounded-md px-2 py-1 font-mono tracking-wider uppercase"
+						>{data.wish.language}</span
+					>
 					{#if data.wish.belated}
-						<span class="badge badge-warning ml-2 gap-2">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								class="inline-block h-4 w-4 stroke-current"
-								><path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-								></path></svg
-							>
-							Nachträglich
-						</span>
+						<span class="bg-warning/20 text-warning rounded-md px-2 py-1 font-medium"
+							>Nachträglich</span
+						>
 					{/if}
-				</h3>
-				<div class="divider my-2"></div>
-				<div class="bg-base-200 rounded-lg p-4">
-					<p class="text-lg leading-relaxed font-medium whitespace-pre-wrap">
-						{data.wish.text}
-					</p>
 				</div>
-				<button
-					class="btn btn-outline btn-sm mt-4 self-start"
-					onclick={() => copyToClipboard(data.wish.text)}
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-4 w-4"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-						/>
-					</svg>
-					Text kopieren
-				</button>
 			</div>
 		</div>
-
-		<!-- Belated Wish Info - This is now redundant -->
-		<!--
-		{#if data.wish.belated}
-			<div class="card bg-base-100 mb-6 shadow-xl">
-				<div class="card-body">
-					<h3 class="card-title">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-5 w-5"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
-						Nachträglicher Wunsch
-					</h3>
-					<div class="divider my-2"></div>
-					<div class="bg-warning/10 border-warning rounded-lg border-l-4 p-4">
-						<div class="badge badge-warning gap-2">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-3 w-3"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
-							</svg>
-							Ja, dieser Wunsch ist nachträglich
-						</div>
-					</div>
-					<button
-						class="btn btn-outline btn-sm mt-4 self-start"
-						onclick={() => copyToClipboard(data.wish.belated)}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-4 w-4"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-							/>
-						</svg>
-					</button>
-				</div>
-			</div>
-		{/if}
-    -->
 	</div>
 
-	<!-- Sidebar -->
-	<div class="lg:col-span-1">
-		<!-- Target Groups -->
-		<div class="card bg-base-100 mb-6 shadow-xl">
-			<div class="card-body">
-				<h3 class="card-title text-lg">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-						/>
-					</svg>
-					Zielgruppen
-				</h3>
-				<div class="divider my-2"></div>
-
-				<!-- Relations -->
-				<div class="mb-4">
-					<h4 class="text-base-content/70 mb-2 text-sm font-medium tracking-wide uppercase">
+	<!-- Target Groups (Simplified) -->
+	<div class="mb-8">
+		<h3 class="mb-5 text-lg font-semibold">Zielgruppen</h3>
+		<div class="bg-base-100 border-base-300 rounded-lg border p-5 shadow-sm">
+			<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+				<div>
+					<h4 class="text-base-content/80 mb-3 flex items-center gap-2 text-sm font-semibold">
+						<span class="bg-primary h-2 w-2 rounded-full"></span>
 						Beziehungen
 					</h4>
 					<div class="flex flex-wrap gap-2">
 						{#each data.wish.relations as relation (relation)}
-							<div class="badge badge-primary">
-								{relationLabels[relation]}
-							</div>
+							<span class="badge badge-primary badge-lg">{relationLabels[relation]}</span>
 						{/each}
 					</div>
 				</div>
-
-				<!-- Age Groups -->
-				<div class="mb-4">
-					<h4 class="text-base-content/70 mb-2 text-sm font-medium tracking-wide uppercase">
+				<div>
+					<h4 class="text-base-content/80 mb-3 flex items-center gap-2 text-sm font-semibold">
+						<span class="bg-secondary h-2 w-2 rounded-full"></span>
 						Altersgruppen
 					</h4>
 					<div class="flex flex-wrap gap-2">
 						{#each data.wish.ageGroups as ageGroup (ageGroup)}
-							<div class="badge badge-secondary">
-								{ageGroupLabels[ageGroup]}
-							</div>
+							<span class="badge badge-secondary badge-lg">{ageGroupLabels[ageGroup]}</span>
 						{/each}
 					</div>
 				</div>
-
-				<!-- Specific Values -->
 				{#if data.wish.specificValues && data.wish.specificValues.length > 0}
-					<div>
-						<h4 class="text-base-content/70 mb-2 text-sm font-medium tracking-wide uppercase">
+					<div class="border-base-300 border-t pt-3 md:col-span-2">
+						<h4 class="text-base-content/80 mb-3 flex items-center gap-2 text-sm font-semibold">
+							<span class="bg-accent h-2 w-2 rounded-full"></span>
 							Spezifische Werte
 						</h4>
 						<div class="flex flex-wrap gap-2">
 							{#each data.wish.specificValues as value (value)}
-								<div class="badge badge-accent">
-									{value}
-								</div>
+								<span class="badge badge-accent badge-lg">{value}</span>
 							{/each}
 						</div>
 					</div>
 				{/if}
 			</div>
 		</div>
+	</div>
 
-		<!-- Actions -->
-		<div class="card bg-base-100 shadow-xl">
-			<div class="card-body">
-				<h3 class="card-title text-lg">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
-						/>
-					</svg>
-					Aktionen
-				</h3>
-				<div class="divider my-2"></div>
-
-				<div class="space-y-2">
-					<a
-						href="/dashboard/wishes/{data.wish.id}/edit"
-						class="btn btn-primary btn-sm w-full justify-start"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-4 w-4"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-							/>
-						</svg>
-						Bearbeiten
-					</a>
-
-					<button
-						class="btn btn-outline btn-sm w-full justify-start"
-						onclick={() => copyToClipboard(JSON.stringify(data.wish, null, 2))}
-					>
+	<!-- Main Text -->
+	<div class="mb-8">
+		<div class="bg-base-100 border-base-300 overflow-hidden rounded-lg border shadow-sm">
+			<div class="p-6">
+				<p class="text-lg leading-relaxed whitespace-pre-wrap">
+					{data.wish.text}
+				</p>
+			</div>
+			<div class="bg-base-200/50 border-base-300 border-t px-6 py-4">
+				<div class="flex items-center justify-between">
+					<button class="btn btn-outline btn-sm" onclick={() => copyToClipboard(data.wish.text)}>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							class="h-4 w-4"
@@ -543,15 +280,10 @@
 								d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
 							/>
 						</svg>
-						JSON exportieren
+						Kopieren
 					</button>
-
-					<!-- Delete Button (Admin only) -->
-					{#if data.profile?.role === 'Administrator'}
-						<button
-							class="btn btn-error btn-sm w-full justify-start"
-							onclick={() => (showDeleteModal = true)}
-						>
+					<div class="text-base-content/60 flex items-center gap-4 text-sm">
+						<div class="flex items-center gap-1">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								class="h-4 w-4"
@@ -563,30 +295,29 @@
 									stroke-linecap="round"
 									stroke-linejoin="round"
 									stroke-width="2"
-									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+									d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-7 8h6m-7 4h6m-7-8h6m-7-4h6"
 								/>
 							</svg>
-							Löschen
-						</button>
-					{/if}
-
-					<a href="/dashboard/wishes" class="btn btn-ghost btn-sm w-full justify-start">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-4 w-4"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M10 19l-7-7m0 0l7-7m-7 7h18"
-							/>
-						</svg>
-						Zurück zur Übersicht
-					</a>
+							<span>Erstellt: {formatDate(data.wish.createdAt)}</span>
+						</div>
+						<div class="flex items-center gap-1">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+								/>
+							</svg>
+							<span class="font-mono">ID: {data.wish.id.slice(0, 8)}...</span>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

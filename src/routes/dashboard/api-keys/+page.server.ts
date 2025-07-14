@@ -139,5 +139,150 @@ export const actions: Actions = {
 			console.error('Error deactivating API key:', error);
 			return fail(500, { error: 'Failed to deactivate API key' });
 		}
+	},
+
+	activate: async ({ request, locals }) => {
+		const {
+			data: { user }
+		} = await locals.supabase.auth.getUser();
+
+		if (!user) {
+			return fail(401, { error: 'Not authenticated' });
+		}
+
+		// Get current user's profile to check permissions
+		const { data: profile } = await locals.supabase
+			.from('profiles')
+			.select('role, id')
+			.eq('id', user.id)
+			.single();
+
+		if (!profile || profile.role !== 'Administrator') {
+			return fail(403, { error: 'Unauthorized' });
+		}
+
+		try {
+			const formData = await request.formData();
+			const keyId = formData.get('keyId') as string;
+
+			if (!keyId) {
+				return fail(400, { error: 'Key ID is required' });
+			}
+
+			const success = await ApiKeyService.activateApiKey(keyId);
+
+			if (!success) {
+				return fail(500, { error: 'Failed to activate API key' });
+			}
+
+			return {
+				success: true,
+				message: 'API Key activated successfully'
+			};
+		} catch (error) {
+			console.error('Error activating API key:', error);
+			return fail(500, { error: 'Failed to activate API key' });
+		}
+	},
+
+	delete: async ({ request, locals }) => {
+		const {
+			data: { user }
+		} = await locals.supabase.auth.getUser();
+
+		if (!user) {
+			return fail(401, { error: 'Not authenticated' });
+		}
+
+		// Get current user's profile to check permissions
+		const { data: profile } = await locals.supabase
+			.from('profiles')
+			.select('role, id')
+			.eq('id', user.id)
+			.single();
+
+		if (!profile || profile.role !== 'Administrator') {
+			return fail(403, { error: 'Unauthorized' });
+		}
+
+		try {
+			const formData = await request.formData();
+			const keyId = formData.get('keyId') as string;
+
+			if (!keyId) {
+				return fail(400, { error: 'Key ID is required' });
+			}
+
+			const success = await ApiKeyService.deleteApiKey(keyId);
+
+			if (!success) {
+				return fail(500, { error: 'Failed to delete API key' });
+			}
+
+			return {
+				success: true,
+				message: 'API Key deleted successfully'
+			};
+		} catch (error) {
+			console.error('Error deleting API key:', error);
+			return fail(500, { error: 'Failed to delete API key' });
+		}
+	},
+
+	update: async ({ request, locals }) => {
+		const {
+			data: { user }
+		} = await locals.supabase.auth.getUser();
+
+		if (!user) {
+			return fail(401, { error: 'Not authenticated' });
+		}
+
+		// Get current user's profile to check permissions
+		const { data: profile } = await locals.supabase
+			.from('profiles')
+			.select('role, id')
+			.eq('id', user.id)
+			.single();
+
+		if (!profile || profile.role !== 'Administrator') {
+			return fail(403, { error: 'Unauthorized' });
+		}
+
+		try {
+			const formData = await request.formData();
+			const keyId = formData.get('keyId') as string;
+			const rateLimitPerHour = parseInt(formData.get('rateLimitPerHour') as string);
+			const description = formData.get('description') as string;
+			const expiresAt = formData.get('expiresAt') as string;
+
+			if (!keyId) {
+				return fail(400, { error: 'Key ID is required' });
+			}
+
+			if (!rateLimitPerHour || rateLimitPerHour < 1 || rateLimitPerHour > 10000) {
+				return fail(400, { error: 'Rate limit must be between 1 and 10000' });
+			}
+
+			const updates = {
+				rateLimitPerHour,
+				description: description?.trim() || undefined,
+				expiresAt: expiresAt ? new Date(expiresAt) : null
+			};
+
+			const success = await ApiKeyService.updateApiKey(keyId, updates);
+
+			if (!success) {
+				return fail(500, { error: 'Failed to update API key' });
+			}
+
+			return {
+				success: true,
+				message: 'API Key updated successfully'
+			};
+		} catch (error) {
+			console.error('Error updating API key:', error);
+			return fail(500, { error: 'Failed to update API key' });
+		}
 	}
 };

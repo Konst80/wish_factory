@@ -35,7 +35,10 @@
 	let showFilters = $state(false);
 	let selectedWishes = $state<string[]>([]);
 	let showExportModal = $state(false);
+	let showUnreleaseModal = $state(false);
 	let showWorkflowHelp = $state(false);
+	let selectedWishForUnrelease = $state<string | null>(null);
+	let isUnreleasing = $state(false);
 
 	// Sorting State - these are for future implementation
 	// let currentSortBy = $state('released_at');
@@ -138,26 +141,35 @@
 		clearSelection();
 	}
 
-	// Unrelease wish
-	async function unreleaseWish(wishId: string) {
-		if (!confirm('Möchten Sie diesen Wunsch wirklich aus der Freigabe nehmen?')) {
-			return;
-		}
+	// Open unrelease modal
+	function openUnreleaseModal(wishId: string) {
+		selectedWishForUnrelease = wishId;
+		showUnreleaseModal = true;
+	}
 
+	// Unrelease wish
+	async function unreleaseWish() {
+		if (!selectedWishForUnrelease) return;
+
+		isUnreleasing = true;
 		try {
-			const response = await fetch(`/api/wishes/${wishId}/release`, {
+			const response = await fetch(`/api/wishes/${selectedWishForUnrelease}/release`, {
 				method: 'DELETE'
 			});
 
 			if (response.ok) {
+				showUnreleaseModal = false;
+				selectedWishForUnrelease = null;
 				// Reload page to refresh data
 				window.location.reload();
 			} else {
 				const errorData = await response.json();
-				alert(`Fehler: ${errorData.error}`);
+				console.error('Unrelease error:', errorData.error);
 			}
-		} catch {
-			alert('Ein Fehler ist aufgetreten');
+		} catch (error) {
+			console.error('Unrelease error:', error);
+		} finally {
+			isUnreleasing = false;
 		}
 	}
 </script>
@@ -577,7 +589,7 @@
 							<div class="flex justify-center">
 								<button
 									class="btn btn-error btn-xs"
-									onclick={() => unreleaseWish(wish.originalWishId)}
+									onclick={() => openUnreleaseModal(wish.originalWishId)}
 									title="Aus Release entfernen"
 									aria-label="Wish aus Release entfernen"
 								>
@@ -701,6 +713,57 @@
 			<div class="modal-action">
 				<button class="btn btn-ghost" onclick={() => (showExportModal = false)}>Abbrechen</button>
 				<button class="btn btn-primary" onclick={exportSelected}>Exportieren</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Unrelease Modal -->
+{#if showUnreleaseModal}
+	<div class="modal-open modal">
+		<div class="modal-box">
+			<h3 class="mb-4 text-lg font-bold">Aus Release entfernen</h3>
+			<p class="mb-4">
+				Möchten Sie diesen Wunsch wirklich aus der Freigabe nehmen?
+			</p>
+			<div class="alert alert-warning">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+					/>
+				</svg>
+				<span>Der Wunsch wird aus der WishSnap-Plattform entfernt.</span>
+			</div>
+			<div class="modal-action">
+				<button
+					class="btn btn-ghost"
+					onclick={() => {
+						showUnreleaseModal = false;
+						selectedWishForUnrelease = null;
+					}}
+				>
+					Abbrechen
+				</button>
+				<button
+					class="btn btn-error"
+					onclick={unreleaseWish}
+					disabled={isUnreleasing}
+				>
+					{#if isUnreleasing}
+						<span class="loading loading-spinner loading-sm"></span>
+						Entfernen...
+					{:else}
+						Entfernen
+					{/if}
+				</button>
 			</div>
 		</div>
 	</div>

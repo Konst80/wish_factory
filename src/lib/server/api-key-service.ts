@@ -222,6 +222,70 @@ export class ApiKeyService {
 	}
 
 	/**
+	 * Activate an API key
+	 */
+	static async activateApiKey(keyId: string): Promise<boolean> {
+		try {
+			const { error } = await this.supabase
+				.from('api_keys')
+				.update({ is_active: true })
+				.eq('id', keyId);
+
+			return !error;
+		} catch (error) {
+			console.error('Error activating API key:', error);
+			return false;
+		}
+	}
+
+	/**
+	 * Delete an API key
+	 */
+	static async deleteApiKey(keyId: string): Promise<boolean> {
+		try {
+			const { error } = await this.supabase.from('api_keys').delete().eq('id', keyId);
+
+			return !error;
+		} catch (error) {
+			console.error('Error deleting API key:', error);
+			return false;
+		}
+	}
+
+	/**
+	 * Update an API key (rate limit and other settings)
+	 */
+	static async updateApiKey(
+		keyId: string,
+		updates: {
+			rateLimitPerHour?: number;
+			description?: string;
+			expiresAt?: Date | null;
+		}
+	): Promise<boolean> {
+		try {
+			const updateData: Record<string, any> = {};
+
+			if (updates.rateLimitPerHour !== undefined) {
+				updateData.rate_limit_per_hour = updates.rateLimitPerHour;
+			}
+			if (updates.description !== undefined) {
+				updateData.description = updates.description;
+			}
+			if (updates.expiresAt !== undefined) {
+				updateData.expires_at = updates.expiresAt?.toISOString() || null;
+			}
+
+			const { error } = await this.supabase.from('api_keys').update(updateData).eq('id', keyId);
+
+			return !error;
+		} catch (error) {
+			console.error('Error updating API key:', error);
+			return false;
+		}
+	}
+
+	/**
 	 * Check rate limiting for an API key
 	 */
 	static async checkRateLimit(apiKey: ApiKey): Promise<{ allowed: boolean; remaining: number }> {
