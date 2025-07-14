@@ -751,33 +751,33 @@
 				<input type="hidden" name="userId" value={selectedUser.id} />
 
 				<div class="form-control">
-					<label class="label">
+					<div class="label">
 						<span class="label-text">Name</span>
-					</label>
+					</div>
 					<input
 						type="text"
 						class="input-bordered input w-full"
 						value={selectedUser.full_name}
 						disabled
 					/>
-					<label class="label">
+					<div class="label">
 						<span class="label-text-alt">Name kann derzeit nicht geändert werden</span>
-					</label>
+					</div>
 				</div>
 
 				<div class="form-control">
-					<label class="label">
+					<div class="label">
 						<span class="label-text">E-Mail</span>
-					</label>
+					</div>
 					<input
 						type="email"
 						class="input-bordered input w-full"
 						value={selectedUser.email}
 						disabled
 					/>
-					<label class="label">
+					<div class="label">
 						<span class="label-text-alt">E-Mail kann derzeit nicht geändert werden</span>
-					</label>
+					</div>
 				</div>
 
 				<div class="form-control">

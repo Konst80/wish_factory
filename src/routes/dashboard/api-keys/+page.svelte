@@ -419,7 +419,7 @@
 						</p>
 					</div>
 				</div>
-				<button class="btn btn-sm btn-circle btn-ghost" onclick={closeCreateModal}>
+				<button class="btn btn-sm btn-circle btn-ghost" onclick={closeCreateModal} aria-label="Modal schließen">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-4 w-4"
@@ -542,11 +542,11 @@
 										/>
 										<span class="btn btn-outline join-item">Req/h</span>
 									</div>
-									<label class="label">
+									<div class="label">
 										<span class="label-text-alt text-info"
 											>💡 Standard: 1000 Anfragen pro Stunde</span
 										>
-									</label>
+									</div>
 								</div>
 
 								<div class="form-control">
@@ -560,11 +560,11 @@
 										bind:value={createForm.expiresAt}
 										class="input input-bordered focus:input-primary"
 									/>
-									<label class="label">
+									<div class="label">
 										<span class="label-text-alt text-info"
 											>⏰ Leer lassen für unbegrenzten API Key</span
 										>
-									</label>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -667,18 +667,18 @@
 
 			<div class="space-y-4">
 				<div class="form-control">
-					<label class="label">
+					<div class="label">
 						<span class="label-text font-medium">Name</span>
-					</label>
+					</div>
 					<div class="input input-bordered bg-base-200">
 						{newApiKeyData.apiKey.name}
 					</div>
 				</div>
 
 				<div class="form-control">
-					<label class="label">
+					<div class="label">
 						<span class="label-text font-medium">API Key</span>
-					</label>
+					</div>
 					<div class="join">
 						<input
 							type="text"
@@ -1001,11 +1001,11 @@
 										/>
 										<span class="btn btn-outline join-item">Req/h</span>
 									</div>
-									<label class="label">
+									<div class="label">
 										<span class="label-text-alt text-info"
 											>💡 Aktuell: {selectedKeyForEdit.rateLimitPerHour} Anfragen pro Stunde</span
 										>
-									</label>
+									</div>
 								</div>
 
 								<div class="form-control">
@@ -1019,11 +1019,11 @@
 										bind:value={editForm.expiresAt}
 										class="input input-bordered focus:input-info"
 									/>
-									<label class="label">
+									<div class="label">
 										<span class="label-text-alt text-info"
 											>⏰ Leer lassen für unbegrenzten API Key</span
 										>
-									</label>
+									</div>
 								</div>
 							</div>
 						</div>

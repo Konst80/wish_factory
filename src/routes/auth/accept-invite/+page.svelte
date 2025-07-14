@@ -89,11 +89,11 @@
 							minlength="6"
 						/>
 						{#if password && !passwordValid}
-							<label class="label">
+							<div class="label">
 								<span class="label-text-alt text-error"
 									>Passwort muss mindestens 6 Zeichen lang sein</span
 								>
-							</label>
+							</div>
 						{/if}
 					</div>
 
@@ -111,9 +111,9 @@
 							disabled={isLoading}
 						/>
 						{#if confirmPassword && !passwordsMatch}
-							<label class="label">
+							<div class="label">
 								<span class="label-text-alt text-error">Passwörter stimmen nicht überein</span>
-							</label>
+							</div>
 						{/if}
 					</div>
 

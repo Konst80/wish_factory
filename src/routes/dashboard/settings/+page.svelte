@@ -547,7 +547,7 @@
 											value={data.settings.profile.email}
 											disabled
 										/>
-										<label class="label">
+										<div class="label">
 											<span class="label-text-alt text-warning flex items-center gap-1">
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
@@ -565,7 +565,7 @@
 												</svg>
 												E-Mail kann nicht geändert werden
 											</span>
-										</label>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -2075,9 +2075,9 @@
 												value={((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)
 													?.promptBatch as string || ''}
 											></textarea>
-											<label class="label">
+											<div class="label">
 												<span class="label-text-alt text-info">Für optimale Batch-Ergebnisse</span>
-											</label>
+											</div>
 
 											<!-- Batch Prompt Platzhalter -->
 											<div class="mt-4">
@@ -2306,11 +2306,11 @@
 									value={((data.settings as Record<string, unknown>)?.ai as Record<string, unknown>)
 										?.promptBelated as string || ''}
 								></textarea>
-								<label class="label">
+								<div class="label">
 									<span class="label-text-alt text-info"
 										>Wird verwendet wenn 'Nachträglich' ausgewählt ist</span
 									>
-								</label>
+								</div>
 							</div>
 
 							<!-- Specific Values Section -->
@@ -2606,7 +2606,7 @@
 										class="tooltip tooltip-left"
 										data-tip="Optimale Werte für die meisten Anwendungen"
 									>
-										<button class="btn btn-ghost btn-sm">
+										<button class="btn btn-ghost btn-sm" aria-label="Informationen zu KI-Prompts anzeigen">
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
 												class="h-4 w-4"
@@ -3192,7 +3192,7 @@
 					</div>
 					Passwort ändern
 				</h3>
-				<button class="btn btn-sm btn-circle btn-ghost" onclick={() => (showPasswordModal = false)}>
+				<button class="btn btn-sm btn-circle btn-ghost" onclick={() => (showPasswordModal = false)} aria-label="Passwort-Modal schließen">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-4 w-4"
@@ -3267,11 +3267,11 @@
 						class="input-bordered input input-lg w-full"
 						required
 					/>
-					<label class="label">
+					<div class="label">
 						<span class="label-text-alt text-xs">
 							Mindestens 8 Zeichen, enthält Groß- und Kleinbuchstaben, Zahlen
 						</span>
-					</label>
+					</div>
 				</div>
 
 				<div class="form-control">
