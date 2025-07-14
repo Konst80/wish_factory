@@ -62,6 +62,11 @@ interface AISettings {
 	promptBatch?: string; // Optional - zusätzliche Anweisungen für Batch-Generierung
 	// Belated-specific prompt
 	promptBelated?: string; // Optional - zusätzliche Anweisungen für nachträgliche Wünsche
+	// Specific values prompts
+	specificValuesBirthdayDe?: string; // Optional - spezifische Werte für Geburtstage auf Deutsch
+	specificValuesBirthdayEn?: string; // Optional - spezifische Werte für Geburtstage auf Englisch
+	specificValuesAnniversaryDe?: string; // Optional - spezifische Werte für Jubiläen auf Deutsch
+	specificValuesAnniversaryEn?: string; // Optional - spezifische Werte für Jubiläen auf Englisch
 	model: string;
 	temperature: number;
 	maxTokens: number;
@@ -664,10 +669,46 @@ class OpenRouterAIService {
 			belatedPromptText = `\n\n**Nachträgliche Wünsche Anweisungen:**\n${belatedPrompt}`;
 		}
 
+		// Build specific values prompts based on event type, language, and provided specific values
+		let specificValuesPromptText = '';
+		if (specificValues && specificValues.length > 0 && aiSettings) {
+			// Check if birthday or anniversary is selected and include appropriate prompt
+			const hasBirthday = eventTypes.includes('birthday');
+			const hasAnniversary = eventTypes.includes('anniversary');
+			
+			if (hasBirthday || hasAnniversary) {
+				const specificValuesPrompts = [];
+				
+				// Add birthday prompts if birthday is selected
+				if (hasBirthday) {
+					if (languages.includes('de') && aiSettings.specificValuesBirthdayDe) {
+						specificValuesPrompts.push(`**Geburtstage (DE):** ${aiSettings.specificValuesBirthdayDe}`);
+					}
+					if (languages.includes('en') && aiSettings.specificValuesBirthdayEn) {
+						specificValuesPrompts.push(`**Birthdays (EN):** ${aiSettings.specificValuesBirthdayEn}`);
+					}
+				}
+				
+				// Add anniversary prompts if anniversary is selected
+				if (hasAnniversary) {
+					if (languages.includes('de') && aiSettings.specificValuesAnniversaryDe) {
+						specificValuesPrompts.push(`**Jubiläen (DE):** ${aiSettings.specificValuesAnniversaryDe}`);
+					}
+					if (languages.includes('en') && aiSettings.specificValuesAnniversaryEn) {
+						specificValuesPrompts.push(`**Anniversaries (EN):** ${aiSettings.specificValuesAnniversaryEn}`);
+					}
+				}
+				
+				if (specificValuesPrompts.length > 0) {
+					specificValuesPromptText = `\n\n**Spezifische Werte Anweisungen:**\n${specificValuesPrompts.join('\n')}`;
+				}
+			}
+		}
+
 		const countText = count === 1 ? 'Glückwunsch' : 'Glückwünsche';
 		const specificValuesText =
 			specificValues && specificValues.length > 0
-				? `\n- Spezielle Werte: ${specificValues.join(', ')}`
+				? `${specificValues.join('')}`
 				: '';
 
 		const additionalInstructionsText = additionalInstructions
@@ -692,7 +733,8 @@ class OpenRouterAIService {
 			ageGroupPromptsText: ageGroupPromptsText ? 'SET' : 'EMPTY',
 			relationPromptsText: relationPromptsText ? 'SET' : 'EMPTY',
 			batchPromptText: batchPromptText ? 'SET' : 'EMPTY',
-			belatedPromptText: belatedPromptText ? 'SET' : 'EMPTY'
+			belatedPromptText: belatedPromptText ? 'SET' : 'EMPTY',
+			specificValuesPromptText: specificValuesPromptText ? 'SET' : 'EMPTY'
 		});
 
 		// Log detailed prompts for debugging
@@ -707,6 +749,9 @@ class OpenRouterAIService {
 		}
 		if (belatedPromptText) {
 			console.log('⏰ Nachträgliche Wünsche Prompts:', belatedPromptText);
+		}
+		if (specificValuesPromptText) {
+			console.log('🎯 Spezifische Werte Prompts:', specificValuesPromptText);
 		}
 
 		// Template-Variablen ersetzen
@@ -732,11 +777,12 @@ class OpenRouterAIService {
 			.replace(/\{length\}/g, lengthText)
 			.replace(/\{wishLength\}/g, lengthText);
 
-		// Age group prompts, relation prompts, batch prompts und belated prompts an das Ende des Templates anhängen
+		// Age group prompts, relation prompts, batch prompts, belated prompts und specific values prompts an das Ende des Templates anhängen
 		finalPrompt += ageGroupPromptsText;
 		finalPrompt += relationPromptsText;
 		finalPrompt += batchPromptText;
 		finalPrompt += belatedPromptText;
+		finalPrompt += specificValuesPromptText;
 
 		// HARDCODIERTE JSON-FORMAT-ANWEISUNG - IMMER ANHÄNGEN
 		const mandatoryJsonInstructions =

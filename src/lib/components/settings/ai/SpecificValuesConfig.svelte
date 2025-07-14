@@ -78,135 +78,65 @@
 
 			{#if activeTab === 'de'}
 				<div class="space-y-4">
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div class="form-control">
-							<label class="label" for="specificValuesBirthdaysDe">
+							<label class="label" for="specificValuesBirthdayDe">
 								<span class="label-text font-medium">🎂 Geburtstage (DE)</span>
 							</label>
 							<textarea
-								id="specificValuesBirthdaysDe"
-								name="specificValuesBirthdaysDe"
+								id="specificValuesBirthdayDe"
+								name="specificValuesBirthdayDe"
 								class="textarea-bordered textarea w-full"
-								rows="3"
+								rows="20"
 								placeholder="18, 25, 30, 40, 50, 60, 65, 70, 75, 80, 85, 90, 95, 100"
-								value={data.settings.ai?.specificValuesBirthdaysDe || ''}
+								value={data.settings.specificValues?.birthdayDe || ''}
 							></textarea>
-							<button
-								type="button"
-								class="btn btn-ghost btn-xs mt-1"
-								onclick={() => generateSpecificValues('birthday', 'de', handleSuccess, handleError)}
-							>
-								🤖 KI-Vorschläge
-							</button>
 						</div>
 
 						<div class="form-control">
-							<label class="label" for="specificValuesAnniversariesDe">
+							<label class="label" for="specificValuesAnniversaryDe">
 								<span class="label-text font-medium">💍 Jubiläen (DE)</span>
 							</label>
 							<textarea
-								id="specificValuesAnniversariesDe"
-								name="specificValuesAnniversariesDe"
+								id="specificValuesAnniversaryDe"
+								name="specificValuesAnniversaryDe"
 								class="textarea-bordered textarea w-full"
-								rows="3"
+								rows="20"
 								placeholder="1, 5, 10, 15, 20, 25, 30, 40, 50, 60"
-								value={data.settings.ai?.specificValuesAnniversariesDe || ''}
+								value={data.settings.specificValues?.anniversaryDe || ''}
 							></textarea>
-							<button
-								type="button"
-								class="btn btn-ghost btn-xs mt-1"
-								onclick={() => generateSpecificValues('anniversary', 'de', handleSuccess, handleError)}
-							>
-								🤖 KI-Vorschläge
-							</button>
-						</div>
-
-						<div class="form-control">
-							<label class="label" for="specificValuesCustomDe">
-								<span class="label-text font-medium">🎉 Sonstige (DE)</span>
-							</label>
-							<textarea
-								id="specificValuesCustomDe"
-								name="specificValuesCustomDe"
-								class="textarea-bordered textarea w-full"
-								rows="3"
-								placeholder="Weitere spezifische Werte..."
-								value={data.settings.ai?.specificValuesCustomDe || ''}
-							></textarea>
-							<button
-								type="button"
-								class="btn btn-ghost btn-xs mt-1"
-								onclick={() => generateSpecificValues('custom', 'de', handleSuccess, handleError)}
-							>
-								🤖 KI-Vorschläge
-							</button>
 						</div>
 					</div>
 				</div>
 			{:else}
 				<div class="space-y-4">
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div class="form-control">
-							<label class="label" for="specificValuesBirthdaysEn">
+							<label class="label" for="specificValuesBirthdayEn">
 								<span class="label-text font-medium">🎂 Birthdays (EN)</span>
 							</label>
 							<textarea
-								id="specificValuesBirthdaysEn"
-								name="specificValuesBirthdaysEn"
+								id="specificValuesBirthdayEn"
+								name="specificValuesBirthdayEn"
 								class="textarea-bordered textarea w-full"
-								rows="3"
+								rows="20"
 								placeholder="18, 25, 30, 40, 50, 60, 65, 70, 75, 80, 85, 90, 95, 100"
-								value={data.settings.ai?.specificValuesBirthdaysEn || ''}
+								value={data.settings.specificValues?.birthdayEn || ''}
 							></textarea>
-							<button
-								type="button"
-								class="btn btn-ghost btn-xs mt-1"
-								onclick={() => generateSpecificValues('birthday', 'en', handleSuccess, handleError)}
-							>
-								🤖 AI Suggestions
-							</button>
 						</div>
 
 						<div class="form-control">
-							<label class="label" for="specificValuesAnniversariesEn">
+							<label class="label" for="specificValuesAnniversaryEn">
 								<span class="label-text font-medium">💍 Anniversaries (EN)</span>
 							</label>
 							<textarea
-								id="specificValuesAnniversariesEn"
-								name="specificValuesAnniversariesEn"
+								id="specificValuesAnniversaryEn"
+								name="specificValuesAnniversaryEn"
 								class="textarea-bordered textarea w-full"
-								rows="3"
+								rows="20"
 								placeholder="1, 5, 10, 15, 20, 25, 30, 40, 50, 60"
-								value={data.settings.ai?.specificValuesAnniversariesEn || ''}
+								value={data.settings.specificValues?.anniversaryEn || ''}
 							></textarea>
-							<button
-								type="button"
-								class="btn btn-ghost btn-xs mt-1"
-								onclick={() => generateSpecificValues('anniversary', 'en', handleSuccess, handleError)}
-							>
-								🤖 AI Suggestions
-							</button>
-						</div>
-
-						<div class="form-control">
-							<label class="label" for="specificValuesCustomEn">
-								<span class="label-text font-medium">🎉 Other (EN)</span>
-							</label>
-							<textarea
-								id="specificValuesCustomEn"
-								name="specificValuesCustomEn"
-								class="textarea-bordered textarea w-full"
-								rows="3"
-								placeholder="Other specific values..."
-								value={data.settings.ai?.specificValuesCustomEn || ''}
-							></textarea>
-							<button
-								type="button"
-								class="btn btn-ghost btn-xs mt-1"
-								onclick={() => generateSpecificValues('custom', 'en', handleSuccess, handleError)}
-							>
-								🤖 AI Suggestions
-							</button>
 						</div>
 					</div>
 				</div>

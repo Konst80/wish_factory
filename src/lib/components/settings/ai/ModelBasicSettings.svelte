@@ -46,6 +46,9 @@
 				<option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
 				<option value="meta-llama/llama-3.1-405b-instruct">Llama 3.1 405B</option>
 				<option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
+				<option value="google/gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash Preview</option>
+				<option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek Chat V3 (Free)</option>
+				<option value="deepseek/deepseek-r1-0528:free">DeepSeek R1 (Free)</option>
 			</select>
 			<div class="label">
 				<span class="label-text-alt text-info">
