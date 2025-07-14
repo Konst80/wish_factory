@@ -18,8 +18,7 @@
 	let userForm = $state({
 		fullName: '',
 		email: '',
-		role: 'Redakteur',
-		password: ''
+		role: 'Redakteur'
 	});
 
 	// Global status message
@@ -50,7 +49,7 @@
 	}
 
 	const roles = ['Administrator', 'Redakteur'];
-	// const statuses = ['active', 'inactive']; // Unused for now
+	const statuses = ['active', 'inactive', 'invited', 'expired'];
 
 	const roleStyles: Record<string, string> = {
 		Administrator: 'badge-error',
@@ -59,7 +58,16 @@
 
 	const statusStyles: Record<string, string> = {
 		active: 'badge-success',
-		inactive: 'badge-neutral'
+		inactive: 'badge-neutral',
+		invited: 'badge-warning',
+		expired: 'badge-error'
+	};
+
+	const statusLabels: Record<string, string> = {
+		active: 'Aktiv',
+		inactive: 'Inaktiv',
+		invited: 'Eingeladen',
+		expired: 'Abgelaufen'
 	};
 
 	function formatDate(date: Date) {
@@ -85,7 +93,6 @@
 		userForm.fullName = user.full_name;
 		userForm.email = user.email;
 		userForm.role = user.role;
-		userForm.password = '';
 		showEditUserModal = true;
 	}
 
@@ -102,11 +109,11 @@
 	function closeEditModal() {
 		selectedUser = null;
 		showEditUserModal = false;
-		userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
+		userForm = { fullName: '', email: '', role: 'Redakteur' };
 	}
 
 	function openAddModal() {
-		userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
+		userForm = { fullName: '', email: '', role: 'Redakteur' };
 		showAddUserModal = true;
 	}
 </script>
@@ -140,7 +147,7 @@
 						d="M12 4v16m8-8H4"
 					/>
 				</svg>
-				Neuer Benutzer
+				Einladung senden
 			</button>
 		</div>
 	</div>
@@ -292,6 +299,8 @@
 					<option value="">Alle Status</option>
 					<option value="active">Aktiv</option>
 					<option value="inactive">Inaktiv</option>
+					<option value="invited">Eingeladen</option>
+					<option value="expired">Abgelaufen</option>
 				</select>
 			</div>
 		</div>
@@ -308,7 +317,7 @@
 					<th>Rolle</th>
 					<th>Status</th>
 					<th>Erstellt am</th>
-					<th>Letzte Anmeldung</th>
+					<th>Zusätzliche Info</th>
 					<th>Aktionen</th>
 				</tr>
 			</thead>
@@ -337,55 +346,110 @@
 						</td>
 						<td>
 							<span class="badge {statusStyles[user.status]} badge-sm">
-								{user.status === 'active' ? 'Aktiv' : 'Inaktiv'}
+								{statusLabels[user.status]}
 							</span>
 						</td>
 						<td>{formatDate(user.createdAt)}</td>
-						<td>{formatDateTime(user.lastLogin)}</td>
+						<td>
+							{#if user.type === 'invitation'}
+								{#if user.status === 'expired'}
+									<span class="text-error text-sm">Abgelaufen: {formatDate(user.expiresAt)}</span>
+								{:else}
+									<span class="text-warning text-sm">Läuft ab: {formatDate(user.expiresAt)}</span>
+								{/if}
+							{:else}
+								<span class="text-sm opacity-70">Letzte Anmeldung: {formatDateTime(user.lastLogin)}</span>
+							{/if}
+						</td>
 						<td>
 							<div class="flex gap-1">
-								<button
-									class="btn btn-ghost btn-xs"
-									title="Bearbeiten"
-									aria-label="Benutzer bearbeiten"
-									onclick={() => openEditModal(user)}
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
+								{#if user.type === 'invitation'}
+									{#if user.status === 'invited'}
+										<button
+											class="btn btn-ghost btn-xs text-warning"
+											title="Einladung erneut senden"
+											aria-label="Einladung erneut senden"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+												/>
+											</svg>
+										</button>
+									{/if}
+									<button
+										class="btn btn-ghost btn-xs text-error"
+										title="Einladung löschen"
+										aria-label="Einladung löschen"
 									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-										/>
-									</svg>
-								</button>
-								<button
-									class="btn btn-ghost btn-xs text-error"
-									title="Löschen"
-									aria-label="Benutzer löschen"
-									onclick={() => openDeleteModal(user)}
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+											/>
+										</svg>
+									</button>
+								{:else}
+									<button
+										class="btn btn-ghost btn-xs"
+										title="Bearbeiten"
+										aria-label="Benutzer bearbeiten"
+										onclick={() => openEditModal(user)}
 									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-										/>
-									</svg>
-								</button>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+											/>
+										</svg>
+									</button>
+									<button
+										class="btn btn-ghost btn-xs text-error"
+										title="Löschen"
+										aria-label="Benutzer löschen"
+										onclick={() => openDeleteModal(user)}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+											/>
+										</svg>
+									</button>
+								{/if}
 							</div>
 						</td>
 					</tr>
@@ -426,23 +490,23 @@
 {#if showAddUserModal}
 	<div class="modal-open modal">
 		<div class="modal-box">
-			<h3 class="mb-4 text-lg font-bold">Neuen Benutzer hinzufügen</h3>
+			<h3 class="mb-4 text-lg font-bold">Benutzer einladen</h3>
 
 			<form
 				method="POST"
-				action="?/createUser"
+				action="?/inviteUser"
 				use:enhance={() => {
 					return async ({ result }) => {
 						if (result.type === 'success') {
 							showAddUserModal = false;
-							userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
-							showGlobalMessage('success', 'Benutzer erfolgreich erstellt');
+							userForm = { fullName: '', email: '', role: 'Redakteur' };
+							showGlobalMessage('success', 'Einladung erfolgreich versendet');
 							// Reload page data to show new user
 							await invalidateAll();
 						} else if (result.type === 'failure') {
 							showGlobalMessage(
 								'error',
-								(result.data?.message as string) || 'Fehler beim Erstellen des Benutzers'
+								(result.data?.message as string) || 'Fehler beim Versenden der Einladung'
 							);
 						}
 					};
@@ -493,25 +557,17 @@
 						{/each}
 					</select>
 				</div>
-				<div class="form-control">
-					<label class="label" for="newUserPassword">
-						<span class="label-text">Temporäres Passwort</span>
-					</label>
-					<input
-						id="newUserPassword"
-						name="password"
-						type="password"
-						placeholder="Passwort"
-						class="input-bordered input w-full"
-						bind:value={userForm.password}
-						required
-					/>
+				<div class="alert alert-info">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					<span>Der Benutzer erhält eine E-Mail mit einem Link zur Passwort-Festlegung.</span>
 				</div>
 				<div class="modal-action">
 					<button type="button" class="btn btn-ghost" onclick={() => (showAddUserModal = false)}>
 						Abbrechen
 					</button>
-					<button type="submit" class="btn btn-primary">Benutzer erstellen</button>
+					<button type="submit" class="btn btn-primary">Einladung senden</button>
 				</div>
 			</form>
 		</div>
@@ -588,7 +644,7 @@
 							showEditUserModal = false;
 							const userName = selectedUser?.full_name || 'Benutzer';
 							selectedUser = null;
-							userForm = { fullName: '', email: '', role: 'Redakteur', password: '' };
+							userForm = { fullName: '', email: '', role: 'Redakteur' };
 							showGlobalMessage('success', `Rolle von ${userName} erfolgreich aktualisiert`);
 							// Reload page data to show updated user
 							await invalidateAll();

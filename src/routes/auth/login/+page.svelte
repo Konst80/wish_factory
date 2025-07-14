@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { auth, isAuthLoading, authError } from '$lib/stores/auth';
 
-	let email = 'admin@example.com';
-	let password = 'Konst';
+	let email = $state('admin@example.com');
+	let password = $state('Konst');
+	
+	const justRegistered = $derived($page.url.searchParams.get('registered') === 'true');
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
@@ -24,7 +27,16 @@
 		<div class="card-body">
 			<h1 class="card-title mb-6 text-center text-2xl font-bold">Wish Factory</h1>
 
-			<form on:submit={handleSubmit} class="space-y-4">
+			{#if justRegistered}
+				<div class="alert alert-success mb-4">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					<span>Account erfolgreich erstellt! Sie können sich jetzt anmelden.</span>
+				</div>
+			{/if}
+
+			<form onsubmit={handleSubmit} class="space-y-4">
 				<div class="form-control">
 					<label class="label" for="email">
 						<span class="label-text">E-Mail</span>
@@ -70,13 +82,7 @@
 				</div>
 			</form>
 
-			<div class="divider">ODER</div>
-
-			<div class="text-center">
-				<a href="/auth/register" class="link link-primary"> Neuen Account erstellen </a>
-			</div>
-
-			<div class="mt-2 text-center">
+			<div class="mt-6 text-center">
 				<a href="/auth/forgot-password" class="link link-secondary text-sm">
 					Passwort vergessen?
 				</a>

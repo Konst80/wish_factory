@@ -1,6 +1,8 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { createSupabaseAdminClient } from '$lib/server/supabase-admin';
+import { createInvitation } from '$lib/server/invitations';
+import { sendInvitationEmail } from '$lib/server/email';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const {
@@ -51,6 +53,28 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			throw error(500, 'Fehler beim Laden der Benutzerdaten');
 		}
 
+		// Get ALL invitations for statistics (unfiltered) 
+		const { data: allInvitations, error: allInvitationsError } = await adminClient
+			.from('invitations')
+			.select(
+				`
+				id,
+				email,
+				full_name,
+				role,
+				created_at,
+				expires_at,
+				accepted_at
+			`
+			)
+			.is('accepted_at', null)
+			.order('created_at', { ascending: false });
+
+		if (allInvitationsError) {
+			console.error('Error fetching all invitations:', allInvitationsError);
+			throw error(500, 'Fehler beim Laden der Einladungsdaten');
+		}
+
 		// Then, build the query for filtered profiles
 		let query = adminClient.from('profiles').select(`
 				id,
@@ -78,6 +102,34 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			throw error(500, 'Fehler beim Laden der Benutzerdaten');
 		}
 
+		// Build query for filtered invitations
+		let invitationQuery = adminClient.from('invitations').select(`
+				id,
+				email,
+				full_name,
+				role,
+				created_at,
+				expires_at,
+				accepted_at
+			`).is('accepted_at', null);
+
+		// Apply filters to invitations
+		if (searchTerm) {
+			invitationQuery = invitationQuery.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+		}
+		if (selectedRole === 'Administrator' || selectedRole === 'Redakteur') {
+			invitationQuery = invitationQuery.eq('role', selectedRole);
+		}
+
+		const { data: invitations, error: invitationsError } = await invitationQuery.order('created_at', {
+			ascending: false
+		});
+
+		if (invitationsError) {
+			console.error('Error fetching filtered invitations:', invitationsError);
+			throw error(500, 'Fehler beim Laden der Einladungsdaten');
+		}
+
 		// Transform ALL profiles for statistics calculation
 		const allUsersForStats = (allProfiles || []).map((profile) => {
 			// For now, mark users as active if they were created recently (within 30 days)
@@ -98,7 +150,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			};
 		});
 
-		// Transform the filtered data for display
+		// Transform the filtered data for display - combine users and invitations
 		const filteredUsers = (profiles || []).map((profile) => {
 			// For now, mark users as active if they were created recently (within 30 days)
 			const now = new Date();
@@ -114,22 +166,72 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				status: isActive ? 'active' : ('inactive' as const),
 				createdAt: createdAt,
 				lastLogin: createdAt, // Placeholder - use creation date as fallback
-				emailConfirmed: true // Placeholder
+				emailConfirmed: true,
+				type: 'user' as const
 			};
 		});
 
-		// Apply status filter to the already filtered users if specified
+		// Transform invitations for display
+		const filteredInvitations = (invitations || []).map((invitation) => {
+			const createdAt = invitation.created_at ? new Date(invitation.created_at) : new Date(0);
+			const expiresAt = invitation.expires_at ? new Date(invitation.expires_at) : new Date(0);
+			const now = new Date();
+			const isExpired = expiresAt < now;
+
+			return {
+				id: invitation.id,
+				full_name: invitation.full_name,
+				email: invitation.email,
+				role: invitation.role,
+				status: isExpired ? 'expired' : ('invited' as const),
+				createdAt: createdAt,
+				lastLogin: createdAt,
+				emailConfirmed: false,
+				type: 'invitation' as const,
+				expiresAt: expiresAt
+			};
+		});
+
+		// Combine users and invitations
+		const allUsersAndInvitations = [...filteredUsers, ...filteredInvitations];
+
+		// Apply status filter to the combined list if specified
 		const finalUsers =
 			selectedStatus === 'active' || selectedStatus === 'inactive'
-				? filteredUsers.filter((user) => user.status === selectedStatus)
-				: filteredUsers;
+				? allUsersAndInvitations.filter((user) => user.status === selectedStatus)
+				: selectedStatus === 'invited'
+				? allUsersAndInvitations.filter((user) => user.status === 'invited')
+				: selectedStatus === 'expired'
+				? allUsersAndInvitations.filter((user) => user.status === 'expired')
+				: allUsersAndInvitations;
 
-		// Calculate statistics from ALL users (unfiltered)
+		// Sort by creation date (newest first)
+		finalUsers.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+		// Transform invitations for statistics
+		const allInvitationsForStats = (allInvitations || []).map((invitation) => {
+			const expiresAt = invitation.expires_at ? new Date(invitation.expires_at) : new Date(0);
+			const now = new Date();
+			const isExpired = expiresAt < now;
+
+			return {
+				id: invitation.id,
+				full_name: invitation.full_name,
+				email: invitation.email,
+				role: invitation.role,
+				status: isExpired ? 'expired' : ('invited' as const),
+				type: 'invitation' as const
+			};
+		});
+
+		// Calculate statistics from ALL users and invitations (unfiltered)
 		const stats = {
 			total: allUsersForStats.length,
 			active: allUsersForStats.filter((u) => u.status === 'active').length,
 			administrators: allUsersForStats.filter((u) => u.role === 'Administrator').length,
-			redakteure: allUsersForStats.filter((u) => u.role === 'Redakteur').length
+			redakteure: allUsersForStats.filter((u) => u.role === 'Redakteur').length,
+			invited: allInvitationsForStats.filter((i) => i.status === 'invited').length,
+			expired: allInvitationsForStats.filter((i) => i.status === 'expired').length
 		};
 
 		return {
@@ -270,7 +372,7 @@ export const actions: Actions = {
 		return { success: true, message: 'Benutzer erfolgreich gelöscht' };
 	},
 
-	createUser: async ({ request, locals }) => {
+	inviteUser: async ({ request, locals }) => {
 		const {
 			data: { user }
 		} = await locals.supabase.auth.getUser();
@@ -281,7 +383,7 @@ export const actions: Actions = {
 		// Check if current user is admin
 		const { data: currentUserProfile } = await locals.supabase
 			.from('profiles')
-			.select('role')
+			.select('role, full_name')
 			.eq('id', user.id)
 			.single();
 
@@ -293,9 +395,8 @@ export const actions: Actions = {
 		const email = formData.get('email') as string;
 		const fullName = formData.get('fullName') as string;
 		const role = formData.get('role') as string;
-		const password = formData.get('password') as string;
 
-		if (!email || !fullName || !role || !password) {
+		if (!email || !fullName || !role) {
 			return fail(400, { message: 'Alle Felder sind erforderlich' });
 		}
 
@@ -308,81 +409,46 @@ export const actions: Actions = {
 			return fail(400, { message: 'Name muss zwischen 2 und 100 Zeichen lang sein' });
 		}
 
+		// Check if user already exists
 		const adminClient = createSupabaseAdminClient();
+		const { data: existingUser } = await adminClient
+			.from('profiles')
+			.select('email')
+			.eq('email', email)
+			.single();
+
+		if (existingUser) {
+			return fail(400, { message: 'Ein Benutzer mit dieser E-Mail-Adresse existiert bereits' });
+		}
 
 		try {
-			// Create user using Supabase Auth Admin API
-			const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+			// Create invitation
+			const invitation = await createInvitation(
+				adminClient,
 				email,
-				password,
-				email_confirm: true,
-				user_metadata: {
-					full_name: fullName
-				}
+				fullName,
+				role as 'Administrator' | 'Redakteur',
+				user.id
+			);
+
+			// Send invitation email
+			const emailResult = await sendInvitationEmail({
+				to: email,
+				fullName,
+				inviterName: currentUserProfile.full_name,
+				role,
+				token: invitation.token
 			});
 
-			if (createError) {
-				console.error('Error creating user:', createError);
-				return fail(500, {
-					message: 'Fehler beim Erstellen des Benutzers: ' + createError.message
-				});
+			if (!emailResult.success) {
+				// Delete invitation if email failed
+				await adminClient.from('invitations').delete().eq('id', invitation.id);
+				return fail(500, { message: 'Fehler beim Senden der Einladungs-E-Mail' });
 			}
 
-			if (!newUser.user) {
-				return fail(500, { message: 'Benutzer wurde nicht erstellt' });
-			}
-
-			// Wait longer for database triggers to complete
-			await new Promise((resolve) => setTimeout(resolve, 500));
-
-			// Check if profile was created by trigger
-			const { data: existingProfile } = await adminClient
-				.from('profiles')
-				.select('id')
-				.eq('id', newUser.user.id)
-				.single();
-
-			if (!existingProfile) {
-				// Trigger didn't create profile, create it manually
-				const { error: profileError } = await adminClient.from('profiles').insert({
-					id: newUser.user.id,
-					email: newUser.user.email || email,
-					full_name: fullName,
-					role: role as 'Administrator' | 'Redakteur',
-					created_at: new Date().toISOString(),
-					updated_at: new Date().toISOString()
-				});
-
-				if (profileError) {
-					console.error('Error creating user profile:', profileError);
-					// Clean up - delete the auth user if profile creation failed
-					await adminClient.auth.admin.deleteUser(newUser.user.id);
-					return fail(500, {
-						message: 'Fehler beim Erstellen des Benutzerprofils: ' + profileError.message
-					});
-				}
-			} else {
-				// Profile exists, update it with the correct role and name
-				const { error: updateError } = await adminClient
-					.from('profiles')
-					.update({
-						full_name: fullName,
-						role: role as 'Administrator' | 'Redakteur',
-						updated_at: new Date().toISOString()
-					})
-					.eq('id', newUser.user.id);
-
-				if (updateError) {
-					console.error('Error updating user profile:', updateError);
-					return fail(500, {
-						message: 'Fehler beim Aktualisieren des Benutzerprofils: ' + updateError.message
-					});
-				}
-			}
-
-			return { success: true, message: 'Benutzer erfolgreich erstellt' };
+			return { success: true, message: 'Einladung erfolgreich versendet' };
 		} catch (error) {
-			console.error('Unexpected error during user creation:', error);
+			console.error('Unexpected error during invitation:', error);
 			return fail(500, { message: 'Ein unerwarteter Fehler ist aufgetreten' });
 		}
 	}
