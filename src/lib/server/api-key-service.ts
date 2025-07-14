@@ -41,9 +41,9 @@ export class ApiKeyService {
 	 * Generate a new API key
 	 */
 	static generateApiKey(): { key: string; prefix: string; hash: string } {
-		// Generate a secure random key: wsk_[8char_prefix][32char_secret]
+		// Generate a secure random key: wsk_[8char_prefix][36char_secret]
 		const prefix = crypto.randomBytes(4).toString('hex'); // 8 characters
-		const secret = crypto.randomBytes(16).toString('hex'); // 32 characters
+		const secret = crypto.randomBytes(18).toString('hex'); // 36 characters
 		const key = `wsk_${prefix}${secret}`;
 
 		// Hash the full key for storage using crypto
@@ -102,7 +102,7 @@ export class ApiKeyService {
 	static async validateApiKey(apiKey: string, endpoint: string): Promise<ApiKeyValidationResult> {
 		try {
 			// Extract prefix from key for faster lookup
-			if (!apiKey.startsWith('wsk_') || apiKey.length !== 48) {
+			if (!apiKey.startsWith('wsk_') || (apiKey.length !== 44 && apiKey.length !== 48)) {
 				return { isValid: false, error: 'Invalid API key format' };
 			}
 
