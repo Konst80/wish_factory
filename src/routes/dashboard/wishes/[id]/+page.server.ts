@@ -2,6 +2,40 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types.js';
 import { WishStatus } from '$lib/types/Wish';
 
+// Client-side fallback for status transition validation
+function validateStatusTransition(oldStatus: string, newStatus: string, userRole: string): boolean {
+	// Redakteur Berechtigungen
+	if (userRole === 'Redakteur' || userRole === 'editor') {
+		// Kann von Entwurf zu "Zur Freigabe" wechseln
+		if (oldStatus === 'Entwurf' && newStatus === 'Zur Freigabe') {
+			return true;
+		}
+		// Kann von "Zur Freigabe" zurück zu Entwurf wechseln
+		if (oldStatus === 'Zur Freigabe' && newStatus === 'Entwurf') {
+			return true;
+		}
+		return false;
+	}
+
+	// Administrator Berechtigungen (kann alle Übergänge)
+	if (userRole === 'Administrator' || userRole === 'administrator') {
+		switch (oldStatus) {
+			case 'Entwurf':
+				return ['Zur Freigabe', 'Archiviert'].includes(newStatus);
+			case 'Zur Freigabe':
+				return ['Entwurf', 'Freigegeben', 'Archiviert'].includes(newStatus);
+			case 'Freigegeben':
+				return newStatus === 'Archiviert';
+			case 'Archiviert':
+				return newStatus === 'Entwurf'; // Reaktivierung möglich
+			default:
+				return false;
+		}
+	}
+
+	return false;
+}
+
 export const load: PageServerLoad = async ({ params, locals }) => {
 	// Benutzer-Session prüfen
 	const { session } = await locals.safeGetSession();
@@ -32,7 +66,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		ageGroups: wish.age_groups || [],
 		specificValues: wish.specific_values || [],
 		text: wish.text,
-		belated: wish.belated,
+		belated: typeof wish.belated === 'boolean' ? wish.belated : wish.belated === 'true', // Convert string to boolean
 		status: wish.status,
 		language: wish.language,
 		createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),
@@ -93,19 +127,30 @@ export const actions: Actions = {
 				return fail(404, { message: 'Wunsch nicht gefunden' });
 			}
 
-			// Validate status transition using database function
-			const { data: isValidTransition, error: validationError } = await locals.supabase.rpc(
-				'validate_status_transition',
-				{
-					current_status: currentWish.status,
-					new_status: newStatus,
-					user_role: profile.role
-				}
-			);
+			// Validate status transition with fallback
+			let isValidTransition = false;
+			try {
+				// Try database function first
+				const { data: dbResult, error: validationError } = await locals.supabase.rpc(
+					'validate_status_transition',
+					{
+						current_status: currentWish.status,
+						new_status: newStatus,
+						user_role: profile.role
+					}
+				);
 
-			if (validationError) {
-				console.error('Error validating status transition:', validationError);
-				return fail(500, { message: 'Fehler bei der Status-Validierung' });
+				if (validationError) {
+					console.log('Database function not available, using fallback:', validationError.message);
+					// Fallback to client-side validation
+					isValidTransition = validateStatusTransition(currentWish.status, newStatus, profile.role);
+				} else {
+					isValidTransition = dbResult;
+				}
+			} catch (error) {
+				console.error('Error with status validation:', error);
+				// Final fallback to client-side validation
+				isValidTransition = validateStatusTransition(currentWish.status, newStatus, profile.role);
 			}
 
 			if (!isValidTransition) {

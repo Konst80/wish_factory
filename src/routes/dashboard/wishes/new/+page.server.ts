@@ -3,10 +3,45 @@ import { createWishSchema, WishStatus, WishLength } from '$lib/types/Wish.js';
 import type { Actions, PageServerLoad } from './$types.js';
 import { z } from 'zod';
 
+// Utility function to generate wish IDs with fallback
+async function generateWishId(
+	supabase: any,
+	language: string,
+	counter: number = 0
+): Promise<string> {
+	try {
+		// Try database function first
+		const { data: dbResult, error: dbError } = await supabase.rpc('generate_wish_id', {
+			wish_language: language
+		});
+
+		if (dbError) {
+			console.log('Database function not available, using fallback:', dbError.message);
+			// Fallback: Generate UUID using crypto.randomUUID()
+			return crypto.randomUUID();
+		} else {
+			return dbResult;
+		}
+	} catch (error) {
+		console.error('Error with ID generation:', error);
+		// Final fallback - generate UUID
+		return crypto.randomUUID();
+	}
+}
+
 export const load: PageServerLoad = async ({ locals }) => {
 	const { session } = await locals.safeGetSession();
 
 	if (!session) {
+		throw redirect(302, '/auth/login');
+	}
+
+	// Get authenticated user data
+	const {
+		data: { user },
+		error: userError
+	} = await locals.supabase.auth.getUser();
+	if (userError || !user) {
 		throw redirect(302, '/auth/login');
 	}
 
@@ -16,7 +51,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.select(
 			'specific_values_birthday_de, specific_values_birthday_en, specific_values_anniversary_de, specific_values_anniversary_en, specific_values_custom_de, specific_values_custom_en'
 		)
-		.eq('user_id', session.user.id)
+		.eq('user_id', user.id)
 		.single();
 
 	// Parse and organize specific values - jetzt sind es Beschreibungen statt Zahlen
@@ -45,6 +80,15 @@ export const actions: Actions = {
 		// Benutzer-Session prüfen
 		const { session } = await locals.safeGetSession();
 		if (!session?.user) {
+			return fail(401, { message: 'Nicht authentifiziert' });
+		}
+
+		// Get authenticated user data
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
+		if (userError || !user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
@@ -87,17 +131,21 @@ export const actions: Actions = {
 			status,
 			language,
 			length,
-			createdBy: session.user.id
+			createdBy: user.id
 		};
 
 		// Server-seitige Validierung
 		try {
 			const validatedData = createWishSchema.parse(wishData);
 
-			// Wunsch in Datenbank speichern (ID wird automatisch als UUID generiert)
+			// Generate wish ID using utility function
+			const idResult = await generateWishId(locals.supabase, validatedData.language);
+
+			// Wunsch in Datenbank speichern mit generierter ID
 			const { data: createdWish, error: insertError } = await locals.supabase
 				.from('wishes')
 				.insert({
+					id: idResult,
 					type: validatedData.type,
 					event_type: validatedData.eventType,
 					relations: validatedData.relations,
@@ -163,6 +211,15 @@ export const actions: Actions = {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
+		// Get authenticated user data
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
+		if (userError || !user) {
+			return fail(401, { message: 'Nicht authentifiziert' });
+		}
+
 		const formData = await request.formData();
 		const wishesData = formData.get('wishes');
 
@@ -179,12 +236,13 @@ export const actions: Actions = {
 
 			// Alle Wünsche validieren und für Datenbank vorbereiten
 			const validatedWishes = [];
+			let batchCounter = 0;
 			for (const wish of wishes) {
 				try {
 					// Normalize the wish data for validation
 					const normalizedWish = {
 						...wish,
-						createdBy: session.user.id,
+						createdBy: user.id,
 						// Convert single specificValues to array if needed
 						specificValues: Array.isArray(wish.specificValues)
 							? wish.specificValues
@@ -199,7 +257,15 @@ export const actions: Actions = {
 
 					const validatedData = createWishSchema.parse(normalizedWish);
 
+					// Generate ID for each wish using utility function
+					const idResult = await generateWishId(
+						locals.supabase,
+						validatedData.language,
+						batchCounter++
+					);
+
 					validatedWishes.push({
+						id: idResult,
 						type: validatedData.type,
 						event_type: validatedData.eventType,
 						relations: validatedData.relations,

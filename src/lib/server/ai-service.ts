@@ -75,10 +75,18 @@ class OpenRouterAIService {
 	private readonly baseUrl = 'https://openrouter.ai/api/v1';
 
 	constructor() {
+		console.log('🔑 OpenRouterAIService constructor - checking API key...');
+		console.log('🔑 env.OPENROUTER_API_KEY exists:', !!env.OPENROUTER_API_KEY);
+		console.log(
+			'🔑 env.OPENROUTER_API_KEY preview:',
+			env.OPENROUTER_API_KEY ? env.OPENROUTER_API_KEY.substring(0, 20) + '...' : 'undefined'
+		);
+
 		if (!env.OPENROUTER_API_KEY) {
 			throw new Error('OPENROUTER_API_KEY environment variable is required');
 		}
 		this.apiKey = env.OPENROUTER_API_KEY;
+		console.log('🔑 API key set successfully');
 	}
 
 	async generateWishes(
@@ -109,6 +117,11 @@ class OpenRouterAIService {
 				promptLength: prompt.length
 			});
 			console.log('📝 Generated Prompt:', prompt);
+
+			console.log(
+				'🔑 About to make API request with key:',
+				this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'undefined'
+			);
 
 			const response = await fetch(`${this.baseUrl}/chat/completions`, {
 				method: 'POST',

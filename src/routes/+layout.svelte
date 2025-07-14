@@ -8,19 +8,15 @@
 
 	// Apply user's saved theme on mount and handle theme changes
 	onMount(() => {
-		console.log('Layout mounted');
-
 		// Apply the user's theme from database
 		if (data.userTheme) {
 			document.documentElement.setAttribute('data-theme', data.userTheme);
-			console.log('Applied theme from database:', data.userTheme);
 		}
 
 		// Listen for theme change events from settings page
 		const handleThemeChange = (event: CustomEvent) => {
 			const newTheme = event.detail.theme;
 			document.documentElement.setAttribute('data-theme', newTheme);
-			console.log('Theme updated via event:', newTheme);
 		};
 
 		// Add global event listener for theme changes

@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async () => {
@@ -8,6 +9,7 @@ export const GET: RequestHandler = async () => {
 			message: 'Environment check successful',
 			timestamp: new Date().toISOString(),
 			environment: {
+				// Using process.env
 				nodeEnv: process.env.NODE_ENV || 'not set',
 				supabaseUrl: process.env.PUBLIC_SUPABASE_URL
 					? `${process.env.PUBLIC_SUPABASE_URL.substring(0, 20)}...`
@@ -23,6 +25,13 @@ export const GET: RequestHandler = async () => {
 					: 'not set',
 				openrouterKey: process.env.OPENROUTER_API_KEY
 					? process.env.OPENROUTER_API_KEY.substring(0, 20) + '...'
+					: 'not set'
+			},
+			envDynamic: {
+				// Using env from $env/dynamic/private
+				openaiKey: env.OPENAI_API_KEY ? env.OPENAI_API_KEY.substring(0, 20) + '...' : 'not set',
+				openrouterKey: env.OPENROUTER_API_KEY
+					? env.OPENROUTER_API_KEY.substring(0, 20) + '...'
 					: 'not set'
 			}
 		});

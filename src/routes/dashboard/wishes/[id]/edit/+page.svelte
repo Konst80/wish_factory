@@ -695,7 +695,8 @@
 										type="radio"
 										name="belated"
 										value="false"
-										bind:group={formData.belated}
+										checked={formData.belated === false}
+										onchange={() => (formData.belated = false)}
 										class="radio radio-primary"
 										required
 									/>
@@ -714,7 +715,8 @@
 										type="radio"
 										name="belated"
 										value="true"
-										bind:group={formData.belated}
+										checked={formData.belated === true}
+										onchange={() => (formData.belated = true)}
 										class="radio radio-primary"
 										required
 									/>
