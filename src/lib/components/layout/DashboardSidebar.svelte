@@ -33,6 +33,11 @@
 			icon: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
 			submenu: [
 				{
+					href: '/dashboard/wishes?status=Entwurf',
+					label: 'Entwürfe',
+					icon: 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z'
+				},
+				{
 					href: '/dashboard/wishes?status=Zur%20Freigabe',
 					label: 'Zur Freigabe',
 					icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
@@ -43,14 +48,14 @@
 					icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'
 				},
 				{
-					href: '/dashboard/wishes?status=Archiviert',
-					label: 'Archiv',
-					icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10'
-				},
-				{
 					href: '/dashboard/wishes/released',
 					label: 'Released',
 					icon: 'M15 17h5l-5 5v-5zM4.828 7l2.828 2.828L5.828 12l-2.828-2.828L7 5.172zm7.071-7.071L19.07 7.1 12 14.172 4.929 7.1l7.07-7.071z'
+				},
+				{
+					href: '/dashboard/wishes?status=Archiviert',
+					label: 'Archiv',
+					icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10'
 				}
 			]
 		},

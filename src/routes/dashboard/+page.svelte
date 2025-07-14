@@ -195,25 +195,6 @@
 				Willkommen zurück, {data.user.name}!
 			</p>
 		</div>
-		<div class="flex items-center gap-3">
-			<div class="badge badge-lg {data.user.isAdmin ? 'badge-error' : 'badge-primary'} gap-2">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-4 w-4"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-					/>
-				</svg>
-				{data.user.isAdmin ? 'Administrator' : 'Redakteur'}
-			</div>
-		</div>
 	</div>
 </div>
 
@@ -263,81 +244,102 @@
 	</div>
 {/if}
 
-<!-- Statistics -->
-<div class="stats mb-8 w-full shadow">
-	<div class="stat">
-		<div class="stat-figure text-primary">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="inline-block h-8 w-8 stroke-current"
-				fill="none"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-				/>
-			</svg>
-		</div>
-		<div class="stat-title">Meine Wünsche</div>
-		<div class="stat-value text-primary">{data.stats.userWishes}</div>
-		<div class="stat-desc">Gesamt erstellt</div>
-	</div>
+<!-- Workflow Process Cards -->
+<div class="mb-8">
+	<h2 class="mb-6 text-2xl font-bold">Workflow-Prozess</h2>
+	<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+		<!-- Phase 1: Entwürfe -->
+		<a
+			href="/dashboard/wishes?filter=draft"
+			class="card bg-base-100 border-l-warning cursor-pointer border-l-4 shadow-lg transition-shadow hover:shadow-xl no-underline"
+		>
+			<div class="card-body p-4">
+				<div class="mb-2 flex items-center justify-between">
+					<div class="badge badge-warning badge-sm">Phase 1</div>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+						class="text-warning h-5 w-5"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+				</div>
+				<h3 class="card-title mb-1 text-lg">Entwürfe</h3>
+				<div class="text-warning mb-2 text-2xl font-bold">{data.stats.userWishes}</div>
+				<p class="text-xs opacity-70">Neue Wünsche erstellen</p>
+			</div>
+		</a>
 
-	<div class="stat">
-		<div class="stat-figure text-warning">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="inline-block h-8 w-8 stroke-current"
-				fill="none"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
-		</div>
-		<div class="stat-title">Zur Freigabe</div>
-		<div class="stat-value text-warning">{data.stats.pendingWishes}</div>
-		<div class="stat-desc">
-			{#if data.stats.todayWishes > 0}
-				↗︎ {data.stats.todayWishes} neue heute
-			{:else}
-				Warten auf Genehmigung
-			{/if}
-		</div>
-	</div>
+		<!-- Phase 2: Zur Freigabe -->
+		<a
+			href="/dashboard/wishes?filter=pending"
+			class="card bg-base-100 border-l-info cursor-pointer border-l-4 shadow-lg transition-shadow hover:shadow-xl no-underline"
+		>
+			<div class="card-body p-4">
+				<div class="mb-2 flex items-center justify-between">
+					<div class="badge badge-info badge-sm">Phase 2</div>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+						class="text-info h-5 w-5"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+				</div>
+				<h3 class="card-title mb-1 text-lg">Zur Freigabe</h3>
+				<div class="text-info mb-2 text-2xl font-bold">{data.stats.pendingWishes}</div>
+				<p class="text-xs opacity-70">
+					{#if data.stats.todayWishes > 0}
+						↗︎ {data.stats.todayWishes} neue heute
+					{:else}
+						Warten auf Genehmigung
+					{/if}
+				</p>
+			</div>
+		</a>
 
-	<div class="stat">
-		<div class="stat-figure text-success">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="inline-block h-8 w-8 stroke-current"
-				fill="none"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
-		</div>
-		<div class="stat-title">Freigegeben</div>
-		<div class="stat-value text-success">{data.stats.approvedWishes}</div>
-		<div class="stat-desc">
-			{#if data.stats.totalWishes > 0}
-				↗︎ {Math.round((data.stats.approvedWishes / data.stats.totalWishes) * 100)}% Freigaberate
-			{:else}
-				Bereit zur Nutzung
-			{/if}
-		</div>
+		<!-- Phase 3: Freigegeben -->
+		<a
+			href="/dashboard/wishes/released"
+			class="card bg-base-100 border-l-success cursor-pointer border-l-4 shadow-lg transition-shadow hover:shadow-xl no-underline"
+		>
+			<div class="card-body p-4">
+				<div class="mb-2 flex items-center justify-between">
+					<div class="badge badge-success badge-sm">Phase 3</div>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+						class="text-success h-5 w-5"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+				</div>
+				<h3 class="card-title mb-1 text-lg">Freigegeben</h3>
+				<div class="text-success mb-2 text-2xl font-bold">{data.stats.approvedWishes}</div>
+				<p class="text-xs opacity-70">
+					{#if data.stats.totalWishes > 0}
+						↗︎ {Math.round((data.stats.approvedWishes / data.stats.totalWishes) * 100)}% Rate
+					{:else}
+						Bereit zur Nutzung
+					{/if}
+				</p>
+			</div>
+		</a>
 	</div>
 </div>
 
@@ -601,165 +603,10 @@
 							Online
 						</div>
 					</div>
-					<div class="flex items-center justify-between">
-						<span class="text-sm">Backup System</span>
-						<div class="badge badge-info badge-sm gap-1">
-							<div class="bg-info h-1.5 w-1.5 animate-pulse rounded-full"></div>
-							Läuft
-						</div>
-					</div>
 				</div>
 
 				<div class="card-actions mt-4">
 					<a href="/dashboard/system" class="btn btn-outline btn-sm btn-block">Details anzeigen</a>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<!-- Additional Information -->
-<div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-	<!-- Tips & Tricks -->
-	<div class="card bg-base-100 shadow-xl">
-		<div class="card-body">
-			<h3 class="card-title mb-6">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-6 w-6"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-					/>
-				</svg>
-				Tipps & Tricks
-			</h3>
-
-			<div class="space-y-4">
-				<div class="flex items-start gap-4">
-					<div class="badge badge-primary badge-lg">1</div>
-					<div>
-						<h4 class="font-semibold">KI-Unterstützung nutzen</h4>
-						<p class="text-sm opacity-70">
-							Nutzen Sie unsere KI, um personalisierte Wünsche zu erstellen, die perfekt zu jedem
-							Anlass passen.
-						</p>
-					</div>
-				</div>
-
-				<div class="flex items-start gap-4">
-					<div class="badge badge-secondary badge-lg">2</div>
-					<div>
-						<h4 class="font-semibold">Workflow optimieren</h4>
-						<p class="text-sm opacity-70">
-							Arbeiten Sie effizient mit unserem Freigabeprozess und behalten Sie den Überblick über
-							alle Wünsche.
-						</p>
-					</div>
-				</div>
-
-				<div class="flex items-start gap-4">
-					<div class="badge badge-accent badge-lg">3</div>
-					<div>
-						<h4 class="font-semibold">Team-Zusammenarbeit</h4>
-						<p class="text-sm opacity-70">
-							Arbeiten Sie nahtlos mit Ihrem Team zusammen und teilen Sie Wünsche einfach.
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Performance Metrics -->
-	<div class="card bg-base-100 shadow-xl">
-		<div class="card-body">
-			<h3 class="card-title mb-6">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-6 w-6"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-					/>
-				</svg>
-				Performance Metriken
-			</h3>
-
-			<div class="stats stats-vertical shadow-none">
-				<div class="stat px-0">
-					<div class="stat-figure text-success">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="inline-block h-6 w-6 stroke-current"
-							fill="none"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
-					</div>
-					<div class="stat-title text-sm">Erstellungszeit</div>
-					<div class="stat-value text-success text-lg">2min</div>
-					<div class="stat-desc">↓ 80% schneller mit KI</div>
-				</div>
-
-				<div class="stat px-0">
-					<div class="stat-figure text-success">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="inline-block h-6 w-6 stroke-current"
-							fill="none"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
-					</div>
-					<div class="stat-title text-sm">Zufriedenheit</div>
-					<div class="stat-value text-success text-lg">98%</div>
-					<div class="stat-desc">↑ 12% mehr Engagement</div>
-				</div>
-
-				<div class="stat px-0">
-					<div class="stat-figure text-primary">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="inline-block h-6 w-6 stroke-current"
-							fill="none"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
-					</div>
-					<div class="stat-title text-sm">Freigaberate</div>
-					<div class="stat-value text-primary text-lg">89%</div>
-					<div class="stat-desc">↑ 5% vs. letzte Woche</div>
 				</div>
 			</div>
 		</div>

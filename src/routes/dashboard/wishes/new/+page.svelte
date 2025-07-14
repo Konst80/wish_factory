@@ -1434,7 +1434,12 @@
 					<h4 class="font-medium">KI-Generierung fehlgeschlagen</h4>
 					<p class="text-sm opacity-90">{generationError}</p>
 				</div>
-				<button type="button" class="btn btn-ghost btn-sm" onclick={() => (generationError = '')} aria-label="Fehlermeldung schließen">
+				<button
+					type="button"
+					class="btn btn-ghost btn-sm"
+					onclick={() => (generationError = '')}
+					aria-label="Fehlermeldung schließen"
+				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-4 w-4"

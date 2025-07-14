@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { WishType, EventType, WishStatus, Language, Relation, AgeGroup } from '$lib/types/Wish';
+	import { WishType, EventType, Language, Relation, AgeGroup, WishLength } from '$lib/types/Wish';
 	import type { PageData } from './$types';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
 
@@ -16,7 +16,7 @@
 		text: data.wish.text,
 		belated: data.wish.belated || false,
 		language: data.wish.language,
-		status: data.wish.status
+		length: data.wish.length || WishLength.MEDIUM
 	});
 
 	// UI state
@@ -89,11 +89,10 @@
 		[AgeGroup.SENIOR]: 'Senior (60+)'
 	};
 
-	const statusLabels = {
-		[WishStatus.ENTWURF]: 'Entwurf',
-		[WishStatus.ZUR_FREIGABE]: 'Zur Freigabe',
-		[WishStatus.FREIGEGEBEN]: 'Freigegeben',
-		[WishStatus.ARCHIVIERT]: 'Archiviert'
+	const lengthLabels = {
+		[WishLength.SHORT]: 'Kurz (50-100 Zeichen)',
+		[WishLength.MEDIUM]: 'Mittel (100-200 Zeichen)',
+		[WishLength.LONG]: 'Lang (200-400 Zeichen)'
 	};
 
 	const languageLabels = {
@@ -205,7 +204,7 @@
 			formData.text !== data.wish.text ||
 			formData.belated !== (data.wish.belated ?? false) ||
 			formData.language !== data.wish.language ||
-			formData.status !== data.wish.status
+			formData.length !== (data.wish.length || WishLength.MEDIUM)
 		);
 	}
 </script>
@@ -469,9 +468,9 @@
 								</select>
 							</div>
 
-							<!-- Status -->
+							<!-- Length -->
 							<div class="form-control">
-								<label class="label" for="status">
+								<label class="label" for="length">
 									<span class="label-text flex items-center gap-2 text-base font-medium">
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
@@ -487,17 +486,18 @@
 												d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 											/>
 										</svg>
-										Status
+										Länge
 									</span>
 								</label>
 								<select
-									id="status"
-									name="status"
+									id="length"
+									name="length"
 									class="select-bordered select select-lg w-full"
-									bind:value={formData.status}
+									bind:value={formData.length}
+									required
 								>
-									{#each Object.values(WishStatus) as status (status)}
-										<option value={status}>{statusLabels[status]}</option>
+									{#each Object.values(WishLength) as length (length)}
+										<option value={length}>{lengthLabels[length]}</option>
 									{/each}
 								</select>
 							</div>
@@ -1059,10 +1059,6 @@
 						<span>Aktualisiert:</span>
 						<span>{formatDate(data.wish.updatedAt)}</span>
 					</div>
-					<div class="flex justify-between">
-						<span>Status:</span>
-						<span class="badge badge-sm">{data.wish.status}</span>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -1103,10 +1099,6 @@
 						<p class="text-xs opacity-70">
 							Der Button ist nur aktiv, wenn Änderungen vorgenommen wurden.
 						</p>
-					</div>
-					<div>
-						<h4 class="font-medium">🔄 Status-Änderung:</h4>
-						<p class="text-xs opacity-70">Beachten Sie Workflow-Regeln beim Ändern des Status.</p>
 					</div>
 				</div>
 			</div>
