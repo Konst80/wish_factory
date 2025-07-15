@@ -1,20 +1,114 @@
 <script lang="ts">
 	import { WishLength, type WishFormState } from '$lib/types/Wish';
+	import SimilarityIndicator from './SimilarityIndicator.svelte';
+	import SimilarWishesPanel from './SimilarWishesPanel.svelte';
+	import type { SimilarityMatch } from '$lib/utils/similarity.js';
 
 	type Props = {
 		formData: WishFormState;
 		errors: Record<string, string>;
 		isGenerating: boolean;
 		onGenerateWithAI: () => void;
+		wishId?: string;
 	};
 
-	let { formData, errors, isGenerating, onGenerateWithAI }: Props = $props();
+	let { formData, errors, isGenerating, onGenerateWithAI, wishId }: Props = $props();
 
 	const lengthLabels = {
 		short: 'Kurz',
 		medium: 'Mittel',
 		long: 'Lang'
 	};
+
+	// Similarity checking state
+	let similarityState = $state({
+		isChecking: false,
+		similarWishes: [] as SimilarityMatch[],
+		suggestions: [] as string[],
+		isDuplicate: false,
+		similarity: 0,
+		algorithm: '',
+		lastCheckedText: ''
+	});
+
+	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+	// Debounced similarity check
+	async function checkSimilarity(text: string) {
+		if (text.length < 10 || text === similarityState.lastCheckedText) {
+			return;
+		}
+
+		similarityState.isChecking = true;
+		similarityState.lastCheckedText = text;
+
+		try {
+			const response = await fetch('/api/wishes/similarity', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					text,
+					language: formData.language,
+					type: formData.type,
+					eventType: formData.eventType,
+					excludeId: wishId,
+					maxResults: 3
+				})
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				similarityState.similarWishes = result.similarWishes || [];
+				similarityState.suggestions = result.suggestions || [];
+				similarityState.isDuplicate = result.isDuplicate || false;
+
+				if (result.similarWishes && result.similarWishes.length > 0) {
+					similarityState.similarity = result.similarWishes[0].similarity;
+					similarityState.algorithm = result.similarWishes[0].algorithm;
+				}
+			}
+		} catch (error) {
+			console.error('Similarity check failed:', error);
+		} finally {
+			similarityState.isChecking = false;
+		}
+	}
+
+	// Handle text input with debouncing
+	function handleTextInput(event: Event) {
+		const target = event.target as HTMLTextAreaElement;
+		formData.text = target.value;
+
+		// Clear existing timer
+		if (debounceTimer) {
+			clearTimeout(debounceTimer);
+		}
+
+		// Set new timer
+		debounceTimer = setTimeout(() => {
+			checkSimilarity(target.value);
+		}, 1000);
+	}
+
+	function handleSelectWish(event: CustomEvent<{ wish: SimilarityMatch['wish'] }>) {
+		// User can manually select a similar wish to use as reference
+		const wish = event.detail.wish;
+		// You could implement a dialog to show the full text or other actions
+		console.log('Selected similar wish:', wish);
+	}
+
+	function handleApplySuggestion(event: CustomEvent<{ suggestion: string }>) {
+		formData.text = event.detail.suggestion;
+		// Re-check similarity for the new text
+		checkSimilarity(formData.text);
+	}
+
+	function handleViewMore(event: CustomEvent<{ wishes: SimilarityMatch[] }>) {
+		// Could open a modal or expand the panel
+		console.log('View more wishes:', event.detail.wishes);
+	}
 </script>
 
 <!-- Wish Type Section -->
@@ -153,6 +247,8 @@
 				placeholder="Liebe/r [Name], zu deinem [Anlass] wünsche ich dir..."
 				class="textarea-bordered textarea textarea-lg w-full pr-32"
 				class:textarea-error={errors.text}
+				class:textarea-warning={similarityState.isDuplicate}
+				oninput={handleTextInput}
 				bind:value={formData.text}
 				required
 			></textarea>
@@ -211,6 +307,33 @@
 				<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
 					>{errors.text}</span
 				>
+			</div>
+		{/if}
+
+		<!-- Similarity Check Results -->
+		{#if formData.text.length >= 10}
+			<div class="mt-4 space-y-4">
+				<SimilarityIndicator
+					similarity={similarityState.similarity}
+					algorithm={similarityState.algorithm}
+					isDuplicate={similarityState.isDuplicate}
+					similarWishes={similarityState.similarWishes}
+					isLoading={similarityState.isChecking}
+					showDetails={true}
+				/>
+
+				{#if similarityState.similarWishes.length > 0 || similarityState.suggestions.length > 0}
+					<SimilarWishesPanel
+						similarWishes={similarityState.similarWishes}
+						suggestions={similarityState.suggestions}
+						isLoading={similarityState.isChecking}
+						maxDisplay={3}
+						showSuggestions={true}
+						on:selectWish={handleSelectWish}
+						on:applySuggestion={handleApplySuggestion}
+						on:viewMore={handleViewMore}
+					/>
+				{/if}
 			</div>
 		{/if}
 	</div>

@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { WishType, EventType, Language, Relation, AgeGroup, WishLength } from '$lib/types/Wish';
+	import type { WishFormState } from '$lib/types/Wish.js';
 	import type { PageData } from './$types';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
+	import WishContentEditor from '$lib/components/wishes/WishContentEditor.svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	// Form state - initialize with existing wish data
-	let formData = $state({
+	let formData: WishFormState = $state({
 		type: data.wish.type,
 		eventType: data.wish.eventType,
 		relations: [...data.wish.relations],
@@ -16,6 +18,7 @@
 		text: data.wish.text,
 		belated: data.wish.belated || false,
 		language: data.wish.language,
+		status: data.wish.status,
 		length:
 			('length' in data.wish ? (data.wish.length as WishLength) : WishLength.MEDIUM) ||
 			WishLength.MEDIUM
@@ -24,16 +27,13 @@
 	// UI state
 	let isSubmitting = $state(false);
 	let showPreview = $state(false);
-	let showAIGenerator = $state(false);
 	let isGenerating = $state(false);
 	let generationError = $state('');
-	let wishCount = $state(3);
-	let additionalInstructions = $state('');
 	let showDeleteModal = $state(false);
 	let showWorkflowHelp = $state(false);
 
-	// Validation state (currently unused but kept for future validation)
-	// let errors = $state({});
+	// Validation state
+	let errors = $state({} as Record<string, string>);
 
 	// Form submission
 	let formElement: HTMLFormElement;
@@ -74,9 +74,10 @@
 		}
 	}
 
-	function validateSpecificValues(value: string): boolean {
-		if (!value.trim()) return true;
-		const values = value.split(',');
+	function validateSpecificValues(value: string | number): boolean {
+		const stringValue = typeof value === 'number' ? value.toString() : value;
+		if (!stringValue.trim()) return true;
+		const values = stringValue.split(',');
 		return values.every((v) => {
 			const num = parseInt(v.trim());
 			return !isNaN(num) && num > 0;
@@ -122,55 +123,26 @@
 	};
 
 	async function generateWithAI() {
-		isGenerating = true;
-		generationError = '';
+		if (isGenerating) return;
 
 		try {
-			// API-Aufruf zur echten KI-Generierung
-			const response = await fetch('/api/ai/generate', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					type: formData.type,
-					eventType: formData.eventType,
-					language: formData.language,
-					relations: formData.relations as Relation[],
-					ageGroups: formData.ageGroups as AgeGroup[],
-					specificValues: formData.specificValues
-						? formData.specificValues
-								.split(',')
-								.map((v) => parseInt(v.trim()))
-								.filter((v) => !isNaN(v))
-						: [],
-					style: formData.type,
-					count: wishCount,
-					additionalInstructions
-				})
-			});
+			isGenerating = true;
+			generationError = '';
 
-			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(errorData.message || `API-Fehler: ${response.status}`);
-			}
+			// Import the generateSingleWish function
+			const { generateSingleWish } = await import('$lib/utils/ai-generation');
 
-			const data = await response.json();
+			const result = await generateSingleWish(formData);
 
-			if (data.success && data.wishes && data.wishes.length > 0) {
-				const wish = data.wishes[0]; // Nehme den ersten generierten Wunsch
-				formData.text = wish.text;
-				formData.belated = wish.belated;
-				showAIGenerator = false;
+			if (result.success && result.text) {
+				formData.text = result.text;
+				errors.text = '';
 			} else {
-				throw new Error('Keine Wünsche generiert');
+				generationError = result.error || 'Unbekannter Fehler bei der KI-Generierung.';
 			}
 		} catch (error) {
-			console.error('Fehler bei der KI-Generierung:', error);
-			generationError =
-				error instanceof Error
-					? error.message
-					: 'Fehler bei der Generierung. Bitte versuche es später erneut.';
+			console.error('KI-Generierung fehlgeschlagen:', error);
+			generationError = 'Ein unerwarteter Fehler ist aufgetreten.';
 		} finally {
 			isGenerating = false;
 		}
@@ -198,7 +170,11 @@
 		};
 
 		// Helper function to normalize specific values comparison
-		const specificValuesEqual = (formString: string, dbArray: number[] | undefined | null) => {
+		const specificValuesEqual = (
+			formValue: string | number,
+			dbArray: number[] | undefined | null
+		) => {
+			const formString = typeof formValue === 'number' ? formValue.toString() : formValue;
 			const formArray = formString
 				.split(',')
 				.map((v) => v.trim())
@@ -279,23 +255,6 @@
 				disabled={!formData.text}
 			>
 				{showPreview ? 'Bearbeiten' : 'Vorschau'}
-			</button>
-			<button type="button" class="btn btn-primary btn-sm" onclick={() => (showAIGenerator = true)}>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="mr-1 h-4 w-4"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 10V3L4 14h7v7l9-11h-7z"
-					/>
-				</svg>
-				Mit KI generieren
 			</button>
 		</div>
 	</div>
@@ -683,154 +642,14 @@
 						{/if}
 					</div>
 
-					<!-- Wunsch-Art -->
-					<div class="bg-base-50 mb-6 rounded-lg p-6">
-						<h3 class="text-accent mb-4 flex items-center gap-2 text-lg font-semibold">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="text-accent h-5 w-5"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-								></path>
-							</svg>
-							Wunsch-Art
-						</h3>
-						<div class="form-control mb-6">
-							<label class="label">
-								<span class="label-text flex items-center gap-2 text-base font-medium">
-									Wunsch-Art *
-								</span>
-							</label>
-							<div class="grid grid-cols-2 gap-4">
-								<label
-									class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
-									false
-										? 'border-primary bg-primary/5'
-										: 'border-base-300'}"
-								>
-									<input
-										type="radio"
-										name="belated"
-										value="false"
-										checked={formData.belated === false}
-										onchange={() => (formData.belated = false)}
-										class="radio radio-primary"
-										required
-									/>
-									<div class="flex flex-col">
-										<span class="font-medium">Normal</span>
-										<span class="text-base-content/60 text-sm">Regulärer Wunsch</span>
-									</div>
-								</label>
-								<label
-									class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
-									true
-										? 'border-primary bg-primary/5'
-										: 'border-base-300'}"
-								>
-									<input
-										type="radio"
-										name="belated"
-										value="true"
-										checked={formData.belated === true}
-										onchange={() => (formData.belated = true)}
-										class="radio radio-primary"
-										required
-									/>
-									<div class="flex flex-col">
-										<span class="font-medium">Nachträglich</span>
-										<span class="text-base-content/60 text-sm">Verspäteter Wunsch</span>
-									</div>
-								</label>
-							</div>
-						</div>
-
-						<!-- Content Creation Section -->
-						<div class="form-control">
-							<label class="label" for="text">
-								<span class="label-text flex items-center gap-2 text-base font-medium">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-										/>
-									</svg>
-									Wunsch-Text *
-								</span>
-								<div class="flex items-center gap-2">
-									<span class="label-text-alt">{formData.text.length}/1000</span>
-									<div class="badge badge-primary badge-sm">KI-unterstützt</div>
-								</div>
-							</label>
-							<div class="relative">
-								<textarea
-									id="text"
-									name="text"
-									rows="6"
-									placeholder="Liebe/r [Name], zu deinem [Anlass] wünsche ich dir..."
-									class="textarea-bordered textarea textarea-lg w-full pr-32"
-									bind:value={formData.text}
-									required
-								></textarea>
-								<button
-									type="button"
-									class="btn btn-primary btn-sm absolute top-2 right-2 gap-1"
-									onclick={() => (showAIGenerator = true)}
-									title="Text mit KI basierend auf aktuellen Einstellungen generieren"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M13 10V3L4 14h7v7l9-11h-7z"
-										/>
-									</svg>
-									KI
-								</button>
-							</div>
-							<label class="label">
-								<span class="label-text-alt flex items-center gap-2">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-3 w-3"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-										/>
-									</svg>
-									Verwenden Sie Platzhalter wie [Name], [Age], [Age - X], [Age + X] für dynamische Inhalte
-								</span>
-							</label>
-						</div>
-					</div>
+					<!-- Content Editor Section -->
+					<WishContentEditor
+						{formData}
+						{errors}
+						{isGenerating}
+						onGenerateWithAI={generateWithAI}
+						wishId={data.wish.id}
+					/>
 
 					<!-- Action Buttons -->
 					<div class="card-actions mt-8 justify-between">
@@ -888,102 +707,6 @@
 						</div>
 					</div>
 				</form>
-			</div>
-		</div>
-
-		<!-- KI Generator Dialog -->
-		<div class="modal {showAIGenerator ? 'modal-open' : ''}">
-			<div class="modal-box max-w-3xl">
-				<h3 class="mb-4 text-lg font-bold">Wunsch mit KI regenerieren</h3>
-
-				<div class="space-y-4">
-					<div class="alert alert-info">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6 shrink-0 stroke-current"
-							fill="none"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
-						<span
-							>Dies wird den aktuellen Text ersetzen. Stellen Sie sicher, dass Sie Änderungen
-							gespeichert haben.</span
-						>
-					</div>
-
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Anzahl der Wünsche</span>
-						</label>
-						<input
-							type="number"
-							min="1"
-							max="5"
-							class="input-bordered input w-20"
-							bind:value={wishCount}
-						/>
-					</div>
-
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text">Zusätzliche Anweisungen</span>
-						</label>
-						<textarea
-							class="textarea-bordered textarea h-24"
-							placeholder="Zusätzliche Hinweise für die KI (optional)"
-							bind:value={additionalInstructions}
-						></textarea>
-					</div>
-
-					{#if generationError}
-						<div class="alert alert-error mt-4">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-6 w-6 shrink-0 stroke-current"
-								fill="none"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
-							</svg>
-							<span>{generationError}</span>
-						</div>
-					{/if}
-
-					<div class="modal-action">
-						<button
-							type="button"
-							class="btn btn-ghost"
-							onclick={() => (showAIGenerator = false)}
-							disabled={isGenerating}
-						>
-							Abbrechen
-						</button>
-						<button
-							type="button"
-							class="btn btn-primary"
-							onclick={generateWithAI}
-							disabled={isGenerating}
-						>
-							{#if isGenerating}
-								<span class="loading loading-spinner"></span>
-								Generiere...
-							{:else}
-								Regenerieren
-							{/if}
-						</button>
-					</div>
-				</div>
 			</div>
 		</div>
 	</div>
