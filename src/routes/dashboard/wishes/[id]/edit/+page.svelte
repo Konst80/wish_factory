@@ -48,10 +48,26 @@
 	}
 
 	function handleAgeGroupChange(ageGroup: string, checked: boolean) {
+		const specificAgeGroups = ['young', 'middle', 'senior'];
+		
 		if (checked) {
-			formData.ageGroups = [...formData.ageGroups, ageGroup as AgeGroup];
+			// Add the age group
+			const newAgeGroups = [...formData.ageGroups.filter(ag => ag !== 'all'), ageGroup as AgeGroup];
+			
+			// Check if all specific age groups are now selected
+			if (specificAgeGroups.every(ag => newAgeGroups.includes(ag as AgeGroup))) {
+				formData.ageGroups = ['all' as AgeGroup];
+			} else {
+				formData.ageGroups = newAgeGroups;
+			}
 		} else {
-			formData.ageGroups = formData.ageGroups.filter((a: string) => a !== ageGroup);
+			// If 'all' was selected, we need to keep the other two age groups
+			if (formData.ageGroups.includes('all' as AgeGroup)) {
+				formData.ageGroups = specificAgeGroups.filter(ag => ag !== ageGroup) as AgeGroup[];
+			} else {
+				// Just remove the specific age group
+				formData.ageGroups = formData.ageGroups.filter((ag: string) => ag !== ageGroup);
+			}
 		}
 	}
 
@@ -601,10 +617,9 @@
 							</label>
 							<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
 								{#each Object.values(AgeGroup).filter((ag) => ag !== 'all') as ageGroup (ageGroup)}
+									{@const isChecked = formData.ageGroups.includes('all' as AgeGroup) || formData.ageGroups.includes(ageGroup)}
 									<label
-										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {formData.ageGroups.includes(
-											ageGroup
-										)
+										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {isChecked
 											? 'border-primary bg-primary/5'
 											: 'border-base-300'}"
 									>
@@ -613,7 +628,7 @@
 											name="ageGroups"
 											value={ageGroup}
 											class="checkbox checkbox-primary"
-											checked={formData.ageGroups.includes(ageGroup)}
+											checked={isChecked}
 											onchange={(e) => handleAgeGroupChange(ageGroup, e.currentTarget.checked)}
 										/>
 										<span class="label-text ml-3 font-medium">{ageGroupLabels[ageGroup]}</span>

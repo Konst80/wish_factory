@@ -335,12 +335,11 @@
 					>Mindestens eine auswählen</span
 				>
 			</legend>
-			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-				{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
+			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+				{#each Object.values(AgeGroup).filter(ag => ag !== 'all') as ageGroup (ageGroup)}
+					{@const isChecked = formData.ageGroups.includes('all') || formData.ageGroups.includes(ageGroup)}
 					<label
-						class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {formData.ageGroups.includes(
-							ageGroup
-						)
+						class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {isChecked
 							? 'border-primary bg-primary/10'
 							: 'border-base-300'}"
 					>
@@ -349,7 +348,7 @@
 							name="ageGroups"
 							value={ageGroup}
 							class="checkbox-primary checkbox checkbox-sm mr-3"
-							checked={formData.ageGroups.includes(ageGroup)}
+							checked={isChecked}
 							onchange={(e) => onAgeGroupChange(ageGroup, e.currentTarget.checked)}
 						/>
 						<span class="label-text text-sm font-medium">{ageGroupLabels[ageGroup]}</span>

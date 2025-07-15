@@ -47,7 +47,7 @@
 	}
 
 	// Auto-refresh every 30 seconds
-	let refreshInterval: number;
+	let refreshInterval: NodeJS.Timeout;
 
 	function startAutoRefresh() {
 		refreshInterval = setInterval(() => {

@@ -65,10 +65,26 @@
 	}
 
 	function handleAgeGroupChange(ageGroup: string, checked: boolean) {
+		const specificAgeGroups = ['young', 'middle', 'senior'];
+		
 		if (checked) {
-			formData.ageGroups = [...formData.ageGroups, ageGroup];
+			// Add the age group
+			const newAgeGroups = [...formData.ageGroups.filter(ag => ag !== 'all'), ageGroup];
+			
+			// Check if all specific age groups are now selected
+			if (specificAgeGroups.every(ag => newAgeGroups.includes(ag))) {
+				formData.ageGroups = ['all'];
+			} else {
+				formData.ageGroups = newAgeGroups;
+			}
 		} else {
-			formData.ageGroups = formData.ageGroups.filter((ag: string) => ag !== ageGroup);
+			// If 'all' was selected, we need to keep the other two age groups
+			if (formData.ageGroups.includes('all')) {
+				formData.ageGroups = specificAgeGroups.filter(ag => ag !== ageGroup);
+			} else {
+				// Just remove the specific age group
+				formData.ageGroups = formData.ageGroups.filter((ag: string) => ag !== ageGroup);
+			}
 		}
 	}
 
