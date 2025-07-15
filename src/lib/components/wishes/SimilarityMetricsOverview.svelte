@@ -44,6 +44,7 @@
 	let isLoading = $state(false);
 	let error = $state<string | null>(null);
 	let lastUpdated = $state<Date | null>(null);
+	let showStats = $state(false);
 
 	async function loadSimilarityStats() {
 		isLoading = true;
@@ -198,6 +199,23 @@
 								</svg>
 							{/if}
 						</button>
+						<button class="btn btn-outline btn-sm" onclick={() => (showStats = !showStats)}>
+							{showStats ? 'Details ausblenden' : 'Details einblenden'}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-4 w-4 transition-transform {showStats ? 'rotate-180' : ''}"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 9l-7 7-7-7"
+								/>
+							</svg>
+						</button>
 					</div>
 				</div>
 
@@ -258,158 +276,160 @@
 						</div>
 					</div>
 
-					<!-- Detailed Metrics -->
-					<div class="space-y-4">
-						<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
-							<div class="flex items-center gap-3">
-								<div
-									class="h-3 w-3 rounded-full {getSimilarityColor(
-										similarityStats.averageSimilarity
-									)} bg-current"
-								></div>
-								<span class="font-medium">Durchschnittliche Ähnlichkeit</span>
-							</div>
-							<div class="flex items-center gap-2">
-								<span
-									class="text-lg font-semibold {getSimilarityColor(
-										similarityStats.averageSimilarity
-									)}"
-								>
-									{formatPercentage(similarityStats.averageSimilarity)}
-								</span>
-								<div class="tooltip" data-tip="Ähnlichkeit zwischen verwandten Wünschen">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="text-base-content/60 h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-										/>
-									</svg>
-								</div>
-							</div>
-						</div>
-
-						<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
-							<div class="flex items-center gap-3">
-								<div class="bg-info h-3 w-3 rounded-full"></div>
-								<span class="font-medium">Analysezeit</span>
-							</div>
-							<div class="flex items-center gap-2">
-								<span class="text-lg font-semibold">
-									{formatDuration(similarityStats.processingTime)}
-								</span>
-								<div class="tooltip" data-tip="Zeit für die Ähnlichkeitsanalyse">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="text-base-content/60 h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-										/>
-									</svg>
-								</div>
-							</div>
-						</div>
-
-						{#if showCacheStats}
+					{#if showStats}
+						<!-- Detailed Metrics -->
+						<div class="space-y-4">
 							<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
 								<div class="flex items-center gap-3">
-									<div class="bg-secondary h-3 w-3 rounded-full"></div>
-									<span class="font-medium">Cache</span>
+									<div
+										class="h-3 w-3 rounded-full {getSimilarityColor(
+											similarityStats.averageSimilarity
+										)} bg-current"
+									></div>
+									<span class="font-medium">Durchschnittliche Ähnlichkeit</span>
 								</div>
-								<div class="flex items-center gap-4">
-									<div class="text-sm">
-										<span class="font-semibold">{cacheStats.size}</span>
-										<span class="text-base-content/60">Einträge</span>
-									</div>
-									<div class="text-sm">
-										<span class="font-semibold">{formatPercentage(cacheStats.hitRate)}</span>
-										<span class="text-base-content/60">Trefferquote</span>
+								<div class="flex items-center gap-2">
+									<span
+										class="text-lg font-semibold {getSimilarityColor(
+											similarityStats.averageSimilarity
+										)}"
+									>
+										{formatPercentage(similarityStats.averageSimilarity)}
+									</span>
+									<div class="tooltip" data-tip="Ähnlichkeit zwischen verwandten Wünschen">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="text-base-content/60 h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
 									</div>
 								</div>
 							</div>
-						{/if}
-					</div>
 
-					<!-- Quality Indicators -->
-					<div class="bg-base-50 mt-6 rounded-lg p-4">
-						<h4 class="mb-3 flex items-center gap-2 font-medium">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-5 w-5"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
-							</svg>
-							Qualitätsindikatoren
-						</h4>
-						<div class="grid grid-cols-3 gap-3 text-sm">
-							<div class="text-center">
-								<div
-									class="text-lg font-semibold {getDuplicateRatio() < 0.05
-										? 'text-success'
-										: getDuplicateRatio() < 0.1
-											? 'text-warning'
-											: 'text-error'}"
-								>
-									{getDuplicateRatio() < 0.05 ? '✓' : getDuplicateRatio() < 0.1 ? '⚠' : '✗'}
+							<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
+								<div class="flex items-center gap-3">
+									<div class="bg-info h-3 w-3 rounded-full"></div>
+									<span class="font-medium">Analysezeit</span>
 								</div>
-								<div class="text-base-content/60 text-xs">Duplikate</div>
+								<div class="flex items-center gap-2">
+									<span class="text-lg font-semibold">
+										{formatDuration(similarityStats.processingTime)}
+									</span>
+									<div class="tooltip" data-tip="Zeit für die Ähnlichkeitsanalyse">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="text-base-content/60 h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
+									</div>
+								</div>
 							</div>
-							<div class="text-center">
-								<div
-									class="text-lg font-semibold {similarityStats.averageSimilarity < 0.6
-										? 'text-success'
-										: similarityStats.averageSimilarity < 0.8
-											? 'text-warning'
-											: 'text-error'}"
-								>
-									{similarityStats.averageSimilarity < 0.6
-										? '✓'
-										: similarityStats.averageSimilarity < 0.8
-											? '⚠'
-											: '✗'}
+
+							{#if showCacheStats}
+								<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
+									<div class="flex items-center gap-3">
+										<div class="bg-secondary h-3 w-3 rounded-full"></div>
+										<span class="font-medium">Cache</span>
+									</div>
+									<div class="flex items-center gap-4">
+										<div class="text-sm">
+											<span class="font-semibold">{cacheStats.size}</span>
+											<span class="text-base-content/60">Einträge</span>
+										</div>
+										<div class="text-sm">
+											<span class="font-semibold">{formatPercentage(cacheStats.hitRate)}</span>
+											<span class="text-base-content/60">Trefferquote</span>
+										</div>
+									</div>
 								</div>
-								<div class="text-base-content/60 text-xs">Diversität</div>
-							</div>
-							<div class="text-center">
-								<div
-									class="text-lg font-semibold {similarityStats.processingTime < 1000
-										? 'text-success'
-										: similarityStats.processingTime < 5000
-											? 'text-warning'
-											: 'text-error'}"
+							{/if}
+						</div>
+
+						<!-- Quality Indicators -->
+						<div class="bg-base-50 mt-6 rounded-lg p-4">
+							<h4 class="mb-3 flex items-center gap-2 font-medium">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-5 w-5"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
 								>
-									{similarityStats.processingTime < 1000
-										? '✓'
-										: similarityStats.processingTime < 5000
-											? '⚠'
-											: '✗'}
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
+								</svg>
+								Qualitätsindikatoren
+							</h4>
+							<div class="grid grid-cols-3 gap-3 text-sm">
+								<div class="text-center">
+									<div
+										class="text-lg font-semibold {getDuplicateRatio() < 0.05
+											? 'text-success'
+											: getDuplicateRatio() < 0.1
+												? 'text-warning'
+												: 'text-error'}"
+									>
+										{getDuplicateRatio() < 0.05 ? '✓' : getDuplicateRatio() < 0.1 ? '⚠' : '✗'}
+									</div>
+									<div class="text-base-content/60 text-xs">Duplikate</div>
 								</div>
-								<div class="text-base-content/60 text-xs">Performance</div>
+								<div class="text-center">
+									<div
+										class="text-lg font-semibold {similarityStats.averageSimilarity < 0.6
+											? 'text-success'
+											: similarityStats.averageSimilarity < 0.8
+												? 'text-warning'
+												: 'text-error'}"
+									>
+										{similarityStats.averageSimilarity < 0.6
+											? '✓'
+											: similarityStats.averageSimilarity < 0.8
+												? '⚠'
+												: '✗'}
+									</div>
+									<div class="text-base-content/60 text-xs">Diversität</div>
+								</div>
+								<div class="text-center">
+									<div
+										class="text-lg font-semibold {similarityStats.processingTime < 1000
+											? 'text-success'
+											: similarityStats.processingTime < 5000
+												? 'text-warning'
+												: 'text-error'}"
+									>
+										{similarityStats.processingTime < 1000
+											? '✓'
+											: similarityStats.processingTime < 5000
+												? '⚠'
+												: '✗'}
+									</div>
+									<div class="text-base-content/60 text-xs">Performance</div>
+								</div>
 							</div>
 						</div>
-					</div>
+					{/if}
 				{/if}
 			</div>
 		</div>

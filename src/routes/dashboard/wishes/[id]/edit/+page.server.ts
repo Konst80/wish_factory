@@ -65,6 +65,71 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 export const actions: Actions = {
+	delete: async ({ request, params, locals }) => {
+		// Get authenticated user data securely
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
+		if (userError || !user) {
+			return fail(401, { message: 'Nicht authentifiziert' });
+		}
+
+		const wishId = params.id;
+		const formData = await request.formData();
+		const idFromForm = formData.get('id');
+
+		// Verify the ID matches
+		if (idFromForm !== wishId) {
+			return fail(400, { message: 'ID stimmt nicht überein' });
+		}
+
+		// Load the wish to verify ownership/permissions
+		const { data: wish, error: wishError } = await locals.supabase
+			.from('wishes')
+			.select('*')
+			.eq('id', wishId)
+			.single();
+
+		if (wishError || !wish) {
+			console.error('Error loading wish for deletion:', wishError);
+			return fail(404, { message: 'Wunsch nicht gefunden' });
+		}
+
+		// Get user profile for permission checking
+		const { data: profiles } = await locals.supabase.from('profiles').select('*').eq('id', user.id);
+		const profile = profiles && profiles.length > 0 ? profiles[0] : null;
+
+		// Check permissions - only the creator or administrator can delete
+		const canDelete = profile && (profile.role === 'Administrator' || wish.created_by === user.id);
+
+		if (!canDelete) {
+			return fail(403, { message: 'Keine Berechtigung zum Löschen dieses Wunsches' });
+		}
+
+		// Delete the wish
+		const { error: deleteError } = await locals.supabase.from('wishes').delete().eq('id', wishId);
+
+		if (deleteError) {
+			console.error('Error deleting wish:', deleteError);
+			return fail(500, { message: 'Fehler beim Löschen des Wunsches: ' + deleteError.message });
+		}
+
+		// Similarity-Hook: Cache invalidieren für gelöschten Wunsch
+		try {
+			const similarityHooks = createSimilarityHooks(locals.supabase);
+			// Background-Ausführung um User nicht zu blockieren
+			similarityHooks.onWishDeleted(wishId).catch((error) => {
+				console.error('Similarity hook error for deleted wish:', error);
+			});
+		} catch (error) {
+			console.error('Error initializing similarity hooks:', error);
+		}
+
+		// Redirect to wishes list
+		throw redirect(303, '/dashboard/wishes');
+	},
+
 	update: async ({ request, params, locals }) => {
 		// Get authenticated user data securely
 		const {

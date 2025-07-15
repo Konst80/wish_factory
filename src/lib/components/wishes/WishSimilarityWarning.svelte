@@ -56,7 +56,7 @@
 					algorithm: data.similarWishes?.[0]?.algorithm || '',
 					processingTime: data.processingTime || 0
 				};
-				
+
 				// Call the callback if provided
 				if (onSimilarityData) {
 					onSimilarityData(similarityData);
