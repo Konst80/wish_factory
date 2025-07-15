@@ -336,7 +336,7 @@
 							No logs yet. Run the cron job to see output.
 						</div>
 					{:else}
-						{#each logs as log (log.id || log.timestamp)}
+						{#each logs as log, index (index)}
 							<div class="py-1 font-mono text-sm">{log}</div>
 						{/each}
 					{/if}

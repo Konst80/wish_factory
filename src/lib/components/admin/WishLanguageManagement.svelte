@@ -201,6 +201,7 @@
 					<div class="form-control">
 						<label class="label" for="code">
 							<span class="label-text">Sprach-Code *</span>
+							<span class="label-text-alt">2 Kleinbuchstaben (ISO 639-1)</span>
 						</label>
 						<input
 							id="code"
@@ -212,9 +213,6 @@
 							disabled={editingLanguage !== null}
 							required
 						/>
-						<label class="label">
-							<span class="label-text-alt">2 Kleinbuchstaben (ISO 639-1)</span>
-						</label>
 					</div>
 
 					<div class="form-control">
@@ -319,7 +317,7 @@
 									</td>
 									<td>
 										<div class="flex gap-2">
-											<button class="btn btn-sm btn-ghost" on:click={() => startEdit(language)}>
+											<button class="btn btn-sm btn-ghost" on:click={() => startEdit(language)} aria-label="Edit language">
 												<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 													<path
 														stroke-linecap="round"
@@ -332,6 +330,7 @@
 											<button
 												class="btn btn-sm btn-ghost text-error"
 												on:click={() => confirmDelete(language)}
+												aria-label="Delete language"
 											>
 												<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 													<path

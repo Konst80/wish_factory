@@ -28,6 +28,7 @@
 	let isSubmitting = $state(false);
 	let showPreview = $state(false);
 	let isGenerating = $state(false);
+	let generationError = $state('');
 	let showDeleteModal = $state(false);
 	let showWorkflowHelp = $state(false);
 
