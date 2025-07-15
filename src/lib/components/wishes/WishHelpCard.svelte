@@ -38,22 +38,22 @@
 					</svg>
 					Platzhalter verwenden
 				</h4>
-				<div class="grid grid-cols-2 gap-2 text-xs">
+				<div class="space-y-2 text-xs">
 					<div class="flex items-center gap-1">
 						<code class="bg-base-200 rounded px-1">[Name]</code>
-						<span class="opacity-70">Name der Person</span>
+						<span class="opacity-70">Vorname der Person</span>
 					</div>
 					<div class="flex items-center gap-1">
-						<code class="bg-base-200 rounded px-1">[Anlass]</code>
-						<span class="opacity-70">Grund der Feier</span>
+						<code class="bg-base-200 rounded px-1">[Age]</code>
+						<span class="opacity-70">Alter der Person</span>
 					</div>
 					<div class="flex items-center gap-1">
-						<code class="bg-base-200 rounded px-1">[Alter]</code>
-						<span class="opacity-70">Lebensalter</span>
+						<code class="bg-base-200 rounded px-1">[Age - X]</code>
+						<span class="opacity-70">Alter minus X (z.B. [Age - 10])</span>
 					</div>
 					<div class="flex items-center gap-1">
-						<code class="bg-base-200 rounded px-1">[Zahl]</code>
-						<span class="opacity-70">Spezifischer Wert</span>
+						<code class="bg-base-200 rounded px-1">[Age + X]</code>
+						<span class="opacity-70">Alter plus X (z.B. [Age + 5])</span>
 					</div>
 				</div>
 			</div>

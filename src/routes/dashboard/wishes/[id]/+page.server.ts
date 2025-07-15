@@ -78,10 +78,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	};
 
 	// Get user profile for role-based actions
-	const { data: profiles } = await locals.supabase
-		.from('profiles')
-		.select('*')
-		.eq('id', user.id);
+	const { data: profiles } = await locals.supabase.from('profiles').select('*').eq('id', user.id);
 
 	const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 

@@ -9,7 +9,10 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
 	if (session?.user) {
 		try {
 			// Get authenticated user data securely
-			const { data: { user }, error: userError } = await supabase.auth.getUser();
+			const {
+				data: { user },
+				error: userError
+			} = await supabase.auth.getUser();
 			if (!userError && user) {
 				const { data: settings } = await supabase
 					.from('user_settings')

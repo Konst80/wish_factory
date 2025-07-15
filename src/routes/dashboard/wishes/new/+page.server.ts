@@ -98,18 +98,19 @@ export const actions: Actions = {
 		const eventType = formData.get('eventType');
 		const rawRelations = formData.getAll('relations');
 		const rawAgeGroups = formData.getAll('ageGroups');
-		
+
 		// Sicherstellen, dass mindestens ein Wert in relations und ageGroups vorhanden ist
 		const relations = rawRelations.length > 0 ? rawRelations : ['friend'];
 		const ageGroups = rawAgeGroups.length > 0 ? rawAgeGroups : ['all'];
 		const specificValuesStr = formData.get('specificValues');
 		const rawText = formData.get('text');
 		const belated = formData.get('belated') === 'true';
-		
+
 		// Sicherstellen, dass der Text die Mindestlänge erfüllt
-		const text = rawText && rawText.toString().trim().length >= 10 
-			? rawText.toString() 
-			: 'Alles Gute zum [Anlass], liebe/r [Name]!';
+		const text =
+			rawText && rawText.toString().trim().length >= 10
+				? rawText.toString()
+				: 'Alles Gute zum [Anlass], liebe/r [Name]!';
 		const language = formData.get('language');
 		const status = formData.get('status') || WishStatus.ENTWURF;
 		const length = formData.get('length') || WishLength.MEDIUM;
@@ -253,7 +254,10 @@ export const actions: Actions = {
 						eventType: wish.eventType,
 						relations: wish.relations && wish.relations.length > 0 ? wish.relations : ['friend'],
 						ageGroups: wish.ageGroups && wish.ageGroups.length > 0 ? wish.ageGroups : ['all'],
-						text: wish.text && wish.text.trim().length >= 10 ? wish.text : 'Alles Gute zum [Anlass], liebe/r [Name]!',
+						text:
+							wish.text && wish.text.trim().length >= 10
+								? wish.text
+								: 'Alles Gute zum [Anlass], liebe/r [Name]!',
 						belated: Boolean(wish.belated),
 						status: wish.status || 'Entwurf',
 						language: wish.language,

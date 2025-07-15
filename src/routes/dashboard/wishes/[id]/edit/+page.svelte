@@ -49,13 +49,16 @@
 
 	function handleAgeGroupChange(ageGroup: string, checked: boolean) {
 		const specificAgeGroups = ['young', 'middle', 'senior'];
-		
+
 		if (checked) {
 			// Add the age group
-			const newAgeGroups = [...formData.ageGroups.filter(ag => ag !== 'all'), ageGroup as AgeGroup];
-			
+			const newAgeGroups = [
+				...formData.ageGroups.filter((ag) => ag !== 'all'),
+				ageGroup as AgeGroup
+			];
+
 			// Check if all specific age groups are now selected
-			if (specificAgeGroups.every(ag => newAgeGroups.includes(ag as AgeGroup))) {
+			if (specificAgeGroups.every((ag) => newAgeGroups.includes(ag as AgeGroup))) {
 				formData.ageGroups = ['all' as AgeGroup];
 			} else {
 				formData.ageGroups = newAgeGroups;
@@ -63,7 +66,7 @@
 		} else {
 			// If 'all' was selected, we need to keep the other two age groups
 			if (formData.ageGroups.includes('all' as AgeGroup)) {
-				formData.ageGroups = specificAgeGroups.filter(ag => ag !== ageGroup) as AgeGroup[];
+				formData.ageGroups = specificAgeGroups.filter((ag) => ag !== ageGroup) as AgeGroup[];
 			} else {
 				// Just remove the specific age group
 				formData.ageGroups = formData.ageGroups.filter((ag: string) => ag !== ageGroup);
@@ -617,7 +620,9 @@
 							</label>
 							<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
 								{#each Object.values(AgeGroup).filter((ag) => ag !== 'all') as ageGroup (ageGroup)}
-									{@const isChecked = formData.ageGroups.includes('all' as AgeGroup) || formData.ageGroups.includes(ageGroup)}
+									{@const isChecked =
+										formData.ageGroups.includes('all' as AgeGroup) ||
+										formData.ageGroups.includes(ageGroup)}
 									<label
 										class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {isChecked
 											? 'border-primary bg-primary/5'
@@ -821,7 +826,7 @@
 											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 										/>
 									</svg>
-									Verwenden Sie Platzhalter wie [Name], [Anlass], [Alter] für dynamische Inhalte
+									Verwenden Sie Platzhalter wie [Name], [Age], [Age - X], [Age + X] für dynamische Inhalte
 								</span>
 							</label>
 						</div>

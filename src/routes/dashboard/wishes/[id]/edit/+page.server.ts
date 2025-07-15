@@ -28,16 +28,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	// Get user profile for permission checking
-	const { data: profiles } = await locals.supabase
-		.from('profiles')
-		.select('*')
-		.eq('id', user.id);
+	const { data: profiles } = await locals.supabase.from('profiles').select('*').eq('id', user.id);
 
 	const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 
 	// Check permissions
-	const canEdit =
-		profile && (profile.role === 'Administrator' || wish.created_by === user.id);
+	const canEdit = profile && (profile.role === 'Administrator' || wish.created_by === user.id);
 
 	if (!canEdit) {
 		throw error(403, 'Keine Berechtigung zum Bearbeiten dieses Wunsches');
@@ -89,13 +85,14 @@ export const actions: Actions = {
 		const specificValuesStr = formData.get('specificValues');
 		const rawText = formData.get('text');
 		const belated = formData.get('belated') === 'true';
-		
+
 		// Ensure minimum requirements are met
 		const relations = rawRelations.length > 0 ? rawRelations : ['friend'];
 		const ageGroups = rawAgeGroups.length > 0 ? rawAgeGroups : ['all'];
-		const text = rawText && rawText.toString().trim().length >= 10 
-			? rawText.toString() 
-			: 'Alles Gute zum [Anlass], liebe/r [Name]!';
+		const text =
+			rawText && rawText.toString().trim().length >= 10
+				? rawText.toString()
+				: 'Alles Gute zum [Anlass], liebe/r [Name]!';
 		const language = formData.get('language');
 		const status = formData.get('status') || WishStatus.ENTWURF;
 

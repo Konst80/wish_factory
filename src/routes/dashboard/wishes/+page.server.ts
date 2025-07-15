@@ -156,10 +156,7 @@ export const actions: Actions = {
 		}
 
 		// Get user profile for permission checking
-		const { data: profiles } = await locals.supabase
-			.from('profiles')
-			.select('*')
-			.eq('id', user.id);
+		const { data: profiles } = await locals.supabase.from('profiles').select('*').eq('id', user.id);
 
 		const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 

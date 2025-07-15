@@ -336,8 +336,9 @@
 				>
 			</legend>
 			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-				{#each Object.values(AgeGroup).filter(ag => ag !== 'all') as ageGroup (ageGroup)}
-					{@const isChecked = formData.ageGroups.includes('all') || formData.ageGroups.includes(ageGroup)}
+				{#each Object.values(AgeGroup).filter((ag) => ag !== 'all') as ageGroup (ageGroup)}
+					{@const isChecked =
+						formData.ageGroups.includes('all') || formData.ageGroups.includes(ageGroup)}
 					<label
 						class="label bg-base-100 hover:bg-base-200 cursor-pointer justify-start rounded-lg border-2 p-3 transition-colors {isChecked
 							? 'border-primary bg-primary/10'
