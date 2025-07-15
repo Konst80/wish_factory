@@ -55,6 +55,7 @@
 	let wishPool: Array<WishFormState & { id: string; createdAt: Date }> = $state([]);
 	let showPoolManager = $state(false);
 	let hasUnsavedChanges = $state(false);
+	let editingPoolItemId = $state<string | null>(null);
 
 	// Validation state
 	let errors = $state(form?.errors || {});
@@ -149,6 +150,12 @@
 
 	// Pool management functions
 	function addToPool() {
+		// Don't add if we're editing
+		if (editingPoolItemId) {
+			updatePoolItem();
+			return;
+		}
+
 		// Basic validation
 		if (!formData.text || formData.text.trim().length < 10) {
 			errors.text = 'Wunschtext muss mindestens 10 Zeichen lang sein';
@@ -175,6 +182,82 @@
 	function removeFromPool(wishId: string) {
 		wishPool = wishPool.filter((wish) => wish.id !== wishId);
 		hasUnsavedChanges = wishPool.length > 0;
+
+		// If we're editing this item, clear the editing state
+		if (editingPoolItemId === wishId) {
+			editingPoolItemId = null;
+		}
+	}
+
+	function editPoolItem(wishId: string) {
+		const wishToEdit = wishPool.find((wish) => wish.id === wishId);
+		if (!wishToEdit) return;
+
+		// Load the wish data into the form
+		formData = {
+			type: wishToEdit.type,
+			eventType: wishToEdit.eventType,
+			relations: [...wishToEdit.relations],
+			ageGroups: [...wishToEdit.ageGroups],
+			specificValues: wishToEdit.specificValues,
+			text: wishToEdit.text,
+			belated: wishToEdit.belated,
+			language: wishToEdit.language,
+			status: wishToEdit.status,
+			length: wishToEdit.length
+		};
+
+		// Set editing state
+		editingPoolItemId = wishId;
+
+		// Clear any errors
+		errors = {};
+
+		// Scroll to form
+		document.querySelector('.card-body')?.scrollIntoView({ behavior: 'smooth' });
+	}
+
+	function updatePoolItem() {
+		if (!editingPoolItemId) return;
+
+		// Basic validation
+		if (!formData.text || formData.text.trim().length < 10) {
+			errors.text = 'Wunschtext muss mindestens 10 Zeichen lang sein';
+			return;
+		}
+
+		// Update the item in the pool
+		wishPool = wishPool.map((wish) =>
+			wish.id === editingPoolItemId
+				? {
+						...formData,
+						id: wish.id,
+						createdAt: wish.createdAt
+					}
+				: wish
+		);
+
+		// Clear editing state
+		editingPoolItemId = null;
+		hasUnsavedChanges = true;
+
+		// Clear errors
+		errors = {};
+
+		// Reset form for next wish
+		formData.text = 'Alles Gute zum Geburtstag, liebe/r [Name]!';
+		formData.specificValues = '';
+	}
+
+	function cancelEdit() {
+		editingPoolItemId = null;
+
+		// Reset form
+		formData.text = 'Alles Gute zum Geburtstag, liebe/r [Name]!';
+		formData.specificValues = '';
+
+		// Clear errors
+		errors = {};
 	}
 
 	function clearPool() {
@@ -394,7 +477,11 @@
 								d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
 							/>
 						</svg>
-						Wunsch-Details
+						{#if editingPoolItemId}
+							Wunsch bearbeiten
+						{:else}
+							Wunsch-Details
+						{/if}
 					</h2>
 					<div class="badge badge-outline badge-lg">
 						<svg
@@ -411,7 +498,11 @@
 								d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 							/>
 						</svg>
-						Entwurf
+						{#if editingPoolItemId}
+							Bearbeitung
+						{:else}
+							Entwurf
+						{/if}
 					</div>
 				</div>
 
@@ -455,28 +546,75 @@
 					{#if !showAIBatchCreator}
 						<div class="flex flex-col gap-4 sm:flex-row sm:justify-between">
 							<div class="flex flex-wrap gap-3">
-								<button
-									type="button"
-									class="btn btn-primary gap-2"
-									onclick={addToPool}
-									disabled={isSubmitting}
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
+								{#if editingPoolItemId}
+									<button
+										type="button"
+										class="btn btn-success gap-2"
+										onclick={updatePoolItem}
+										disabled={isSubmitting}
 									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-										/>
-									</svg>
-									Zu Pool hinzufügen
-								</button>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M5 13l4 4L19 7"
+											/>
+										</svg>
+										Änderungen speichern
+									</button>
+									<button
+										type="button"
+										class="btn btn-ghost gap-2"
+										onclick={cancelEdit}
+										disabled={isSubmitting}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M6 18L18 6M6 6l12 12"
+											/>
+										</svg>
+										Abbrechen
+									</button>
+								{:else}
+									<button
+										type="button"
+										class="btn btn-primary gap-2"
+										onclick={addToPool}
+										disabled={isSubmitting}
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+											/>
+										</svg>
+										Zu Pool hinzufügen
+									</button>
+								{/if}
 
 								<button
 									type="button"
@@ -586,13 +724,31 @@
 
 					<div class="space-y-3">
 						{#each wishPool as wish, index (wish.id)}
-							<div class="border-base-300 rounded-lg border p-3">
+							<div
+								class="border-base-300 hover:bg-base-50 cursor-pointer rounded-lg border p-3 transition-colors {editingPoolItemId ===
+								wish.id
+									? 'border-primary bg-primary/5'
+									: ''}"
+								onclick={() => editPoolItem(wish.id)}
+								onkeydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										editPoolItem(wish.id);
+									}
+								}}
+								role="button"
+								tabindex="0"
+								aria-label="Wunsch #{index + 1} bearbeiten"
+							>
 								<div class="mb-2 flex items-center justify-between">
 									<div class="flex items-center gap-2">
 										<span class="text-sm font-medium">#{index + 1}</span>
 										<span class="badge badge-xs badge-outline">
 											{wish.type === 'normal' ? 'Normal' : 'Lustig'}
 										</span>
+										{#if editingPoolItemId === wish.id}
+											<span class="badge badge-xs badge-info"> Bearbeitung </span>
+										{/if}
 									</div>
 									<span class="text-base-content/60 text-xs">
 										{new Date(wish.createdAt).toLocaleTimeString('de-DE', {
@@ -769,6 +925,9 @@
 													? 'Jubiläum'
 													: 'Benutzerdefiniert'}
 										</span>
+										{#if editingPoolItemId === wish.id}
+											<span class="badge badge-sm badge-info ml-1"> Bearbeitung </span>
+										{/if}
 									</h4>
 									<p class="text-base-content/70 mt-1 text-sm">
 										{new Date(wish.createdAt).toLocaleString('de-DE')}
@@ -782,26 +941,51 @@
 										{/each}
 									</div>
 								</div>
-								<button
-									class="btn btn-ghost btn-sm"
-									onclick={() => removeFromPool(wish.id)}
-									aria-label="Wunsch aus Pool entfernen"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
+								<div class="flex gap-2">
+									<button
+										class="btn btn-ghost btn-sm"
+										onclick={() => {
+											editPoolItem(wish.id);
+											showPoolManager = false;
+										}}
+										aria-label="Wunsch bearbeiten"
 									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-										/>
-									</svg>
-								</button>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+											/>
+										</svg>
+									</button>
+									<button
+										class="btn btn-ghost btn-sm"
+										onclick={() => removeFromPool(wish.id)}
+										aria-label="Wunsch aus Pool entfernen"
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+											/>
+										</svg>
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>

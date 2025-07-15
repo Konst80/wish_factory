@@ -116,3 +116,7 @@ The system centers around a "Wish" object with the following structure:
 ## Additional Guidelines
 
 - Always use DaisyUI 5.x components (as far as applicable)
+
+## Code Structure Recommendations
+
+- Vermeide große Datein, die zu viel Funktionen beihalten. Teile Funktionen auf Module mit guter Struktur und suberen Interfaces.
