@@ -3,7 +3,10 @@
 	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
-		data: Record<string, unknown>;
+		data: {
+			settings: Record<string, unknown>;
+			[key: string]: unknown;
+		};
 		isSubmitting: boolean;
 		languages: Array<{ value: string; label: string }>;
 		timezones: Array<{ value: string; label: string }>;

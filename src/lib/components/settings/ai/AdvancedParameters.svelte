@@ -2,7 +2,10 @@
 	import { setPreset } from '$lib/utils/settings.js';
 
 	interface Props {
-		data: Record<string, unknown>;
+		data: {
+			settings: Record<string, unknown>;
+			[key: string]: unknown;
+		};
 	}
 
 	let { data }: Props = $props();
