@@ -1,6 +1,6 @@
 <script lang="ts">
 	interface Props {
-		data: any;
+		data: Record<string, unknown>;
 	}
 
 	let { data }: Props = $props();
@@ -56,7 +56,7 @@
 					name="promptBatch"
 					class="textarea-bordered textarea w-full"
 					rows="10"
-					placeholder="Prompt für Batch-Generierung mit Platzhaltern wie {'{'}batchCount{'}'}, {'{'}batchTypes{'}'}, {'{'}batchEventTypes{'}'}..."
+					placeholder="Prompt für Batch-Generierung mit Platzhaltern wie {batchCount}, {batchTypes}, {batchEventTypes}..."
 					value={data.settings.ai?.promptBatch || ''}
 				></textarea>
 			</div>

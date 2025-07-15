@@ -3,7 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
-		data: any;
+		data: Record<string, unknown>;
 		isSubmitting: boolean;
 		onSubmittingChange: (submitting: boolean) => void;
 		onMessage: (message: string, isError?: boolean) => void;

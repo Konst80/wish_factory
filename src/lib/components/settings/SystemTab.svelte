@@ -4,7 +4,7 @@
 	import WishLanguageManagement from '$lib/components/admin/WishLanguageManagement.svelte';
 
 	interface Props {
-		data: any;
+		data: Record<string, unknown>;
 		isSubmitting: boolean;
 		onSubmittingChange: (submitting: boolean) => void;
 		onMessage: (message: string, isError?: boolean) => void;
