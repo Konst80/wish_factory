@@ -1,25 +1,18 @@
 <script lang="ts">
-	import { generateSpecificValues } from '$lib/utils/settings.js';
 
 	interface Props {
-		data: any;
+		data: {
+			settings: Record<string, unknown>;
+			[key: string]: unknown;
+		};
 		onMessage: (message: string, isError?: boolean) => void;
 	}
 
-	let { data, onMessage }: Props = $props();
+	let { data }: Props = $props();
 
 	let isCollapsed = $state(true);
 	let activeTab = $state('de');
 
-	// Handle successful message display
-	function handleSuccess(message: string) {
-		onMessage(message, false);
-	}
-
-	// Handle error message display
-	function handleError(message: string) {
-		onMessage(message, true);
-	}
 </script>
 
 <div class="bg-base-50 rounded-lg p-4">

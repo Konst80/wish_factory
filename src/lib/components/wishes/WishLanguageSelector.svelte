@@ -5,8 +5,7 @@
 		wishLanguagesLoading,
 		wishLanguagesError,
 		loadActiveWishLanguages,
-		formatLanguageDisplay,
-		type WishLanguage
+		formatLanguageDisplay
 	} from '$lib/stores/wishLanguages';
 
 	interface Props {

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { WishStatus, type WishFormState } from '$lib/types/Wish';
+	import { type WishFormState } from '$lib/types/Wish';
 	import {
 		generateBatchWishes,
 		type GeneratedWish,
 		type BatchSettings
 	} from '$lib/utils/ai-generation';
-	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
+	import { loadActiveWishLanguages } from '$lib/stores/wishLanguages';
 	import { onMount } from 'svelte';
 
 	type Props = {
@@ -20,7 +20,6 @@
 	// Internal state management
 	let isGenerating = $state(false);
 	let currentStep = $state(1);
-	let generationError = $state('');
 	let generatedWishes = $state<GeneratedWish[]>([]);
 	let selectedGeneratedWishes = $state<string[]>([]);
 
@@ -42,7 +41,6 @@
 		try {
 			isGenerating = true;
 			currentStep = 2;
-			generationError = '';
 
 			const result = await generateBatchWishes(formData, batchSettings);
 
@@ -50,12 +48,12 @@
 				generatedWishes = result.wishes;
 				currentStep = 3;
 			} else {
-				generationError = result.error || 'Es konnten keine Wünsche generiert werden.';
+				console.error('Generation failed:', result.error || 'Es konnten keine Wünsche generiert werden.');
 				currentStep = 1;
 			}
 		} catch (error) {
 			console.error('Batch-Generierung fehlgeschlagen:', error);
-			generationError = `Fehler bei der Batch-Generierung: ${error}`;
+			console.error('Batch generation error:', error);
 			currentStep = 1;
 		} finally {
 			isGenerating = false;
@@ -76,7 +74,6 @@
 		currentStep = 1;
 		generatedWishes = [];
 		selectedGeneratedWishes = [];
-		generationError = '';
 		onClose();
 	}
 
@@ -138,24 +135,6 @@
 		custom: 'Sonstiges'
 	};
 
-	const relationLabels = {
-		friend: 'Freund/in',
-		family: 'Familie',
-		partner: 'Partner/in',
-		colleague: 'Kollege/in'
-	};
-
-	const ageGroupLabels = {
-		all: 'Alle',
-		young: 'Jung (18-35)',
-		middle: 'Mittleres Alter (36-55)',
-		senior: 'Senior (55+)'
-	};
-
-	// Dynamic language labels from activeWishLanguages
-	const languageLabels = $derived(
-		Object.fromEntries($activeWishLanguages.map((lang) => [lang.code, lang.name]))
-	);
 
 	// Load active wish languages on mount
 	onMount(() => {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WishType, EventType, Relation, AgeGroup, type WishFormState } from '$lib/types/Wish';
 	import WishLanguageSelector from './WishLanguageSelector.svelte';
-	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
+	import { loadActiveWishLanguages } from '$lib/stores/wishLanguages';
 	import { onMount } from 'svelte';
 
 	type Props = {
@@ -44,10 +44,6 @@
 		senior: 'Senior (55+)'
 	};
 
-	// Dynamic language labels from activeWishLanguages
-	const languageLabels = $derived(
-		Object.fromEntries($activeWishLanguages.map((lang) => [lang.code, lang.name]))
-	);
 
 	// Load active wish languages on mount
 	onMount(() => {

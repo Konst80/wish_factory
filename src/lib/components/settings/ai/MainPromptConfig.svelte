@@ -2,7 +2,10 @@
 	import { insertPlaceholder } from '$lib/utils/settings.js';
 
 	interface Props {
-		data: any;
+		data: {
+			settings: Record<string, unknown>;
+			[key: string]: unknown;
+		};
 	}
 
 	let { data }: Props = $props();
