@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { Wish } from '$lib/types/Wish.js';
 	import type { SimilarityMatch } from '$lib/utils/similarity.js';
-	import { onMount } from 'svelte';
 
 	interface Props {
-		wish: Wish | any; // Allow flexibility for table view
+		wish: Wish | Record<string, unknown>; // Allow flexibility for table view
 		isOpen: boolean;
 		onClose: () => void;
 	}
@@ -34,7 +33,7 @@
 	let showAutoCleanModal = $state(false);
 	let autoCleanThreshold = $state(80);
 	let isAutoCleanProcessing = $state(false);
-	let autoCleanCandidates = $state<string[]>([]);
+	let _autoCleanCandidates = $state<string[]>([]);
 
 	async function loadDetailedSimilarityData() {
 		if (!wish.id || isLoading || lastLoadedWishId === wish.id) return;

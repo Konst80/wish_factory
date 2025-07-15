@@ -1,4 +1,4 @@
-import { json, error } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
 import { createSimilarityPrecomputationService } from '$lib/server/similarity-precomputation.service';
@@ -141,7 +141,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 			lastExecution: lastExecution?.[0]?.similarity_updated_at || null,
 			nextRecommendedRun: outdatedWishes && outdatedWishes.length > 0 ? 'now' : 'tomorrow'
 		});
-	} catch (err) {
+	} catch (_err) {
 		return json({ error: 'Health check failed' }, { status: 500 });
 	}
 };

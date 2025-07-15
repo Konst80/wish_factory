@@ -448,7 +448,7 @@ export class SimilarityService {
 		// Use precomputed similarity data from cache for much faster statistics
 		try {
 			// Get total wishes count with language filter
-			let wishQuery = this.supabase
+			const wishQuery = this.supabase
 				.from('wishes')
 				.select('id', { count: 'exact' })
 				.eq('status', 'Freigegeben')
@@ -475,7 +475,7 @@ export class SimilarityService {
 				const stats = statsData[0];
 
 				// Calculate duplicate groups from precomputed similarities
-				let dupQuery = this.supabase
+				const dupQuery = this.supabase
 					.from('wish_similarities')
 					.select('wish_id_1, wish_id_2')
 					.gte('overall_similarity', this.config.duplicateThreshold);

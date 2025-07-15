@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import type { SettingsData } from '$lib/types/Settings';
 
 	interface Props {
-		data: {
-			settings: Record<string, unknown>;
-			[key: string]: unknown;
-		};
+		data: SettingsData;
 		isSubmitting: boolean;
 		onSubmittingChange: (submitting: boolean) => void;
 		onMessage: (message: string, isError?: boolean) => void;
@@ -130,7 +128,7 @@
 									type="checkbox"
 									name="emailNotifications"
 									class="toggle toggle-primary"
-									checked={(data.settings as any).notifications?.emailNotifications || false}
+									checked={data.settings.notifications?.emailNotifications || false}
 								/>
 							</label>
 						</div>
@@ -165,7 +163,7 @@
 									type="checkbox"
 									name="pushNotifications"
 									class="toggle toggle-secondary"
-									checked={(data.settings as any).notifications?.pushNotifications || false}
+									checked={data.settings.notifications?.pushNotifications || false}
 								/>
 							</label>
 						</div>
@@ -223,7 +221,7 @@
 									type="checkbox"
 									name="newWishAlerts"
 									class="toggle toggle-accent"
-									checked={(data.settings as any).notifications?.newWishAlerts || false}
+									checked={data.settings.notifications?.newWishAlerts || false}
 								/>
 							</label>
 						</div>
@@ -258,7 +256,7 @@
 									type="checkbox"
 									name="approvalRequests"
 									class="toggle toggle-warning"
-									checked={(data.settings as any).notifications?.approvalRequests || false}
+									checked={data.settings.notifications?.approvalRequests || false}
 								/>
 							</label>
 						</div>
@@ -316,7 +314,7 @@
 									type="checkbox"
 									name="systemUpdates"
 									class="toggle toggle-info"
-									checked={(data.settings as any).notifications?.systemUpdates || false}
+									checked={data.settings.notifications?.systemUpdates || false}
 								/>
 							</label>
 						</div>
@@ -351,7 +349,7 @@
 									type="checkbox"
 									name="weeklyReport"
 									class="toggle toggle-success"
-									checked={(data.settings as any).notifications?.weeklyReport || false}
+									checked={data.settings.notifications?.weeklyReport || false}
 								/>
 							</label>
 						</div>

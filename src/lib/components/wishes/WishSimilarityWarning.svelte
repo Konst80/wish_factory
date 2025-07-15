@@ -5,7 +5,7 @@
 	import WishSimilarityModal from './WishSimilarityModal.svelte';
 
 	interface Props {
-		wish: Wish | any; // Allow flexibility for table view
+		wish: Wish | Record<string, unknown>; // Allow flexibility for table view
 		showDetails?: boolean;
 		maxSimilarWishes?: number;
 		onSimilarityData?: (data: SimilarityData) => void;

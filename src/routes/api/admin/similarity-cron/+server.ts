@@ -1,6 +1,5 @@
-import { json, error } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { env } from '$env/dynamic/private';
 import { createSimilarityPrecomputationService } from '$lib/server/similarity-precomputation.service';
 
 /**
