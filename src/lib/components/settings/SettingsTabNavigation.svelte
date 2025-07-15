@@ -18,8 +18,7 @@
 	<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
 		{#each tabs as tab}
 			<button
-				class="btn btn-ghost btn-sm flex items-center gap-2 px-3 py-2 text-sm {activeTab ===
-				tab.id
+				class="btn btn-ghost btn-sm flex items-center gap-2 px-3 py-2 text-sm {activeTab === tab.id
 					? 'bg-primary/10 text-primary'
 					: 'text-base-content/70 hover:text-base-content hover:bg-base-200'}"
 				onclick={() => onTabChange(tab.id)}

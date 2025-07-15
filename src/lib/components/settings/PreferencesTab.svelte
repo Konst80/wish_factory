@@ -25,16 +25,23 @@
 				return async ({ result }) => {
 					if (result.type === 'success') {
 						await invalidateAll();
-						onMessage((result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!', false);
-						
+						onMessage(
+							(result.data?.message as string) || 'Einstellungen erfolgreich gespeichert!',
+							false
+						);
+
 						// Handle theme change
 						if (typeof window !== 'undefined') {
-							const form = document.querySelector('form[action="?/updatePreferences"]') as HTMLFormElement;
+							const form = document.querySelector(
+								'form[action="?/updatePreferences"]'
+							) as HTMLFormElement;
 							if (form) {
 								const formData = new FormData(form);
 								const newTheme = formData.get('theme') as string;
 								if (newTheme) {
-									window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: newTheme } }));
+									window.dispatchEvent(
+										new CustomEvent('themeChanged', { detail: { theme: newTheme } })
+									);
 								}
 							}
 						}

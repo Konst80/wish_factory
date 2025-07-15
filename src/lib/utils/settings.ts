@@ -113,9 +113,7 @@ export async function generateSpecificValues(
 		if (result.success && result.description) {
 			// Get the appropriate form field
 			const fieldName = `specificValues${eventType.charAt(0).toUpperCase() + eventType.slice(1)}${language.charAt(0).toUpperCase() + language.slice(1)}`;
-			const field = document.querySelector(
-				`textarea[name="${fieldName}"]`
-			) as HTMLTextAreaElement;
+			const field = document.querySelector(`textarea[name="${fieldName}"]`) as HTMLTextAreaElement;
 
 			if (field) {
 				field.value = result.description;

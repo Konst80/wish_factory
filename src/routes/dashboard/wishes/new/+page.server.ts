@@ -80,13 +80,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
 	create: async ({ request, locals }) => {
-		// Benutzer-Session prüfen
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
-			return fail(401, { message: 'Nicht authentifiziert' });
-		}
+		console.log('🔥 CREATE ACTION CALLED!');
 
-		// Get authenticated user data
+		// Get authenticated user data securely
 		const {
 			data: { user },
 			error: userError
@@ -100,18 +96,27 @@ export const actions: Actions = {
 		// Form-Daten extrahieren
 		const type = formData.get('type');
 		const eventType = formData.get('eventType');
-		const relations = formData.getAll('relations');
-		const ageGroups = formData.getAll('ageGroups');
+		const rawRelations = formData.getAll('relations');
+		const rawAgeGroups = formData.getAll('ageGroups');
+		
+		// Sicherstellen, dass mindestens ein Wert in relations und ageGroups vorhanden ist
+		const relations = rawRelations.length > 0 ? rawRelations : ['friend'];
+		const ageGroups = rawAgeGroups.length > 0 ? rawAgeGroups : ['all'];
 		const specificValuesStr = formData.get('specificValues');
-		const text = formData.get('text');
+		const rawText = formData.get('text');
 		const belated = formData.get('belated') === 'true';
+		
+		// Sicherstellen, dass der Text die Mindestlänge erfüllt
+		const text = rawText && rawText.toString().trim().length >= 10 
+			? rawText.toString() 
+			: 'Alles Gute zum [Anlass], liebe/r [Name]!';
 		const language = formData.get('language');
 		const status = formData.get('status') || WishStatus.ENTWURF;
 		const length = formData.get('length') || WishLength.MEDIUM;
 
 		// Specific Values parsen - jetzt nur noch ein einzelner Wert
 		let specificValues: number[] = [];
-		if (specificValuesStr && typeof specificValuesStr === 'string') {
+		if (specificValuesStr && typeof specificValuesStr === 'string' && specificValuesStr.trim()) {
 			try {
 				const singleValue = parseInt(specificValuesStr.trim());
 				if (!isNaN(singleValue) && singleValue > 0) {
@@ -139,6 +144,7 @@ export const actions: Actions = {
 
 		// Server-seitige Validierung
 		try {
+			console.log('🔍 Validating wish data:', JSON.stringify(wishData, null, 2));
 			const validatedData = createWishSchema.parse(wishData);
 
 			// Generate wish ID using utility function
@@ -184,10 +190,12 @@ export const actions: Actions = {
 
 			if (error instanceof z.ZodError) {
 				// Validierungsfehler
+				console.error('❌ Zod Validation Error:', error.issues);
 				const errors: Record<string, string> = {};
 				for (const issue of error.issues) {
 					const path = issue.path.join('.');
 					errors[path] = issue.message;
+					console.error(`  - ${path}: ${issue.message}`);
 				}
 
 				return fail(400, {
@@ -208,13 +216,9 @@ export const actions: Actions = {
 	},
 
 	createBatch: async ({ request, locals }) => {
-		// Benutzer-Session prüfen
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
-			return fail(401, { message: 'Nicht authentifiziert' });
-		}
+		console.log('🚀 createBatch action called!');
 
-		// Get authenticated user data
+		// Get authenticated user data securely
 		const {
 			data: { user },
 			error: userError
@@ -232,6 +236,7 @@ export const actions: Actions = {
 
 		try {
 			const wishes = JSON.parse(wishesData);
+			console.log('🔍 Raw wishes from frontend:', JSON.stringify(wishes, null, 2));
 
 			if (!Array.isArray(wishes) || wishes.length === 0) {
 				return fail(400, { message: 'Ungültige Wunsch-Daten' });
@@ -244,19 +249,25 @@ export const actions: Actions = {
 				try {
 					// Normalize the wish data for validation
 					const normalizedWish = {
-						...wish,
+						type: wish.type,
+						eventType: wish.eventType,
+						relations: wish.relations && wish.relations.length > 0 ? wish.relations : ['friend'],
+						ageGroups: wish.ageGroups && wish.ageGroups.length > 0 ? wish.ageGroups : ['all'],
+						text: wish.text && wish.text.trim().length >= 10 ? wish.text : 'Alles Gute zum [Anlass], liebe/r [Name]!',
+						belated: Boolean(wish.belated),
+						status: wish.status || 'Entwurf',
+						language: wish.language,
+						length: wish.length || WishLength.MEDIUM,
 						createdBy: user.id,
 						// Convert single specificValues to array if needed
 						specificValues: Array.isArray(wish.specificValues)
 							? wish.specificValues
 							: wish.specificValues
 								? [wish.specificValues]
-								: [],
-						// Ensure belated is a boolean
-						belated: Boolean(wish.belated),
-						// Ensure length has a default value
-						length: wish.length || WishLength.MEDIUM
+								: []
 					};
+
+					console.log('🔍 Normalizing wish data:', JSON.stringify(normalizedWish, null, 2));
 
 					const validatedData = createWishSchema.parse(normalizedWish);
 

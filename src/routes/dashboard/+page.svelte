@@ -251,7 +251,7 @@
 		<!-- Phase 1: Entwürfe -->
 		<a
 			href="/dashboard/wishes?filter=draft"
-			class="card bg-base-100 border-l-warning cursor-pointer border-l-4 shadow-lg transition-shadow hover:shadow-xl no-underline"
+			class="card bg-base-100 border-l-warning cursor-pointer border-l-4 no-underline shadow-lg transition-shadow hover:shadow-xl"
 		>
 			<div class="card-body p-4">
 				<div class="mb-2 flex items-center justify-between">
@@ -278,7 +278,7 @@
 		<!-- Phase 2: Zur Freigabe -->
 		<a
 			href="/dashboard/wishes?filter=pending"
-			class="card bg-base-100 border-l-info cursor-pointer border-l-4 shadow-lg transition-shadow hover:shadow-xl no-underline"
+			class="card bg-base-100 border-l-info cursor-pointer border-l-4 no-underline shadow-lg transition-shadow hover:shadow-xl"
 		>
 			<div class="card-body p-4">
 				<div class="mb-2 flex items-center justify-between">
@@ -311,7 +311,7 @@
 		<!-- Phase 3: Freigegeben -->
 		<a
 			href="/dashboard/wishes/released"
-			class="card bg-base-100 border-l-success cursor-pointer border-l-4 shadow-lg transition-shadow hover:shadow-xl no-underline"
+			class="card bg-base-100 border-l-success cursor-pointer border-l-4 no-underline shadow-lg transition-shadow hover:shadow-xl"
 		>
 			<div class="card-body p-4">
 				<div class="mb-2 flex items-center justify-between">

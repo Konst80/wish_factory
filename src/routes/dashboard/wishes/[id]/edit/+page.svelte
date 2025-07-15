@@ -16,7 +16,9 @@
 		text: data.wish.text,
 		belated: data.wish.belated || false,
 		language: data.wish.language,
-		length: data.wish.length || WishLength.MEDIUM
+		length:
+			('length' in data.wish ? (data.wish.length as WishLength) : WishLength.MEDIUM) ||
+			WishLength.MEDIUM
 	});
 
 	// UI state
@@ -204,7 +206,9 @@
 			formData.text !== data.wish.text ||
 			formData.belated !== (data.wish.belated ?? false) ||
 			formData.language !== data.wish.language ||
-			formData.length !== (data.wish.length || WishLength.MEDIUM)
+			formData.length !==
+				(('length' in data.wish ? (data.wish.length as WishLength) : WishLength.MEDIUM) ||
+					WishLength.MEDIUM)
 		);
 	}
 </script>

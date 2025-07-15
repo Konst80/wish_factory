@@ -36,15 +36,15 @@
 		<textarea
 			id="promptTemplate"
 			name="promptTemplate"
-			class="textarea-bordered textarea w-full h-96"
+			class="textarea-bordered textarea h-96 w-full"
 			placeholder="Haupt-Prompt-Template mit Platzhaltern wie &#123;count&#125;, &#123;countText&#125;, &#123;languageTexts&#125;, &#123;length&#125;, &#123;specificValues&#125;, &#123;additionalInstructions&#125;"
 			value={data.settings.ai?.promptTemplate || ''}
 		></textarea>
-		
+
 		<!-- Template Variables Helper -->
 		<button
 			type="button"
-			class="mt-2 flex items-center gap-2 text-sm text-primary hover:text-primary-focus"
+			class="text-primary hover:text-primary-focus mt-2 flex items-center gap-2 text-sm"
 			onclick={() => (isTemplateVariablesCollapsed = !isTemplateVariablesCollapsed)}
 		>
 			<svg

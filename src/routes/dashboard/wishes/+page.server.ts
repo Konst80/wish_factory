@@ -4,9 +4,12 @@ import type { WishStatus, EventType, Language, Relation, AgeGroup } from '$lib/t
 import type { WishFilters } from '$lib/utils/wishUtils';
 
 export const load: PageServerLoad = async ({ locals, url, parent }) => {
-	const { session } = await locals.safeGetSession();
-
-	if (!session) {
+	// Get authenticated user data securely
+	const {
+		data: { user },
+		error: userError
+	} = await locals.supabase.auth.getUser();
+	if (userError || !user) {
 		throw redirect(302, '/auth/login');
 	}
 
@@ -143,8 +146,12 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 
 export const actions: Actions = {
 	bulkDelete: async ({ request, locals }) => {
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
+		// Get authenticated user data securely
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
+		if (userError || !user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
@@ -152,7 +159,7 @@ export const actions: Actions = {
 		const { data: profiles } = await locals.supabase
 			.from('profiles')
 			.select('*')
-			.eq('id', session.user.id);
+			.eq('id', user.id);
 
 		const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 

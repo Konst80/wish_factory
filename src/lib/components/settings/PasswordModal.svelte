@@ -16,7 +16,7 @@
 	<div class="modal modal-open">
 		<div class="modal-box">
 			<h3 class="text-lg font-bold">Passwort ändern</h3>
-			
+
 			<form
 				method="POST"
 				action="?/changePassword"
@@ -28,7 +28,10 @@
 							onMessage('Passwort erfolgreich geändert!', false);
 							onClose();
 						} else if (result.type === 'failure') {
-							onMessage((result.data?.message as string) || 'Fehler beim Ändern des Passworts', true);
+							onMessage(
+								(result.data?.message as string) || 'Fehler beim Ändern des Passworts',
+								true
+							);
 						}
 						onSubmittingChange(false);
 					};

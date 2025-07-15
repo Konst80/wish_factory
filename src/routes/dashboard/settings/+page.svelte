@@ -213,48 +213,48 @@
 <SettingsTabNavigation {activeTab} {tabs} onTabChange={handleTabChange} />
 
 <!-- Settings Content -->
-<div class="max-w-4xl mx-auto">
-		{#if activeTab === 'profile'}
-			<ProfileTab
-				data={data as any}
-				{languages}
-				{timezones}
-				{isSubmitting}
-				onSubmittingChange={handleSubmittingChange}
-				onMessage={handleMessage}
-				onPasswordModalOpen={handlePasswordModalOpen}
-			/>
-		{:else if activeTab === 'notifications'}
-			<NotificationsTab
-				data={data as any}
-				{isSubmitting}
-				onSubmittingChange={handleSubmittingChange}
-				onMessage={handleMessage}
-			/>
-		{:else if activeTab === 'preferences'}
-			<PreferencesTab
-				data={data as any}
-				{themes}
-				{languages}
-				{isSubmitting}
-				onSubmittingChange={handleSubmittingChange}
-				onMessage={handleMessage}
-			/>
-		{:else if activeTab === 'ai'}
-			<AITab
-				data={data as any}
-				{isSubmitting}
-				onSubmittingChange={handleSubmittingChange}
-				onMessage={handleMessage}
-			/>
-		{:else if activeTab === 'system'}
-			<SystemTab
-				data={data as any}
-				{isSubmitting}
-				onSubmittingChange={handleSubmittingChange}
-				onMessage={handleMessage}
-			/>
-		{/if}
+<div class="mx-auto max-w-4xl">
+	{#if activeTab === 'profile'}
+		<ProfileTab
+			data={data as any}
+			{languages}
+			{timezones}
+			{isSubmitting}
+			onSubmittingChange={handleSubmittingChange}
+			onMessage={handleMessage}
+			onPasswordModalOpen={handlePasswordModalOpen}
+		/>
+	{:else if activeTab === 'notifications'}
+		<NotificationsTab
+			data={data as any}
+			{isSubmitting}
+			onSubmittingChange={handleSubmittingChange}
+			onMessage={handleMessage}
+		/>
+	{:else if activeTab === 'preferences'}
+		<PreferencesTab
+			data={data as any}
+			{themes}
+			{languages}
+			{isSubmitting}
+			onSubmittingChange={handleSubmittingChange}
+			onMessage={handleMessage}
+		/>
+	{:else if activeTab === 'ai'}
+		<AITab
+			data={data as any}
+			{isSubmitting}
+			onSubmittingChange={handleSubmittingChange}
+			onMessage={handleMessage}
+		/>
+	{:else if activeTab === 'system'}
+		<SystemTab
+			data={data as any}
+			{isSubmitting}
+			onSubmittingChange={handleSubmittingChange}
+			onMessage={handleMessage}
+		/>
+	{/if}
 </div>
 
 <!-- Password Change Modal -->

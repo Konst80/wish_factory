@@ -29,9 +29,7 @@
 		<!-- Model Selection -->
 		<div class="form-control max-w-md">
 			<label class="label" for="model">
-				<span class="label-text flex items-center gap-2 font-medium">
-					🤖 KI-Modell
-				</span>
+				<span class="label-text flex items-center gap-2 font-medium"> 🤖 KI-Modell </span>
 			</label>
 			<select
 				id="model"
@@ -51,26 +49,20 @@
 				<option value="deepseek/deepseek-r1-0528:free">DeepSeek R1 (Free)</option>
 			</select>
 			<div class="label">
-				<span class="label-text-alt text-info">
-					💡 Über OpenRouter - API-Key aus .env Datei
-				</span>
+				<span class="label-text-alt text-info"> 💡 Über OpenRouter - API-Key aus .env Datei </span>
 			</div>
 		</div>
 
 		<!-- System Prompt -->
 		<div class="form-control">
 			<label class="label" for="promptSystem">
-				<span class="label-text flex items-center gap-2 font-medium">
-					📝 System-Prompt
-				</span>
-				<span class="label-text-alt badge badge-outline">
-					Grundverhalten der KI
-				</span>
+				<span class="label-text flex items-center gap-2 font-medium"> 📝 System-Prompt </span>
+				<span class="label-text-alt badge badge-outline"> Grundverhalten der KI </span>
 			</label>
 			<textarea
 				id="promptSystem"
 				name="promptSystem"
-				class="textarea-bordered textarea textarea-lg w-full min-h-[120px] leading-relaxed"
+				class="textarea-bordered textarea textarea-lg min-h-[120px] w-full leading-relaxed"
 				rows="5"
 				placeholder="System-Anweisungen für die KI... 
 

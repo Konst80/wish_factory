@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	
+
 	// Import all modular AI components
 	import ModelBasicSettings from './ai/ModelBasicSettings.svelte';
 	import MainPromptConfig from './ai/MainPromptConfig.svelte';
@@ -71,9 +71,15 @@
 					return async ({ result }) => {
 						if (result.type === 'success') {
 							await invalidateAll();
-							onMessage((result.data?.message as string) || 'KI-Einstellungen erfolgreich gespeichert!', false);
+							onMessage(
+								(result.data?.message as string) || 'KI-Einstellungen erfolgreich gespeichert!',
+								false
+							);
 						} else if (result.type === 'failure') {
-							onMessage((result.data?.message as string) || 'Fehler beim Speichern der KI-Einstellungen', true);
+							onMessage(
+								(result.data?.message as string) || 'Fehler beim Speichern der KI-Einstellungen',
+								true
+							);
 						}
 						onSubmittingChange(false);
 					};
@@ -102,7 +108,9 @@
 					<AdvancedParameters {data} />
 
 					<!-- Submit Section -->
-					<div class="border-base-300 flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+					<div
+						class="border-base-300 flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between"
+					>
 						<div class="text-base-content/70 flex items-center gap-2 text-sm">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"

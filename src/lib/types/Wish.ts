@@ -214,3 +214,17 @@ export const releasedWishSchema = z.object({
 // Helper Types für Formulare
 export type WishFormData = z.infer<typeof createWishSchema>;
 export type WishUpdateData = z.infer<typeof updateWishSchema>;
+
+// Form State Type für Component Props
+export interface WishFormState {
+	type: WishType;
+	eventType: EventType;
+	relations: string[];
+	ageGroups: string[];
+	specificValues: string | number;
+	text: string;
+	belated: boolean;
+	language: Language;
+	status: WishStatus;
+	length: WishLength;
+}

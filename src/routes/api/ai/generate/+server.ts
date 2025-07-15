@@ -182,8 +182,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					promptBelated: (settings.ai_prompt_belated as string) || undefined,
 					specificValuesBirthdayDe: (settings.specific_values_birthday_de as string) || undefined,
 					specificValuesBirthdayEn: (settings.specific_values_birthday_en as string) || undefined,
-					specificValuesAnniversaryDe: (settings.specific_values_anniversary_de as string) || undefined,
-					specificValuesAnniversaryEn: (settings.specific_values_anniversary_en as string) || undefined,
+					specificValuesAnniversaryDe:
+						(settings.specific_values_anniversary_de as string) || undefined,
+					specificValuesAnniversaryEn:
+						(settings.specific_values_anniversary_en as string) || undefined,
 					model: (settings.ai_model as string) || 'anthropic/claude-sonnet-4',
 					temperature: (settings.ai_temperature as number) ?? 0.8,
 					maxTokens: (settings.ai_max_tokens as number) || 2000,

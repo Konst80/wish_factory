@@ -8,14 +8,18 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
 	// If user is logged in, fetch their theme preference
 	if (session?.user) {
 		try {
-			const { data: settings } = await supabase
-				.from('user_settings')
-				.select('theme')
-				.eq('user_id', session.user.id)
-				.single();
+			// Get authenticated user data securely
+			const { data: { user }, error: userError } = await supabase.auth.getUser();
+			if (!userError && user) {
+				const { data: settings } = await supabase
+					.from('user_settings')
+					.select('theme')
+					.eq('user_id', user.id)
+					.single();
 
-			if (settings?.theme) {
-				userTheme = settings.theme;
+				if (settings?.theme) {
+					userTheme = settings.theme;
+				}
 			}
 		} catch (error) {
 			console.error('Error fetching user theme:', error);

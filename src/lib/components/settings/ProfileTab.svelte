@@ -12,7 +12,15 @@
 		onPasswordModalOpen: () => void;
 	}
 
-	let { data, isSubmitting, languages, timezones, onSubmittingChange, onMessage, onPasswordModalOpen }: Props = $props();
+	let {
+		data,
+		isSubmitting,
+		languages,
+		timezones,
+		onSubmittingChange,
+		onMessage,
+		onPasswordModalOpen
+	}: Props = $props();
 </script>
 
 <div class="card bg-base-100 border-base-200 border shadow-xl">
@@ -64,9 +72,15 @@
 				return async ({ result }) => {
 					if (result.type === 'success') {
 						await invalidateAll();
-						onMessage((result.data?.message as string) || 'Profil erfolgreich aktualisiert!', false);
+						onMessage(
+							(result.data?.message as string) || 'Profil erfolgreich aktualisiert!',
+							false
+						);
 					} else if (result.type === 'failure') {
-						onMessage((result.data?.message as string) || 'Fehler beim Speichern des Profils', true);
+						onMessage(
+							(result.data?.message as string) || 'Fehler beim Speichern des Profils',
+							true
+						);
 					}
 					onSubmittingChange(false);
 				};

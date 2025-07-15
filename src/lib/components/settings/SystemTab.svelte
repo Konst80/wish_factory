@@ -61,9 +61,15 @@
 				return async ({ result }) => {
 					if (result.type === 'success') {
 						await invalidateAll();
-						onMessage((result.data?.message as string) || 'System-Einstellungen erfolgreich gespeichert!', false);
+						onMessage(
+							(result.data?.message as string) || 'System-Einstellungen erfolgreich gespeichert!',
+							false
+						);
 					} else if (result.type === 'failure') {
-						onMessage((result.data?.message as string) || 'Fehler beim Speichern der System-Einstellungen', true);
+						onMessage(
+							(result.data?.message as string) || 'Fehler beim Speichern der System-Einstellungen',
+							true
+						);
 					}
 					onSubmittingChange(false);
 				};
@@ -91,7 +97,9 @@
 					</h3>
 
 					<div class="form-control">
-						<label class="label cursor-pointer bg-base-100 hover:bg-base-200 rounded-lg p-3 transition-colors">
+						<label
+							class="label bg-base-100 hover:bg-base-200 cursor-pointer rounded-lg p-3 transition-colors"
+						>
 							<div class="flex items-center gap-3">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"

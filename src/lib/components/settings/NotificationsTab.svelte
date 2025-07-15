@@ -61,9 +61,15 @@
 				return async ({ result }) => {
 					if (result.type === 'success') {
 						await invalidateAll();
-						onMessage((result.data?.message as string) || 'Benachrichtigungen erfolgreich gespeichert!', false);
+						onMessage(
+							(result.data?.message as string) || 'Benachrichtigungen erfolgreich gespeichert!',
+							false
+						);
 					} else if (result.type === 'failure') {
-						onMessage((result.data?.message as string) || 'Fehler beim Speichern der Benachrichtigungen', true);
+						onMessage(
+							(result.data?.message as string) || 'Fehler beim Speichern der Benachrichtigungen',
+							true
+						);
 					}
 					onSubmittingChange(false);
 				};

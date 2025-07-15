@@ -675,30 +675,38 @@ class OpenRouterAIService {
 			// Check if birthday or anniversary is selected and include appropriate prompt
 			const hasBirthday = eventTypes.includes('birthday');
 			const hasAnniversary = eventTypes.includes('anniversary');
-			
+
 			if (hasBirthday || hasAnniversary) {
 				const specificValuesPrompts = [];
-				
+
 				// Add birthday prompts if birthday is selected
 				if (hasBirthday) {
 					if (languages.includes('de') && aiSettings.specificValuesBirthdayDe) {
-						specificValuesPrompts.push(`**Geburtstage (DE):** ${aiSettings.specificValuesBirthdayDe}`);
+						specificValuesPrompts.push(
+							`**Geburtstage (DE):** ${aiSettings.specificValuesBirthdayDe}`
+						);
 					}
 					if (languages.includes('en') && aiSettings.specificValuesBirthdayEn) {
-						specificValuesPrompts.push(`**Birthdays (EN):** ${aiSettings.specificValuesBirthdayEn}`);
+						specificValuesPrompts.push(
+							`**Birthdays (EN):** ${aiSettings.specificValuesBirthdayEn}`
+						);
 					}
 				}
-				
+
 				// Add anniversary prompts if anniversary is selected
 				if (hasAnniversary) {
 					if (languages.includes('de') && aiSettings.specificValuesAnniversaryDe) {
-						specificValuesPrompts.push(`**Jubiläen (DE):** ${aiSettings.specificValuesAnniversaryDe}`);
+						specificValuesPrompts.push(
+							`**Jubiläen (DE):** ${aiSettings.specificValuesAnniversaryDe}`
+						);
 					}
 					if (languages.includes('en') && aiSettings.specificValuesAnniversaryEn) {
-						specificValuesPrompts.push(`**Anniversaries (EN):** ${aiSettings.specificValuesAnniversaryEn}`);
+						specificValuesPrompts.push(
+							`**Anniversaries (EN):** ${aiSettings.specificValuesAnniversaryEn}`
+						);
 					}
 				}
-				
+
 				if (specificValuesPrompts.length > 0) {
 					specificValuesPromptText = `\n\n**Spezifische Werte Anweisungen:**\n${specificValuesPrompts.join('\n')}`;
 				}
@@ -707,9 +715,7 @@ class OpenRouterAIService {
 
 		const countText = count === 1 ? 'Glückwunsch' : 'Glückwünsche';
 		const specificValuesText =
-			specificValues && specificValues.length > 0
-				? `${specificValues.join('')}`
-				: '';
+			specificValues && specificValues.length > 0 ? `${specificValues.join('')}` : '';
 
 		const additionalInstructionsText = additionalInstructions
 			? `\n- Zusätzliche Anweisungen: ${additionalInstructions}`

@@ -4,8 +4,12 @@ import { createWishSchema, WishStatus } from '$lib/types/Wish';
 import { z } from 'zod';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const { session } = await locals.safeGetSession();
-	if (!session?.user) {
+	// Get authenticated user data securely
+	const {
+		data: { user },
+		error: userError
+	} = await locals.supabase.auth.getUser();
+	if (userError || !user) {
 		throw redirect(303, '/auth/login');
 	}
 
@@ -27,13 +31,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const { data: profiles } = await locals.supabase
 		.from('profiles')
 		.select('*')
-		.eq('id', session.user.id);
+		.eq('id', user.id);
 
 	const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 
 	// Check permissions
 	const canEdit =
-		profile && (profile.role === 'Administrator' || wish.created_by === session.user.id);
+		profile && (profile.role === 'Administrator' || wish.created_by === user.id);
 
 	if (!canEdit) {
 		throw error(403, 'Keine Berechtigung zum Bearbeiten dieses Wunsches');
@@ -58,15 +62,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	return {
 		wish: wishData,
-		user: session.user,
+		user: user,
 		profile
 	};
 };
 
 export const actions: Actions = {
 	update: async ({ request, params, locals }) => {
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
+		// Get authenticated user data securely
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
+		if (userError || !user) {
 			return fail(401, { message: 'Nicht authentifiziert' });
 		}
 
@@ -76,11 +84,18 @@ export const actions: Actions = {
 		// Extract form data
 		const type = formData.get('type');
 		const eventType = formData.get('eventType');
-		const relations = formData.getAll('relations');
-		const ageGroups = formData.getAll('ageGroups');
+		const rawRelations = formData.getAll('relations');
+		const rawAgeGroups = formData.getAll('ageGroups');
 		const specificValuesStr = formData.get('specificValues');
-		const text = formData.get('text');
+		const rawText = formData.get('text');
 		const belated = formData.get('belated') === 'true';
+		
+		// Ensure minimum requirements are met
+		const relations = rawRelations.length > 0 ? rawRelations : ['friend'];
+		const ageGroups = rawAgeGroups.length > 0 ? rawAgeGroups : ['all'];
+		const text = rawText && rawText.toString().trim().length >= 10 
+			? rawText.toString() 
+			: 'Alles Gute zum [Anlass], liebe/r [Name]!';
 		const language = formData.get('language');
 		const status = formData.get('status') || WishStatus.ENTWURF;
 
@@ -108,7 +123,7 @@ export const actions: Actions = {
 			belated,
 			status,
 			language,
-			createdBy: session.user.id
+			createdBy: user.id
 		};
 
 		try {

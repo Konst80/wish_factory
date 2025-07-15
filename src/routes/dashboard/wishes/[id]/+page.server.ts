@@ -37,9 +37,12 @@ function validateStatusTransition(oldStatus: string, newStatus: string, userRole
 }
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	// Benutzer-Session prüfen
-	const { session } = await locals.safeGetSession();
-	if (!session?.user) {
+	// Get authenticated user data securely
+	const {
+		data: { user },
+		error: userError
+	} = await locals.supabase.auth.getUser();
+	if (userError || !user) {
 		throw redirect(303, '/auth/login');
 	}
 
@@ -78,21 +81,25 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const { data: profiles } = await locals.supabase
 		.from('profiles')
 		.select('*')
-		.eq('id', session.user.id);
+		.eq('id', user.id);
 
 	const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 
 	return {
 		wish: wishData,
-		user: session.user,
+		user: user,
 		profile: profile || null
 	};
 };
 
 export const actions: Actions = {
 	updateStatus: async ({ params, request, locals }) => {
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
+		// Get authenticated user data securely
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
+		if (userError || !user) {
 			throw redirect(302, '/auth/login');
 		}
 
@@ -109,7 +116,7 @@ export const actions: Actions = {
 			const { data: profile } = await locals.supabase
 				.from('profiles')
 				.select('role')
-				.eq('id', session.user.id)
+				.eq('id', user.id)
 				.single();
 
 			if (!profile) {
@@ -178,8 +185,12 @@ export const actions: Actions = {
 	},
 
 	delete: async ({ params, locals }) => {
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
+		// Get authenticated user data securely
+		const {
+			data: { user },
+			error: userError
+		} = await locals.supabase.auth.getUser();
+		if (userError || !user) {
 			throw redirect(302, '/auth/login');
 		}
 
@@ -190,7 +201,7 @@ export const actions: Actions = {
 			const { data: profile } = await locals.supabase
 				.from('profiles')
 				.select('role')
-				.eq('id', session.user.id)
+				.eq('id', user.id)
 				.single();
 
 			if (!profile || profile.role !== 'Administrator') {
