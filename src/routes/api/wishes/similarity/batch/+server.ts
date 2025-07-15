@@ -2,10 +2,15 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createSimilarityService } from '$lib/server/similarity-service';
 import type { Wish } from '$lib/types/Wish';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
-		const { wishes: specificWishes, threshold = 0.7, language } = await request.json().catch(() => ({}));
+		const {
+			wishes: specificWishes,
+			threshold = 0.7,
+			language
+		} = await request.json().catch(() => ({}));
 
 		const stream = new ReadableStream({
 			start(controller) {
@@ -20,7 +25,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					controller.enqueue(encoder.encode(progressData));
 				};
 
-				const sendResult = (wish: any) => {
+				const sendResult = (wish: Wish) => {
 					const resultData =
 						JSON.stringify({
 							type: 'result',
@@ -74,17 +79,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 };
 
-async function getAllWishes(supabase: any, language?: string): Promise<Wish[]> {
+async function getAllWishes(supabase: SupabaseClient, language?: string): Promise<Wish[]> {
 	let query = supabase
 		.from('wishes')
 		.select('id, text, type, event_type, status, language, relations, age_groups, created_at')
 		.in('status', ['Freigegeben', 'Entwurf', 'Zur Freigabe']);
-	
+
 	// Filter by language if specified
 	if (language) {
 		query = query.eq('language', language);
 	}
-	
+
 	const { data: wishes, error } = await query.order('created_at', { ascending: false });
 
 	if (error) {
@@ -93,7 +98,7 @@ async function getAllWishes(supabase: any, language?: string): Promise<Wish[]> {
 	}
 
 	// Transform database field names to match our interface
-	const transformedWishes = (wishes || []).map((wish: any) => ({
+	const transformedWishes = (wishes || []).map((wish: Record<string, unknown>) => ({
 		...wish,
 		eventType: wish.event_type,
 		ageGroups: wish.age_groups || [],
@@ -101,7 +106,7 @@ async function getAllWishes(supabase: any, language?: string): Promise<Wish[]> {
 	}));
 
 	console.log('Sample transformed wish:', transformedWishes[0]);
-	return transformedWishes;
+	return transformedWishes as Wish[];
 }
 
 async function processWishesBatch(
@@ -109,10 +114,10 @@ async function processWishesBatch(
 	threshold: number,
 	language: string | undefined,
 	sendProgress: (progress: number) => void,
-	sendResult: (wish: any) => void,
+	sendResult: (wish: Wish) => void,
 	sendError: (error: string) => void,
 	sendComplete: () => void,
-	locals: any
+	locals: App.Locals
 ) {
 	try {
 		// Check authentication
@@ -181,6 +186,12 @@ async function processWishesBatch(
 							language: wish.language,
 							relations: wish.relations || [],
 							ageGroups: wish.ageGroups || [],
+							specificValues: wish.specificValues || [],
+							belated: Boolean(wish.belated),
+							length: wish.length || 0,
+							createdAt: wish.createdAt || '',
+							updatedAt: wish.updatedAt || '',
+							createdBy: wish.createdBy || '',
 							similarWishes: filteredSimilar.map((sw) => ({
 								id: sw.wish.id,
 								text: sw.wish.text,

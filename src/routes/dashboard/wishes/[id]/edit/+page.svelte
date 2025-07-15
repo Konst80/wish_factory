@@ -28,7 +28,6 @@
 	let isSubmitting = $state(false);
 	let showPreview = $state(false);
 	let isGenerating = $state(false);
-	let generationError = $state('');
 	let showDeleteModal = $state(false);
 	let showWorkflowHelp = $state(false);
 
@@ -127,7 +126,6 @@
 
 		try {
 			isGenerating = true;
-			generationError = '';
 
 			// Import the generateSingleWish function
 			const { generateSingleWish } = await import('$lib/utils/ai-generation');
@@ -138,11 +136,11 @@
 				formData.text = result.text;
 				errors.text = '';
 			} else {
-				generationError = result.error || 'Unbekannter Fehler bei der KI-Generierung.';
+				errors.text = result.error || 'Unbekannter Fehler bei der KI-Generierung.';
 			}
 		} catch (error) {
 			console.error('KI-Generierung fehlgeschlagen:', error);
-			generationError = 'Ein unerwarteter Fehler ist aufgetreten.';
+			errors.text = 'Ein unerwarteter Fehler ist aufgetreten.';
 		} finally {
 			isGenerating = false;
 		}

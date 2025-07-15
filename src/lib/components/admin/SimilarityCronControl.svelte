@@ -24,7 +24,7 @@
 	let showLogs = $state(false);
 	let logs = $state<string[]>([]);
 	let showGithubSetup = $state(false);
-	let executionResult = $state<any>(null);
+	let executionResult = $state<Record<string, unknown> | null>(null);
 	let errorMessage = $state<string | null>(null);
 
 	// Auto-refresh orphaned wishes count
@@ -294,7 +294,7 @@
 					<h3 class="font-bold">Execution Completed Successfully!</h3>
 					<div class="text-xs">
 						Processed {executionResult.processed} wishes in {executionResult.duration}ms
-						{executionResult.errors > 0 ? ` with ${executionResult.errors} errors` : ''}
+						{(executionResult.errors as number) > 0 ? ` with ${executionResult.errors} errors` : ''}
 					</div>
 				</div>
 			</div>

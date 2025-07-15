@@ -152,8 +152,10 @@
 	const similarCount = $derived(
 		wishesForCurrentLanguage.filter((w) => w.duplicateStatus === 'similar').length
 	);
-	const uniqueCount = $derived(wishesForCurrentLanguage.filter((w) => w.duplicateStatus === 'unique').length);
-	
+	const uniqueCount = $derived(
+		wishesForCurrentLanguage.filter((w) => w.duplicateStatus === 'unique').length
+	);
+
 	// Total count for current language
 	const totalCount = $derived(wishesForCurrentLanguage.length);
 
@@ -554,7 +556,6 @@
 				<div class="stat-desc">Unter 70% Ähnlichkeit</div>
 			</div>
 		</div>
-
 
 		<!-- Tabs -->
 		<div class="tabs tabs-boxed">

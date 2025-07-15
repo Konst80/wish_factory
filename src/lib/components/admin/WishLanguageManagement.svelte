@@ -317,7 +317,11 @@
 									</td>
 									<td>
 										<div class="flex gap-2">
-											<button class="btn btn-sm btn-ghost" on:click={() => startEdit(language)} aria-label="Edit language">
+											<button
+												class="btn btn-sm btn-ghost"
+												on:click={() => startEdit(language)}
+												aria-label="Edit language"
+											>
 												<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 													<path
 														stroke-linecap="round"
