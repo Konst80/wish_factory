@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	interface Props {
 		data: {
 			settings: Record<string, unknown>;
@@ -12,7 +11,6 @@
 
 	let isCollapsed = $state(true);
 	let activeTab = $state('de');
-
 </script>
 
 <div class="bg-base-50 rounded-lg p-4">

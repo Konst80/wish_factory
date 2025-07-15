@@ -48,7 +48,10 @@
 				generatedWishes = result.wishes;
 				currentStep = 3;
 			} else {
-				console.error('Generation failed:', result.error || 'Es konnten keine Wünsche generiert werden.');
+				console.error(
+					'Generation failed:',
+					result.error || 'Es konnten keine Wünsche generiert werden.'
+				);
 				currentStep = 1;
 			}
 		} catch (error) {
@@ -134,7 +137,6 @@
 		anniversary: 'Jubiläum',
 		custom: 'Sonstiges'
 	};
-
 
 	// Load active wish languages on mount
 	onMount(() => {

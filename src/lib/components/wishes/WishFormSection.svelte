@@ -44,7 +44,6 @@
 		senior: 'Senior (55+)'
 	};
 
-
 	// Load active wish languages on mount
 	onMount(() => {
 		loadActiveWishLanguages();
