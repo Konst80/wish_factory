@@ -1,0 +1,134 @@
+name: Similarity Precomputation Cron
+
+on:
+  schedule:
+    # Täglich um 2 Uhr nachts (UTC)
+    - cron: '0 2 * * *'
+    # Wöchentlich am Sonntag um 3 Uhr (vollständige Neuberechnung)
+    - cron: '0 3 * * 0'
+
+  # Ermöglicht manuelles Triggern
+  workflow_dispatch:
+
+jobs:
+  similarity-precomputation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call Cloudflare Pages Webhook
+        id: webhook
+        run: |
+          echo "🔄 Triggering similarity precomputation on Cloudflare Pages..."
+
+          # Rufe den Webhook-Endpoint auf deiner Cloudflare Pages App auf
+          response=$(curl -w "%{http_code}" -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: GitHub-Actions-Cron/1.0" \
+            -d '{"source": "github-actions", "schedule": "daily", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' \
+            ${{ secrets.CLOUDFLARE_PAGES_URL }}/api/admin/similarity-cron)
+
+          # Extrahiere HTTP-Status-Code
+          http_code="${response: -3}"
+          response_body="${response%???}"
+
+          echo "HTTP Status: $http_code"
+          echo "Response: $response_body"
+
+          # Prüfe Erfolg
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ Similarity precomputation triggered successfully"
+          else
+            echo "❌ Similarity precomputation failed with HTTP $http_code"
+            exit 1
+          fi
+
+          # Speichere Response für nächsten Step
+          echo "response_body=$response_body" >> $GITHUB_OUTPUT
+
+      - name: Parse Results
+        run: |
+          echo "📊 Parsing similarity precomputation results..."
+
+          # Extrahiere wichtige Informationen aus der Response
+          response="${{ steps.webhook.outputs.response_body }}"
+
+          # Einfache JSON-Parsing (falls jq nicht verfügbar)
+          if echo "$response" | grep -q '"success":true'; then
+            echo "✅ Precomputation completed successfully"
+            
+            # Extrahiere Zahlen (vereinfacht)
+            processed=$(echo "$response" | grep -o '"processed":[0-9]*' | cut -d':' -f2 || echo "0")
+            errors=$(echo "$response" | grep -o '"errors":[0-9]*' | cut -d':' -f2 || echo "0")
+            
+            echo "📈 Processed wishes: $processed"
+            echo "❌ Errors: $errors"
+            
+            # Setze GitHub-Status
+            if [ "$errors" -gt 0 ]; then
+              echo "⚠️ Completed with $errors errors"
+            else
+              echo "🎉 Completed successfully without errors"
+            fi
+          else
+            echo "❌ Precomputation failed"
+            echo "Response: $response"
+            exit 1
+          fi
+
+  health-check:
+    runs-on: ubuntu-latest
+    needs: similarity-precomputation
+    if: always() # Läuft auch wenn der vorherige Job fehlschlägt
+
+    steps:
+      - name: Check Similarity System Health
+        run: |
+          echo "🔍 Checking similarity system health..."
+
+          # Health-Check
+          response=$(curl -w "%{http_code}" -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "User-Agent: GitHub-Actions-HealthCheck/1.0" \
+            ${{ secrets.CLOUDFLARE_PAGES_URL }}/api/admin/similarity-cron)
+
+          # Extrahiere HTTP-Status-Code
+          http_code="${response: -3}"
+          response_body="${response%???}"
+
+          echo "HTTP Status: $http_code"
+          echo "Health Response: $response_body"
+
+          # Prüfe ob Response erfolgreich ist
+          if [ "$http_code" -eq 200 ] && echo "$response_body" | grep -q '"status":"healthy"'; then
+            echo "✅ Similarity system is healthy"
+            
+            # Extrahiere Health-Informationen
+            outdated=$(echo "$response_body" | grep -o '"outdatedWishes":[0-9]*' | cut -d':' -f2 || echo "unknown")
+            echo "📊 Outdated wishes: $outdated"
+            
+          else
+            echo "❌ Similarity system health check failed"
+            echo "This might indicate issues with the similarity service"
+            # Nicht als Fehler behandeln, nur warnen
+          fi
+
+  notify-status:
+    runs-on: ubuntu-latest
+    needs: [similarity-precomputation, health-check]
+    if: always()
+
+    steps:
+      - name: Summary
+        run: |
+          echo "📋 Similarity Cron Job Summary"
+          echo "================================"
+          echo "Timestamp: $(date -u)"
+          echo "Precomputation Status: ${{ needs.similarity-precomputation.result }}"
+          echo "Health Check Status: ${{ needs.health-check.result }}"
+
+          if [ "${{ needs.similarity-precomputation.result }}" = "success" ]; then
+            echo "🎉 Cron job completed successfully!"
+          else
+            echo "❌ Cron job failed - check logs above"
+          fi

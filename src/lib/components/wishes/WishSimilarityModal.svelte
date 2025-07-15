@@ -1,0 +1,361 @@
+<script lang="ts">
+	import type { Wish } from '$lib/types/Wish.js';
+	import type { SimilarityMatch } from '$lib/utils/similarity.js';
+	import { onMount } from 'svelte';
+
+	interface Props {
+		wish: Wish | any; // Allow flexibility for table view
+		isOpen: boolean;
+		onClose: () => void;
+	}
+
+	let { wish, isOpen, onClose }: Props = $props();
+
+	interface SimilarityData {
+		similarWishes: SimilarityMatch[];
+		isDuplicate: boolean;
+		similarity: number;
+		algorithm: string;
+		processingTime: number;
+		suggestions: string[];
+	}
+
+	let similarityData = $state<SimilarityData | null>(null);
+	let isLoading = $state(false);
+	let error = $state<string | null>(null);
+	let lastLoadedWishId = $state<string | null>(null);
+	let loadTimeout: ReturnType<typeof setTimeout> | null = null;
+	let currentRequestId = $state<string | null>(null);
+
+	async function loadDetailedSimilarityData() {
+		if (!wish.id || isLoading || lastLoadedWishId === wish.id) return;
+
+		console.log(`Loading similarity data for wish ${wish.id}`);
+		isLoading = true;
+		error = null;
+		lastLoadedWishId = wish.id;
+
+		// Generate unique request ID to prevent race conditions
+		const requestId = `${wish.id}-${Date.now()}`;
+		currentRequestId = requestId;
+
+		try {
+			const params = new URLSearchParams({
+				wishId: wish.id,
+				language: wish.language || 'de',
+				type: wish.type || 'normal',
+				eventType: wish.eventType || 'birthday'
+			});
+
+			const response = await fetch(`/api/wishes/similarity?${params}`);
+
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
+
+			const data = await response.json();
+
+			// Check if this is still the current request (prevent race conditions)
+			if (currentRequestId !== requestId) {
+				console.log('Request outdated, ignoring response');
+				return;
+			}
+
+			if (data.success) {
+				similarityData = {
+					similarWishes: data.similarWishes || [],
+					isDuplicate: data.isDuplicate || false,
+					similarity: data.similarWishes?.[0]?.similarity || 0,
+					algorithm: data.similarWishes?.[0]?.algorithm || '',
+					processingTime: data.processingTime || 0,
+					suggestions: data.suggestions || []
+				};
+			} else {
+				throw new Error(data.error || 'Unbekannter Fehler');
+			}
+		} catch (err) {
+			// Check if this is still the current request before setting error
+			if (currentRequestId !== requestId) {
+				console.log('Request outdated, ignoring error');
+				return;
+			}
+
+			console.error('Fehler beim Laden der Ähnlichkeitsdaten:', err);
+			error = err instanceof Error ? err.message : 'Unbekannter Fehler';
+			lastLoadedWishId = null; // Reset on error so user can retry
+		} finally {
+			// Only set loading to false if this is still the current request
+			if (currentRequestId === requestId) {
+				isLoading = false;
+			}
+		}
+	}
+
+	function formatSimilarity(similarity: number): string {
+		return `${Math.round(similarity * 100)}%`;
+	}
+
+	function getSimilarityColor(similarity: number): string {
+		if (similarity >= 0.9) return 'text-error';
+		if (similarity >= 0.7) return 'text-warning';
+		if (similarity >= 0.5) return 'text-info';
+		return 'text-success';
+	}
+
+	function getSimilarityBadgeColor(similarity: number): string {
+		if (similarity >= 0.9) return 'badge-error';
+		if (similarity >= 0.7) return 'badge-warning';
+		if (similarity >= 0.5) return 'badge-info';
+		return 'badge-success';
+	}
+
+	function getAlgorithmName(algorithm: string): string {
+		switch (algorithm) {
+			case 'cosine':
+				return 'Cosine Similarity';
+			case 'jaccard':
+				return 'Jaccard Index';
+			case 'levenshtein':
+				return 'Levenshtein Distance';
+			case 'tfidf':
+				return 'TF-IDF';
+			default:
+				return algorithm;
+		}
+	}
+
+	function truncateText(text: string, maxLength: number): string {
+		if (text.length <= maxLength) return text;
+		return text.substring(0, maxLength) + '...';
+	}
+
+	function debouncedLoadData() {
+		if (loadTimeout) {
+			clearTimeout(loadTimeout);
+		}
+
+		loadTimeout = setTimeout(() => {
+			loadDetailedSimilarityData();
+		}, 100); // 100ms debounce
+	}
+
+	$effect(() => {
+		if (isOpen && wish.id && !isLoading && lastLoadedWishId !== wish.id) {
+			console.log(`Effect triggered for wish ${wish.id}, isOpen: ${isOpen}`);
+			debouncedLoadData();
+		}
+	});
+
+	// Reset data when modal closes
+	$effect(() => {
+		if (!isOpen) {
+			// Clear any pending timeout
+			if (loadTimeout) {
+				clearTimeout(loadTimeout);
+				loadTimeout = null;
+			}
+
+			similarityData = null;
+			error = null;
+			lastLoadedWishId = null;
+		}
+	});
+
+	// Cleanup on component unmount
+	$effect(() => {
+		return () => {
+			if (loadTimeout) {
+				clearTimeout(loadTimeout);
+			}
+		};
+	});
+</script>
+
+{#if isOpen}
+	<div class="modal modal-open">
+		<div class="modal-box max-w-4xl">
+			<div class="mb-6 flex items-center justify-between">
+				<h3 class="text-lg font-bold">Ähnlichkeitsanalyse</h3>
+				<button
+					class="btn btn-sm btn-circle btn-ghost"
+					onclick={onClose}
+					aria-label="Modal schließen"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
+
+			<!-- Current Wish -->
+			<div class="mb-6">
+				<h4 class="mb-2 font-semibold">Aktueller Wunsch:</h4>
+				<div class="bg-base-200 rounded-lg p-4">
+					<div class="mb-2 flex items-center gap-2">
+						<div class="badge badge-outline badge-sm">{wish.type}</div>
+						<div class="badge badge-outline badge-sm">{wish.eventType}</div>
+						<div class="badge badge-outline badge-sm">{wish.language}</div>
+						<div class="badge badge-outline badge-sm">{wish.status}</div>
+					</div>
+					<p class="text-sm">{wish.text}</p>
+				</div>
+			</div>
+
+			{#if error}
+				<div class="alert alert-error">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6 shrink-0 stroke-current"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
+					</svg>
+					<span>Fehler beim Laden der Ähnlichkeitsdaten: {error}</span>
+				</div>
+			{:else if isLoading}
+				<div class="flex items-center justify-center py-8">
+					<span class="loading loading-spinner loading-lg"></span>
+					<span class="ml-2">Analysiere Ähnlichkeiten...</span>
+				</div>
+			{:else if similarityData}
+				<!-- Analysis Results -->
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+					<!-- Summary Stats -->
+					<div class="card bg-base-100 shadow-sm">
+						<div class="card-body">
+							<h4 class="card-title text-base">Zusammenfassung</h4>
+							<div class="stats stats-vertical shadow-sm">
+								<div class="stat">
+									<div class="stat-title">Ähnlichste Übereinstimmung</div>
+									<div class="stat-value {getSimilarityColor(similarityData.similarity)} text-2xl">
+										{formatSimilarity(similarityData.similarity)}
+									</div>
+									<div class="stat-desc">{getAlgorithmName(similarityData.algorithm)}</div>
+								</div>
+								<div class="stat">
+									<div class="stat-title">Gefundene Ähnlichkeiten</div>
+									<div class="stat-value text-primary text-2xl">
+										{similarityData.similarWishes.length}
+									</div>
+									<div class="stat-desc">Ähnliche Wünsche</div>
+								</div>
+								<div class="stat">
+									<div class="stat-title">Analysezeit</div>
+									<div class="stat-value text-info text-2xl">{similarityData.processingTime}ms</div>
+									<div class="stat-desc">Verarbeitungszeit</div>
+								</div>
+							</div>
+
+							{#if similarityData.isDuplicate}
+								<div class="alert alert-warning mt-4">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-6 w-6 shrink-0 stroke-current"
+										fill="none"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+										/>
+									</svg>
+									<span
+										><strong>Duplikat erkannt!</strong> Dieser Wunsch ist sehr ähnlich zu einem bereits
+										existierenden Wunsch.</span
+									>
+								</div>
+							{/if}
+						</div>
+					</div>
+
+					<!-- Similar Wishes -->
+					<div class="card bg-base-100 shadow-sm">
+						<div class="card-body">
+							<h4 class="card-title text-base">Ähnliche Wünsche</h4>
+							{#if similarityData.similarWishes.length > 0}
+								<div class="max-h-96 space-y-3 overflow-y-auto">
+									{#each similarityData.similarWishes as { wish: similarWish, similarity, algorithm }}
+										<div class="border-base-300 rounded-lg border p-3">
+											<div class="mb-2 flex items-center justify-between">
+												<div class="flex items-center gap-2">
+													<div class="badge {getSimilarityBadgeColor(similarity)} badge-sm">
+														{formatSimilarity(similarity)}
+													</div>
+													<div class="badge badge-ghost badge-sm">
+														{getAlgorithmName(algorithm)}
+													</div>
+												</div>
+												<div class="text-base-content/60 text-xs">
+													ID: {similarWish.id.substring(0, 8)}...
+												</div>
+											</div>
+											<p class="text-base-content/80 text-sm">
+												{truncateText(similarWish.text, 200)}
+											</p>
+											<div class="mt-2 flex items-center gap-2">
+												{#if similarWish.type}
+													<div class="badge badge-outline badge-xs">{similarWish.type}</div>
+												{/if}
+												{#if similarWish.eventType}
+													<div class="badge badge-outline badge-xs">{similarWish.eventType}</div>
+												{/if}
+												{#if similarWish.language}
+													<div class="badge badge-outline badge-xs">{similarWish.language}</div>
+												{/if}
+											</div>
+										</div>
+									{/each}
+								</div>
+							{:else}
+								<div class="py-8 text-center">
+									<div class="mb-2 text-4xl">✨</div>
+									<p class="text-base-content/70">Keine ähnlichen Wünsche gefunden</p>
+									<p class="text-base-content/50 text-sm">Dieser Wunsch ist einzigartig!</p>
+								</div>
+							{/if}
+						</div>
+					</div>
+				</div>
+
+				<!-- Suggestions -->
+				{#if similarityData.suggestions.length > 0}
+					<div class="card bg-base-100 mt-6 shadow-sm">
+						<div class="card-body">
+							<h4 class="card-title text-base">Variationsvorschläge</h4>
+							<div class="space-y-2">
+								{#each similarityData.suggestions as suggestion}
+									<div class="bg-base-50 rounded-lg p-3">
+										<p class="text-sm">{suggestion}</p>
+									</div>
+								{/each}
+							</div>
+						</div>
+					</div>
+				{/if}
+			{/if}
+
+			<div class="modal-action">
+				<button class="btn btn-primary" onclick={onClose}>Schließen</button>
+			</div>
+		</div>
+	</div>
+{/if}

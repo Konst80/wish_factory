@@ -1,0 +1,13 @@
+{
+	"functions": {
+		"src/routes/api/similarity/cron/+server.ts": {
+			"maxDuration": 300
+		}
+	},
+	"crons": [
+		{
+			"path": "/api/similarity/cron",
+			"schedule": "0 2 * * *"
+		}
+	]
+}

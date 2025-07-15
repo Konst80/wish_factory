@@ -2,6 +2,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import type { WishStatus, EventType, Language, Relation, AgeGroup } from '$lib/types/Wish';
 import type { WishFilters } from '$lib/utils/wishUtils';
+import { createSimilarityHooks } from '$lib/server/similarity-hooks.js';
 
 export const load: PageServerLoad = async ({ locals, url, parent }) => {
 	// Get authenticated user data securely
@@ -184,6 +185,19 @@ export const actions: Actions = {
 				return fail(500, {
 					message: 'Fehler beim Löschen der Wünsche: ' + deleteError.message
 				});
+			}
+
+			// Similarity-Hook: Cache bereinigen für gelöschte Wünsche
+			try {
+				const similarityHooks = createSimilarityHooks(locals.supabase);
+				// Background-Ausführung für alle gelöschten Wünsche
+				for (const wishId of wishIds) {
+					similarityHooks.onWishDeleted(wishId).catch((error) => {
+						console.error(`Similarity hook error for deleted wish ${wishId}:`, error);
+					});
+				}
+			} catch (error) {
+				console.error('Error initializing similarity hooks:', error);
 			}
 
 			// Redirect with success message

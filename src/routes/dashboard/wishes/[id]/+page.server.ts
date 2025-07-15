@@ -1,6 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types.js';
 import { WishStatus } from '$lib/types/Wish';
+import { createSimilarityHooks } from '$lib/server/similarity-hooks.js';
 
 // Client-side fallback for status transition validation
 function validateStatusTransition(oldStatus: string, newStatus: string, userRole: string): boolean {
@@ -174,6 +175,19 @@ export const actions: Actions = {
 				return fail(500, { message: 'Fehler beim Aktualisieren des Status' });
 			}
 
+			// Similarity-Hook: Status-Änderung verarbeiten
+			try {
+				const similarityHooks = createSimilarityHooks(locals.supabase);
+				// Background-Ausführung um User nicht zu blockieren
+				similarityHooks
+					.onWishStatusChanged(wishId, currentWish.status, newStatus)
+					.catch((error) => {
+						console.error('Similarity hook error for status change:', error);
+					});
+			} catch (error) {
+				console.error('Error initializing similarity hooks:', error);
+			}
+
 			return { success: true, message: `Status erfolgreich auf "${newStatus}" geändert` };
 		} catch (err) {
 			console.error('Error in updateStatus action:', err);
@@ -211,6 +225,17 @@ export const actions: Actions = {
 			if (deleteError) {
 				console.error('Error deleting wish:', deleteError);
 				return fail(500, { message: 'Fehler beim Löschen des Wunsches' });
+			}
+
+			// Similarity-Hook: Cache bereinigen für gelöschten Wunsch
+			try {
+				const similarityHooks = createSimilarityHooks(locals.supabase);
+				// Background-Ausführung um User nicht zu blockieren
+				similarityHooks.onWishDeleted(wishId).catch((error) => {
+					console.error('Similarity hook error for deleted wish:', error);
+				});
+			} catch (error) {
+				console.error('Error initializing similarity hooks:', error);
 			}
 
 			throw redirect(302, '/dashboard/wishes?deleted=true');

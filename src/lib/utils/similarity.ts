@@ -1,5 +1,5 @@
 import * as stringSimilarity from 'string-similarity';
-import { LevenshteinDistance } from 'natural';
+import natural from 'natural';
 
 export interface SimilarityResult {
 	similarity: number;
@@ -58,17 +58,27 @@ export class SimilarityEngine {
 	 * Berechnet Cosine Similarity zwischen zwei Texten
 	 */
 	cosineSimilarity(text1: string, text2: string): SimilarityResult {
-		const normalized1 = this.normalizeText(text1);
-		const normalized2 = this.normalizeText(text2);
+		try {
+			const normalized1 = this.normalizeText(text1);
+			const normalized2 = this.normalizeText(text2);
 
-		const similarity = stringSimilarity.compareTwoStrings(normalized1, normalized2);
+			const similarity = stringSimilarity.compareTwoStrings(normalized1, normalized2);
 
-		return {
-			similarity,
-			algorithm: 'cosine',
-			threshold: this.config.cosineSimilarityThreshold,
-			isSimilar: similarity >= this.config.cosineSimilarityThreshold
-		};
+			return {
+				similarity,
+				algorithm: 'cosine',
+				threshold: this.config.cosineSimilarityThreshold,
+				isSimilar: similarity >= this.config.cosineSimilarityThreshold
+			};
+		} catch (error) {
+			console.error('Error in cosineSimilarity:', error);
+			return {
+				similarity: 0,
+				algorithm: 'cosine',
+				threshold: this.config.cosineSimilarityThreshold,
+				isSimilar: false
+			};
+		}
 	}
 
 	/**
@@ -98,78 +108,98 @@ export class SimilarityEngine {
 	 * Berechnet normalisierte Levenshtein-Distanz
 	 */
 	levenshteinSimilarity(text1: string, text2: string): SimilarityResult {
-		const normalized1 = this.normalizeText(text1);
-		const normalized2 = this.normalizeText(text2);
+		try {
+			const normalized1 = this.normalizeText(text1);
+			const normalized2 = this.normalizeText(text2);
 
-		const maxLength = Math.max(normalized1.length, normalized2.length);
-		if (maxLength === 0) {
+			const maxLength = Math.max(normalized1.length, normalized2.length);
+			if (maxLength === 0) {
+				return {
+					similarity: 1,
+					algorithm: 'levenshtein',
+					threshold: this.config.levenshteinThreshold,
+					isSimilar: true
+				};
+			}
+
+			const dist = natural.LevenshteinDistance(normalized1, normalized2);
+			const similarity = 1 - dist / maxLength;
+
 			return {
-				similarity: 1,
+				similarity,
 				algorithm: 'levenshtein',
 				threshold: this.config.levenshteinThreshold,
-				isSimilar: true
+				isSimilar: similarity >= this.config.levenshteinThreshold
+			};
+		} catch (error) {
+			console.error('Error in levenshteinSimilarity:', error);
+			return {
+				similarity: 0,
+				algorithm: 'levenshtein',
+				threshold: this.config.levenshteinThreshold,
+				isSimilar: false
 			};
 		}
-
-		const dist = LevenshteinDistance(normalized1, normalized2);
-		const similarity = 1 - dist / maxLength;
-
-		return {
-			similarity,
-			algorithm: 'levenshtein',
-			threshold: this.config.levenshteinThreshold,
-			isSimilar: similarity >= this.config.levenshteinThreshold
-		};
 	}
 
 	/**
 	 * Berechnet TF-IDF basierte Ähnlichkeit
 	 */
 	tfIdfSimilarity(text1: string, text2: string, corpus: string[]): SimilarityResult {
-		const normalized1 = this.normalizeText(text1);
-		const normalized2 = this.normalizeText(text2);
+		try {
+			const normalized1 = this.normalizeText(text1);
+			const normalized2 = this.normalizeText(text2);
 
-		// Einfache TF-IDF Implementierung
-		const allTexts = [normalized1, normalized2, ...corpus.map((t) => this.normalizeText(t))];
-		const allWords = new Set(allTexts.flatMap((text) => text.split(/\s+/)));
+			// Einfache TF-IDF Implementierung
+			const allTexts = [normalized1, normalized2, ...corpus.map((t) => this.normalizeText(t))];
+			const allWords = new Set(allTexts.flatMap((text) => text.split(/\s+/)));
 
-		const calculateTfIdf = (text: string) => {
-			const words = text.split(/\s+/);
-			const wordCount = words.length;
-			const tfIdf: { [word: string]: number } = {};
+			const calculateTfIdf = (text: string) => {
+				const words = text.split(/\s+/);
+				const wordCount = words.length;
+				const tfIdf: { [word: string]: number } = {};
+
+				for (const word of allWords) {
+					const tf = words.filter((w) => w === word).length / wordCount;
+					const df = allTexts.filter((text) => text.includes(word)).length;
+					const idf = Math.log(allTexts.length / df);
+					tfIdf[word] = tf * idf;
+				}
+
+				return tfIdf;
+			};
+
+			const vector1 = calculateTfIdf(normalized1);
+			const vector2 = calculateTfIdf(normalized2);
+
+			// Cosine Similarity der TF-IDF Vektoren
+			let dotProduct = 0;
+			let norm1 = 0;
+			let norm2 = 0;
 
 			for (const word of allWords) {
-				const tf = words.filter((w) => w === word).length / wordCount;
-				const df = allTexts.filter((text) => text.includes(word)).length;
-				const idf = Math.log(allTexts.length / df);
-				tfIdf[word] = tf * idf;
+				dotProduct += vector1[word] * vector2[word];
+				norm1 += vector1[word] * vector1[word];
+				norm2 += vector2[word] * vector2[word];
 			}
 
-			return tfIdf;
-		};
+			const similarity = dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
 
-		const vector1 = calculateTfIdf(normalized1);
-		const vector2 = calculateTfIdf(normalized2);
-
-		// Cosine Similarity der TF-IDF Vektoren
-		let dotProduct = 0;
-		let norm1 = 0;
-		let norm2 = 0;
-
-		for (const word of allWords) {
-			dotProduct += vector1[word] * vector2[word];
-			norm1 += vector1[word] * vector1[word];
-			norm2 += vector2[word] * vector2[word];
+			return {
+				similarity: isNaN(similarity) ? 0 : similarity,
+				algorithm: 'tfidf',
+				threshold: this.config.tfIdfThreshold,
+				isSimilar: similarity >= this.config.tfIdfThreshold
+			};
+		} catch (error) {
+			console.error('Error in tfIdfSimilarity:', error);
+			return {
+				similarity: 0,
+				algorithm: 'tfidf',
+				threshold: this.config.tfIdfThreshold,
+				isSimilar: false
+			};
 		}
-
-		const similarity = dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
-
-		return {
-			similarity: isNaN(similarity) ? 0 : similarity,
-			algorithm: 'tfidf',
-			threshold: this.config.tfIdfThreshold,
-			isSimilar: similarity >= this.config.tfIdfThreshold
-		};
 	}
 
 	/**
@@ -197,23 +227,34 @@ export class SimilarityEngine {
 		wishes: WishText[],
 		maxResults: number = 5
 	): SimilarityMatch[] {
-		const corpus = wishes.map((wish) => wish.text);
-		const matches: SimilarityMatch[] = [];
+		try {
+			const corpus = wishes.map((wish) => wish.text);
+			const matches: SimilarityMatch[] = [];
 
-		for (const wish of wishes) {
-			const results = this.calculateSimilarity(inputText, wish.text, corpus);
-			const bestResult = results[0];
+			for (const wish of wishes) {
+				try {
+					const results = this.calculateSimilarity(inputText, wish.text, corpus);
+					const bestResult = results[0];
 
-			if (bestResult.isSimilar) {
-				matches.push({
-					wish,
-					similarity: bestResult.similarity,
-					algorithm: bestResult.algorithm
-				});
+					if (bestResult && bestResult.isSimilar) {
+						matches.push({
+							wish,
+							similarity: bestResult.similarity,
+							algorithm: bestResult.algorithm
+						});
+					}
+				} catch (error) {
+					console.error(`Error calculating similarity for wish ${wish.id}:`, error);
+					// Continue with next wish instead of failing completely
+					continue;
+				}
 			}
-		}
 
-		return matches.sort((a, b) => b.similarity - a.similarity).slice(0, maxResults);
+			return matches.sort((a, b) => b.similarity - a.similarity).slice(0, maxResults);
+		} catch (error) {
+			console.error('Error in findSimilarWishes:', error);
+			return [];
+		}
 	}
 
 	/**

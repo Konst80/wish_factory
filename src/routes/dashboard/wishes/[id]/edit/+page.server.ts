@@ -2,6 +2,7 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types.js';
 import { createWishSchema, WishStatus } from '$lib/types/Wish';
 import { z } from 'zod';
+import { createSimilarityHooks } from '$lib/server/similarity-hooks.js';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	// Get authenticated user data securely
@@ -151,6 +152,23 @@ export const actions: Actions = {
 					errors: {},
 					values: updateData
 				});
+			}
+
+			// Similarity-Hook: Cache invalidieren und neu berechnen für aktualisierten Wunsch
+			try {
+				const similarityHooks = createSimilarityHooks(locals.supabase);
+				const updatedWish = {
+					...validatedData,
+					id: wishId,
+					createdAt: new Date(), // Wird im Hook korrekt gesetzt
+					updatedAt: new Date()
+				};
+				// Background-Ausführung um User nicht zu blockieren
+				similarityHooks.onWishUpdated(wishId, updatedWish).catch((error) => {
+					console.error('Similarity hook error for updated wish:', error);
+				});
+			} catch (error) {
+				console.error('Error initializing similarity hooks:', error);
 			}
 
 			// Redirect to wish detail page

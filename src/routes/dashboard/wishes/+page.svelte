@@ -4,6 +4,8 @@
 	import { WishStatus, EventType, Relation, AgeGroup } from '$lib/types/Wish';
 	import type { PageData } from './$types';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
+	import SimilarityMetricsOverview from '$lib/components/wishes/SimilarityMetricsOverview.svelte';
+	import WishSimilarityWarning from '$lib/components/wishes/WishSimilarityWarning.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -487,6 +489,15 @@
 		<div class="stat-value text-success">{data.stats.freigegeben}</div>
 		<div class="stat-desc">Bereit zur Nutzung</div>
 	</div>
+</div>
+
+<!-- Similarity Metrics Overview -->
+<div class="mb-6">
+	<SimilarityMetricsOverview
+		language={(selectedLanguage as 'de' | 'en') || 'de'}
+		showCacheStats={true}
+		autoRefresh={false}
+	/>
 </div>
 
 <!-- Enhanced Filter Panel -->
@@ -1122,6 +1133,10 @@
 							<div class="max-w-md">
 								<div class="text-base-content text-sm leading-relaxed font-medium">
 									{truncateText(wish.text, 120)}
+								</div>
+								<!-- Similarity Warning -->
+								<div class="mt-2">
+									<WishSimilarityWarning {wish} showDetails={false} maxSimilarWishes={2} />
 								</div>
 							</div>
 						</td>

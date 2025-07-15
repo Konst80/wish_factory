@@ -37,7 +37,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Service erstellen
 		const similarityService = createSimilarityService(locals.supabase as any, {
 			maxResults: body.maxResults || 5,
-			includeArchived: false,
+			includeArchived: true,
 			duplicateThreshold: 0.9,
 			cacheResults: true
 		});
@@ -122,13 +122,19 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			| null;
 		const action = url.searchParams.get('action');
 
+		console.log('Similarity API GET request:', { wishId, language, type, eventType, action });
+
 		const similarityService = createSimilarityService(locals.supabase as any);
 
 		// Verschiedene Aktionen je nach Parameter
 		if (action === 'stats') {
-			// Statistiken abrufen
-			const stats = await similarityService.getSimilarityStats(language || undefined);
-			const cacheStats = similarityService.getCacheStats();
+			// Statistiken abrufen mit allen Wünschen einschließlich Entwürfe
+			const statsService = createSimilarityService(locals.supabase as any, {
+				includeArchived: true,
+				maxResults: 10
+			});
+			const stats = await statsService.getSimilarityStats(language || undefined);
+			const cacheStats = await statsService.getCacheStats();
 
 			return json({
 				success: true,
@@ -147,16 +153,31 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 				return json({ error: 'Ungültige Wunsch-ID' }, { status: 400 });
 			}
 
-			const result = await similarityService.findSimilarToWish(wishId, {
-				language: language || undefined,
-				type: type || undefined,
-				eventType: eventType || undefined
+			const wishService = createSimilarityService(locals.supabase as any, {
+				includeArchived: true,
+				maxResults: 10
 			});
 
-			return json({
-				success: true,
-				...result
-			});
+			try {
+				const result = await wishService.findSimilarToWish(wishId, {
+					language: language || undefined,
+					type: type || undefined,
+					eventType: eventType || undefined
+				});
+
+				return json({
+					success: true,
+					...result
+				});
+			} catch (error) {
+				console.error('Fehler beim Finden ähnlicher Wünsche:', error);
+				return json(
+					{
+						error: `Fehler beim Finden ähnlicher Wünsche: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`
+					},
+					{ status: 400 }
+				);
+			}
 		}
 
 		// Keine spezifische Aktion -> Fehler
@@ -167,7 +188,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	}
 };
 
-export const DELETE: RequestHandler = async ({ locals }) => {
+export const DELETE: RequestHandler = async ({ locals, url }) => {
 	try {
 		// Authentifizierung prüfen
 		const session = await locals.safeGetSession();
@@ -191,12 +212,23 @@ export const DELETE: RequestHandler = async ({ locals }) => {
 		}
 
 		const similarityService = createSimilarityService(locals.supabase as any);
-		similarityService.clearCache();
+		const wishId = url.searchParams.get('wishId');
 
-		return json({
-			success: true,
-			message: 'Cache wurde geleert'
-		});
+		if (wishId) {
+			// Cache für spezifischen Wunsch invalidieren
+			await similarityService.invalidateCacheForWish(wishId);
+			return json({
+				success: true,
+				message: `Cache für Wunsch ${wishId} wurde invalidiert`
+			});
+		} else {
+			// Gesamten Cache leeren
+			similarityService.clearCache();
+			return json({
+				success: true,
+				message: 'Cache wurde geleert'
+			});
+		}
 	} catch (error) {
 		console.error('Fehler beim Leeren des Caches:', error);
 		return json({ error: 'Interner Serverfehler beim Leeren des Caches' }, { status: 500 });

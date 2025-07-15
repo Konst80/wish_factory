@@ -16,7 +16,7 @@ export type Database = {
 					description: string | null;
 					expires_at: string | null;
 					id: string;
-					is_active: boolean;
+					is_active: boolean | null;
 					key_hash: string;
 					key_prefix: string;
 					last_used_at: string | null;
@@ -32,7 +32,7 @@ export type Database = {
 					description?: string | null;
 					expires_at?: string | null;
 					id?: string;
-					is_active?: boolean;
+					is_active?: boolean | null;
 					key_hash: string;
 					key_prefix: string;
 					last_used_at?: string | null;
@@ -48,7 +48,7 @@ export type Database = {
 					description?: string | null;
 					expires_at?: string | null;
 					id?: string;
-					is_active?: boolean;
+					is_active?: boolean | null;
 					key_hash?: string;
 					key_prefix?: string;
 					last_used_at?: string | null;
@@ -186,7 +186,7 @@ export type Database = {
 					admin_email: string;
 					admin_full_name: string;
 					admin_user_id: string;
-					created_at: string | null;
+					created_at: string;
 					id: string;
 					setup_completed: boolean;
 				};
@@ -194,7 +194,7 @@ export type Database = {
 					admin_email: string;
 					admin_full_name: string;
 					admin_user_id: string;
-					created_at?: string | null;
+					created_at?: string;
 					id?: string;
 					setup_completed?: boolean;
 				};
@@ -202,7 +202,7 @@ export type Database = {
 					admin_email?: string;
 					admin_full_name?: string;
 					admin_user_id?: string;
-					created_at?: string | null;
+					created_at?: string;
 					id?: string;
 					setup_completed?: boolean;
 				};
@@ -352,6 +352,57 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			wish_similarities: {
+				Row: {
+					calculated_at: string | null;
+					cosine_similarity: number;
+					id: string;
+					jaccard_similarity: number;
+					levenshtein_similarity: number;
+					overall_similarity: number;
+					tfidf_similarity: number;
+					wish_id_1: string;
+					wish_id_2: string;
+				};
+				Insert: {
+					calculated_at?: string | null;
+					cosine_similarity?: number;
+					id?: string;
+					jaccard_similarity?: number;
+					levenshtein_similarity?: number;
+					overall_similarity?: number;
+					tfidf_similarity?: number;
+					wish_id_1: string;
+					wish_id_2: string;
+				};
+				Update: {
+					calculated_at?: string | null;
+					cosine_similarity?: number;
+					id?: string;
+					jaccard_similarity?: number;
+					levenshtein_similarity?: number;
+					overall_similarity?: number;
+					tfidf_similarity?: number;
+					wish_id_1?: string;
+					wish_id_2?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'wish_similarities_wish_id_1_fkey';
+						columns: ['wish_id_1'];
+						isOneToOne: false;
+						referencedRelation: 'wishes';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'wish_similarities_wish_id_2_fkey';
+						columns: ['wish_id_2'];
+						isOneToOne: false;
+						referencedRelation: 'wishes';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			wishes: {
 				Row: {
 					age_groups: Database['public']['Enums']['age_group'][];
@@ -363,6 +414,9 @@ export type Database = {
 					language: Database['public']['Enums']['language'];
 					length: string;
 					relations: Database['public']['Enums']['relation'][];
+					similarity_hash: string | null;
+					similarity_updated_at: string | null;
+					similarity_vectors: Json | null;
 					specific_values: number[] | null;
 					status: Database['public']['Enums']['wish_status'];
 					text: string;
@@ -379,6 +433,9 @@ export type Database = {
 					language: Database['public']['Enums']['language'];
 					length?: string;
 					relations: Database['public']['Enums']['relation'][];
+					similarity_hash?: string | null;
+					similarity_updated_at?: string | null;
+					similarity_vectors?: Json | null;
 					specific_values?: number[] | null;
 					status?: Database['public']['Enums']['wish_status'];
 					text: string;
@@ -395,6 +452,9 @@ export type Database = {
 					language?: Database['public']['Enums']['language'];
 					length?: string;
 					relations?: Database['public']['Enums']['relation'][];
+					similarity_hash?: string | null;
+					similarity_updated_at?: string | null;
+					similarity_vectors?: Json | null;
 					specific_values?: number[] | null;
 					status?: Database['public']['Enums']['wish_status'];
 					text?: string;
@@ -413,9 +473,25 @@ export type Database = {
 			};
 		};
 		Views: {
-			[_ in never]: never;
+			similarity_stats: {
+				Row: {
+					avg_similarity: number | null;
+					high_similarities: number | null;
+					max_similarity: number | null;
+					medium_similarities: number | null;
+					recent_similarities: number | null;
+					stale_similarities: number | null;
+					total_similarities: number | null;
+					total_wishes: number | null;
+				};
+				Relationships: [];
+			};
 		};
 		Functions: {
+			cleanup_stale_similarities: {
+				Args: { days_threshold?: number };
+				Returns: number;
+			};
 			generate_wish_id: {
 				Args: { wish_language: Database['public']['Enums']['language'] };
 				Returns: string;
@@ -475,3 +551,132 @@ export type Database = {
 		};
 	};
 };
+
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>];
+
+export type Tables<
+	DefaultSchemaTableNameOrOptions extends
+		| keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+		| { schema: keyof DatabaseWithoutInternals },
+	TableName extends DefaultSchemaTableNameOrOptions extends {
+		schema: keyof DatabaseWithoutInternals;
+	}
+		? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+				DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+		: never = never
+> = DefaultSchemaTableNameOrOptions extends {
+	schema: keyof DatabaseWithoutInternals;
+}
+	? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+			DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+			Row: infer R;
+		}
+		? R
+		: never
+	: DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+		? (DefaultSchema['Tables'] & DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+				Row: infer R;
+			}
+			? R
+			: never
+		: never;
+
+export type TablesInsert<
+	DefaultSchemaTableNameOrOptions extends
+		| keyof DefaultSchema['Tables']
+		| { schema: keyof DatabaseWithoutInternals },
+	TableName extends DefaultSchemaTableNameOrOptions extends {
+		schema: keyof DatabaseWithoutInternals;
+	}
+		? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+		: never = never
+> = DefaultSchemaTableNameOrOptions extends {
+	schema: keyof DatabaseWithoutInternals;
+}
+	? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+			Insert: infer I;
+		}
+		? I
+		: never
+	: DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+		? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+				Insert: infer I;
+			}
+			? I
+			: never
+		: never;
+
+export type TablesUpdate<
+	DefaultSchemaTableNameOrOptions extends
+		| keyof DefaultSchema['Tables']
+		| { schema: keyof DatabaseWithoutInternals },
+	TableName extends DefaultSchemaTableNameOrOptions extends {
+		schema: keyof DatabaseWithoutInternals;
+	}
+		? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+		: never = never
+> = DefaultSchemaTableNameOrOptions extends {
+	schema: keyof DatabaseWithoutInternals;
+}
+	? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+			Update: infer U;
+		}
+		? U
+		: never
+	: DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+		? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+				Update: infer U;
+			}
+			? U
+			: never
+		: never;
+
+export type Enums<
+	DefaultSchemaEnumNameOrOptions extends
+		| keyof DefaultSchema['Enums']
+		| { schema: keyof DatabaseWithoutInternals },
+	EnumName extends DefaultSchemaEnumNameOrOptions extends {
+		schema: keyof DatabaseWithoutInternals;
+	}
+		? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+		: never = never
+> = DefaultSchemaEnumNameOrOptions extends {
+	schema: keyof DatabaseWithoutInternals;
+}
+	? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+	: DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+		? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+		: never;
+
+export type CompositeTypes<
+	PublicCompositeTypeNameOrOptions extends
+		| keyof DefaultSchema['CompositeTypes']
+		| { schema: keyof DatabaseWithoutInternals },
+	CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+		schema: keyof DatabaseWithoutInternals;
+	}
+		? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+		: never = never
+> = PublicCompositeTypeNameOrOptions extends {
+	schema: keyof DatabaseWithoutInternals;
+}
+	? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+	: PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+		? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+		: never;
+
+export const Constants = {
+	public: {
+		Enums: {
+			age_group: ['all', 'young', 'middle', 'senior'],
+			event_type: ['birthday', 'anniversary', 'custom'],
+			language: ['de', 'en'],
+			relation: ['friend', 'family', 'partner', 'colleague'],
+			user_role: ['Redakteur', 'Administrator'],
+			wish_status: ['Entwurf', 'Zur Freigabe', 'Freigegeben', 'Archiviert'],
+			wish_type: ['normal', 'herzlich', 'humorvoll']
+		}
+	}
+} as const;

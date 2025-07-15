@@ -1,0 +1,17 @@
+# Cron-Konfiguration für Similarity-Vorberechnung
+# Dokumentation: https://supabase.com/docs/guides/functions/schedule-functions
+
+# Täglich um 2 Uhr nachts
+- name: 'similarity-precomputation-daily'
+  schedule: '0 2 * * *'
+  function: 'similarity-cron'
+
+# Stündlich (für Testing/Development)
+# - name: "similarity-precomputation-hourly"
+#   schedule: "0 * * * *"
+#   function: "similarity-cron"
+
+# Wöchentlich am Sonntag um 3 Uhr (für vollständige Neuberechnung)
+- name: 'similarity-precomputation-weekly'
+  schedule: '0 3 * * 0'
+  function: 'similarity-cron'

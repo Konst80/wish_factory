@@ -4,6 +4,7 @@ import type { Actions, PageServerLoad } from './$types.js';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '$lib/types/supabase';
+import { createSimilarityHooks } from '$lib/server/similarity-hooks.js';
 
 // Utility function to generate wish IDs with fallback
 async function generateWishId(
@@ -180,6 +181,23 @@ export const actions: Actions = {
 				});
 			}
 
+			// Similarity-Hook: Vorberechnung für neuen Wunsch
+			try {
+				const similarityHooks = createSimilarityHooks(locals.supabase);
+				const newWish = {
+					...validatedData,
+					id: createdWish.id,
+					createdAt: new Date(),
+					updatedAt: new Date()
+				};
+				// Background-Ausführung um User nicht zu blockieren
+				similarityHooks.onWishCreated(newWish).catch((error) => {
+					console.error('Similarity hook error for new wish:', error);
+				});
+			} catch (error) {
+				console.error('Error initializing similarity hooks:', error);
+			}
+
 			// Weiterleitung zur Wunsch-Detail-Ansicht mit der neuen UUID
 			throw redirect(303, `/dashboard/wishes/${createdWish.id}`);
 		} catch (error) {
@@ -316,6 +334,31 @@ export const actions: Actions = {
 				return fail(500, {
 					message: 'Fehler beim Speichern der Wünsche: ' + insertError.message
 				});
+			}
+
+			// Similarity-Hook: Batch-Vorberechnung für alle neuen Wünsche
+			if (createdWishes && createdWishes.length > 0) {
+				try {
+					const similarityHooks = createSimilarityHooks(locals.supabase);
+					const wishesWithIds = validatedWishes.map((wish, index) => ({
+						...wish,
+						id: createdWishes[index].id,
+						eventType: wish.event_type,
+						ageGroups: wish.age_groups,
+						specificValues: wish.specific_values || [],
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						createdBy: wish.created_by,
+						length: wish.length as any
+					}));
+
+					// Background-Ausführung für Batch-Verarbeitung
+					similarityHooks.onBatchWishesCreated(wishesWithIds).catch((error) => {
+						console.error('Similarity hook error for batch wishes:', error);
+					});
+				} catch (error) {
+					console.error('Error initializing similarity hooks for batch:', error);
+				}
 			}
 
 			// Erfolgreiche Weiterleitung
