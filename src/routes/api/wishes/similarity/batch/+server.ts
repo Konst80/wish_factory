@@ -67,7 +67,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 async function getAllWishes(supabase: any): Promise<Wish[]> {
 	const { data: wishes, error } = await supabase
 		.from('wishes')
-		.select('*')
+		.select('id, text, type, event_type, status, language, relations, age_groups, created_at')
 		.in('status', ['Freigegeben', 'Entwurf', 'Zur Freigabe'])
 		.order('created_at', { ascending: false });
 
@@ -76,7 +76,16 @@ async function getAllWishes(supabase: any): Promise<Wish[]> {
 		return [];
 	}
 
-	return wishes || [];
+	// Transform database field names to match our interface
+	const transformedWishes = (wishes || []).map(wish => ({
+		...wish,
+		eventType: wish.event_type,
+		ageGroups: wish.age_groups || [],
+		relations: wish.relations || []
+	}));
+
+	console.log('Sample transformed wish:', transformedWishes[0]);
+	return transformedWishes;
 }
 
 async function processWishesBatch(
@@ -151,6 +160,8 @@ async function processWishesBatch(
 						eventType: wish.eventType,
 						status: wish.status,
 						language: wish.language,
+						relations: wish.relations || [],
+						ageGroups: wish.ageGroups || [],
 						similarWishes: filteredSimilar.map(sw => ({
 							id: sw.wish.id,
 							text: sw.wish.text,
@@ -161,6 +172,8 @@ async function processWishesBatch(
 						duplicateStatus,
 						maxSimilarity
 					};
+
+					console.log('Wish result for ID:', wish.id, 'relations:', wish.relations, 'ageGroups:', wish.ageGroups);
 
 					sendResult(result);
 					processed++;

@@ -9,6 +9,8 @@
 		eventType: string;
 		status: string;
 		language: string;
+		relations: string[];
+		ageGroups: string[];
 		createdAt?: string;
 		similarWishes: Array<{
 			id: string;
@@ -86,6 +88,7 @@
 								if (data.type === 'progress') {
 									analysisProgress = data.progress;
 								} else if (data.type === 'result') {
+									console.log('Received wish:', data.wish.id, 'relations:', data.wish.relations, 'ageGroups:', data.wish.ageGroups);
 									wishes = [...wishes, data.wish];
 									updateCounts();
 								}
@@ -123,6 +126,52 @@
 		}
 	}
 
+	function formatRelations(relations: string[]): string {
+		const relationMap: Record<string, string> = {
+			'friend': 'Freund/in',
+			'family': 'Familie',
+			'partner': 'Partner/in',
+			'colleague': 'Kollege/in'
+		};
+		return relations.map(rel => relationMap[rel] || rel).join(', ');
+	}
+
+	function formatAgeGroups(ageGroups: string[]): string {
+		const ageGroupMap: Record<string, string> = {
+			'all': 'Alle',
+			'young': 'Jung (18-35)',
+			'middle': 'Mittleres Alter (36-55)',
+			'senior': 'Senior (55+)'
+		};
+		return ageGroups.map(age => ageGroupMap[age] || age).join(', ');
+	}
+
+	function formatWishType(type: string): string {
+		const typeMap: Record<string, string> = {
+			'normal': 'Normal',
+			'herzlich': 'Herzlich',
+			'humorvoll': 'Humorvoll'
+		};
+		return typeMap[type] || type;
+	}
+
+	function formatEventType(eventType: string): string {
+		const eventMap: Record<string, string> = {
+			'birthday': 'Geburtstag',
+			'anniversary': 'Jubiläum',
+			'custom': 'Sonstiges'
+		};
+		return eventMap[eventType] || eventType;
+	}
+
+	function formatLanguage(language: string): string {
+		const languageMap: Record<string, string> = {
+			'de': 'Deutsch',
+			'en': 'English'
+		};
+		return languageMap[language] || language;
+	}
+
 	async function exportResults() {
 		const exportData = {
 			analysis_date: new Date().toISOString(),
@@ -139,6 +188,8 @@
 				eventType: wish.eventType,
 				status: wish.status,
 				language: wish.language,
+				relations: wish.relations || [],
+				ageGroups: wish.ageGroups || [],
 				duplicateStatus: wish.duplicateStatus,
 				maxSimilarity: wish.maxSimilarity,
 				similarWishesCount: wish.similarWishes.length,
@@ -496,9 +547,47 @@
 												</svg>
 											</button>
 										</div>
-										<p class="text-base-content/70 text-sm">
-											{wish.type} • {wish.eventType} • {wish.language} • {wish.status}
-										</p>
+										<div class="flex flex-wrap gap-2 mt-1">
+											<span class="badge badge-info badge-sm">{formatWishType(wish.type)}</span>
+											<span class="badge badge-success badge-sm">{formatEventType(wish.eventType)}</span>
+											<span class="badge badge-accent badge-sm">{formatLanguage(wish.language)}</span>
+											<span class="badge badge-warning badge-sm">{wish.status}</span>
+										</div>
+										<div class="flex flex-wrap gap-4 mt-2">
+											<!-- Beziehungen -->
+											<div class="flex flex-wrap gap-2">
+												<div class="flex items-center gap-1">
+													<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+													</svg>
+													<span class="text-xs font-medium text-primary">Beziehungen:</span>
+												</div>
+												{#if wish.relations && wish.relations.length > 0}
+													{#each wish.relations as relation}
+														<span class="badge badge-outline badge-sm">{formatRelations([relation])}</span>
+													{/each}
+												{:else}
+													<span class="badge badge-ghost badge-sm text-base-content/50">Keine Beziehungen</span>
+												{/if}
+											</div>
+											
+											<!-- Altersgruppen -->
+											<div class="flex flex-wrap gap-2">
+												<div class="flex items-center gap-1">
+													<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+													</svg>
+													<span class="text-xs font-medium text-secondary">Altersgruppen:</span>
+												</div>
+												{#if wish.ageGroups && wish.ageGroups.length > 0}
+													{#each wish.ageGroups as ageGroup}
+														<span class="badge badge-secondary badge-outline badge-sm">{formatAgeGroups([ageGroup])}</span>
+													{/each}
+												{:else}
+													<span class="badge badge-ghost badge-sm text-base-content/50">Keine Altersgruppen</span>
+												{/if}
+											</div>
+										</div>
 									</div>
 									<div class="flex items-center gap-2">
 										<div class="badge {getBadgeClass(wish.duplicateStatus)}">
