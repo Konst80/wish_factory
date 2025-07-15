@@ -5,7 +5,6 @@
 			settings: Record<string, unknown>;
 			[key: string]: unknown;
 		};
-		onMessage: (message: string, isError?: boolean) => void;
 	}
 
 	let { data }: Props = $props();
