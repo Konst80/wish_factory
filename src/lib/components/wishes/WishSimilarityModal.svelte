@@ -41,7 +41,7 @@
 		console.log(`Loading similarity data for wish ${wish.id}`);
 		isLoading = true;
 		error = null;
-		lastLoadedWishId = wish.id;
+		lastLoadedWishId = wish.id as string;
 
 		// Generate unique request ID to prevent race conditions
 		const requestId = `${wish.id}-${Date.now()}`;
@@ -49,10 +49,10 @@
 
 		try {
 			const params = new URLSearchParams({
-				wishId: wish.id,
-				language: wish.language || 'de',
-				type: wish.type || 'normal',
-				eventType: wish.eventType || 'birthday'
+				wishId: wish.id as string,
+				language: (wish.language as string) || 'de',
+				type: (wish.type as string) || 'normal',
+				eventType: (wish.eventType as string) || 'birthday'
 			});
 
 			const response = await fetch(`/api/wishes/similarity?${params}`);
@@ -217,7 +217,7 @@
 		if (!similarityData) return;
 
 		const threshold = autoCleanThreshold / 100;
-		autoCleanCandidates = similarityData.similarWishes
+		_autoCleanCandidates = similarityData.similarWishes
 			.filter((sw) => sw.similarity >= threshold)
 			.map((sw) => sw.wish.id);
 
@@ -260,7 +260,7 @@
 
 			// Close modal and reset
 			showAutoCleanModal = false;
-			autoCleanCandidates = [];
+			_autoCleanCandidates = [];
 
 			// Reload similarity data
 			lastLoadedWishId = null;

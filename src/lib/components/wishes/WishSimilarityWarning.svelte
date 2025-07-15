@@ -34,10 +34,10 @@
 
 		try {
 			const params = new URLSearchParams({
-				wishId: wish.id,
-				language: wish.language || 'de',
-				type: wish.type || 'normal',
-				eventType: wish.eventType || 'birthday'
+				wishId: wish.id as string,
+				language: (wish.language as string) || 'de',
+				type: (wish.type as string) || 'normal',
+				eventType: (wish.eventType as string) || 'birthday'
 			});
 
 			const response = await fetch(`/api/wishes/similarity?${params}`);
