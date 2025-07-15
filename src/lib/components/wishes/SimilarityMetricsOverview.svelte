@@ -55,9 +55,12 @@
 				action: 'stats'
 			});
 
-			if (language) {
-				params.append('language', language);
+			// Always require language parameter for language-specific evaluation
+			if (!language) {
+				throw new Error('Sprache ist erforderlich für die Ähnlichkeitsanalyse');
 			}
+
+			params.append('language', language);
 
 			const response = await fetch(`/api/wishes/similarity?${params}`);
 
@@ -111,9 +114,14 @@
 		return 'text-success';
 	}
 
-	onMount(() => {
-		loadSimilarityStats();
+	// React to language changes
+	$effect(() => {
+		if (language) {
+			loadSimilarityStats();
+		}
+	});
 
+	onMount(() => {
 		let interval: ReturnType<typeof setInterval> | null = null;
 		if (autoRefresh) {
 			interval = setInterval(loadSimilarityStats, refreshInterval);
@@ -168,9 +176,11 @@
 						</svg>
 						Ähnlichkeitsmetriken
 						{#if language === 'de'}
-							<span class="badge badge-sm">🇩🇪</span>
+							<span class="badge badge-sm badge-info">🇩🇪 Deutsch</span>
 						{:else if language === 'en'}
-							<span class="badge badge-sm">🇬🇧</span>
+							<span class="badge badge-sm badge-info">🇬🇧 English</span>
+						{:else}
+							<span class="badge badge-sm badge-warning">Keine Sprache</span>
 						{/if}
 					</h3>
 					<div class="flex items-center gap-2">

@@ -53,38 +53,32 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Check permissions: Admin can delete any wish, users can only delete their own
 		if (profile?.role !== 'Administrator') {
 			const userId = session.user.id;
-			const unauthorizedWishes = wishesToDelete.filter(
-				wish => wish.created_by !== userId
-			);
+			const unauthorizedWishes = wishesToDelete.filter((wish) => wish.created_by !== userId);
 			if (unauthorizedWishes.length > 0) {
-				return json({ 
-					error: 'Sie haben keine Berechtigung, einige der ausgewählten Wünsche zu löschen' 
-				}, { status: 403 });
+				return json(
+					{
+						error: 'Sie haben keine Berechtigung, einige der ausgewählten Wünsche zu löschen'
+					},
+					{ status: 403 }
+				);
 			}
 		}
 
 		// Delete the wishes
-		const { error: deleteError } = await locals.supabase
-			.from('wishes')
-			.delete()
-			.in('id', wishIds);
+		const { error: deleteError } = await locals.supabase.from('wishes').delete().in('id', wishIds);
 
 		if (deleteError) {
 			console.error('Error deleting wishes:', deleteError);
 			return json({ error: 'Fehler beim Löschen der Wünsche' }, { status: 500 });
 		}
 
-		return json({ 
+		return json({
 			message: `${wishesToDelete.length} Wünsche erfolgreich gelöscht`,
 			deletedCount: wishesToDelete.length,
 			deletedIds: wishIds
 		});
-
 	} catch (error) {
 		console.error('Error in bulk delete:', error);
-		return json(
-			{ error: 'Interner Serverfehler beim Löschen der Wünsche' },
-			{ status: 500 }
-		);
+		return json({ error: 'Interner Serverfehler beim Löschen der Wünsche' }, { status: 500 });
 	}
 };

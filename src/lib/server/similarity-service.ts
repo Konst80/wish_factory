@@ -57,14 +57,12 @@ export class SimilarityService {
 	/**
 	 * Lädt alle relevanten Wünsche aus der Datenbank
 	 */
-	private async loadWishesForComparison(
-		filters: {
-			language?: string;
-			type?: string;
-			eventType?: string;
-			excludeId?: string;
-		} = {}
-	): Promise<WishText[]> {
+	private async loadWishesForComparison(filters: {
+		language: string; // Make language required
+		type?: string;
+		eventType?: string;
+		excludeId?: string;
+	}): Promise<WishText[]> {
 		let query = this.supabase
 			.from('wishes')
 			.select('id, text, type, event_type, language, status')
@@ -75,10 +73,10 @@ export class SimilarityService {
 					: ['Freigegeben', 'Entwurf', 'Zur Freigabe']
 			);
 
-		// Anwenden von Filtern
-		if (filters.language) {
-			query = query.eq('language', filters.language as any);
-		}
+		// Language filter is now required for language-specific evaluation
+		query = query.eq('language', filters.language as any);
+
+		// Anwenden von anderen Filtern
 		if (filters.type) {
 			query = query.eq('type', filters.type as any);
 		}
@@ -142,13 +140,18 @@ export class SimilarityService {
 	async checkSimilarity(
 		inputText: string,
 		filters: {
-			language?: string;
+			language: string; // Make language required
 			type?: string;
 			eventType?: string;
 			excludeId?: string;
-		} = {}
+		}
 	): Promise<SimilarityCheckResult> {
 		const startTime = Date.now();
+
+		// Validate required language parameter
+		if (!filters.language) {
+			throw new Error('Language parameter is required for similarity check');
+		}
 
 		console.log(
 			`Starting similarity check for text: "${inputText.substring(0, 50)}..." with filters:`,
@@ -271,13 +274,18 @@ export class SimilarityService {
 	private async performTraditionalSimilarityCheck(
 		inputText: string,
 		filters: {
-			language?: string;
+			language: string; // Make language required
 			type?: string;
 			eventType?: string;
 			excludeId?: string;
 		},
 		startTime: number
 	): Promise<SimilarityCheckResult> {
+		// Validate required language parameter
+		if (!filters.language) {
+			throw new Error('Language parameter is required for traditional similarity check');
+		}
+
 		// Wünsche aus Datenbank laden
 		const wishes = await this.loadWishesForComparison(filters);
 		console.log(`Loaded ${wishes.length} wishes for comparison`);
@@ -330,12 +338,17 @@ export class SimilarityService {
 	async batchCheckSimilarity(
 		texts: string[],
 		filters: {
-			language?: string;
+			language: string; // Make language required
 			type?: string;
 			eventType?: string;
-		} = {}
+		}
 	): Promise<SimilarityCheckResult[]> {
 		const results: SimilarityCheckResult[] = [];
+
+		// Validate required language parameter
+		if (!filters.language) {
+			throw new Error('Language parameter is required for batch similarity check');
+		}
 
 		// Wünsche einmal laden für alle Checks
 		const wishes = await this.loadWishesForComparison(filters);
@@ -399,11 +412,18 @@ export class SimilarityService {
 			`Found wish: ${wish.text.substring(0, 50)}... (${wish.type}, ${wish.event_type}, ${wish.language})`
 		);
 
+		// Always use the wish's language for language-specific evaluation
+		const targetLanguage = filters.language || wish.language;
+
+		if (!targetLanguage) {
+			throw new Error('No language specified for similarity check');
+		}
+
 		// Ähnlichkeitscheck mit Ausschluss des Original-Wunsches
 		return this.checkSimilarity(wish.text, {
 			...filters,
 			excludeId: wishId,
-			language: filters.language || wish.language || undefined,
+			language: targetLanguage,
 			type: filters.type || wish.type || undefined,
 			eventType: filters.eventType || wish.event_type || undefined
 		});
@@ -412,7 +432,7 @@ export class SimilarityService {
 	/**
 	 * Statistiken über Ähnlichkeiten in der Datenbank
 	 */
-	async getSimilarityStats(language?: string): Promise<{
+	async getSimilarityStats(language: string): Promise<{
 		totalWishes: number;
 		duplicateGroups: number;
 		averageSimilarity: number;
@@ -420,17 +440,19 @@ export class SimilarityService {
 	}> {
 		const startTime = Date.now();
 
+		// Validate required language parameter
+		if (!language) {
+			throw new Error('Language parameter is required for similarity stats');
+		}
+
 		// Use precomputed similarity data from cache for much faster statistics
 		try {
-			// Get total wishes count with language filter if specified
+			// Get total wishes count with language filter
 			let wishQuery = this.supabase
 				.from('wishes')
 				.select('id', { count: 'exact' })
-				.eq('status', 'Freigegeben');
-
-			if (language) {
-				wishQuery = wishQuery.eq('language', language as 'de' | 'en');
-			}
+				.eq('status', 'Freigegeben')
+				.eq('language', language as 'de' | 'en');
 
 			const { count: totalWishes } = await wishQuery;
 
@@ -487,13 +509,18 @@ export class SimilarityService {
 		return await this.getLegacySimilarityStats(language);
 	}
 
-	private async getLegacySimilarityStats(language?: string): Promise<{
+	private async getLegacySimilarityStats(language: string): Promise<{
 		totalWishes: number;
 		duplicateGroups: number;
 		averageSimilarity: number;
 		processingTime: number;
 	}> {
 		const startTime = Date.now();
+
+		// Validate required language parameter
+		if (!language) {
+			throw new Error('Language parameter is required for legacy similarity stats');
+		}
 
 		const wishes = await this.loadWishesForComparison({ language });
 		const totalWishes = wishes.length;
@@ -668,13 +695,18 @@ export class SimilarityService {
 	private async performOptimizedSimilarityCheck(
 		inputText: string,
 		filters: {
-			language?: string;
+			language: string; // Make language required
 			type?: string;
 			eventType?: string;
 			excludeId?: string;
 		},
 		startTime: number
 	): Promise<SimilarityCheckResult> {
+		// Validate required language parameter
+		if (!filters.language) {
+			throw new Error('Language parameter is required for optimized similarity check');
+		}
+
 		// Lade nur relevante Wünsche für bessere Performance
 		const wishes = await this.loadWishesForComparison(filters);
 

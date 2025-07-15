@@ -284,7 +284,16 @@
 	<div class="modal modal-open">
 		<div class="modal-box max-w-4xl">
 			<div class="mb-6 flex items-center justify-between">
-				<h3 class="text-lg font-bold">Ähnlichkeitsanalyse</h3>
+				<div class="flex items-center gap-3">
+					<h3 class="text-lg font-bold">Ähnlichkeitsanalyse</h3>
+					{#if wish.language === 'de'}
+						<span class="badge badge-info badge-sm">🇩🇪 Deutsch</span>
+					{:else if wish.language === 'en'}
+						<span class="badge badge-info badge-sm">🇬🇧 English</span>
+					{:else}
+						<span class="badge badge-warning badge-sm">⚠️ Unbekannte Sprache</span>
+					{/if}
+				</div>
 				<div class="flex items-center gap-2">
 					{#if similarityData && similarityData.similarWishes.length > 0}
 						<!-- Auto-Clean Button -->
@@ -335,7 +344,16 @@
 
 			<!-- Current Wish -->
 			<div class="mb-6">
-				<h4 class="mb-2 font-semibold">Aktueller Wunsch:</h4>
+				<div class="mb-2 flex items-center justify-between">
+					<h4 class="font-semibold">Aktueller Wunsch:</h4>
+					<div class="text-base-content/60 text-xs">
+						Nur Wünsche in {wish.language === 'de'
+							? 'Deutsch'
+							: wish.language === 'en'
+								? 'English'
+								: wish.language} werden verglichen
+					</div>
+				</div>
 				<div class="bg-base-200 rounded-lg p-4">
 					<div class="mb-2 flex items-center gap-2">
 						<div class="badge badge-outline badge-sm">{wish.type}</div>

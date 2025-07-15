@@ -21,7 +21,6 @@
 	let currentSortBy = $state(data.sorting?.sortBy || 'created_at');
 	let currentSortOrder = $state(data.sorting?.sortOrder || 'desc');
 
-
 	// UI State
 	let showFilters = $state(false);
 	let selectedWishes = $state<string[]>([]);
@@ -99,7 +98,6 @@
 	function getSortedWishes() {
 		return [...data.wishes];
 	}
-
 
 	function clearFilters() {
 		searchTerm = '';

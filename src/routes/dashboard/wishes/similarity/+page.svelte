@@ -30,7 +30,7 @@
 	let duplicateCount = 0;
 	let similarCount = 0;
 	let uniqueCount = 0;
-	let selectedTab = 'all';
+	let selectedTab = 'duplicates';
 	let expandedWishes = new Set<string>();
 	let selectedWishes = new Set<string>();
 	let showDeleteModal = false;
@@ -39,12 +39,18 @@
 	let similarWishToDelete: string | null = null;
 	let autoCleanThreshold = 90;
 	let isDeleting = false;
+	let selectedLanguage = 'all';
 
-	$: filteredWishes = wishes.filter(wish => {
-		if (selectedTab === 'duplicates') return wish.duplicateStatus === 'duplicate';
-		if (selectedTab === 'similar') return wish.duplicateStatus === 'similar';
-		if (selectedTab === 'unique') return wish.duplicateStatus === 'unique';
-		return true;
+	$: filteredWishes = wishes.filter((wish) => {
+		let matchesTab = false;
+		if (selectedTab === 'duplicates') matchesTab = wish.duplicateStatus === 'duplicate';
+		else if (selectedTab === 'similar') matchesTab = wish.duplicateStatus === 'similar';
+		else if (selectedTab === 'unique') matchesTab = wish.duplicateStatus === 'unique';
+		else matchesTab = true;
+
+		let matchesLanguage = selectedLanguage === 'all' || wish.language === selectedLanguage;
+
+		return matchesTab && matchesLanguage;
 	});
 
 	onMount(() => {
@@ -84,11 +90,18 @@
 						if (line.trim()) {
 							try {
 								const data = JSON.parse(line);
-								
+
 								if (data.type === 'progress') {
 									analysisProgress = data.progress;
 								} else if (data.type === 'result') {
-									console.log('Received wish:', data.wish.id, 'relations:', data.wish.relations, 'ageGroups:', data.wish.ageGroups);
+									console.log(
+										'Received wish:',
+										data.wish.id,
+										'relations:',
+										data.wish.relations,
+										'ageGroups:',
+										data.wish.ageGroups
+									);
 									wishes = [...wishes, data.wish];
 									updateCounts();
 								}
@@ -107,9 +120,9 @@
 	}
 
 	function updateCounts() {
-		duplicateCount = wishes.filter(w => w.duplicateStatus === 'duplicate').length;
-		similarCount = wishes.filter(w => w.duplicateStatus === 'similar').length;
-		uniqueCount = wishes.filter(w => w.duplicateStatus === 'unique').length;
+		duplicateCount = wishes.filter((w) => w.duplicateStatus === 'duplicate').length;
+		similarCount = wishes.filter((w) => w.duplicateStatus === 'similar').length;
+		uniqueCount = wishes.filter((w) => w.duplicateStatus === 'unique').length;
 	}
 
 	function getSimilarityColor(similarity: number): string {
@@ -120,54 +133,57 @@
 
 	function getBadgeClass(status: string): string {
 		switch (status) {
-			case 'duplicate': return 'badge-error';
-			case 'similar': return 'badge-warning';
-			default: return 'badge-success';
+			case 'duplicate':
+				return 'badge-error';
+			case 'similar':
+				return 'badge-warning';
+			default:
+				return 'badge-success';
 		}
 	}
 
 	function formatRelations(relations: string[]): string {
 		const relationMap: Record<string, string> = {
-			'friend': 'Freund/in',
-			'family': 'Familie',
-			'partner': 'Partner/in',
-			'colleague': 'Kollege/in'
+			friend: 'Freund/in',
+			family: 'Familie',
+			partner: 'Partner/in',
+			colleague: 'Kollege/in'
 		};
-		return relations.map(rel => relationMap[rel] || rel).join(', ');
+		return relations.map((rel) => relationMap[rel] || rel).join(', ');
 	}
 
 	function formatAgeGroups(ageGroups: string[]): string {
 		const ageGroupMap: Record<string, string> = {
-			'all': 'Alle',
-			'young': 'Jung (18-35)',
-			'middle': 'Mittleres Alter (36-55)',
-			'senior': 'Senior (55+)'
+			all: 'Alle',
+			young: 'Jung (18-35)',
+			middle: 'Mittleres Alter (36-55)',
+			senior: 'Senior (55+)'
 		};
-		return ageGroups.map(age => ageGroupMap[age] || age).join(', ');
+		return ageGroups.map((age) => ageGroupMap[age] || age).join(', ');
 	}
 
 	function formatWishType(type: string): string {
 		const typeMap: Record<string, string> = {
-			'normal': 'Normal',
-			'herzlich': 'Herzlich',
-			'humorvoll': 'Humorvoll'
+			normal: 'Normal',
+			herzlich: 'Herzlich',
+			humorvoll: 'Humorvoll'
 		};
 		return typeMap[type] || type;
 	}
 
 	function formatEventType(eventType: string): string {
 		const eventMap: Record<string, string> = {
-			'birthday': 'Geburtstag',
-			'anniversary': 'Jubiläum',
-			'custom': 'Sonstiges'
+			birthday: 'Geburtstag',
+			anniversary: 'Jubiläum',
+			custom: 'Sonstiges'
 		};
 		return eventMap[eventType] || eventType;
 	}
 
 	function formatLanguage(language: string): string {
 		const languageMap: Record<string, string> = {
-			'de': 'Deutsch',
-			'en': 'English'
+			de: 'Deutsch',
+			en: 'English'
 		};
 		return languageMap[language] || language;
 	}
@@ -181,7 +197,7 @@
 				similar: similarCount,
 				unique: uniqueCount
 			},
-			wishes: wishes.map(wish => ({
+			wishes: wishes.map((wish) => ({
 				id: wish.id,
 				text: wish.text.substring(0, 100) + '...',
 				type: wish.type,
@@ -193,7 +209,7 @@
 				duplicateStatus: wish.duplicateStatus,
 				maxSimilarity: wish.maxSimilarity,
 				similarWishesCount: wish.similarWishes.length,
-				topSimilarWishes: wish.similarWishes.slice(0, 3).map(sw => ({
+				topSimilarWishes: wish.similarWishes.slice(0, 3).map((sw) => ({
 					id: sw.id,
 					similarity: sw.similarity,
 					text: sw.text.substring(0, 50) + '...'
@@ -229,7 +245,7 @@
 	}
 
 	function selectAllVisible() {
-		filteredWishes.forEach(wish => selectedWishes.add(wish.id));
+		filteredWishes.forEach((wish) => selectedWishes.add(wish.id));
 		selectedWishes = selectedWishes;
 	}
 
@@ -252,7 +268,7 @@
 
 			if (response.ok) {
 				// Remove deleted wishes from local state
-				wishes = wishes.filter(w => !selectedWishes.has(w.id));
+				wishes = wishes.filter((w) => !selectedWishes.has(w.id));
 				selectedWishes.clear();
 				selectedWishes = selectedWishes;
 				updateCounts();
@@ -275,18 +291,22 @@
 		try {
 			// Find all wishes that should be deleted based on similarity threshold
 			const wishesToDelete = new Set<string>();
-			
-			wishes.forEach(wish => {
-				if (wish.maxSimilarity >= (autoCleanThreshold / 100)) {
+
+			wishes.forEach((wish) => {
+				if (wish.maxSimilarity >= autoCleanThreshold / 100) {
 					// Keep the first occurrence, delete similar ones
-					const similarGroup = [wish, ...wish.similarWishes.map(sw => 
-						wishes.find(w => w.id === sw.id)
-					)].filter((w): w is WishSimilarityResult => w !== undefined).sort((a, b) => 
-						new Date(a.createdAt || '0').getTime() - new Date(b.createdAt || '0').getTime()
-					);
-					
+					const similarGroup = [
+						wish,
+						...wish.similarWishes.map((sw) => wishes.find((w) => w.id === sw.id))
+					]
+						.filter((w): w is WishSimilarityResult => w !== undefined)
+						.sort(
+							(a, b) =>
+								new Date(a.createdAt || '0').getTime() - new Date(b.createdAt || '0').getTime()
+						);
+
 					// Delete all but the first (oldest) wish
-					similarGroup.slice(1).forEach(w => wishesToDelete.add(w.id));
+					similarGroup.slice(1).forEach((w) => wishesToDelete.add(w.id));
 				}
 			});
 
@@ -304,7 +324,7 @@
 
 			if (response.ok) {
 				// Remove deleted wishes from local state
-				wishes = wishes.filter(w => !wishesToDelete.has(w.id));
+				wishes = wishes.filter((w) => !wishesToDelete.has(w.id));
 				updateCounts();
 				showAutoCleanModal = false;
 			} else {
@@ -320,12 +340,12 @@
 
 	function getAutoCleanCount(): number {
 		const wishesToDelete = new Set<string>();
-		
-		wishes.forEach(wish => {
-			if (wish.maxSimilarity >= (autoCleanThreshold / 100)) {
+
+		wishes.forEach((wish) => {
+			if (wish.maxSimilarity >= autoCleanThreshold / 100) {
 				// Find similar wishes and count how many would be deleted
-				wish.similarWishes.forEach(sw => {
-					if (sw.similarity >= (autoCleanThreshold / 100)) {
+				wish.similarWishes.forEach((sw) => {
+					if (sw.similarity >= autoCleanThreshold / 100) {
 						wishesToDelete.add(sw.id);
 					}
 				});
@@ -353,11 +373,13 @@
 
 			if (response.ok) {
 				// Remove the deleted wish from all similar wishes lists
-				wishes = wishes.map(wish => ({
-					...wish,
-					similarWishes: wish.similarWishes.filter(sw => sw.id !== similarWishToDelete)
-				})).filter(wish => wish.id !== similarWishToDelete); // Also remove the wish itself if it's in the main list
-				
+				wishes = wishes
+					.map((wish) => ({
+						...wish,
+						similarWishes: wish.similarWishes.filter((sw) => sw.id !== similarWishToDelete)
+					}))
+					.filter((wish) => wish.id !== similarWishToDelete); // Also remove the wish itself if it's in the main list
+
 				// Update counts
 				updateCounts();
 				showSimilarWishDeleteModal = false;
@@ -378,29 +400,83 @@
 	<title>Similarity Analysis - Wish Factory</title>
 </svelte:head>
 
-<div class="container mx-auto p-6 space-y-6">
+<div class="container mx-auto space-y-6 p-6">
 	<!-- Header -->
-	<div class="flex justify-between items-center">
+	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-3xl font-bold">Ähnlichkeitsanalyse</h1>
-			<p class="text-base-content/70 mt-2">Analysieren und verwalten Sie ähnliche Wünsche in Ihrer Sammlung</p>
+			<p class="text-base-content/70 mt-2">
+				Analysieren und verwalten Sie ähnliche Wünsche in Ihrer Sammlung
+			</p>
 		</div>
-		<div class="flex gap-2">
+		<div class="flex items-center gap-2">
+			<!-- Language Filter -->
+			<div class="form-control">
+				<label class="label">
+					<span class="label-text text-sm">Sprache:</span>
+				</label>
+				<select class="select select-bordered select-sm" bind:value={selectedLanguage}>
+					<option value="all">Alle Sprachen</option>
+					<option value="de">🇩🇪 Deutsch</option>
+					<option value="en">🇬🇧 English</option>
+				</select>
+			</div>
 			<button class="btn btn-outline btn-sm" on:click={analyzeAllWishes} disabled={loading}>
-				<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="mr-2 h-4 w-4"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+					/>
 				</svg>
 				Neu analysieren
 			</button>
-			<button class="btn btn-error btn-sm" on:click={() => showAutoCleanModal = true} disabled={loading || wishes.length === 0}>
-				<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+			<button
+				class="btn btn-error btn-sm"
+				on:click={() => (showAutoCleanModal = true)}
+				disabled={loading || wishes.length === 0}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="mr-2 h-4 w-4"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+					/>
 				</svg>
 				Auto-Clean
 			</button>
-			<button class="btn btn-outline btn-sm" on:click={exportResults} disabled={loading || wishes.length === 0}>
-				<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+			<button
+				class="btn btn-outline btn-sm"
+				on:click={exportResults}
+				disabled={loading || wishes.length === 0}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="mr-2 h-4 w-4"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+					/>
 				</svg>
 				Ergebnisse exportieren
 			</button>
@@ -413,8 +489,9 @@
 			<div class="card-body">
 				<h2 class="card-title">Analysiere Wünsche...</h2>
 				<p class="text-base-content/70">Führe Ähnlichkeitsanalyse für alle Wünsche durch</p>
-				<progress class="progress progress-primary w-full" value={analysisProgress} max="100"></progress>
-				<p class="text-sm text-base-content/70">{analysisProgress}% abgeschlossen</p>
+				<progress class="progress progress-primary w-full" value={analysisProgress} max="100"
+				></progress>
+				<p class="text-base-content/70 text-sm">{analysisProgress}% abgeschlossen</p>
 			</div>
 		</div>
 	{/if}
@@ -422,8 +499,18 @@
 	<!-- Error State -->
 	{#if error}
 		<div class="alert alert-error">
-			<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-6 w-6 shrink-0 stroke-current"
+				fill="none"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
 			</svg>
 			<div>
 				<h3 class="font-bold">Analysefehler</h3>
@@ -435,59 +522,124 @@
 	<!-- Results -->
 	{#if wishes.length > 0}
 		<!-- Statistics -->
-		<div class="stats stats-vertical lg:stats-horizontal shadow w-full">
+		<div class="stats stats-vertical lg:stats-horizontal w-full shadow">
 			<div class="stat">
 				<div class="stat-title">Gesamt</div>
-				<div class="stat-value text-primary">{wishes.length}</div>
-				<div class="stat-desc">Alle Wünsche</div>
+				<div class="stat-value text-primary">{filteredWishes.length}</div>
+				<div class="stat-desc">
+					{#if selectedLanguage === 'all'}
+						Alle Wünsche
+					{:else}
+						{selectedLanguage === 'de' ? 'Deutsche' : 'Englische'} Wünsche
+					{/if}
+				</div>
 			</div>
 			<div class="stat">
 				<div class="stat-title">Duplikate</div>
-				<div class="stat-value text-error">{duplicateCount}</div>
+				<div class="stat-value text-error">
+					{filteredWishes.filter((w) => w.duplicateStatus === 'duplicate').length}
+				</div>
 				<div class="stat-desc">Sehr ähnlich (≥90%)</div>
 			</div>
 			<div class="stat">
 				<div class="stat-title">Ähnlich</div>
-				<div class="stat-value text-warning">{similarCount}</div>
+				<div class="stat-value text-warning">
+					{filteredWishes.filter((w) => w.duplicateStatus === 'similar').length}
+				</div>
 				<div class="stat-desc">Mäßig ähnlich (≥70%)</div>
 			</div>
 			<div class="stat">
 				<div class="stat-title">Einzigartig</div>
-				<div class="stat-value text-success">{uniqueCount}</div>
+				<div class="stat-value text-success">
+					{filteredWishes.filter((w) => w.duplicateStatus === 'unique').length}
+				</div>
 				<div class="stat-desc">Unter 70% Ähnlichkeit</div>
 			</div>
 		</div>
 
+		<!-- Language-specific evaluation notice -->
+		<div class="alert alert-info">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-6 w-6 shrink-0 stroke-current"
+				fill="none"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+			<span>
+				<strong>Sprachspezifische Bewertung:</strong> Ähnlichkeitsanalyse wird nur zwischen Wünschen
+				derselben Sprache durchgeführt.
+				{#if selectedLanguage === 'all'}
+					Alle Sprachen werden angezeigt, aber verglichen werden nur Wünsche derselben Sprache.
+				{:else}
+					Aktuell werden nur {selectedLanguage === 'de' ? 'deutsche' : 'englische'} Wünsche angezeigt.
+				{/if}
+			</span>
+		</div>
+
 		<!-- Tabs -->
 		<div class="tabs tabs-boxed">
-			<button class="tab {selectedTab === 'all' ? 'tab-active' : ''}" on:click={() => selectedTab = 'all'}>
-				Alle ({wishes.length})
+			<button
+				class="tab {selectedTab === 'duplicates' ? 'tab-active' : ''}"
+				on:click={() => (selectedTab = 'duplicates')}
+			>
+				Duplikate ({filteredWishes.filter((w) => w.duplicateStatus === 'duplicate').length})
 			</button>
-			<button class="tab {selectedTab === 'duplicates' ? 'tab-active' : ''}" on:click={() => selectedTab = 'duplicates'}>
-				Duplikate ({duplicateCount})
+			<button
+				class="tab {selectedTab === 'similar' ? 'tab-active' : ''}"
+				on:click={() => (selectedTab = 'similar')}
+			>
+				Ähnlich ({filteredWishes.filter((w) => w.duplicateStatus === 'similar').length})
 			</button>
-			<button class="tab {selectedTab === 'similar' ? 'tab-active' : ''}" on:click={() => selectedTab = 'similar'}>
-				Ähnlich ({similarCount})
-			</button>
-			<button class="tab {selectedTab === 'unique' ? 'tab-active' : ''}" on:click={() => selectedTab = 'unique'}>
-				Einzigartig ({uniqueCount})
+			<button
+				class="tab {selectedTab === 'unique' ? 'tab-active' : ''}"
+				on:click={() => (selectedTab = 'unique')}
+			>
+				Einzigartig ({filteredWishes.filter((w) => w.duplicateStatus === 'unique').length})
 			</button>
 		</div>
 
 		<!-- Bulk Actions -->
 		{#if selectedWishes.size > 0}
 			<div class="alert alert-info">
-				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
 				</svg>
 				<div>
 					<h3 class="font-bold">{selectedWishes.size} Wünsche ausgewählt</h3>
 					<div class="text-xs">Sie können die ausgewählten Wünsche löschen.</div>
 				</div>
 				<div class="flex gap-2">
-					<button class="btn btn-error btn-sm" on:click={() => showDeleteModal = true}>
-						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+					<button class="btn btn-error btn-sm" on:click={() => (showDeleteModal = true)}>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="mr-1 h-4 w-4"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+							/>
 						</svg>
 						Löschen
 					</button>
@@ -497,7 +649,7 @@
 		{/if}
 
 		<!-- Selection Controls -->
-		<div class="flex justify-between items-center mb-4">
+		<div class="mb-4 flex items-center justify-between">
 			<div class="flex gap-2">
 				<button class="btn btn-outline btn-xs" on:click={selectAllVisible}>
 					Alle sichtbaren auswählen
@@ -508,165 +660,448 @@
 					</button>
 				{/if}
 			</div>
-			<div class="text-sm text-base-content/70">
+			<div class="text-base-content/70 text-sm">
 				{filteredWishes.length} Wünsche angezeigt
 			</div>
 		</div>
 
 		<!-- Wishes List -->
 		<div class="space-y-4">
-			{#each filteredWishes as wish}
+			{#if filteredWishes.length === 0}
+				<!-- Empty State Message -->
 				<div class="card bg-base-100 shadow-xl">
-					<div class="card-body">
-						<div class="flex items-start gap-3">
-							<!-- Selection Checkbox -->
-							<label class="cursor-pointer">
-								<input 
-									type="checkbox" 
-									class="checkbox checkbox-primary"
-									checked={selectedWishes.has(wish.id)}
-									on:change={() => toggleWishSelection(wish.id)}
-								/>
-							</label>
-
-							<!-- Main Content -->
-							<div class="flex-1">
-								<div class="flex justify-between items-start">
-									<div class="flex-1">
-										<div class="flex items-center">
-											<h2 class="card-title text-lg flex-1">
-												{expandedWishes.has(wish.id) ? wish.text : `${wish.text.substring(0, 80)}...`}
-											</h2>
-											<button 
-												class="btn btn-ghost btn-xs ml-2"
-												on:click={() => toggleWishExpansion(wish.id)}
-												aria-label={expandedWishes.has(wish.id) ? 'Wunsch zuklappen' : 'Wunsch erweitern'}
-											>
-												<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform {expandedWishes.has(wish.id) ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-												</svg>
-											</button>
-										</div>
-										<div class="flex flex-wrap gap-2 mt-1">
-											<span class="badge badge-info badge-sm">{formatWishType(wish.type)}</span>
-											<span class="badge badge-success badge-sm">{formatEventType(wish.eventType)}</span>
-											<span class="badge badge-accent badge-sm">{formatLanguage(wish.language)}</span>
-											<span class="badge badge-warning badge-sm">{wish.status}</span>
-										</div>
-										<div class="flex flex-wrap gap-4 mt-2">
-											<!-- Beziehungen -->
-											<div class="flex flex-wrap gap-2">
-												<div class="flex items-center gap-1">
-													<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-													</svg>
-													<span class="text-xs font-medium text-primary">Beziehungen:</span>
-												</div>
-												{#if wish.relations && wish.relations.length > 0}
-													{#each wish.relations as relation}
-														<span class="badge badge-outline badge-sm">{formatRelations([relation])}</span>
-													{/each}
-												{:else}
-													<span class="badge badge-ghost badge-sm text-base-content/50">Keine Beziehungen</span>
-												{/if}
-											</div>
-											
-											<!-- Altersgruppen -->
-											<div class="flex flex-wrap gap-2">
-												<div class="flex items-center gap-1">
-													<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-													</svg>
-													<span class="text-xs font-medium text-secondary">Altersgruppen:</span>
-												</div>
-												{#if wish.ageGroups && wish.ageGroups.length > 0}
-													{#each wish.ageGroups as ageGroup}
-														<span class="badge badge-secondary badge-outline badge-sm">{formatAgeGroups([ageGroup])}</span>
-													{/each}
-												{:else}
-													<span class="badge badge-ghost badge-sm text-base-content/50">Keine Altersgruppen</span>
-												{/if}
-											</div>
-										</div>
-									</div>
-									<div class="flex items-center gap-2">
-										<div class="badge {getBadgeClass(wish.duplicateStatus)}">
-											{wish.duplicateStatus === 'duplicate' ? 'Duplikat' : 
-											 wish.duplicateStatus === 'similar' ? 'Ähnlich' : 'Einzigartig'}
-										</div>
-										{#if wish.duplicateStatus !== 'unique'}
-											<span class="text-sm font-mono {getSimilarityColor(wish.maxSimilarity)}">
-												{Math.round(wish.maxSimilarity * 100)}%
-											</span>
-										{/if}
-									</div>
-								</div>
-
-								<!-- Expanded Content -->
-								{#if expandedWishes.has(wish.id)}
-									<div class="mt-4 space-y-4">
-										<!-- Individual Actions -->
-										<div class="flex gap-2">
-											<a href="/dashboard/wishes/{wish.id}" class="btn btn-outline btn-sm">
-												<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-												</svg>
-												Anzeigen
-											</a>
-											<a href="/dashboard/wishes/{wish.id}/edit" class="btn btn-outline btn-sm">
-												<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-												</svg>
-												Bearbeiten
-											</a>
-											<button class="btn btn-error btn-sm" on:click={() => {selectedWishes.clear(); selectedWishes.add(wish.id); selectedWishes = selectedWishes; showDeleteModal = true;}}>
-												<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-												</svg>
-												Löschen
-											</button>
-										</div>
-									</div>
-								{/if}
-								
-								{#if wish.similarWishes.length > 0 && expandedWishes.has(wish.id)}
-									<div class="mt-4">
-										<h4 class="font-medium mb-3">Ähnliche Wünsche ({wish.similarWishes.length})</h4>
-										<div class="space-y-2">
-											{#each wish.similarWishes as similar}
-												<div class="flex justify-between items-center p-3 bg-base-200 rounded-lg group hover:bg-base-300 transition-colors">
-													<span class="text-sm flex-1 pr-4">
-														{similar.text}
-													</span>
-													<div class="flex items-center gap-2">
-														<div class="badge badge-outline badge-sm">
-															{similar.type} • {similar.eventType}
-														</div>
-														<span class="text-sm font-mono {getSimilarityColor(similar.similarity)}">
-															{Math.round(similar.similarity * 100)}%
-														</span>
-														<button 
-															class="btn btn-ghost btn-xs text-error hover:bg-error hover:text-error-content opacity-0 group-hover:opacity-100 transition-opacity"
-															on:click={() => showSimilarWishDeleteConfirmation(similar.id)}
-															title="Ähnlichen Wunsch löschen"
-															aria-label="Ähnlichen Wunsch löschen"
-														>
-															<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-																<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-															</svg>
-														</button>
-													</div>
-												</div>
-											{/each}
-										</div>
-									</div>
-								{/if}
-							</div>
+					<div class="card-body py-12 text-center">
+						<div class="mb-4 flex justify-center">
+							{#if selectedTab === 'duplicates'}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="text-success h-16 w-16"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
+								</svg>
+							{:else if selectedTab === 'similar'}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="text-success h-16 w-16"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
+								</svg>
+							{:else}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="text-info h-16 w-16"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
+								</svg>
+							{/if}
+						</div>
+						<h3 class="mb-2 text-xl font-bold">
+							{#if selectedTab === 'duplicates'}
+								Keine Duplikate gefunden
+							{:else if selectedTab === 'similar'}
+								Keine ähnlichen Wünsche gefunden
+							{:else}
+								Alle Wünsche sind einzigartig
+							{/if}
+						</h3>
+						<p class="text-base-content/70 mx-auto max-w-md">
+							{#if selectedTab === 'duplicates'}
+								Es wurden keine Wünsche mit einer Ähnlichkeit von 90% oder höher gefunden. Ihre
+								Sammlung enthält keine exakten Duplikate.
+							{:else if selectedTab === 'similar'}
+								Es wurden keine Wünsche mit einer Ähnlichkeit zwischen 70% und 89% gefunden. Ihre
+								Sammlung ist gut diversifiziert.
+							{:else}
+								Alle Ihre Wünsche sind einzigartig und haben eine Ähnlichkeit von weniger als 70%
+								zueinander.
+							{/if}
+						</p>
+						<div class="mt-6">
+							<button
+								class="btn btn-primary btn-outline"
+								on:click={() => (selectedTab = 'duplicates')}
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="mr-2 h-4 w-4"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+									/>
+								</svg>
+								Übersicht anzeigen
+							</button>
 						</div>
 					</div>
 				</div>
-			{/each}
+			{:else}
+				{#each filteredWishes as wish}
+					<div class="card bg-base-100 shadow-xl">
+						<div class="card-body">
+							<div class="flex items-start gap-3">
+								<!-- Selection Checkbox -->
+								<label class="cursor-pointer">
+									<input
+										type="checkbox"
+										class="checkbox checkbox-primary"
+										checked={selectedWishes.has(wish.id)}
+										on:change={() => toggleWishSelection(wish.id)}
+									/>
+								</label>
+
+								<!-- Main Content -->
+								<div class="flex-1">
+									<div class="flex items-start justify-between">
+										<div class="flex-1">
+											<div class="flex items-center justify-between">
+												<h2 class="card-title flex-1 text-lg">
+													{expandedWishes.has(wish.id)
+														? wish.text
+														: `${wish.text.substring(0, 80)}...`}
+												</h2>
+												<div class="flex items-center gap-3">
+													<!-- Prominenter Ähnlichkeitsstatus -->
+													<div class="flex items-center gap-2">
+														{#if wish.duplicateStatus === 'duplicate'}
+															<div
+																class="bg-error/10 flex items-center gap-1 rounded-full px-3 py-1"
+															>
+																<svg
+																	xmlns="http://www.w3.org/2000/svg"
+																	class="text-error h-4 w-4"
+																	fill="none"
+																	viewBox="0 0 24 24"
+																	stroke="currentColor"
+																>
+																	<path
+																		stroke-linecap="round"
+																		stroke-linejoin="round"
+																		stroke-width="2"
+																		d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+																	/>
+																</svg>
+																<span class="text-error text-sm font-bold">Duplikat</span>
+																<span class="text-error font-mono text-xs"
+																	>{Math.round(wish.maxSimilarity * 100)}%</span
+																>
+															</div>
+														{:else if wish.duplicateStatus === 'similar'}
+															<div
+																class="bg-warning/10 flex items-center gap-1 rounded-full px-3 py-1"
+															>
+																<svg
+																	xmlns="http://www.w3.org/2000/svg"
+																	class="text-warning h-4 w-4"
+																	fill="none"
+																	viewBox="0 0 24 24"
+																	stroke="currentColor"
+																>
+																	<path
+																		stroke-linecap="round"
+																		stroke-linejoin="round"
+																		stroke-width="2"
+																		d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+																	/>
+																</svg>
+																<span class="text-warning text-sm font-bold">Ähnlich</span>
+																<span class="text-warning font-mono text-xs"
+																	>{Math.round(wish.maxSimilarity * 100)}%</span
+																>
+															</div>
+														{:else}
+															<div
+																class="bg-success/10 flex items-center gap-1 rounded-full px-3 py-1"
+															>
+																<svg
+																	xmlns="http://www.w3.org/2000/svg"
+																	class="text-success h-4 w-4"
+																	fill="none"
+																	viewBox="0 0 24 24"
+																	stroke="currentColor"
+																>
+																	<path
+																		stroke-linecap="round"
+																		stroke-linejoin="round"
+																		stroke-width="2"
+																		d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+																	/>
+																</svg>
+																<span class="text-success text-sm font-bold">Einzigartig</span>
+															</div>
+														{/if}
+													</div>
+													<button
+														class="btn btn-ghost btn-xs"
+														on:click={() => toggleWishExpansion(wish.id)}
+														aria-label={expandedWishes.has(wish.id)
+															? 'Wunsch zuklappen'
+															: 'Wunsch erweitern'}
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class="h-4 w-4 transition-transform {expandedWishes.has(wish.id)
+																? 'rotate-180'
+																: ''}"
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M19 9l-7 7-7-7"
+															/>
+														</svg>
+													</button>
+												</div>
+											</div>
+											<!-- Organisierte Tag-Struktur -->
+											<div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+												<!-- Linke Spalte: Grunddaten -->
+												<div class="space-y-2">
+													<div class="flex items-center gap-2">
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class="text-info h-4 w-4"
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+															/>
+														</svg>
+														<span class="text-info text-xs font-semibold">Eigenschaften</span>
+													</div>
+													<div class="flex flex-wrap gap-1 pl-6">
+														<span class="badge badge-info badge-xs"
+															>{formatWishType(wish.type)}</span
+														>
+														<span class="badge badge-success badge-xs"
+															>{formatEventType(wish.eventType)}</span
+														>
+														<span class="badge badge-accent badge-xs"
+															>{formatLanguage(wish.language)}</span
+														>
+														<span class="badge badge-warning badge-xs">{wish.status}</span>
+													</div>
+												</div>
+
+												<!-- Rechte Spalte: Zielgruppen -->
+												<div class="space-y-2">
+													<div class="flex items-center gap-2">
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class="text-primary h-4 w-4"
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+															/>
+														</svg>
+														<span class="text-primary text-xs font-semibold">Zielgruppen</span>
+													</div>
+													<div class="flex flex-wrap gap-1 pl-6">
+														{#if wish.relations && wish.relations.length > 0}
+															{#each wish.relations as relation}
+																<span class="badge badge-primary badge-outline badge-xs"
+																	>{formatRelations([relation])}</span
+																>
+															{/each}
+														{:else}
+															<span class="badge badge-ghost badge-xs text-base-content/50"
+																>Keine Beziehungen</span
+															>
+														{/if}
+														<!-- Trenner -->
+														{#if wish.relations && wish.relations.length > 0 && wish.ageGroups && wish.ageGroups.length > 0}
+															<span class="text-base-content/30 text-xs">|</span>
+														{/if}
+														{#if wish.ageGroups && wish.ageGroups.length > 0}
+															{#each wish.ageGroups as ageGroup}
+																<span class="badge badge-secondary badge-outline badge-xs"
+																	>{formatAgeGroups([ageGroup])}</span
+																>
+															{/each}
+														{:else}
+															<span class="badge badge-ghost badge-xs text-base-content/50"
+																>Keine Altersgruppen</span
+															>
+														{/if}
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Expanded Content -->
+									{#if expandedWishes.has(wish.id)}
+										<div class="mt-4 space-y-4">
+											<!-- Individual Actions -->
+											<div class="flex gap-2">
+												<a href="/dashboard/wishes/{wish.id}" class="btn btn-outline btn-sm">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														class="mr-1 h-4 w-4"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+														/>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+														/>
+													</svg>
+													Anzeigen
+												</a>
+												<a href="/dashboard/wishes/{wish.id}/edit" class="btn btn-outline btn-sm">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														class="mr-1 h-4 w-4"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+														/>
+													</svg>
+													Bearbeiten
+												</a>
+												<button
+													class="btn btn-error btn-sm"
+													on:click={() => {
+														selectedWishes.clear();
+														selectedWishes.add(wish.id);
+														selectedWishes = selectedWishes;
+														showDeleteModal = true;
+													}}
+												>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														class="mr-1 h-4 w-4"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+														/>
+													</svg>
+													Löschen
+												</button>
+											</div>
+										</div>
+									{/if}
+
+									{#if wish.similarWishes.length > 0 && expandedWishes.has(wish.id)}
+										<div class="mt-4">
+											<h4 class="mb-3 font-medium">
+												Ähnliche Wünsche ({wish.similarWishes.length})
+											</h4>
+											<div class="space-y-2">
+												{#each wish.similarWishes as similar}
+													<div
+														class="bg-base-200 group hover:bg-base-300 flex items-center justify-between rounded-lg p-3 transition-colors"
+													>
+														<span class="flex-1 pr-4 text-sm">
+															{similar.text}
+														</span>
+														<div class="flex items-center gap-2">
+															<div class="badge badge-outline badge-sm">
+																{similar.type} • {similar.eventType}
+															</div>
+															<span
+																class="font-mono text-sm {getSimilarityColor(similar.similarity)}"
+															>
+																{Math.round(similar.similarity * 100)}%
+															</span>
+															<button
+																class="btn btn-ghost btn-xs text-error hover:bg-error hover:text-error-content opacity-0 transition-opacity group-hover:opacity-100"
+																on:click={() => showSimilarWishDeleteConfirmation(similar.id)}
+																title="Ähnlichen Wunsch löschen"
+																aria-label="Ähnlichen Wunsch löschen"
+															>
+																<svg
+																	xmlns="http://www.w3.org/2000/svg"
+																	class="h-3 w-3"
+																	fill="none"
+																	viewBox="0 0 24 24"
+																	stroke="currentColor"
+																>
+																	<path
+																		stroke-linecap="round"
+																		stroke-linejoin="round"
+																		stroke-width="2"
+																		d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+																	/>
+																</svg>
+															</button>
+														</div>
+													</div>
+												{/each}
+											</div>
+										</div>
+									{/if}
+								</div>
+							</div>
+						</div>
+					</div>
+				{/each}
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -675,18 +1110,33 @@
 {#if showDeleteModal}
 	<div class="modal modal-open">
 		<div class="modal-box">
-			<h3 class="font-bold text-lg mb-4">Wünsche löschen</h3>
+			<h3 class="mb-4 text-lg font-bold">Wünsche löschen</h3>
 			<p class="mb-4">
-				Möchten Sie wirklich {selectedWishes.size} {selectedWishes.size === 1 ? 'Wunsch' : 'Wünsche'} löschen?
+				Möchten Sie wirklich {selectedWishes.size}
+				{selectedWishes.size === 1 ? 'Wunsch' : 'Wünsche'} löschen?
 			</p>
 			<div class="alert alert-warning mb-4">
-				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+					/>
 				</svg>
 				<span>Diese Aktion kann nicht rückgängig gemacht werden!</span>
 			</div>
 			<div class="modal-action">
-				<button class="btn btn-ghost" on:click={() => showDeleteModal = false} disabled={isDeleting}>
+				<button
+					class="btn btn-ghost"
+					on:click={() => (showDeleteModal = false)}
+					disabled={isDeleting}
+				>
 					Abbrechen
 				</button>
 				<button class="btn btn-error" on:click={deleteSelectedWishes} disabled={isDeleting}>
@@ -706,26 +1156,27 @@
 {#if showAutoCleanModal}
 	<div class="modal modal-open">
 		<div class="modal-box">
-			<h3 class="font-bold text-lg mb-4">Auto-Clean Ähnlichkeits-Bereinigung</h3>
+			<h3 class="mb-4 text-lg font-bold">Auto-Clean Ähnlichkeits-Bereinigung</h3>
 			<p class="mb-4">
-				Automatisches Löschen von Wünschen mit hoher Ähnlichkeit. Es wird immer der älteste Wunsch beibehalten.
+				Automatisches Löschen von Wünschen mit hoher Ähnlichkeit. Es wird immer der älteste Wunsch
+				beibehalten.
 			</p>
-			
+
 			<div class="form-control mb-4">
 				<label class="label">
 					<span class="label-text">Ähnlichkeits-Schwellenwert:</span>
 					<span class="label-text-alt">{autoCleanThreshold}%</span>
 				</label>
-				<input 
-					type="range" 
-					class="range range-primary" 
-					min="70" 
-					max="100" 
+				<input
+					type="range"
+					class="range range-primary"
+					min="70"
+					max="100"
 					step="5"
 					bind:value={autoCleanThreshold}
 					aria-label="Ähnlichkeits-Schwellenwert in Prozent"
 				/>
-				<div class="w-full flex justify-between text-xs px-2 mt-1">
+				<div class="mt-1 flex w-full justify-between px-2 text-xs">
 					<span>70%</span>
 					<span>85%</span>
 					<span>100%</span>
@@ -733,33 +1184,58 @@
 			</div>
 
 			<div class="alert alert-info mb-4">
-				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
 				</svg>
 				<div>
 					<h4 class="font-bold">Vorschau</h4>
 					<div class="text-sm">
-						Etwa <strong>{getAutoCleanCount()}</strong> Wünsche würden bei {autoCleanThreshold}% Ähnlichkeit gelöscht.
+						Etwa <strong>{getAutoCleanCount()}</strong> Wünsche würden bei {autoCleanThreshold}%
+						Ähnlichkeit gelöscht.
 					</div>
 				</div>
 			</div>
 
 			{#if autoCleanThreshold >= 95}
 				<div class="alert alert-warning mb-4">
-					<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6 shrink-0 stroke-current"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+						/>
 					</svg>
 					<span>Hoher Schwellenwert! Es werden nur sehr ähnliche Wünsche gelöscht.</span>
 				</div>
 			{/if}
 
 			<div class="modal-action">
-				<button class="btn btn-ghost" on:click={() => showAutoCleanModal = false} disabled={isDeleting}>
+				<button
+					class="btn btn-ghost"
+					on:click={() => (showAutoCleanModal = false)}
+					disabled={isDeleting}
+				>
 					Abbrechen
 				</button>
-				<button 
-					class="btn btn-error" 
-					on:click={autoCleanSimilarWishes} 
+				<button
+					class="btn btn-error"
+					on:click={autoCleanSimilarWishes}
 					disabled={isDeleting || getAutoCleanCount() === 0}
 				>
 					{#if isDeleting}
@@ -778,18 +1254,30 @@
 {#if showSimilarWishDeleteModal}
 	<div class="modal modal-open">
 		<div class="modal-box">
-			<h3 class="font-bold text-lg mb-4">Ähnlichen Wunsch löschen</h3>
-			<p class="mb-4">
-				Möchten Sie diesen ähnlichen Wunsch wirklich löschen?
-			</p>
+			<h3 class="mb-4 text-lg font-bold">Ähnlichen Wunsch löschen</h3>
+			<p class="mb-4">Möchten Sie diesen ähnlichen Wunsch wirklich löschen?</p>
 			<div class="alert alert-warning mb-4">
-				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+					/>
 				</svg>
 				<span>Diese Aktion kann nicht rückgängig gemacht werden!</span>
 			</div>
 			<div class="modal-action">
-				<button class="btn btn-ghost" on:click={() => showSimilarWishDeleteModal = false} disabled={isDeleting}>
+				<button
+					class="btn btn-ghost"
+					on:click={() => (showSimilarWishDeleteModal = false)}
+					disabled={isDeleting}
+				>
 					Abbrechen
 				</button>
 				<button class="btn btn-error" on:click={confirmDeleteSimilarWish} disabled={isDeleting}>

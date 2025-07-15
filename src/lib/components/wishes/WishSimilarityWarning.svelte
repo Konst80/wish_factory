@@ -111,7 +111,12 @@
 				<!-- Duplicate Warning -->
 				<div
 					class="tooltip"
-					data-tip="Klicken für Details - Sehr ähnlicher Wunsch bereits vorhanden"
+					data-tip="Klicken für Details - Sehr ähnlicher Wunsch bereits vorhanden ({wish.language ===
+					'de'
+						? 'Deutsch'
+						: wish.language === 'en'
+							? 'English'
+							: wish.language})"
 				>
 					<button
 						class="badge badge-error badge-xs hover:badge-error/80 cursor-pointer"
@@ -127,7 +132,11 @@
 					class="tooltip"
 					data-tip="Klicken für Details - Ähnlichkeit: {formatSimilarity(
 						similarityData.similarity
-					)} ({similarityData.algorithm})"
+					)} ({similarityData.algorithm}) - {wish.language === 'de'
+						? 'Deutsch'
+						: wish.language === 'en'
+							? 'English'
+							: wish.language}"
 				>
 					<button
 						class="badge {getSimilarityColor(

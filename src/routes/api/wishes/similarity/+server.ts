@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 const SimilarityCheckSchema = z.object({
 	text: z.string().min(1, 'Text darf nicht leer sein'),
-	language: z.enum(['de', 'en']).optional(),
+	language: z.enum(['de', 'en'], { required_error: 'Sprache ist erforderlich' }),
 	type: z.enum(['normal', 'funny']).optional(),
 	eventType: z.enum(['birthday', 'anniversary', 'custom']).optional(),
 	excludeId: z.string().uuid().optional(),
@@ -13,7 +13,7 @@ const SimilarityCheckSchema = z.object({
 
 const BatchSimilarityCheckSchema = z.object({
 	texts: z.array(z.string().min(1)).min(1).max(10),
-	language: z.enum(['de', 'en']).optional(),
+	language: z.enum(['de', 'en'], { required_error: 'Sprache ist erforderlich' }),
 	type: z.enum(['normal', 'funny']).optional(),
 	eventType: z.enum(['birthday', 'anniversary', 'custom']).optional(),
 	maxResults: z.number().int().min(1).max(10).optional()
@@ -128,12 +128,23 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 		// Verschiedene Aktionen je nach Parameter
 		if (action === 'stats') {
+			// Validate that language is provided for language-specific evaluation
+			if (!language) {
+				return json(
+					{
+						error: 'Sprache ist erforderlich für die Ähnlichkeitsstatistiken',
+						details: { language: ['Sprache muss angegeben werden'] }
+					},
+					{ status: 400 }
+				);
+			}
+
 			// Statistiken abrufen mit allen Wünschen einschließlich Entwürfe
 			const statsService = createSimilarityService(locals.supabase as any, {
 				includeArchived: true,
 				maxResults: 10
 			});
-			const stats = await statsService.getSimilarityStats(language || undefined);
+			const stats = await statsService.getSimilarityStats(language);
 			const cacheStats = await statsService.getCacheStats();
 
 			return json({
@@ -159,6 +170,8 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			});
 
 			try {
+				// Note: findSimilarToWish will use the wish's language if not provided
+				// This is acceptable since we're finding similar wishes to a specific wish
 				const result = await wishService.findSimilarToWish(wishId, {
 					language: language || undefined,
 					type: type || undefined,
