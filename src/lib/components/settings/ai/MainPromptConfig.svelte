@@ -41,7 +41,7 @@
 			name="promptTemplate"
 			class="textarea-bordered textarea h-96 w-full"
 			placeholder="Haupt-Prompt-Template mit Platzhaltern wie &#123;count&#125;, &#123;countText&#125;, &#123;languageTexts&#125;, &#123;length&#125;, &#123;specificValues&#125;, &#123;additionalInstructions&#125;"
-			value={data.settings.ai?.promptTemplate || ''}
+			value={(data.settings as any).ai?.promptTemplate || ''}
 		></textarea>
 
 		<!-- Template Variables Helper -->

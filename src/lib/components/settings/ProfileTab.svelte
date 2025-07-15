@@ -137,7 +137,7 @@
 								type="text"
 								placeholder="Ihr vollständiger Name"
 								class="input-bordered input input-lg w-full"
-								value={data.settings.profile.fullName}
+								value={(data.settings as any).profile?.fullName || ''}
 								required
 							/>
 						</div>
@@ -167,7 +167,7 @@
 								type="email"
 								placeholder="ihre@email.com"
 								class="input-bordered input input-lg w-full"
-								value={data.settings.profile.email}
+								value={(data.settings as any).profile?.email || ''}
 								disabled
 							/>
 							<div class="label">
@@ -238,7 +238,7 @@
 								id="language"
 								name="language"
 								class="select-bordered select select-lg w-full"
-								value={data.settings.profile.language}
+								value={(data.settings as any).profile?.language || ''}
 							>
 								{#each languages as lang (lang.value)}
 									<option value={lang.value}>{lang.label}</option>
@@ -270,7 +270,7 @@
 								id="timezone"
 								name="timezone"
 								class="select-bordered select select-lg w-full"
-								value={data.settings.profile.timezone}
+								value={(data.settings as any).profile?.timezone || ''}
 							>
 								{#each timezones as tz (tz.value)}
 									<option value={tz.value}>{tz.label}</option>

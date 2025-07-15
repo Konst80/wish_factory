@@ -38,7 +38,7 @@
 				id="model"
 				name="model"
 				class="select-bordered select select-lg w-full"
-				value={data.settings.ai?.model || 'anthropic/claude-3.5-sonnet'}
+				value={(data.settings as any).ai?.model || 'anthropic/claude-3.5-sonnet'}
 			>
 				<option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
 				<option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
@@ -70,7 +70,7 @@
 				placeholder="System-Anweisungen für die KI... 
 
 Beispiel: Du bist ein hilfreicher Assistent für das Erstellen von personalisierten Wünschen und Grüßen. Erstelle warme, authentische und kulturell angemessene Texte."
-				value={data.settings.ai?.promptSystem || ''}
+				value={(data.settings as any).ai?.promptSystem || ''}
 			></textarea>
 			<div class="label">
 				<span class="label-text-alt text-base-content/60">

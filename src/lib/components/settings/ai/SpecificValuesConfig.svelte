@@ -5,9 +5,10 @@
 			settings: Record<string, unknown>;
 			[key: string]: unknown;
 		};
+		onMessage: (message: string, isError?: boolean) => void;
 	}
 
-	let { data }: Props = $props();
+	let { data, onMessage }: Props = $props();
 
 	let isCollapsed = $state(true);
 	let activeTab = $state('de');
@@ -81,7 +82,7 @@
 								class="textarea-bordered textarea w-full"
 								rows="20"
 								placeholder="18, 25, 30, 40, 50, 60, 65, 70, 75, 80, 85, 90, 95, 100"
-								value={data.settings.specificValues?.birthdayDe || ''}
+								value={(data.settings as any).specificValues?.birthdayDe || ''}
 							></textarea>
 						</div>
 
@@ -95,7 +96,7 @@
 								class="textarea-bordered textarea w-full"
 								rows="20"
 								placeholder="1, 5, 10, 15, 20, 25, 30, 40, 50, 60"
-								value={data.settings.specificValues?.anniversaryDe || ''}
+								value={(data.settings as any).specificValues?.anniversaryDe || ''}
 							></textarea>
 						</div>
 					</div>
@@ -113,7 +114,7 @@
 								class="textarea-bordered textarea w-full"
 								rows="20"
 								placeholder="18, 25, 30, 40, 50, 60, 65, 70, 75, 80, 85, 90, 95, 100"
-								value={data.settings.specificValues?.birthdayEn || ''}
+								value={(data.settings as any).specificValues?.birthdayEn || ''}
 							></textarea>
 						</div>
 
@@ -127,7 +128,7 @@
 								class="textarea-bordered textarea w-full"
 								rows="20"
 								placeholder="1, 5, 10, 15, 20, 25, 30, 40, 50, 60"
-								value={data.settings.specificValues?.anniversaryEn || ''}
+								value={(data.settings as any).specificValues?.anniversaryEn || ''}
 							></textarea>
 						</div>
 					</div>

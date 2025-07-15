@@ -130,7 +130,7 @@
 									type="checkbox"
 									name="emailNotifications"
 									class="toggle toggle-primary"
-									checked={data.settings.notifications.emailNotifications}
+									checked={(data.settings as any).notifications?.emailNotifications || false}
 								/>
 							</label>
 						</div>
@@ -165,7 +165,7 @@
 									type="checkbox"
 									name="pushNotifications"
 									class="toggle toggle-secondary"
-									checked={data.settings.notifications.pushNotifications}
+									checked={(data.settings as any).notifications?.pushNotifications || false}
 								/>
 							</label>
 						</div>
@@ -223,7 +223,7 @@
 									type="checkbox"
 									name="newWishAlerts"
 									class="toggle toggle-accent"
-									checked={data.settings.notifications.newWishAlerts}
+									checked={(data.settings as any).notifications?.newWishAlerts || false}
 								/>
 							</label>
 						</div>
@@ -258,7 +258,7 @@
 									type="checkbox"
 									name="approvalRequests"
 									class="toggle toggle-warning"
-									checked={data.settings.notifications.approvalRequests}
+									checked={(data.settings as any).notifications?.approvalRequests || false}
 								/>
 							</label>
 						</div>
@@ -316,7 +316,7 @@
 									type="checkbox"
 									name="systemUpdates"
 									class="toggle toggle-info"
-									checked={data.settings.notifications.systemUpdates}
+									checked={(data.settings as any).notifications?.systemUpdates || false}
 								/>
 							</label>
 						</div>
@@ -351,7 +351,7 @@
 									type="checkbox"
 									name="weeklyReport"
 									class="toggle toggle-success"
-									checked={data.settings.notifications.weeklyReport}
+									checked={(data.settings as any).notifications?.weeklyReport || false}
 								/>
 							</label>
 						</div>

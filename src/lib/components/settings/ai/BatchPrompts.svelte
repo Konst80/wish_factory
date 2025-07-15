@@ -60,7 +60,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="10"
 					placeholder="Prompt für Batch-Generierung mit Platzhaltern wie batchCount, batchTypes, batchEventTypes..."
-					value={data.settings.ai?.promptBatch || ''}
+					value={(data.settings as any).ai?.promptBatch || ''}
 				></textarea>
 			</div>
 		</div>
@@ -95,7 +95,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für verspätete Wünsche..."
-					value={data.settings.ai?.promptBelated || ''}
+					value={(data.settings as any).ai?.promptBelated || ''}
 				></textarea>
 			</div>
 		</div>

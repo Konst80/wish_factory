@@ -60,7 +60,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für Freunde..."
-					value={data.settings.ai?.promptRelationFriend || ''}
+					value={(data.settings as any).ai?.promptRelationFriend || ''}
 				></textarea>
 			</div>
 		</div>
@@ -95,7 +95,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für Familie..."
-					value={data.settings.ai?.promptRelationFamily || ''}
+					value={(data.settings as any).ai?.promptRelationFamily || ''}
 				></textarea>
 			</div>
 		</div>
@@ -130,7 +130,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für Partner..."
-					value={data.settings.ai?.promptRelationPartner || ''}
+					value={(data.settings as any).ai?.promptRelationPartner || ''}
 				></textarea>
 			</div>
 		</div>
@@ -165,7 +165,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für Kollegen..."
-					value={data.settings.ai?.promptRelationColleague || ''}
+					value={(data.settings as any).ai?.promptRelationColleague || ''}
 				></textarea>
 			</div>
 		</div>

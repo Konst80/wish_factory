@@ -155,7 +155,7 @@
 								type="checkbox"
 								name="apiAccess"
 								class="toggle toggle-success"
-								checked={data.settings.system.apiAccess}
+								checked={(data.settings as any).system?.apiAccess || false}
 							/>
 						</label>
 					</div>
@@ -191,7 +191,7 @@
 							id="exportFormat"
 							name="exportFormat"
 							class="select-bordered select select-lg w-full"
-							value={data.settings.system.exportFormat}
+							value={(data.settings as any).system?.exportFormat || 'json'}
 						>
 							<option value="json">JSON</option>
 							<option value="csv">CSV</option>
@@ -232,7 +232,7 @@
 								id="backupFrequency"
 								name="backupFrequency"
 								class="select-bordered select select-lg w-full"
-								value={data.settings.system.backupFrequency}
+								value={(data.settings as any).system?.backupFrequency || 'daily'}
 							>
 								<option value="none">Keine Backups</option>
 								<option value="daily">Täglich</option>
@@ -255,7 +255,7 @@
 								max="3650"
 								step="1"
 								class="input-bordered input input-lg w-full"
-								value={data.settings.system.dataRetention}
+								value={(data.settings as any).system?.dataRetention || '30'}
 							/>
 							<div class="label">
 								<span class="label-text-alt text-info">

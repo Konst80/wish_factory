@@ -64,7 +64,7 @@
 						id="theme"
 						name="theme"
 						class="select-bordered select w-full"
-						value={data.settings.preferences.theme}
+						value={(data.settings as any).preferences?.theme || 'light'}
 					>
 						{#each themes as theme (theme.value)}
 							<option value={theme.value}>{theme.label}</option>
@@ -80,7 +80,7 @@
 						id="defaultLanguage"
 						name="defaultLanguage"
 						class="select-bordered select w-full"
-						value={data.settings.preferences.defaultLanguage}
+						value={(data.settings as any).preferences?.defaultLanguage || 'de'}
 					>
 						{#each languages as lang (lang.value)}
 							<option value={lang.value}>{lang.label}</option>
@@ -96,7 +96,7 @@
 						id="wishesPerPage"
 						name="wishesPerPage"
 						class="select-bordered select w-full"
-						value={data.settings.preferences.wishesPerPage}
+						value={(data.settings as any).preferences?.wishesPerPage || 10}
 					>
 						<option value={10}>10</option>
 						<option value={25}>25</option>
@@ -112,7 +112,7 @@
 							type="checkbox"
 							name="autoSave"
 							class="toggle toggle-primary"
-							checked={data.settings.preferences.autoSave}
+							checked={(data.settings as any).preferences?.autoSave || false}
 						/>
 					</label>
 				</div>
@@ -124,7 +124,7 @@
 							type="checkbox"
 							name="confirmBeforeDelete"
 							class="toggle toggle-secondary"
-							checked={data.settings.preferences.confirmBeforeDelete}
+							checked={(data.settings as any).preferences?.confirmBeforeDelete || true}
 						/>
 					</label>
 				</div>

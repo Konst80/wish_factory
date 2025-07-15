@@ -60,7 +60,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für junge Menschen..."
-					value={data.settings.ai?.promptAgeYoung || ''}
+					value={(data.settings as any).ai?.promptAgeYoung || ''}
 				></textarea>
 			</div>
 		</div>
@@ -95,7 +95,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für mittleres Alter..."
-					value={data.settings.ai?.promptAgeMiddle || ''}
+					value={(data.settings as any).ai?.promptAgeMiddle || ''}
 				></textarea>
 			</div>
 		</div>
@@ -130,7 +130,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für Senioren..."
-					value={data.settings.ai?.promptAgeSenior || ''}
+					value={(data.settings as any).ai?.promptAgeSenior || ''}
 				></textarea>
 			</div>
 		</div>
