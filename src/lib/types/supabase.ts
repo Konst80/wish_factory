@@ -102,6 +102,7 @@ export type Database = {
 					email: string;
 					full_name: string;
 					id: string;
+					preferred_language: string | null;
 					role: Database['public']['Enums']['user_role'];
 					updated_at: string | null;
 				};
@@ -111,6 +112,7 @@ export type Database = {
 					email: string;
 					full_name: string;
 					id: string;
+					preferred_language?: string | null;
 					role?: Database['public']['Enums']['user_role'];
 					updated_at?: string | null;
 				};
@@ -120,6 +122,7 @@ export type Database = {
 					email?: string;
 					full_name?: string;
 					id?: string;
+					preferred_language?: string | null;
 					role?: Database['public']['Enums']['user_role'];
 					updated_at?: string | null;
 				};
@@ -471,6 +474,36 @@ export type Database = {
 					}
 				];
 			};
+			wish_languages: {
+				Row: {
+					id: string;
+					code: string;
+					name: string;
+					flag: string;
+					is_active: boolean;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					code: string;
+					name: string;
+					flag: string;
+					is_active?: boolean;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					code?: string;
+					name?: string;
+					flag?: string;
+					is_active?: boolean;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
 		};
 		Views: {
 			similarity_stats: {
@@ -540,7 +573,7 @@ export type Database = {
 		Enums: {
 			age_group: 'all' | 'young' | 'middle' | 'senior';
 			event_type: 'birthday' | 'anniversary' | 'custom';
-			language: 'de' | 'en';
+			language: string;
 			relation: 'friend' | 'family' | 'partner' | 'colleague';
 			user_role: 'Redakteur' | 'Administrator';
 			wish_status: 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert';

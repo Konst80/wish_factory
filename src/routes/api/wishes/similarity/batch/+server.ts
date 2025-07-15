@@ -5,7 +5,7 @@ import type { Wish } from '$lib/types/Wish';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
-		const { wishes: specificWishes, threshold = 0.7 } = await request.json().catch(() => ({}));
+		const { wishes: specificWishes, threshold = 0.7, language } = await request.json().catch(() => ({}));
 
 		const stream = new ReadableStream({
 			start(controller) {
@@ -52,6 +52,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				processWishesBatch(
 					specificWishes,
 					threshold,
+					language,
 					sendProgress,
 					sendResult,
 					sendError,
@@ -73,12 +74,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 };
 
-async function getAllWishes(supabase: any): Promise<Wish[]> {
-	const { data: wishes, error } = await supabase
+async function getAllWishes(supabase: any, language?: string): Promise<Wish[]> {
+	let query = supabase
 		.from('wishes')
 		.select('id, text, type, event_type, status, language, relations, age_groups, created_at')
-		.in('status', ['Freigegeben', 'Entwurf', 'Zur Freigabe'])
-		.order('created_at', { ascending: false });
+		.in('status', ['Freigegeben', 'Entwurf', 'Zur Freigabe']);
+	
+	// Filter by language if specified
+	if (language) {
+		query = query.eq('language', language);
+	}
+	
+	const { data: wishes, error } = await query.order('created_at', { ascending: false });
 
 	if (error) {
 		console.error('Error fetching wishes:', error);
@@ -100,6 +107,7 @@ async function getAllWishes(supabase: any): Promise<Wish[]> {
 async function processWishesBatch(
 	specificWishes: Wish[] | undefined,
 	threshold: number,
+	language: string | undefined,
 	sendProgress: (progress: number) => void,
 	sendResult: (wish: any) => void,
 	sendError: (error: string) => void,
@@ -117,7 +125,7 @@ async function processWishesBatch(
 		const similarityService = createSimilarityService(locals.supabase);
 
 		// Get all wishes or use specific wishes
-		const allWishes = specificWishes || (await getAllWishes(locals.supabase));
+		const allWishes = specificWishes || (await getAllWishes(locals.supabase, language));
 
 		if (!allWishes || allWishes.length === 0) {
 			sendError('No wishes found for analysis');

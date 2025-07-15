@@ -16,7 +16,7 @@
 
 <div class="bg-base-100 border-base-200 mb-6 rounded-lg border p-2 shadow-sm">
 	<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-		{#each tabs as tab}
+		{#each tabs as tab (tab.id)}
 			<button
 				class="btn btn-ghost btn-sm flex items-center gap-2 px-3 py-2 text-sm {activeTab === tab.id
 					? 'bg-primary/10 text-primary'

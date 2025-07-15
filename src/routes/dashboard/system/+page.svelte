@@ -41,7 +41,7 @@
 
 	// Calculate memory usage percentage
 	function getMemoryUsagePercentage() {
-		const { rss, heapTotal, heapUsed } = data.systemInfo.runtime.memory;
+		const { rss } = data.systemInfo.runtime.memory;
 		const totalMemory = data.systemInfo.performance.totalMemory;
 		return ((rss / totalMemory) * 100).toFixed(2);
 	}

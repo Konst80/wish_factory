@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import SimilarityCronControl from '$lib/components/admin/SimilarityCronControl.svelte';
 	import type { PageData } from './$types';
 
@@ -24,7 +23,7 @@
 	<div class="mb-8">
 		<div class="breadcrumbs text-sm">
 			<ul>
-				{#each breadcrumbs as breadcrumb}
+				{#each breadcrumbs as breadcrumb (breadcrumb.href)}
 					<li>
 						<a href={breadcrumb.href} class="link link-hover">
 							{breadcrumb.label}

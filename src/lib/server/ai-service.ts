@@ -547,7 +547,7 @@ class OpenRouterAIService {
 		// Übersetze Enums für bessere Prompts
 		const typeMap = { normal: 'Normal', herzlich: 'Herzlich', humorvoll: 'Humorvoll' };
 		const eventMap = { birthday: 'Geburtstag', anniversary: 'Hochzeitstag', custom: 'individuell' };
-		const languageMap = { de: 'Deutsch', en: 'Englisch' };
+		const languageMap: Record<string, string> = { de: 'Deutsch', en: 'Englisch' };
 		const relationMap = {
 			friend: 'Freund/in',
 			family: 'Familie',

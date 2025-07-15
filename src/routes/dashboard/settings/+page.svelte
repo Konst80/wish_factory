@@ -7,6 +7,8 @@
 	import AITab from '$lib/components/settings/AITab.svelte';
 	import SystemTab from '$lib/components/settings/SystemTab.svelte';
 	import PasswordModal from '$lib/components/settings/PasswordModal.svelte';
+	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
+	import { onMount } from 'svelte';
 
 	let { data, form }: { data: PageData; form: import('./$types.js').ActionData } = $props();
 
@@ -16,6 +18,11 @@
 	let currentMessage = $state('');
 	let showPasswordModal = $state(false);
 	let isSubmitting = $state(false);
+
+	// Load active wish languages on mount
+	onMount(() => {
+		loadActiveWishLanguages();
+	});
 
 	// Show form result messages
 	$effect(() => {
@@ -68,10 +75,13 @@
 		}
 	];
 
-	const languages = [
-		{ value: 'de', label: 'Deutsch' },
-		{ value: 'en', label: 'English' }
-	];
+	// Dynamic languages from activeWishLanguages (reactive)
+	const languages = $derived(
+		$activeWishLanguages.map((lang) => ({
+			value: lang.code,
+			label: lang.name
+		}))
+	);
 
 	const timezones = [
 		{ value: 'Europe/Berlin', label: 'Europa/Berlin (GMT+1)' },

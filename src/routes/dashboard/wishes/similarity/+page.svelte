@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Card from '$lib/components/ui/Card.svelte';
+	import { getLocale } from '$lib/paraglide/runtime';
+	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
 
 	interface WishSimilarityResult {
 		id: string;
@@ -23,38 +24,61 @@
 		maxSimilarity: number;
 	}
 
-	let wishes: WishSimilarityResult[] = [];
-	let loading = false;
-	let error = '';
-	let analysisProgress = 0;
-	let duplicateCount = 0;
-	let similarCount = 0;
-	let uniqueCount = 0;
-	let selectedTab = 'duplicates';
-	let expandedWishes = new Set<string>();
-	let selectedWishes = new Set<string>();
-	let showDeleteModal = false;
-	let showAutoCleanModal = false;
-	let showSimilarWishDeleteModal = false;
-	let similarWishToDelete: string | null = null;
-	let autoCleanThreshold = 90;
-	let isDeleting = false;
-	let selectedLanguage = 'all';
+	let wishes = $state<WishSimilarityResult[]>([]);
+	let loading = $state(false);
+	let error = $state('');
+	let analysisProgress = $state(0);
+	let selectedTab = $state('duplicates');
+	let expandedWishes = $state(new Set<string>());
+	let selectedWishes = $state(new Set<string>());
+	let showDeleteModal = $state(false);
+	let showAutoCleanModal = $state(false);
+	let showSimilarWishDeleteModal = $state(false);
+	let similarWishToDelete = $state<string | null>(null);
+	let autoCleanThreshold = $state(90);
+	let isDeleting = $state(false);
 
-	$: filteredWishes = wishes.filter((wish) => {
-		let matchesTab = false;
-		if (selectedTab === 'duplicates') matchesTab = wish.duplicateStatus === 'duplicate';
-		else if (selectedTab === 'similar') matchesTab = wish.duplicateStatus === 'similar';
-		else if (selectedTab === 'unique') matchesTab = wish.duplicateStatus === 'unique';
-		else matchesTab = true;
+	// Create a reactive store for the current locale
+	let currentLocale = $state(getLocale());
 
-		let matchesLanguage = selectedLanguage === 'all' || wish.language === selectedLanguage;
+	// Periodically check for locale changes
+	let localeCheckInterval: NodeJS.Timeout;
 
-		return matchesTab && matchesLanguage;
-	});
+	// Filter by language only (for statistics)
+	const wishesForCurrentLanguage = $derived(
+		wishes.filter((wish) => wish.language === currentLocale)
+	);
+
+	const filteredWishes = $derived(
+		wishesForCurrentLanguage.filter((wish) => {
+			let matchesTab = false;
+			if (selectedTab === 'duplicates') matchesTab = wish.duplicateStatus === 'duplicate';
+			else if (selectedTab === 'similar') matchesTab = wish.duplicateStatus === 'similar';
+			else if (selectedTab === 'unique') matchesTab = wish.duplicateStatus === 'unique';
+			else matchesTab = true;
+
+			return matchesTab;
+		})
+	);
 
 	onMount(() => {
+		loadActiveWishLanguages();
 		analyzeAllWishes();
+
+		// Check for locale changes every 100ms
+		localeCheckInterval = setInterval(() => {
+			const newLocale = getLocale();
+			if (newLocale !== currentLocale) {
+				currentLocale = newLocale;
+			}
+		}, 100);
+
+		// Cleanup interval on component destroy
+		return () => {
+			if (localeCheckInterval) {
+				clearInterval(localeCheckInterval);
+			}
+		};
 	});
 
 	async function analyzeAllWishes() {
@@ -68,7 +92,10 @@
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
-				}
+				},
+				body: JSON.stringify({
+					language: currentLocale
+				})
 			});
 
 			if (!response.ok) {
@@ -103,9 +130,8 @@
 										data.wish.ageGroups
 									);
 									wishes = [...wishes, data.wish];
-									updateCounts();
 								}
-							} catch (e) {
+							} catch {
 								// Ignore malformed JSON lines
 							}
 						}
@@ -119,27 +145,22 @@
 		}
 	}
 
-	function updateCounts() {
-		duplicateCount = wishes.filter((w) => w.duplicateStatus === 'duplicate').length;
-		similarCount = wishes.filter((w) => w.duplicateStatus === 'similar').length;
-		uniqueCount = wishes.filter((w) => w.duplicateStatus === 'unique').length;
-	}
+	// Make counts reactive based on wishes for current language (not filtered by tab)
+	const duplicateCount = $derived(
+		wishesForCurrentLanguage.filter((w) => w.duplicateStatus === 'duplicate').length
+	);
+	const similarCount = $derived(
+		wishesForCurrentLanguage.filter((w) => w.duplicateStatus === 'similar').length
+	);
+	const uniqueCount = $derived(wishesForCurrentLanguage.filter((w) => w.duplicateStatus === 'unique').length);
+	
+	// Total count for current language
+	const totalCount = $derived(wishesForCurrentLanguage.length);
 
 	function getSimilarityColor(similarity: number): string {
 		if (similarity >= 0.9) return 'text-red-600';
 		if (similarity >= 0.7) return 'text-yellow-600';
 		return 'text-green-600';
-	}
-
-	function getBadgeClass(status: string): string {
-		switch (status) {
-			case 'duplicate':
-				return 'badge-error';
-			case 'similar':
-				return 'badge-warning';
-			default:
-				return 'badge-success';
-		}
 	}
 
 	function formatRelations(relations: string[]): string {
@@ -181,11 +202,7 @@
 	}
 
 	function formatLanguage(language: string): string {
-		const languageMap: Record<string, string> = {
-			de: 'Deutsch',
-			en: 'English'
-		};
-		return languageMap[language] || language;
+		return $activeWishLanguages.find((lang) => lang.code === language)?.name || language;
 	}
 
 	async function exportResults() {
@@ -232,7 +249,7 @@
 		} else {
 			expandedWishes.add(wishId);
 		}
-		expandedWishes = expandedWishes;
+		expandedWishes = new Set(expandedWishes);
 	}
 
 	function toggleWishSelection(wishId: string) {
@@ -241,17 +258,17 @@
 		} else {
 			selectedWishes.add(wishId);
 		}
-		selectedWishes = selectedWishes;
+		selectedWishes = new Set(selectedWishes);
 	}
 
 	function selectAllVisible() {
 		filteredWishes.forEach((wish) => selectedWishes.add(wish.id));
-		selectedWishes = selectedWishes;
+		selectedWishes = new Set(selectedWishes);
 	}
 
 	function clearSelection() {
 		selectedWishes.clear();
-		selectedWishes = selectedWishes;
+		selectedWishes = new Set(selectedWishes);
 	}
 
 	async function deleteSelectedWishes() {
@@ -270,8 +287,7 @@
 				// Remove deleted wishes from local state
 				wishes = wishes.filter((w) => !selectedWishes.has(w.id));
 				selectedWishes.clear();
-				selectedWishes = selectedWishes;
-				updateCounts();
+				selectedWishes = new Set(selectedWishes);
 				showDeleteModal = false;
 			} else {
 				const errorData = await response.json();
@@ -325,7 +341,6 @@
 			if (response.ok) {
 				// Remove deleted wishes from local state
 				wishes = wishes.filter((w) => !wishesToDelete.has(w.id));
-				updateCounts();
 				showAutoCleanModal = false;
 			} else {
 				const errorData = await response.json();
@@ -380,8 +395,6 @@
 					}))
 					.filter((wish) => wish.id !== similarWishToDelete); // Also remove the wish itself if it's in the main list
 
-				// Update counts
-				updateCounts();
 				showSimilarWishDeleteModal = false;
 				similarWishToDelete = null;
 			} else {
@@ -410,18 +423,7 @@
 			</p>
 		</div>
 		<div class="flex items-center gap-2">
-			<!-- Language Filter -->
-			<div class="form-control">
-				<label class="label">
-					<span class="label-text text-sm">Sprache:</span>
-				</label>
-				<select class="select select-bordered select-sm" bind:value={selectedLanguage}>
-					<option value="all">Alle Sprachen</option>
-					<option value="de">🇩🇪 Deutsch</option>
-					<option value="en">🇬🇧 English</option>
-				</select>
-			</div>
-			<button class="btn btn-outline btn-sm" on:click={analyzeAllWishes} disabled={loading}>
+			<button class="btn btn-outline btn-sm" onclick={analyzeAllWishes} disabled={loading}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="mr-2 h-4 w-4"
@@ -440,7 +442,7 @@
 			</button>
 			<button
 				class="btn btn-error btn-sm"
-				on:click={() => (showAutoCleanModal = true)}
+				onclick={() => (showAutoCleanModal = true)}
 				disabled={loading || wishes.length === 0}
 			>
 				<svg
@@ -461,7 +463,7 @@
 			</button>
 			<button
 				class="btn btn-outline btn-sm"
-				on:click={exportResults}
+				onclick={exportResults}
 				disabled={loading || wishes.length === 0}
 			>
 				<svg
@@ -525,83 +527,54 @@
 		<div class="stats stats-vertical lg:stats-horizontal w-full shadow">
 			<div class="stat">
 				<div class="stat-title">Gesamt</div>
-				<div class="stat-value text-primary">{filteredWishes.length}</div>
+				<div class="stat-value text-primary">{totalCount}</div>
 				<div class="stat-desc">
-					{#if selectedLanguage === 'all'}
-						Alle Wünsche
-					{:else}
-						{selectedLanguage === 'de' ? 'Deutsche' : 'Englische'} Wünsche
-					{/if}
+					{formatLanguage(currentLocale)} Wünsche
 				</div>
 			</div>
 			<div class="stat">
 				<div class="stat-title">Duplikate</div>
 				<div class="stat-value text-error">
-					{filteredWishes.filter((w) => w.duplicateStatus === 'duplicate').length}
+					{duplicateCount}
 				</div>
 				<div class="stat-desc">Sehr ähnlich (≥90%)</div>
 			</div>
 			<div class="stat">
 				<div class="stat-title">Ähnlich</div>
 				<div class="stat-value text-warning">
-					{filteredWishes.filter((w) => w.duplicateStatus === 'similar').length}
+					{similarCount}
 				</div>
 				<div class="stat-desc">Mäßig ähnlich (≥70%)</div>
 			</div>
 			<div class="stat">
 				<div class="stat-title">Einzigartig</div>
 				<div class="stat-value text-success">
-					{filteredWishes.filter((w) => w.duplicateStatus === 'unique').length}
+					{uniqueCount}
 				</div>
 				<div class="stat-desc">Unter 70% Ähnlichkeit</div>
 			</div>
 		</div>
 
-		<!-- Language-specific evaluation notice -->
-		<div class="alert alert-info">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-6 w-6 shrink-0 stroke-current"
-				fill="none"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
-			<span>
-				<strong>Sprachspezifische Bewertung:</strong> Ähnlichkeitsanalyse wird nur zwischen Wünschen
-				derselben Sprache durchgeführt.
-				{#if selectedLanguage === 'all'}
-					Alle Sprachen werden angezeigt, aber verglichen werden nur Wünsche derselben Sprache.
-				{:else}
-					Aktuell werden nur {selectedLanguage === 'de' ? 'deutsche' : 'englische'} Wünsche angezeigt.
-				{/if}
-			</span>
-		</div>
 
 		<!-- Tabs -->
 		<div class="tabs tabs-boxed">
 			<button
 				class="tab {selectedTab === 'duplicates' ? 'tab-active' : ''}"
-				on:click={() => (selectedTab = 'duplicates')}
+				onclick={() => (selectedTab = 'duplicates')}
 			>
-				Duplikate ({filteredWishes.filter((w) => w.duplicateStatus === 'duplicate').length})
+				Duplikate ({duplicateCount})
 			</button>
 			<button
 				class="tab {selectedTab === 'similar' ? 'tab-active' : ''}"
-				on:click={() => (selectedTab = 'similar')}
+				onclick={() => (selectedTab = 'similar')}
 			>
-				Ähnlich ({filteredWishes.filter((w) => w.duplicateStatus === 'similar').length})
+				Ähnlich ({similarCount})
 			</button>
 			<button
 				class="tab {selectedTab === 'unique' ? 'tab-active' : ''}"
-				on:click={() => (selectedTab = 'unique')}
+				onclick={() => (selectedTab = 'unique')}
 			>
-				Einzigartig ({filteredWishes.filter((w) => w.duplicateStatus === 'unique').length})
+				Einzigartig ({uniqueCount})
 			</button>
 		</div>
 
@@ -626,7 +599,7 @@
 					<div class="text-xs">Sie können die ausgewählten Wünsche löschen.</div>
 				</div>
 				<div class="flex gap-2">
-					<button class="btn btn-error btn-sm" on:click={() => (showDeleteModal = true)}>
+					<button class="btn btn-error btn-sm" onclick={() => (showDeleteModal = true)}>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							class="mr-1 h-4 w-4"
@@ -643,7 +616,7 @@
 						</svg>
 						Löschen
 					</button>
-					<button class="btn btn-ghost btn-sm" on:click={clearSelection}>Auswahl aufheben</button>
+					<button class="btn btn-ghost btn-sm" onclick={clearSelection}>Auswahl aufheben</button>
 				</div>
 			</div>
 		{/if}
@@ -651,11 +624,11 @@
 		<!-- Selection Controls -->
 		<div class="mb-4 flex items-center justify-between">
 			<div class="flex gap-2">
-				<button class="btn btn-outline btn-xs" on:click={selectAllVisible}>
+				<button class="btn btn-outline btn-xs" onclick={selectAllVisible}>
 					Alle sichtbaren auswählen
 				</button>
 				{#if selectedWishes.size > 0}
-					<button class="btn btn-ghost btn-xs" on:click={clearSelection}>
+					<button class="btn btn-ghost btn-xs" onclick={clearSelection}>
 						Auswahl aufheben ({selectedWishes.size})
 					</button>
 				{/if}
@@ -743,7 +716,7 @@
 						<div class="mt-6">
 							<button
 								class="btn btn-primary btn-outline"
-								on:click={() => (selectedTab = 'duplicates')}
+								onclick={() => (selectedTab = 'duplicates')}
 							>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -765,7 +738,7 @@
 					</div>
 				</div>
 			{:else}
-				{#each filteredWishes as wish}
+				{#each filteredWishes as wish (wish.id)}
 					<div class="card bg-base-100 shadow-xl">
 						<div class="card-body">
 							<div class="flex items-start gap-3">
@@ -775,7 +748,7 @@
 										type="checkbox"
 										class="checkbox checkbox-primary"
 										checked={selectedWishes.has(wish.id)}
-										on:change={() => toggleWishSelection(wish.id)}
+										onchange={() => toggleWishSelection(wish.id)}
 									/>
 								</label>
 
@@ -862,7 +835,7 @@
 													</div>
 													<button
 														class="btn btn-ghost btn-xs"
-														on:click={() => toggleWishExpansion(wish.id)}
+														onclick={() => toggleWishExpansion(wish.id)}
 														aria-label={expandedWishes.has(wish.id)
 															? 'Wunsch zuklappen'
 															: 'Wunsch erweitern'}
@@ -942,7 +915,7 @@
 													</div>
 													<div class="flex flex-wrap gap-1 pl-6">
 														{#if wish.relations && wish.relations.length > 0}
-															{#each wish.relations as relation}
+															{#each wish.relations as relation (relation)}
 																<span class="badge badge-primary badge-outline badge-xs"
 																	>{formatRelations([relation])}</span
 																>
@@ -957,7 +930,7 @@
 															<span class="text-base-content/30 text-xs">|</span>
 														{/if}
 														{#if wish.ageGroups && wish.ageGroups.length > 0}
-															{#each wish.ageGroups as ageGroup}
+															{#each wish.ageGroups as ageGroup (ageGroup)}
 																<span class="badge badge-secondary badge-outline badge-xs"
 																	>{formatAgeGroups([ageGroup])}</span
 																>
@@ -1020,10 +993,10 @@
 												</a>
 												<button
 													class="btn btn-error btn-sm"
-													on:click={() => {
+													onclick={() => {
 														selectedWishes.clear();
 														selectedWishes.add(wish.id);
-														selectedWishes = selectedWishes;
+														selectedWishes = new Set(selectedWishes);
 														showDeleteModal = true;
 													}}
 												>
@@ -1047,13 +1020,13 @@
 										</div>
 									{/if}
 
-									{#if wish.similarWishes.length > 0 && expandedWishes.has(wish.id)}
+									{#if wish.similarWishes && wish.similarWishes.length > 0 && expandedWishes.has(wish.id)}
 										<div class="mt-4">
 											<h4 class="mb-3 font-medium">
 												Ähnliche Wünsche ({wish.similarWishes.length})
 											</h4>
 											<div class="space-y-2">
-												{#each wish.similarWishes as similar}
+												{#each wish.similarWishes as similar (similar.id)}
 													<div
 														class="bg-base-200 group hover:bg-base-300 flex items-center justify-between rounded-lg p-3 transition-colors"
 													>
@@ -1071,7 +1044,7 @@
 															</span>
 															<button
 																class="btn btn-ghost btn-xs text-error hover:bg-error hover:text-error-content opacity-0 transition-opacity group-hover:opacity-100"
-																on:click={() => showSimilarWishDeleteConfirmation(similar.id)}
+																onclick={() => showSimilarWishDeleteConfirmation(similar.id)}
 																title="Ähnlichen Wunsch löschen"
 																aria-label="Ähnlichen Wunsch löschen"
 															>
@@ -1134,12 +1107,12 @@
 			<div class="modal-action">
 				<button
 					class="btn btn-ghost"
-					on:click={() => (showDeleteModal = false)}
+					onclick={() => (showDeleteModal = false)}
 					disabled={isDeleting}
 				>
 					Abbrechen
 				</button>
-				<button class="btn btn-error" on:click={deleteSelectedWishes} disabled={isDeleting}>
+				<button class="btn btn-error" onclick={deleteSelectedWishes} disabled={isDeleting}>
 					{#if isDeleting}
 						<span class="loading loading-spinner loading-sm"></span>
 						Lösche...
@@ -1163,11 +1136,12 @@
 			</p>
 
 			<div class="form-control mb-4">
-				<label class="label">
+				<label class="label" for="auto-clean-threshold">
 					<span class="label-text">Ähnlichkeits-Schwellenwert:</span>
 					<span class="label-text-alt">{autoCleanThreshold}%</span>
 				</label>
 				<input
+					id="auto-clean-threshold"
 					type="range"
 					class="range range-primary"
 					min="70"
@@ -1228,14 +1202,14 @@
 			<div class="modal-action">
 				<button
 					class="btn btn-ghost"
-					on:click={() => (showAutoCleanModal = false)}
+					onclick={() => (showAutoCleanModal = false)}
 					disabled={isDeleting}
 				>
 					Abbrechen
 				</button>
 				<button
 					class="btn btn-error"
-					on:click={autoCleanSimilarWishes}
+					onclick={autoCleanSimilarWishes}
 					disabled={isDeleting || getAutoCleanCount() === 0}
 				>
 					{#if isDeleting}
@@ -1275,12 +1249,12 @@
 			<div class="modal-action">
 				<button
 					class="btn btn-ghost"
-					on:click={() => (showSimilarWishDeleteModal = false)}
+					onclick={() => (showSimilarWishDeleteModal = false)}
 					disabled={isDeleting}
 				>
 					Abbrechen
 				</button>
-				<button class="btn btn-error" on:click={confirmDeleteSimilarWish} disabled={isDeleting}>
+				<button class="btn btn-error" onclick={confirmDeleteSimilarWish} disabled={isDeleting}>
 					{#if isDeleting}
 						<span class="loading loading-spinner loading-sm"></span>
 						Lösche...

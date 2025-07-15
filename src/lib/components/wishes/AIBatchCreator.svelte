@@ -1,18 +1,12 @@
 <script lang="ts">
-	import {
-		WishType,
-		EventType,
-		Language,
-		Relation,
-		AgeGroup,
-		WishStatus,
-		type WishFormState
-	} from '$lib/types/Wish';
+	import { WishStatus, type WishFormState } from '$lib/types/Wish';
 	import {
 		generateBatchWishes,
 		type GeneratedWish,
 		type BatchSettings
 	} from '$lib/utils/ai-generation';
+	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
+	import { onMount } from 'svelte';
 
 	type Props = {
 		isOpen: boolean;
@@ -158,10 +152,15 @@
 		senior: 'Senior (55+)'
 	};
 
-	const languageLabels = {
-		de: 'Deutsch',
-		en: 'English'
-	};
+	// Dynamic language labels from activeWishLanguages
+	const languageLabels = $derived(
+		Object.fromEntries($activeWishLanguages.map((lang) => [lang.code, lang.name]))
+	);
+
+	// Load active wish languages on mount
+	onMount(() => {
+		loadActiveWishLanguages();
+	});
 </script>
 
 <!-- AI Batch Creator Modal -->

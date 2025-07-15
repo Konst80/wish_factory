@@ -349,7 +349,7 @@ export const actions: Actions = {
 						createdAt: new Date(),
 						updatedAt: new Date(),
 						createdBy: wish.created_by,
-						length: wish.length as any
+						length: wish.length
 					}));
 
 					// Background-Ausführung für Batch-Verarbeitung

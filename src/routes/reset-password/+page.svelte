@@ -88,10 +88,11 @@
 			{:else}
 				<form onsubmit={handleResetPassword} class="space-y-4">
 					<div class="form-control">
-						<label class="label">
+						<label class="label" for="new-password">
 							<span class="label-text">Neues Passwort</span>
 						</label>
 						<input
+							id="new-password"
 							type="password"
 							placeholder="Mindestens 8 Zeichen"
 							class="input input-bordered"
@@ -102,10 +103,11 @@
 					</div>
 
 					<div class="form-control">
-						<label class="label">
+						<label class="label" for="confirm-password">
 							<span class="label-text">Passwort bestätigen</span>
 						</label>
 						<input
+							id="confirm-password"
 							type="password"
 							placeholder="Passwort wiederholen"
 							class="input input-bordered"

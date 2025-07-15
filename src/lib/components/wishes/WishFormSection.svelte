@@ -1,12 +1,8 @@
 <script lang="ts">
-	import {
-		WishType,
-		EventType,
-		Language,
-		Relation,
-		AgeGroup,
-		type WishFormState
-	} from '$lib/types/Wish';
+	import { WishType, EventType, Relation, AgeGroup, type WishFormState } from '$lib/types/Wish';
+	import WishLanguageSelector from './WishLanguageSelector.svelte';
+	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
+	import { onMount } from 'svelte';
 
 	type Props = {
 		formData: WishFormState;
@@ -16,6 +12,10 @@
 	};
 
 	let { formData, errors, onRelationChange, onAgeGroupChange }: Props = $props();
+
+	function handleLanguageChange(language: string) {
+		formData.language = language;
+	}
 
 	// German translations for display
 	const typeLabels = {
@@ -44,10 +44,15 @@
 		senior: 'Senior (55+)'
 	};
 
-	const languageLabels = {
-		de: 'Deutsch',
-		en: 'English'
-	};
+	// Dynamic language labels from activeWishLanguages
+	const languageLabels = $derived(
+		Object.fromEntries($activeWishLanguages.map((lang) => [lang.code, lang.name]))
+	);
+
+	// Load active wish languages on mount
+	onMount(() => {
+		loadActiveWishLanguages();
+	});
 </script>
 
 <!-- Basic Information Section -->
@@ -155,46 +160,12 @@
 		</div>
 
 		<!-- Sprache -->
-		<div class="form-control">
-			<label class="label" for="language">
-				<span class="label-text flex items-center gap-2 text-base font-medium">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-4 w-4"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
-						/>
-					</svg>
-					Sprache *
-				</span>
-			</label>
-			<select
-				id="language"
-				name="language"
-				class="select-bordered select select-lg w-full"
-				class:select-error={errors.language}
-				bind:value={formData.language}
-				required
-			>
-				{#each Object.values(Language) as language (language)}
-					<option value={language}>{languageLabels[language]}</option>
-				{/each}
-			</select>
-			{#if errors.language}
-				<div class="label">
-					<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
-						>{errors.language}</span
-					>
-				</div>
-			{/if}
-		</div>
+		<WishLanguageSelector
+			selectedLanguage={formData.language}
+			onLanguageChange={handleLanguageChange}
+			name="language"
+			error={errors.language}
+		/>
 
 		<!-- Spezifische Werte -->
 		<div class="form-control">

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Language Selector Test</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link
+			href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
+			rel="stylesheet"
+			type="text/css"
+		/>
+	</head>
+	<body class="bg-base-100">
+		<div class="p-8">
+			<h1 class="mb-4 text-2xl font-bold">Language Selector Test</h1>
+			<p class="mb-4">Click on the language selector to test if it opens and allows selection:</p>
+
+			<div class="dropdown dropdown-end">
+				<div
+					tabindex="0"
+					role="button"
+					class="btn btn-ghost btn-sm gap-2"
+					onclick="toggleDropdown()"
+				>
+					<span class="text-sm">🇩🇪</span>
+					<span class="hidden text-sm sm:inline">Deutsch</span>
+					<svg
+						class="h-4 w-4 transition-transform duration-200"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				</div>
+
+				<ul
+					id="dropdown-menu"
+					class="dropdown-content menu bg-base-100 rounded-box border-base-300 z-[1] w-52 border p-2 shadow"
+					style="display: none"
+				>
+					<li class="menu-title">
+						<span class="text-xs font-semibold">Sprache für Wünsche & Analyse</span>
+					</li>
+					<div class="divider my-1"></div>
+					<li>
+						<button class="flex items-center gap-3 text-sm" onclick="selectLanguage('de')">
+							<span class="text-lg">🇩🇪</span>
+							<span class="flex-1 text-left">Deutsch</span>
+						</button>
+					</li>
+					<li>
+						<button class="flex items-center gap-3 text-sm" onclick="selectLanguage('en')">
+							<span class="text-lg">🇺🇸</span>
+							<span class="flex-1 text-left">English</span>
+						</button>
+					</li>
+					<div class="divider my-1"></div>
+					<li>
+						<div class="text-base-content/60 px-3 py-2 text-xs">
+							Diese Einstellung bestimmt die Sprache für alle Wünsche und Ähnlichkeitsanalysen
+						</div>
+					</li>
+				</ul>
+			</div>
+
+			<div class="bg-base-200 rounded-box mt-8 p-4">
+				<h2 class="mb-2 text-lg font-semibold">Test Results:</h2>
+				<div id="test-results">
+					<p>• Click test: <span id="click-test">Not tested</span></p>
+					<p>• Selection test: <span id="selection-test">Not tested</span></p>
+					<p>• Outside click test: <span id="outside-test">Not tested</span></p>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			let isOpen = false;
+			const dropdownMenu = document.getElementById('dropdown-menu');
+			const clickTest = document.getElementById('click-test');
+			const selectionTest = document.getElementById('selection-test');
+			const outsideTest = document.getElementById('outside-test');
+
+			function toggleDropdown() {
+				isOpen = !isOpen;
+				dropdownMenu.style.display = isOpen ? 'block' : 'none';
+				clickTest.textContent = isOpen ? '✅ Passed' : '❌ Failed';
+
+				if (isOpen) {
+					// Set up outside click test
+					setTimeout(() => {
+						document.addEventListener('click', handleOutsideClick);
+						outsideTest.textContent = '⏳ Click outside to test';
+					}, 100);
+				}
+			}
+
+			function selectLanguage(lang) {
+				selectionTest.textContent = `✅ Selected: ${lang}`;
+				isOpen = false;
+				dropdownMenu.style.display = 'none';
+				document.removeEventListener('click', handleOutsideClick);
+			}
+
+			function handleOutsideClick(event) {
+				if (!event.target.closest('.dropdown')) {
+					isOpen = false;
+					dropdownMenu.style.display = 'none';
+					outsideTest.textContent = '✅ Outside click works';
+					document.removeEventListener('click', handleOutsideClick);
+				}
+			}
+		</script>
+	</body>
+</html>

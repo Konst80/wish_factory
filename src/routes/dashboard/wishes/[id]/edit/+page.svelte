@@ -28,7 +28,6 @@
 	let isSubmitting = $state(false);
 	let showPreview = $state(false);
 	let isGenerating = $state(false);
-	let generationError = $state('');
 	let showDeleteModal = $state(false);
 	let showWorkflowHelp = $state(false);
 
@@ -507,8 +506,8 @@
 						</h3>
 
 						<!-- Beziehungen -->
-						<div class="form-control mb-6">
-							<label class="label">
+						<fieldset class="form-control mb-6">
+							<legend class="label">
 								<span class="label-text flex items-center gap-2 text-base font-medium">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -529,7 +528,7 @@
 								<span class="label-text-alt badge badge-neutral badge-sm"
 									>Mehrere Auswahl möglich</span
 								>
-							</label>
+							</legend>
 							<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
 								{#each Object.values(Relation) as relation (relation)}
 									<label
@@ -551,11 +550,11 @@
 									</label>
 								{/each}
 							</div>
-						</div>
+						</fieldset>
 
 						<!-- Altersgruppen -->
-						<div class="form-control mb-6">
-							<label class="label">
+						<fieldset class="form-control mb-6">
+							<legend class="label">
 								<span class="label-text flex items-center gap-2 text-base font-medium">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -576,7 +575,7 @@
 								<span class="label-text-alt badge badge-neutral badge-sm"
 									>Mehrere Auswahl möglich</span
 								>
-							</label>
+							</legend>
 							<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
 								{#each Object.values(AgeGroup).filter((ag) => ag !== 'all') as ageGroup (ageGroup)}
 									{@const isChecked =
@@ -599,7 +598,7 @@
 									</label>
 								{/each}
 							</div>
-						</div>
+						</fieldset>
 					</div>
 
 					<!-- Spezifische Werte -->
@@ -634,11 +633,11 @@
 							bind:value={formData.specificValues}
 						/>
 						{#if formData.specificValues && !validateSpecificValues(formData.specificValues)}
-							<label class="label">
+							<div class="label">
 								<span class="label-text-alt text-error"
 									>Bitte nur positive Zahlen, getrennt durch Kommas</span
 								>
-							</label>
+							</div>
 						{/if}
 					</div>
 

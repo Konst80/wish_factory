@@ -158,62 +158,12 @@
 	{:else}
 		<div class="card bg-base-100 shadow-md">
 			<div class="card-body">
-				<div class="mb-4 flex items-center justify-between">
-					<h3 class="card-title text-lg">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-							/>
-						</svg>
-						Ähnlichkeitsmetriken
-						{#if language === 'de'}
-							<span class="badge badge-sm badge-info">🇩🇪 Deutsch</span>
-						{:else if language === 'en'}
-							<span class="badge badge-sm badge-info">🇬🇧 English</span>
-						{:else}
-							<span class="badge badge-sm badge-warning">Keine Sprache</span>
-						{/if}
-					</h3>
-					<div class="flex items-center gap-2">
-						{#if lastUpdated}
-							<span class="text-base-content/60 text-xs">
-								{lastUpdated.toLocaleTimeString()}
-							</span>
-						{/if}
-						<button class="btn btn-ghost btn-sm" onclick={loadSimilarityStats} disabled={isLoading}>
-							{#if isLoading}
-								<span class="loading loading-spinner loading-xs"></span>
-							{:else}
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									class="h-4 w-4"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-									/>
-								</svg>
-							{/if}
-						</button>
-						<button class="btn btn-outline btn-sm" onclick={() => (showStats = !showStats)}>
-							{showStats ? 'Details ausblenden' : 'Details einblenden'}
+				<div class="mb-4 space-y-3">
+					<div class="flex items-center justify-between">
+						<h3 class="card-title text-lg">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
-								class="h-4 w-4 transition-transform {showStats ? 'rotate-180' : ''}"
+								class="h-6 w-6"
 								fill="none"
 								viewBox="0 0 24 24"
 								stroke="currentColor"
@@ -222,10 +172,72 @@
 									stroke-linecap="round"
 									stroke-linejoin="round"
 									stroke-width="2"
-									d="M19 9l-7 7-7-7"
+									d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
 								/>
 							</svg>
-						</button>
+							Ähnlichkeitsmetriken
+						</h3>
+						<div class="flex items-center gap-2">
+							{#if language === 'de'}
+								<span class="badge badge-sm badge-info">🇩🇪 Deutsch</span>
+							{:else if language === 'en'}
+								<span class="badge badge-sm badge-info">🇬🇧 English</span>
+							{:else}
+								<span class="badge badge-sm badge-warning">Keine Sprache</span>
+							{/if}
+						</div>
+					</div>
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2">
+							{#if lastUpdated}
+								<span class="text-base-content/60 text-xs">
+									Aktualisiert: {lastUpdated.toLocaleTimeString()}
+								</span>
+							{/if}
+						</div>
+						<div class="flex items-center gap-2">
+							<button
+								class="btn btn-ghost btn-sm"
+								onclick={loadSimilarityStats}
+								disabled={isLoading}
+							>
+								{#if isLoading}
+									<span class="loading loading-spinner loading-xs"></span>
+								{:else}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+										/>
+									</svg>
+								{/if}
+							</button>
+							<button class="btn btn-outline btn-sm" onclick={() => (showStats = !showStats)}>
+								{showStats ? 'Details ausblenden' : 'Details einblenden'}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4 transition-transform {showStats ? 'rotate-180' : ''}"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M19 9l-7 7-7-7"
+									/>
+								</svg>
+							</button>
+						</div>
 					</div>
 				</div>
 
@@ -448,6 +460,6 @@
 
 <style>
 	.similarity-metrics-overview {
-		@apply w-full;
+		width: 100%;
 	}
 </style>

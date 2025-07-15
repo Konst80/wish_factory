@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { aiService } from '$lib/server/ai-service';
-import { WishType, EventType, Language, Relation, AgeGroup, WishLength } from '$lib/types/Wish';
+import { WishType, EventType, Relation, AgeGroup, WishLength } from '$lib/types/Wish';
 import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -103,10 +103,28 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
+		// Validate languages against dynamic wish languages from database
+		const { data: validLanguages, error: languageError } = await locals.supabase
+			.from('wish_languages')
+			.select('code')
+			.eq('is_active', true);
+
+		if (languageError) {
+			console.error('❌ Fehler beim Laden der Wunsch-Sprachen:', languageError);
+			throw error(500, 'Fehler beim Laden der Wunsch-Sprachen');
+		}
+
+		const validLanguageCodes = validLanguages?.map((lang) => lang.code) || [];
+
 		for (const l of finalLanguages) {
-			if (!Object.values(Language).includes(l)) {
-				console.log(`❌ Ungültige Sprache: ${l}`);
-				throw error(400, `Ungültige Sprache: ${l}`);
+			if (!validLanguageCodes.includes(l)) {
+				console.log(
+					`❌ Ungültige Sprache: ${l}. Verfügbare Sprachen: ${validLanguageCodes.join(', ')}`
+				);
+				throw error(
+					400,
+					`Ungültige Sprache: ${l}. Verfügbare Sprachen: ${validLanguageCodes.join(', ')}`
+				);
 			}
 		}
 

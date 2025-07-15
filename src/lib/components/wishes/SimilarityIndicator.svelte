@@ -163,6 +163,6 @@
 
 <style>
 	.similarity-indicator {
-		@apply w-full;
+		width: 100%;
 	}
 </style>

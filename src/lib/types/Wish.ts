@@ -20,6 +20,7 @@ export const WishStatus = {
 	ARCHIVIERT: 'Archiviert'
 } as const;
 
+// Language type updated to support dynamic languages
 export const Language = {
 	DE: 'de',
 	EN: 'en'
@@ -49,7 +50,8 @@ export const WishLength = {
 export type WishType = (typeof WishType)[keyof typeof WishType];
 export type EventType = (typeof EventType)[keyof typeof EventType];
 export type WishStatus = (typeof WishStatus)[keyof typeof WishStatus];
-export type Language = (typeof Language)[keyof typeof Language];
+// Language type now accepts any string to support dynamic languages
+export type Language = string;
 export type Relation = (typeof Relation)[keyof typeof Relation];
 export type AgeGroup = (typeof AgeGroup)[keyof typeof AgeGroup];
 export type WishLength = (typeof WishLength)[keyof typeof WishLength];
@@ -153,7 +155,8 @@ export function isValidWishStatus(value: string): value is WishStatus {
 }
 
 export function isValidLanguage(value: string): value is Language {
-	return Object.values(Language).includes(value as Language);
+	// With dynamic languages, any string is potentially valid
+	return typeof value === 'string' && value.length > 0;
 }
 
 // Released Wish Interface für öffentliche API
@@ -224,7 +227,7 @@ export interface WishFormState {
 	specificValues: string | number;
 	text: string;
 	belated: boolean;
-	language: Language;
+	language: string; // Changed from Language to string to support dynamic languages
 	status: WishStatus;
 	length: WishLength;
 }

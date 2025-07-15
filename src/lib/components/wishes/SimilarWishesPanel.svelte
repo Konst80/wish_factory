@@ -272,6 +272,6 @@
 
 <style>
 	.similar-wishes-panel {
-		@apply w-full;
+		width: 100%;
 	}
 </style>

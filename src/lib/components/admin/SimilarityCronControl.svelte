@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { browser } from '$app/environment';
 
@@ -337,7 +336,7 @@
 							No logs yet. Run the cron job to see output.
 						</div>
 					{:else}
-						{#each logs as log}
+						{#each logs as log (log.id || log.timestamp)}
 							<div class="py-1 font-mono text-sm">{log}</div>
 						{/each}
 					{/if}

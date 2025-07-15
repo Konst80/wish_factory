@@ -586,10 +586,11 @@
 		<div class="modal-box">
 			<h3 class="mb-4 text-lg font-bold">Auto-Clean konfigurieren</h3>
 			<div class="mb-4">
-				<label class="label">
+				<label class="label" for="threshold-slider">
 					<span class="label-text">Ähnlichkeitsschwelle (%):</span>
 				</label>
 				<input
+					id="threshold-slider"
 					type="range"
 					min="50"
 					max="100"

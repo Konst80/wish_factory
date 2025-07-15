@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { Database } from '$lib/types/supabase';
+	import LanguageSelector from '$lib/components/ui/LanguageSelector.svelte';
 
 	type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -103,7 +104,7 @@
 	};
 </script>
 
-<aside class="bg-base-100 text-base-content border-base-300 min-h-full w-64 border-r">
+<aside class="bg-base-100 text-base-content border-base-300 flex min-h-full w-64 flex-col border-r">
 	<!-- Sidebar header -->
 	<div class="border-base-300 border-b p-4">
 		<div class="flex items-center gap-3">
@@ -128,7 +129,7 @@
 	</div>
 
 	<!-- Navigation menu -->
-	<nav class="p-3">
+	<nav class="flex-1 p-3">
 		<ul class="menu menu-compact">
 			{#each visibleMenuItems as item (item.href)}
 				<li>
@@ -232,4 +233,12 @@
 			</li>
 		</ul>
 	</nav>
+
+	<!-- Language Selector in Footer -->
+	<div class="border-base-300 border-t p-4">
+		<div class="mb-2 flex items-center justify-between">
+			<span class="text-base-content/60 text-xs">Sprache für Wünsche:</span>
+		</div>
+		<LanguageSelector />
+	</div>
 </aside>

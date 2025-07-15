@@ -1,10 +1,9 @@
 import type { PageServerLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
 import { loadavg, freemem, totalmem } from 'os';
 
-export const load: PageServerLoad = async ({ locals, parent }) => {
+export const load: PageServerLoad = async ({ parent }) => {
 	// Get user data from parent layout (dashboard layout handles authentication)
-	const { user } = await parent();
+	await parent();
 
 	// If we reach here, user is already authenticated by dashboard layout
 	// Allow all authenticated users to access system information

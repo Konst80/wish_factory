@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { currentUserProfile } from '$lib/stores/auth';
+	import LanguageSelector from '$lib/components/ui/LanguageSelector.svelte';
 
 	let { onMenuToggle }: { onMenuToggle?: () => void } = $props();
 
@@ -32,24 +33,30 @@
 	</div>
 
 	<div class="flex-none">
-		<div class="dropdown dropdown-end">
-			<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm avatar">
-				<div class="placeholder avatar">
-					<div class="bg-primary text-primary-content w-8 rounded-full">
-						<span class="text-xs">{$currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
+		<div class="flex items-center gap-2">
+			<!-- Language Selector -->
+			<LanguageSelector />
+
+			<!-- User Profile Dropdown -->
+			<div class="dropdown dropdown-end">
+				<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm avatar">
+					<div class="placeholder avatar">
+						<div class="bg-primary text-primary-content w-8 rounded-full">
+							<span class="text-xs">{$currentUserProfile?.full_name?.charAt(0) || 'U'}</span>
+						</div>
 					</div>
 				</div>
+				<ul
+					class="menu dropdown-content rounded-box bg-base-100 border-base-300 z-[1] mt-3 w-48 border p-2 shadow-lg"
+				>
+					<li class="menu-title">
+						<span class="text-xs">{$currentUserProfile?.full_name || 'User'}</span>
+					</li>
+					<li><a href="/dashboard/settings" class="text-sm">Einstellungen</a></li>
+					<div class="divider my-1"></div>
+					<li><a href="/auth/logout" class="text-error text-sm">Abmelden</a></li>
+				</ul>
 			</div>
-			<ul
-				class="menu dropdown-content rounded-box bg-base-100 border-base-300 z-[1] mt-3 w-48 border p-2 shadow-lg"
-			>
-				<li class="menu-title">
-					<span class="text-xs">{$currentUserProfile?.full_name || 'User'}</span>
-				</li>
-				<li><a href="/dashboard/settings" class="text-sm">Einstellungen</a></li>
-				<div class="divider my-1"></div>
-				<li><a href="/auth/logout" class="text-error text-sm">Abmelden</a></li>
-			</ul>
 		</div>
 	</div>
 </div>

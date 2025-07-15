@@ -5,6 +5,8 @@
 	import type { PageData } from './$types';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
 	import SimilarityMetricsOverview from '$lib/components/wishes/SimilarityMetricsOverview.svelte';
+	import { currentLanguage } from '$lib/stores/language';
+	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
 
 	let { data }: { data: PageData } = $props();
 
@@ -32,9 +34,24 @@
 	let showWorkflowHelp = $state(false);
 	let selectedWishForRelease = $state<string | null>(null);
 
-	// Load saved filters on page mount
+	// Initialize language store and load saved filters on page mount
 	$effect(() => {
+		currentLanguage.initialize();
+		loadActiveWishLanguages();
 		loadFiltersFromSession();
+	});
+
+	// Sync language filter with global language selector
+	$effect(() => {
+		// When the global language changes, update the language filter
+		const globalLang = $currentLanguage;
+		if (globalLang && globalLang !== selectedLanguage) {
+			selectedLanguage = globalLang;
+			// Auto-apply the language filter only if it has changed
+			if (selectedLanguage !== data.filters.language) {
+				applyFilters();
+			}
+		}
 	});
 
 	// Status badge styles
@@ -101,7 +118,8 @@
 
 	function clearFilters() {
 		searchTerm = '';
-		selectedLanguage = '';
+		// Reset to global language instead of empty
+		selectedLanguage = $currentLanguage || '';
 		selectedStatus = '';
 		selectedEventType = '';
 		selectedRelations = [];
@@ -152,7 +170,8 @@
 
 					if (!hasUrlFilters) {
 						searchTerm = filters.searchTerm || '';
-						selectedLanguage = filters.selectedLanguage || '';
+						// Prefer global language over saved filter language
+						selectedLanguage = filters.selectedLanguage || $currentLanguage || '';
 						selectedStatus = filters.selectedStatus || '';
 						selectedEventType = filters.selectedEventType || '';
 						selectedRelations = filters.selectedRelations || [];
@@ -513,7 +532,7 @@
 <!-- Similarity Metrics Overview -->
 <div class="mb-6">
 	<SimilarityMetricsOverview
-		language={(selectedLanguage as 'de' | 'en') || 'de'}
+		language={$currentLanguage as 'de' | 'en'}
 		showCacheStats={true}
 		autoRefresh={false}
 	/>
@@ -646,10 +665,17 @@
 								id="language"
 								class="select select-bordered bg-base-50 hover:bg-base-100 focus:border-secondary focus:bg-base-100 focus:shadow-secondary/10 w-full transition-all duration-200 focus:shadow-lg"
 								bind:value={selectedLanguage}
+								onchange={(e) => {
+									const target = e.target as HTMLSelectElement;
+									if (target.value && target.value !== '') {
+										currentLanguage.setLanguage(target.value);
+									}
+								}}
 							>
 								<option value="">Alle Sprachen</option>
-								<option value="de">🇩🇪 Deutsch</option>
-								<option value="en">🇺🇸 English</option>
+								{#each $activeWishLanguages as lang}
+									<option value={lang.code}>{lang.flag} {lang.name}</option>
+								{/each}
 							</select>
 						</div>
 
@@ -724,7 +750,7 @@
 					<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 						<!-- Relations -->
 						<div class="space-y-3">
-							<label class="label pb-1">
+							<div class="label pb-1">
 								<span
 									class="label-text text-base-content/80 flex items-center gap-2 text-sm font-medium"
 								>
@@ -735,7 +761,7 @@
 									</span>
 									Beziehungen
 								</span>
-							</label>
+							</div>
 							<div class="space-y-2">
 								{#each Object.values(Relation) as relation (relation)}
 									<label
@@ -761,7 +787,7 @@
 
 						<!-- Age Groups -->
 						<div class="space-y-3">
-							<label class="label pb-1">
+							<div class="label pb-1">
 								<span
 									class="label-text text-base-content/80 flex items-center gap-2 text-sm font-medium"
 								>
@@ -772,7 +798,7 @@
 									</span>
 									Altersgruppen
 								</span>
-							</label>
+							</div>
 							<div class="space-y-2">
 								{#each Object.values(AgeGroup) as ageGroup (ageGroup)}
 									<label

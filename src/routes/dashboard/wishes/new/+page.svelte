@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { WishType, EventType, WishStatus, Language, WishLength } from '$lib/types/Wish';
+	import { WishType, EventType, WishStatus, WishLength } from '$lib/types/Wish';
 	import type { WishFormState } from '$lib/types/Wish.js';
 	import { generateSingleWish } from '$lib/utils/ai-generation';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
@@ -39,7 +39,7 @@
 		specificValues: form?.values?.specificValues || '',
 		text: form?.values?.text || 'Alles Gute zum Geburtstag, liebe/r [Name]!', // Default text to satisfy min length validation
 		belated: form?.values?.belated || false,
-		language: (form?.values?.language as Language) || Language.DE,
+		language: form?.values?.language || 'de', // Changed to use dynamic language code
 		status: (form?.values?.status as WishStatus) || WishStatus.ENTWURF,
 		length: (form?.values?.length as WishLength) || WishLength.MEDIUM
 	});
@@ -852,7 +852,7 @@
 		<!-- Similarity Metrics Overview -->
 		<div class="mb-6">
 			<SimilarityMetricsOverview
-				language={formData.language}
+				language={formData.language as 'de' | 'en'}
 				showCacheStats={true}
 				autoRefresh={false}
 			/>
