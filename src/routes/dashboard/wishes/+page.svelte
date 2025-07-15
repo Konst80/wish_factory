@@ -21,6 +21,9 @@
 	// Sorting State
 	let currentSortBy = $state(data.sorting?.sortBy || 'created_at');
 	let currentSortOrder = $state(data.sorting?.sortOrder || 'desc');
+	
+	// Store similarity data for sorting
+	let similarityDataStore = $state<Map<string, { similarity: number; isDuplicate: boolean; similarWishCount: number }>>(new Map());
 
 	// UI State
 	let showFilters = $state(false);
@@ -80,8 +83,6 @@
 
 	// Sorting function
 	function sortBy(column: string) {
-		const params = new URLSearchParams(window.location.search);
-
 		// Toggle sort order if clicking the same column
 		if (currentSortBy === column) {
 			currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
@@ -90,11 +91,52 @@
 			currentSortOrder = 'desc'; // Default to descending for new columns
 		}
 
-		// Update URL parameters
+		// For similarity sorting, we handle it client-side
+		if (column === 'similarity') {
+			// No need to update URL or reload page for similarity sorting
+			return;
+		}
+
+		// For other columns, use server-side sorting
+		const params = new URLSearchParams(window.location.search);
 		params.set('sortBy', currentSortBy);
 		params.set('sortOrder', currentSortOrder);
-
 		goto(`?${params.toString()}`, { replaceState: true });
+	}
+
+	// Client-side sorting function for wishes
+	function getSortedWishes() {
+		let sortedWishes = [...data.wishes];
+
+		if (currentSortBy === 'similarity') {
+			sortedWishes.sort((a, b) => {
+				const aData = similarityDataStore.get(a.id);
+				const bData = similarityDataStore.get(b.id);
+				
+				// Primary sort: by similarity score
+				const aSimilarity = aData?.similarity || 0;
+				const bSimilarity = bData?.similarity || 0;
+				
+				// Secondary sort: duplicates first
+				const aIsDuplicate = aData?.isDuplicate || false;
+				const bIsDuplicate = bData?.isDuplicate || false;
+				
+				// If both are duplicates or both are not, sort by similarity
+				if (aIsDuplicate === bIsDuplicate) {
+					return currentSortOrder === 'asc' ? aSimilarity - bSimilarity : bSimilarity - aSimilarity;
+				}
+				
+				// Duplicates first when desc, non-duplicates first when asc
+				return currentSortOrder === 'asc' ? (aIsDuplicate ? 1 : -1) : (aIsDuplicate ? -1 : 1);
+			});
+		}
+
+		return sortedWishes;
+	}
+
+	// Function to update similarity data store
+	function updateSimilarityData(wishId: string, similarity: number, isDuplicate: boolean, similarWishCount: number) {
+		similarityDataStore.set(wishId, { similarity, isDuplicate, similarWishCount });
 	}
 
 	function clearFilters() {
@@ -1097,12 +1139,51 @@
 							{/if}
 						</div>
 					</th>
-					<th class="px-3 py-4 text-left text-sm font-semibold">Von</th>
+					<th
+						class="hover:bg-base-200 cursor-pointer px-3 py-4 text-left text-sm font-semibold transition-colors select-none"
+						onclick={() => sortBy('similarity')}
+						title="Nach Ähnlichkeit sortieren"
+					>
+						<div class="flex items-center gap-2">
+							<span>Ähnlichkeit</span>
+							{#if currentSortBy === 'similarity'}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4 {currentSortOrder === 'asc' ? 'rotate-180' : ''}"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M19 9l-7 7-7-7"
+									/>
+								</svg>
+							{:else}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4 opacity-30"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+									/>
+								</svg>
+							{/if}
+						</div>
+					</th>
 					<th class="w-20 px-3 py-4 text-center text-sm font-semibold">Aktionen</th>
 				</tr>
 			</thead>
 			<tbody>
-				{#each data.wishes as wish (wish.id)}
+				{#each getSortedWishes() as wish (wish.id)}
 					<tr class="hover:bg-base-50 border-base-200/50 border-b transition-colors">
 						<td class="px-3 py-3">
 							<label>
@@ -1134,10 +1215,6 @@
 								<div class="text-base-content text-sm leading-relaxed font-medium">
 									{truncateText(wish.text, 120)}
 								</div>
-								<!-- Similarity Warning -->
-								<div class="mt-2">
-									<WishSimilarityWarning {wish} showDetails={false} maxSimilarWishes={2} />
-								</div>
 							</div>
 						</td>
 						<td class="px-3 py-3">
@@ -1157,8 +1234,13 @@
 							</div>
 						</td>
 						<td class="px-3 py-3">
-							<div class="text-base-content/70 text-xs font-medium">
-								{wish.createdBy || 'Unbekannt'}
+							<div class="flex items-center gap-2">
+								<WishSimilarityWarning 
+									{wish} 
+									showDetails={false} 
+									maxSimilarWishes={2} 
+									onSimilarityData={(data) => updateSimilarityData(wish.id, data.similarity, data.isDuplicate, data.similarWishes.length)}
+								/>
 							</div>
 						</td>
 						<td class="px-3 py-3">

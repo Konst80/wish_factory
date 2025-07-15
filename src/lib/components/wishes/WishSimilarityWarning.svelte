@@ -8,9 +8,10 @@
 		wish: Wish | any; // Allow flexibility for table view
 		showDetails?: boolean;
 		maxSimilarWishes?: number;
+		onSimilarityData?: (data: SimilarityData) => void;
 	}
 
-	let { wish, showDetails = false, maxSimilarWishes = 3 }: Props = $props();
+	let { wish, showDetails = false, maxSimilarWishes = 3, onSimilarityData }: Props = $props();
 
 	interface SimilarityData {
 		similarWishes: SimilarityMatch[];
@@ -55,6 +56,11 @@
 					algorithm: data.similarWishes?.[0]?.algorithm || '',
 					processingTime: data.processingTime || 0
 				};
+				
+				// Call the callback if provided
+				if (onSimilarityData) {
+					onSimilarityData(similarityData);
+				}
 			} else {
 				throw new Error(data.error || 'Unbekannter Fehler');
 			}
