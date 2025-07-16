@@ -1,4 +1,4 @@
-import * as stringSimilarity from 'string-similarity';
+import stringSimilarity from 'string-similarity-js';
 import natural from 'natural';
 
 export interface SimilarityResult {
@@ -62,7 +62,7 @@ export class SimilarityEngine {
 			const normalized1 = this.normalizeText(text1);
 			const normalized2 = this.normalizeText(text2);
 
-			const similarity = stringSimilarity.compareTwoStrings(normalized1, normalized2);
+			const similarity = stringSimilarity(normalized1, normalized2);
 
 			return {
 				similarity,
