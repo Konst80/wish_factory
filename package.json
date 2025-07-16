@@ -3,10 +3,15 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
+	"engines": {
+		"node": ">=18.0.0",
+		"npm": ">=8.0.0"
+	},
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "paraglide-js compile && vite build",
 		"preview": "vite preview",
+		"start": "node build/index.js",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
@@ -19,7 +24,11 @@
 		"supabase:prod": "./scripts/supabase-setup.sh login-prod",
 		"supabase:migrate": "./scripts/supabase-setup.sh migrate",
 		"supabase:setup-prod": "./scripts/setup-production-env.sh",
-		"supabase:list": "./scripts/supabase-setup.sh list"
+		"supabase:list": "./scripts/supabase-setup.sh list",
+		"railway:env": "./scripts/railway-env-setup.sh",
+		"railway:deploy": "./scripts/railway-deploy.sh",
+		"railway:logs": "railway logs",
+		"railway:open": "railway open"
 	},
 	"lint-staged": {
 		"*.{js,ts,svelte}": [
@@ -65,6 +74,7 @@
 		"@supabase/ssr": "^0.6.1",
 		"@supabase/supabase-js": "^2.50.3",
 		"@sveltejs/adapter-cloudflare": "^7.0.5",
+		"@sveltejs/adapter-node": "^5.2.13",
 		"@tailwindcss/vite": "^4.1.11",
 		"@types/bcrypt": "^5.0.2",
 		"bcrypt": "^6.0.0",
