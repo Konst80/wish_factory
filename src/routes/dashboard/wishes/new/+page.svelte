@@ -9,7 +9,6 @@
 	import WishFormSection from '$lib/components/wishes/WishFormSection.svelte';
 	import WishContentEditor from '$lib/components/wishes/WishContentEditor.svelte';
 	import AIBatchCreator from '$lib/components/wishes/AIBatchCreator.svelte';
-	import SimilarityMetricsOverview from '$lib/components/wishes/SimilarityMetricsOverview.svelte';
 
 	type ActionData = {
 		message?: string;
@@ -848,15 +847,6 @@
 				</div>
 			</div>
 		{/if}
-
-		<!-- Similarity Metrics Overview -->
-		<div class="mb-6">
-			<SimilarityMetricsOverview
-				language={formData.language as 'de' | 'en'}
-				showCacheStats={true}
-				autoRefresh={false}
-			/>
-		</div>
 
 		<WishHelpCard />
 	</div>

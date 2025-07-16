@@ -4,7 +4,6 @@
 	import { WishStatus, EventType, Relation, AgeGroup } from '$lib/types/Wish';
 	import type { PageData } from './$types';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
-	import SimilarityMetricsOverview from '$lib/components/wishes/SimilarityMetricsOverview.svelte';
 	import { currentLanguage } from '$lib/stores/language';
 	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
 
@@ -527,15 +526,6 @@
 		<div class="stat-value text-success">{data.stats.freigegeben}</div>
 		<div class="stat-desc">Bereit zur Nutzung</div>
 	</div>
-</div>
-
-<!-- Similarity Metrics Overview -->
-<div class="mb-6">
-	<SimilarityMetricsOverview
-		language={$currentLanguage as 'de' | 'en'}
-		showCacheStats={true}
-		autoRefresh={false}
-	/>
 </div>
 
 <!-- Enhanced Filter Panel -->

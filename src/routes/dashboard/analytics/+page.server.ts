@@ -1,7 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals, url }) => {
+export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 	const { session } = await locals.safeGetSession();
 
 	if (!session) {
@@ -24,6 +24,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		// Get time range from URL parameters
 		const timeRange = url.searchParams.get('timeRange') || 'last-30-days';
 
+		// Get language from global language cookie (managed by Paraglide)
+		const selectedLanguage = cookies.get('PARAGLIDE_LOCALE') || 'de';
+
 		// Calculate date range
 		const now = new Date();
 		let startDate: Date;
@@ -45,16 +48,37 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 		}
 
+		// Build query with language filter
+		const buildWishQuery = (query: any) => {
+			// Always filter by the selected language (no "all" option since we use global language)
+			return query.eq('language', selectedLanguage);
+		};
+
+		// Type for wish data
+		type WishData = {
+			status: string;
+			event_type: string;
+			language: string;
+			created_at: string;
+			created_by: string;
+			type: string;
+			relations: string[];
+			age_groups: string[];
+			belated: boolean | string;
+		};
+
 		// Get overview statistics
 		const [wishesResult, usersResult, publishedResult] = await Promise.all([
-			// Total wishes
-			locals.supabase.from('wishes').select('id', { count: 'exact' }),
+			// Total wishes (filtered by language)
+			buildWishQuery(locals.supabase.from('wishes').select('id', { count: 'exact' })),
 
 			// Total users
 			locals.supabase.from('profiles').select('id', { count: 'exact' }),
 
-			// Published wishes
-			locals.supabase.from('wishes').select('id', { count: 'exact' }).eq('status', 'Freigegeben')
+			// Published wishes (filtered by language)
+			buildWishQuery(
+				locals.supabase.from('wishes').select('id', { count: 'exact' }).eq('status', 'Freigegeben')
+			)
 		]);
 
 		const overview = {
@@ -64,20 +88,24 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			averageRating: 4.7 // Placeholder until we have ratings
 		};
 
-		// Get wishes by status for distribution
-		const { data: allWishes } = await locals.supabase
-			.from('wishes')
-			.select(
-				'status, event_type, language, created_at, created_by, type, relations, age_groups, belated'
-			);
+		// Get wishes by status for distribution (filtered by language)
+		const { data: allWishes } = await buildWishQuery(
+			locals.supabase
+				.from('wishes')
+				.select(
+					'status, event_type, language, created_at, created_by, type, relations, age_groups, belated'
+				)
+		);
 
 		if (!allWishes) {
 			throw new Error('Fehler beim Laden der Wunsch-Daten');
 		}
 
+		const typedWishes = allWishes as WishData[];
+
 		// Calculate status distribution
-		const statusCounts = allWishes.reduce(
-			(acc, wish) => {
+		const statusCounts = typedWishes.reduce(
+			(acc: Record<string, number>, wish: WishData) => {
 				acc[wish.status] = (acc[wish.status] || 0) + 1;
 				return acc;
 			},
@@ -87,12 +115,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const statusDistribution = Object.entries(statusCounts).map(([status, count]) => ({
 			status,
 			count,
-			percentage: Math.round((count / allWishes.length) * 100 * 10) / 10
+			percentage: Math.round((count / typedWishes.length) * 100 * 10) / 10
 		}));
 
 		// Calculate category distribution
-		const categoryCounts = allWishes.reduce(
-			(acc, wish) => {
+		const categoryCounts = typedWishes.reduce(
+			(acc: Record<string, number>, wish: WishData) => {
 				const eventType =
 					wish.event_type === 'birthday'
 						? 'Geburtstag'
@@ -108,12 +136,16 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const categoryDistribution = Object.entries(categoryCounts).map(([category, count]) => ({
 			category,
 			count,
-			percentage: Math.round((count / allWishes.length) * 100 * 10) / 10
+			percentage: Math.round((count / typedWishes.length) * 100 * 10) / 10
 		}));
 
-		// Calculate language distribution
-		const languageCounts = allWishes.reduce(
-			(acc, wish) => {
+		// Calculate language distribution (unfiltered - show all languages)
+		const { data: allWishesForLanguage } = await locals.supabase.from('wishes').select('language');
+
+		const allWishesForLanguageTyped = (allWishesForLanguage || []) as { language: string }[];
+
+		const languageCounts = allWishesForLanguageTyped.reduce(
+			(acc: Record<string, number>, wish: { language: string }) => {
 				const language = wish.language === 'de' ? 'Deutsch' : 'English';
 				acc[language] = (acc[language] || 0) + 1;
 				return acc;
@@ -124,12 +156,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const languageDistribution = Object.entries(languageCounts).map(([language, count]) => ({
 			language,
 			count,
-			percentage: Math.round((count / allWishes.length) * 100 * 10) / 10
+			percentage: Math.round((count / allWishesForLanguageTyped.length) * 100 * 10) / 10
 		}));
 
 		// Calculate type/style distribution
-		const typeCounts = allWishes.reduce(
-			(acc, wish) => {
+		const typeCounts = typedWishes.reduce(
+			(acc: Record<string, number>, wish: WishData) => {
 				const type =
 					wish.type === 'normal'
 						? 'Normal'
@@ -147,14 +179,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const typeDistribution = Object.entries(typeCounts).map(([type, count]) => ({
 			type,
 			count,
-			percentage: Math.round((count / allWishes.length) * 100 * 10) / 10
+			percentage: Math.round((count / typedWishes.length) * 100 * 10) / 10
 		}));
 
 		// Calculate relations distribution (flatten arrays)
-		const relationsCounts = allWishes.reduce(
-			(acc, wish) => {
+		const relationsCounts = typedWishes.reduce(
+			(acc: Record<string, number>, wish: WishData) => {
 				if (wish.relations && Array.isArray(wish.relations)) {
-					wish.relations.forEach((relation) => {
+					wish.relations.forEach((relation: string) => {
 						const relationLabel =
 							relation === 'friend'
 								? 'Freund/in'
@@ -177,15 +209,18 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			relation,
 			count,
 			percentage:
-				Math.round((count / Object.values(relationsCounts).reduce((a, b) => a + b, 0)) * 100 * 10) /
-				10
+				Math.round(
+					(count / Object.values(relationsCounts).reduce((a: number, b: number) => a + b, 0)) *
+						100 *
+						10
+				) / 10
 		}));
 
 		// Calculate age groups distribution (flatten arrays)
-		const ageGroupsCounts = allWishes.reduce(
-			(acc, wish) => {
+		const ageGroupsCounts = typedWishes.reduce(
+			(acc: Record<string, number>, wish: WishData) => {
 				if (wish.age_groups && Array.isArray(wish.age_groups)) {
-					wish.age_groups.forEach((ageGroup) => {
+					wish.age_groups.forEach((ageGroup: string) => {
 						const ageGroupLabel =
 							ageGroup === 'young'
 								? 'Junge Menschen'
@@ -208,13 +243,16 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			ageGroup,
 			count,
 			percentage:
-				Math.round((count / Object.values(ageGroupsCounts).reduce((a, b) => a + b, 0)) * 100 * 10) /
-				10
+				Math.round(
+					(count / Object.values(ageGroupsCounts).reduce((a: number, b: number) => a + b, 0)) *
+						100 *
+						10
+				) / 10
 		}));
 
 		// Calculate belated distribution
-		const belatedCounts = allWishes.reduce(
-			(acc, wish) => {
+		const belatedCounts = typedWishes.reduce(
+			(acc: Record<string, number>, wish: WishData) => {
 				const belatedLabel = (
 					typeof wish.belated === 'boolean' ? wish.belated : wish.belated === 'true'
 				)
@@ -229,7 +267,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const belatedDistribution = Object.entries(belatedCounts).map(([belated, count]) => ({
 			belated,
 			count,
-			percentage: Math.round((count / allWishes.length) * 100 * 10) / 10
+			percentage: Math.round((count / typedWishes.length) * 100 * 10) / 10
 		}));
 
 		// Get wishes over time (daily for 7/30 days, monthly for longer periods)
@@ -243,7 +281,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
 				const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i + 1);
 
-				const dayWishes = allWishes.filter((wish) => {
+				const dayWishes = typedWishes.filter((wish: WishData) => {
 					if (!wish.created_at) return false;
 					const wishDate = new Date(wish.created_at);
 					return wishDate >= dayStart && wishDate < dayEnd;
@@ -280,7 +318,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
 				const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
 
-				const monthWishes = allWishes.filter((wish) => {
+				const monthWishes = typedWishes.filter((wish: WishData) => {
 					if (!wish.created_at) return false;
 					const wishDate = new Date(wish.created_at);
 					return wishDate >= monthStart && wishDate <= monthEnd;
@@ -294,8 +332,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}
 
 		// Get user activity (top 5 creators)
-		const userWishCounts = allWishes.reduce(
-			(acc, wish) => {
+		const userWishCounts = typedWishes.reduce(
+			(acc: Record<string, number>, wish: WishData) => {
 				acc[wish.created_by] = (acc[wish.created_by] || 0) + 1;
 				return acc;
 			},
@@ -303,7 +341,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		);
 
 		const topUserIds = Object.entries(userWishCounts)
-			.sort(([, a], [, b]) => b - a)
+			.sort(([, a], [, b]) => (b as number) - (a as number))
 			.slice(0, 5)
 			.map(([userId]) => userId);
 
@@ -316,8 +354,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const userActivity = topUserIds.map((userId) => {
 			const user = topUsers?.find((u) => u.id === userId);
 			const totalWishes = userWishCounts[userId];
-			const publishedWishes = allWishes.filter(
-				(w) => w.created_by === userId && w.status === 'Freigegeben'
+			const publishedWishes = typedWishes.filter(
+				(w: WishData) => w.created_by === userId && w.status === 'Freigegeben'
 			).length;
 
 			return {
@@ -339,7 +377,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			wishesOverTime,
 			userActivity,
 			timeRange,
-			totalWishes: allWishes.length
+			totalWishes: typedWishes.length
 		};
 	} catch (err) {
 		console.error('Error loading analytics:', err);
