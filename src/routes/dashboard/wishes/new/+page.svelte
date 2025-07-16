@@ -306,8 +306,8 @@
 	function handleBeforeUnload(event: BeforeUnloadEvent) {
 		if (hasUnsavedChanges) {
 			event.preventDefault();
-			return (event.returnValue =
-				'Sie haben ungespeicherte Wünsche im Pool. Möchten Sie wirklich die Seite verlassen?');
+			// Modern browsers ignore the custom message and show their own
+			event.returnValue = '';
 		}
 	}
 </script>

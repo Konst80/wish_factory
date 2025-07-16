@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { browser } from '$app/environment';
 	import '../app.css';
 	import type { LayoutData } from './$types';
 
-	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
+	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	// Apply user's saved theme on mount and handle theme changes
 	onMount(() => {
