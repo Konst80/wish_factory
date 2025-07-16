@@ -28,7 +28,7 @@
 		};
 	} | null;
 
-	let { form }: { form: ActionData } = $props();
+	const { form }: { form: ActionData } = $props();
 
 	// Form state
 	let formData: WishFormState = $state({

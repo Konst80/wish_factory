@@ -1,13 +1,11 @@
 <script lang="ts">
+	import type { SettingsData } from '$lib/types/Settings.js';
+
 	interface Props {
-		data: {
-			settings: Record<string, unknown>;
-			[key: string]: unknown;
-		};
-		onMessage: (message: string, isError?: boolean) => void;
+		data: SettingsData;
 	}
 
-	let { data, onMessage }: Props = $props();
+	const { data }: Props = $props();
 
 	let isCollapsed = $state(true);
 	let activeTab = $state('de');
@@ -80,7 +78,7 @@
 								class="textarea-bordered textarea w-full"
 								rows="20"
 								placeholder="18, 25, 30, 40, 50, 60, 65, 70, 75, 80, 85, 90, 95, 100"
-								value={(data.settings as any).specificValues?.birthdayDe || ''}
+								value={data.settings.specificValues?.birthdayDe || ''}
 							></textarea>
 						</div>
 
@@ -94,7 +92,7 @@
 								class="textarea-bordered textarea w-full"
 								rows="20"
 								placeholder="1, 5, 10, 15, 20, 25, 30, 40, 50, 60"
-								value={(data.settings as any).specificValues?.anniversaryDe || ''}
+								value={data.settings.specificValues?.anniversaryDe || ''}
 							></textarea>
 						</div>
 					</div>
@@ -112,7 +110,7 @@
 								class="textarea-bordered textarea w-full"
 								rows="20"
 								placeholder="18, 25, 30, 40, 50, 60, 65, 70, 75, 80, 85, 90, 95, 100"
-								value={(data.settings as any).specificValues?.birthdayEn || ''}
+								value={data.settings.specificValues?.birthdayEn || ''}
 							></textarea>
 						</div>
 
@@ -126,7 +124,7 @@
 								class="textarea-bordered textarea w-full"
 								rows="20"
 								placeholder="1, 5, 10, 15, 20, 25, 30, 40, 50, 60"
-								value={(data.settings as any).specificValues?.anniversaryEn || ''}
+								value={data.settings.specificValues?.anniversaryEn || ''}
 							></textarea>
 						</div>
 					</div>

@@ -12,7 +12,7 @@
 		wishId?: string;
 	};
 
-	let { formData, errors, isGenerating, onGenerateWithAI, wishId }: Props = $props();
+	const { formData, errors, isGenerating, onGenerateWithAI, wishId }: Props = $props();
 
 	const lengthLabels = {
 		short: 'Kurz',

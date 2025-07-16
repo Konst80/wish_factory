@@ -2,7 +2,7 @@
 	import SimilarityCronControl from '$lib/components/admin/SimilarityCronControl.svelte';
 	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 
 	const breadcrumbs = [
 		{ label: 'Dashboard', href: '/dashboard' },

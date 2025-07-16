@@ -74,14 +74,20 @@ export class SimilarityService {
 			);
 
 		// Language filter is now required for language-specific evaluation
-		query = query.eq('language', filters.language as any);
+		query = query.eq('language', filters.language);
 
 		// Anwenden von anderen Filtern
 		if (filters.type) {
-			query = query.eq('type', filters.type as any);
+			query = query.eq(
+				'type',
+				filters.type as Database['public']['Tables']['wishes']['Row']['type']
+			);
 		}
 		if (filters.eventType) {
-			query = query.eq('event_type', filters.eventType as any);
+			query = query.eq(
+				'event_type',
+				filters.eventType as Database['public']['Tables']['wishes']['Row']['event_type']
+			);
 		}
 		if (filters.excludeId) {
 			query = query.neq('id', filters.excludeId);
@@ -116,7 +122,7 @@ export class SimilarityService {
 	/**
 	 * Generiert einen Cache-Key für die Ähnlichkeitssuche
 	 */
-	private generateCacheKey(text: string, filters: Record<string, any>): string {
+	private generateCacheKey(text: string, filters: Record<string, unknown>): string {
 		const filterString = JSON.stringify(filters);
 		const textHash = text.toLowerCase().replace(/\s+/g, '').slice(0, 50);
 		return `similarity:${textHash}:${btoa(filterString)}`;
@@ -264,7 +270,7 @@ export class SimilarityService {
 			createdAt: data.created_at ? new Date(data.created_at) : new Date(),
 			updatedAt: data.updated_at ? new Date(data.updated_at) : new Date(),
 			createdBy: data.created_by,
-			length: data.length as any // Type assertion for compatibility
+			length: data.length as 'short' | 'medium' | 'long' // Type assertion for compatibility
 		};
 	}
 
@@ -642,7 +648,7 @@ export class SimilarityService {
 		await this.precomputationService.invalidateSimilarityCache(wishId);
 
 		// Auch lokalen Cache invalidieren
-		for (const [key, _] of this.cache) {
+		for (const [key] of this.cache) {
 			if (key.includes(wishId)) {
 				this.cache.delete(key);
 			}

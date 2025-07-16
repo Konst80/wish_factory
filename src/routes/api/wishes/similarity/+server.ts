@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Service erstellen
-		const similarityService = createSimilarityService(locals.supabase as any, {
+		const similarityService = createSimilarityService(locals.supabase, {
 			maxResults: body.maxResults || 5,
 			includeArchived: true,
 			duplicateThreshold: 0.9,
@@ -56,7 +56,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				);
 			}
 
-			const { texts, language, type, eventType, maxResults } = validation.data;
+			const { texts, language, type, eventType } = validation.data;
 
 			const results = await similarityService.batchCheckSimilarity(texts, {
 				language,
@@ -83,7 +83,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				);
 			}
 
-			const { text, language, type, eventType, excludeId, maxResults } = validation.data;
+			const { text, language, type, eventType, excludeId } = validation.data;
 
 			const result = await similarityService.checkSimilarity(text, {
 				language,
@@ -123,8 +123,6 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		const action = url.searchParams.get('action');
 
 		console.log('Similarity API GET request:', { wishId, language, type, eventType, action });
-
-		const similarityService = createSimilarityService(locals.supabase as any);
 
 		// Verschiedene Aktionen je nach Parameter
 		if (action === 'stats') {
@@ -224,7 +222,7 @@ export const DELETE: RequestHandler = async ({ locals, url }) => {
 			return json({ error: 'Nicht autorisiert' }, { status: 403 });
 		}
 
-		const similarityService = createSimilarityService(locals.supabase as any);
+		const similarityService = createSimilarityService(locals.supabase);
 		const wishId = url.searchParams.get('wishId');
 
 		if (wishId) {

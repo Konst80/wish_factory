@@ -8,7 +8,7 @@
 	import { currentLanguage } from '$lib/stores/language';
 	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 
 	// Filter State
 	let searchTerm = $state(data.filters.search || '');
@@ -673,7 +673,7 @@
 								}}
 							>
 								<option value="">Alle Sprachen</option>
-								{#each $activeWishLanguages as lang}
+								{#each $activeWishLanguages as lang (lang.code)}
 									<option value={lang.code}>{lang.flag} {lang.name}</option>
 								{/each}
 							</select>

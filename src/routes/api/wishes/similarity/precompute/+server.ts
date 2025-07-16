@@ -42,7 +42,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Content-Type muss application/json sein' }, { status: 400 });
 		}
 
-		const similarityService = createSimilarityService(locals.supabase as any);
+		const similarityService = createSimilarityService(locals.supabase);
 
 		// Batch-Vorberechnung oder einzelne Vorberechnung?
 		if (body.wishIds && Array.isArray(body.wishIds)) {
@@ -93,7 +93,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),
 						updatedAt: wish.updated_at ? new Date(wish.updated_at) : new Date(),
 						createdBy: wish.created_by,
-						length: wish.length as any
+						length: wish.length as 'short' | 'medium' | 'long'
 					};
 					await similarityService.precomputeSimilarityForWish(convertedWish);
 
@@ -158,7 +158,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),
 				updatedAt: wish.updated_at ? new Date(wish.updated_at) : new Date(),
 				createdBy: wish.created_by,
-				length: wish.length as any
+				length: wish.length as 'short' | 'medium' | 'long'
 			};
 			await similarityService.precomputeSimilarityForWish(convertedWish);
 
@@ -200,18 +200,18 @@ export const GET: RequestHandler = async ({ locals }) => {
 		// Statistiken über vorberechnete Ähnlichkeiten
 		const { data: totalWishes } = await locals.supabase.from('wishes').select('count').single();
 
-		const { data: cachedSimilarities } = await (locals.supabase as any)
+		const { data: cachedSimilarities } = await locals.supabase
 			.from('wish_similarities')
 			.select('count')
 			.single();
 
-		const { data: recentlyUpdated } = await (locals.supabase as any)
+		const { data: recentlyUpdated } = await locals.supabase
 			.from('wish_similarities')
 			.select('count')
 			.gte('calculated_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
 			.single();
 
-		const { data: staleEntries } = await (locals.supabase as any)
+		const { data: staleEntries } = await locals.supabase
 			.from('wish_similarities')
 			.select('count')
 			.lt('calculated_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
@@ -261,7 +261,7 @@ export const PUT: RequestHandler = async ({ locals }) => {
 			return json({ error: 'Nicht autorisiert' }, { status: 403 });
 		}
 
-		const similarityService = createSimilarityService(locals.supabase as any);
+		const similarityService = createSimilarityService(locals.supabase);
 
 		// Veraltete Ähnlichkeiten aktualisieren
 		await similarityService.refreshStaleComparisons();

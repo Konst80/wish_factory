@@ -6,7 +6,7 @@
 	import { page } from '$app/stores';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 
 	const releasedWishes = $derived(data.releasedWishes as ReleasedWish[]);
 	const metadata = $derived(data.metadata);

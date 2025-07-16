@@ -10,7 +10,7 @@
 	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
 	import { onMount } from 'svelte';
 
-	let { data, form }: { data: PageData; form: import('./$types.js').ActionData } = $props();
+	const { data, form }: { data: PageData; form: import('./$types.js').ActionData } = $props();
 
 	let activeTab = $state('profile');
 	let showSuccessMessage = $state(false);
@@ -226,7 +226,7 @@
 <div class="mx-auto max-w-4xl">
 	{#if activeTab === 'profile'}
 		<ProfileTab
-			data={data as any}
+			{data}
 			{languages}
 			{timezones}
 			{isSubmitting}
@@ -236,14 +236,14 @@
 		/>
 	{:else if activeTab === 'notifications'}
 		<NotificationsTab
-			data={data as any}
+			{data}
 			{isSubmitting}
 			onSubmittingChange={handleSubmittingChange}
 			onMessage={handleMessage}
 		/>
 	{:else if activeTab === 'preferences'}
 		<PreferencesTab
-			data={data as any}
+			{data}
 			{themes}
 			{languages}
 			{isSubmitting}
@@ -252,14 +252,14 @@
 		/>
 	{:else if activeTab === 'ai'}
 		<AITab
-			data={data as any}
+			{data}
 			{isSubmitting}
 			onSubmittingChange={handleSubmittingChange}
 			onMessage={handleMessage}
 		/>
 	{:else if activeTab === 'system'}
 		<SystemTab
-			data={data as any}
+			{data}
 			{isSubmitting}
 			onSubmittingChange={handleSubmittingChange}
 			onMessage={handleMessage}

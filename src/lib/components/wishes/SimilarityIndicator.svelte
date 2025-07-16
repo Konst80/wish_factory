@@ -10,14 +10,16 @@
 		showDetails?: boolean;
 	}
 
-	let {
+	const {
 		similarity,
 		algorithm,
 		isDuplicate,
 		similarWishes,
 		isLoading = false,
-		showDetails = false
+		showDetails: initialShowDetails = false
 	}: Props = $props();
+
+	let showDetails = $state(initialShowDetails);
 
 	function getSimilarityColor(similarity: number): string {
 		if (similarity >= 0.9) return 'error';
@@ -104,11 +106,9 @@
 					<span class="text-sm opacity-70">
 						{formatSimilarity(similarity)}
 					</span>
-					{#if showDetails}
-						<button class="btn btn-ghost btn-xs" onclick={() => (showDetails = !showDetails)}>
-							Details
-						</button>
-					{/if}
+					<button class="btn btn-ghost btn-xs" onclick={() => (showDetails = !showDetails)}>
+						{showDetails ? 'Weniger' : 'Details'}
+					</button>
 				</div>
 			</div>
 

@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import type { SettingsData, EnhanceResult } from '$lib/types/Settings.js';
 
 	interface Props {
-		data: {
-			settings: Record<string, unknown>;
-			[key: string]: unknown;
-		};
+		data: SettingsData;
 		themes: Array<{ value: string; label: string }>;
 		languages: Array<{ value: string; label: string }>;
 		isSubmitting: boolean;
@@ -14,7 +12,7 @@
 		onMessage: (message: string, isError?: boolean) => void;
 	}
 
-	let { data, themes, languages, isSubmitting, onSubmittingChange, onMessage }: Props = $props();
+	const { data, themes, languages, isSubmitting, onSubmittingChange, onMessage }: Props = $props();
 </script>
 
 <div class="card bg-base-100 shadow-xl">
@@ -25,7 +23,7 @@
 			action="?/updatePreferences"
 			use:enhance={() => {
 				onSubmittingChange(true);
-				return async ({ result }) => {
+				return async ({ result }: EnhanceResult) => {
 					if (result.type === 'success') {
 						await invalidateAll();
 						onMessage(
@@ -64,7 +62,7 @@
 						id="theme"
 						name="theme"
 						class="select-bordered select w-full"
-						value={(data.settings as any).preferences?.theme || 'light'}
+						value={data.settings.preferences?.theme || 'light'}
 					>
 						{#each themes as theme (theme.value)}
 							<option value={theme.value}>{theme.label}</option>
@@ -80,7 +78,7 @@
 						id="defaultLanguage"
 						name="defaultLanguage"
 						class="select-bordered select w-full"
-						value={(data.settings as any).preferences?.defaultLanguage || 'de'}
+						value={data.settings.preferences?.defaultLanguage || 'de'}
 					>
 						{#each languages as lang (lang.value)}
 							<option value={lang.value}>{lang.label}</option>
@@ -96,7 +94,7 @@
 						id="wishesPerPage"
 						name="wishesPerPage"
 						class="select-bordered select w-full"
-						value={(data.settings as any).preferences?.wishesPerPage || 10}
+						value={data.settings.preferences?.wishesPerPage || 10}
 					>
 						<option value={10}>10</option>
 						<option value={25}>25</option>
@@ -112,7 +110,7 @@
 							type="checkbox"
 							name="autoSave"
 							class="toggle toggle-primary"
-							checked={(data.settings as any).preferences?.autoSave || false}
+							checked={data.settings.preferences?.autoSave || false}
 						/>
 					</label>
 				</div>
@@ -124,7 +122,7 @@
 							type="checkbox"
 							name="confirmBeforeDelete"
 							class="toggle toggle-secondary"
-							checked={(data.settings as any).preferences?.confirmBeforeDelete || true}
+							checked={data.settings.preferences?.confirmBeforeDelete || true}
 						/>
 					</label>
 				</div>

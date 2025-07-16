@@ -5,7 +5,7 @@
 
 	type Profile = Database['public']['Tables']['profiles']['Row'];
 
-	let { profile }: { profile: Profile | null } = $props();
+	const { profile }: { profile: Profile | null } = $props();
 
 	// Use profile data from database with $derived
 	const currentUserProfile = $derived({

@@ -5,7 +5,7 @@
 		onClearError?: () => void;
 	};
 
-	let { isSubmitting, generationError, onClearError }: Props = $props();
+	const { isSubmitting, generationError, onClearError }: Props = $props();
 </script>
 
 <!-- Action Buttons -->

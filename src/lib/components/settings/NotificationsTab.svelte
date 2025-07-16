@@ -10,7 +10,7 @@
 		onMessage: (message: string, isError?: boolean) => void;
 	}
 
-	let { data, isSubmitting, onSubmittingChange, onMessage }: Props = $props();
+	const { data, isSubmitting, onSubmittingChange, onMessage }: Props = $props();
 </script>
 
 <div class="card bg-base-100 border-base-200 border shadow-xl">

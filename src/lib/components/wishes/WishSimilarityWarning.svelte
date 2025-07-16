@@ -11,7 +11,7 @@
 		onSimilarityData?: (data: SimilarityData) => void;
 	}
 
-	let { wish, showDetails = false, maxSimilarWishes = 3, onSimilarityData }: Props = $props();
+	const { wish, showDetails = false, maxSimilarWishes = 3, onSimilarityData }: Props = $props();
 
 	interface SimilarityData {
 		similarWishes: SimilarityMatch[];
@@ -178,7 +178,7 @@
 			<!-- Detailed Similar Wishes -->
 			<div class="mt-2 space-y-1">
 				<div class="text-base-content/70 text-xs font-medium">Ähnliche Wünsche:</div>
-				{#each similarityData.similarWishes.slice(0, maxSimilarWishes) as { wish: similarWish, similarity, algorithm }}
+				{#each similarityData.similarWishes.slice(0, maxSimilarWishes) as { wish: similarWish, similarity, algorithm } (similarWish.id)}
 					<div class="flex items-center gap-2 text-xs">
 						<div class="badge {getSimilarityColor(similarity)} badge-xs">
 							{formatSimilarity(similarity)}

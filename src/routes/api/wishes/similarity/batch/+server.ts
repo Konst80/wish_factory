@@ -25,11 +25,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					controller.enqueue(encoder.encode(progressData));
 				};
 
-				const sendResult = (wish: Wish) => {
+				const sendResult = (wish: Wish, cached: boolean = false) => {
 					const resultData =
 						JSON.stringify({
 							type: 'result',
-							wish
+							wish,
+							cached
 						}) + '\n';
 					controller.enqueue(encoder.encode(resultData));
 				};
@@ -109,12 +110,132 @@ async function getAllWishes(supabase: SupabaseClient, language?: string): Promis
 	return transformedWishes as Wish[];
 }
 
+async function getCachedSimilarityResults(
+	supabase: SupabaseClient,
+	wishes: Wish[],
+	threshold: number
+): Promise<any[]> {
+	const cachedResults = [];
+
+	// Get cached similarities for all wishes at once
+	const wishIds = wishes.map((w) => w.id);
+	const { data: cachedSimilarities, error } = await supabase
+		.from('wish_similarities')
+		.select(
+			`
+			wish_id_1,
+			wish_id_2,
+			overall_similarity,
+			wishes1:wish_id_1(id, text, type, event_type, language, status, relations, age_groups, created_at),
+			wishes2:wish_id_2(id, text, type, event_type, language, status, relations, age_groups, created_at)
+		`
+		)
+		.or(`wish_id_1.in.(${wishIds.join(',')}),wish_id_2.in.(${wishIds.join(',')})`);
+	// Note: Removed .gte() filter - we want ALL cached similarities, filter later
+
+	if (error) {
+		console.error('Error fetching cached similarities:', error);
+		return [];
+	}
+
+	// Group similarities by wish ID
+	const similaritiesByWish = new Map<string, any[]>();
+
+	for (const similarity of cachedSimilarities || []) {
+		const wish1Id = similarity.wish_id_1;
+		const wish2Id = similarity.wish_id_2;
+
+		// Add to both wishes' similarity lists
+		if (wishIds.includes(wish1Id)) {
+			if (!similaritiesByWish.has(wish1Id)) {
+				similaritiesByWish.set(wish1Id, []);
+			}
+			similaritiesByWish.get(wish1Id)!.push({
+				...similarity,
+				targetWish: similarity.wishes2,
+				isTarget: false
+			});
+		}
+
+		if (wishIds.includes(wish2Id)) {
+			if (!similaritiesByWish.has(wish2Id)) {
+				similaritiesByWish.set(wish2Id, []);
+			}
+			similaritiesByWish.get(wish2Id)!.push({
+				...similarity,
+				targetWish: similarity.wishes1,
+				isTarget: true
+			});
+		}
+	}
+
+	// Build results for wishes that have cached similarities
+	for (const wish of wishes) {
+		const similarities = similaritiesByWish.get(wish.id);
+		if (similarities && similarities.length > 0) {
+			// Sort all similarities by score (highest first)
+			const allSimilarities = similarities.sort(
+				(a, b) => b.overall_similarity - a.overall_similarity
+			);
+
+			// Get the maximum similarity from all cached similarities
+			const maxSimilarity =
+				allSimilarities.length > 0
+					? Math.max(...allSimilarities.map((s) => s.overall_similarity))
+					: 0;
+
+			// Filter for display only those above threshold
+			const filteredSimilar = allSimilarities.filter((s) => s.overall_similarity >= threshold);
+
+			let duplicateStatus: 'duplicate' | 'similar' | 'unique';
+			if (maxSimilarity >= 0.9) {
+				duplicateStatus = 'duplicate';
+			} else if (maxSimilarity >= 0.7) {
+				duplicateStatus = 'similar';
+			} else {
+				duplicateStatus = 'unique';
+			}
+
+			const result = {
+				id: wish.id,
+				text: wish.text,
+				type: wish.type,
+				eventType: wish.eventType,
+				status: wish.status,
+				language: wish.language,
+				relations: wish.relations || [],
+				ageGroups: wish.ageGroups || [],
+				specificValues: wish.specificValues || [],
+				belated: Boolean(wish.belated),
+				length: wish.length || 0,
+				createdAt: wish.createdAt || '',
+				updatedAt: wish.updatedAt || '',
+				createdBy: wish.createdBy || '',
+				similarWishes: filteredSimilar.map((s) => ({
+					id: s.targetWish.id,
+					text: s.targetWish.text,
+					similarity: s.overall_similarity,
+					type: s.targetWish.type || '',
+					eventType: s.targetWish.event_type || ''
+				})),
+				duplicateStatus,
+				maxSimilarity
+			};
+
+			cachedResults.push(result);
+		}
+	}
+
+	console.log(`Found cached results for ${cachedResults.length} out of ${wishes.length} wishes`);
+	return cachedResults;
+}
+
 async function processWishesBatch(
 	specificWishes: Wish[] | undefined,
 	threshold: number,
 	language: string | undefined,
 	sendProgress: (progress: number) => void,
-	sendResult: (wish: Wish) => void,
+	sendResult: (wish: Wish, cached?: boolean) => void,
 	sendError: (error: string) => void,
 	sendComplete: () => void,
 	locals: App.Locals
@@ -140,12 +261,32 @@ async function processWishesBatch(
 		const total = allWishes.length;
 		let processed = 0;
 
-		// Process wishes in batches to avoid overwhelming the system
-		const batchSize = 10;
+		// First, try to get cached results for all wishes
+		const cachedResults = await getCachedSimilarityResults(locals.supabase, allWishes, threshold);
+		const wishesWithCache = new Set(cachedResults.map((r) => r.id));
+
+		// Send cached results immediately
+		for (const result of cachedResults) {
+			sendResult(result, true); // Mark as cached
+			processed++;
+			const progress = Math.round((processed / total) * 100);
+			sendProgress(progress);
+		}
+
+		// Process remaining wishes that don't have cached results
+		const wishesToProcess = allWishes.filter((wish) => !wishesWithCache.has(wish.id));
+
+		if (wishesToProcess.length === 0) {
+			sendComplete();
+			return;
+		}
+
+		// Process uncached wishes in smaller batches for better performance
+		const batchSize = 5; // Reduced batch size for non-cached processing
 		const batches = [];
 
-		for (let i = 0; i < allWishes.length; i += batchSize) {
-			batches.push(allWishes.slice(i, i + batchSize));
+		for (let i = 0; i < wishesToProcess.length; i += batchSize) {
+			batches.push(wishesToProcess.slice(i, i + batchSize));
 		}
 
 		for (const batch of batches) {
@@ -203,15 +344,6 @@ async function processWishesBatch(
 							maxSimilarity
 						};
 
-						console.log(
-							'Wish result for ID:',
-							wish.id,
-							'relations:',
-							wish.relations,
-							'ageGroups:',
-							wish.ageGroups
-						);
-
 						sendResult(result);
 						processed++;
 
@@ -226,8 +358,8 @@ async function processWishesBatch(
 				})
 			);
 
-			// Small delay between batches to prevent overwhelming the system
-			await new Promise((resolve) => setTimeout(resolve, 100));
+			// Reduced delay for better performance
+			await new Promise((resolve) => setTimeout(resolve, 50));
 		}
 
 		sendComplete();

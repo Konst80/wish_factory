@@ -4,7 +4,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 
 	let searchTerm = $state(data.filters.search || '');
 	let selectedRole = $state(data.filters.role || '');

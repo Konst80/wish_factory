@@ -6,10 +6,10 @@
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
 	import WishContentEditor from '$lib/components/wishes/WishContentEditor.svelte';
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 
 	// Form state - initialize with existing wish data
-	let formData: WishFormState = $state({
+	const formData: WishFormState = $state({
 		type: data.wish.type,
 		eventType: data.wish.eventType,
 		relations: [...data.wish.relations],
@@ -32,7 +32,7 @@
 	let showWorkflowHelp = $state(false);
 
 	// Validation state
-	let errors = $state({} as Record<string, string>);
+	const errors = $state({} as Record<string, string>);
 
 	// Form submission
 	let formElement: HTMLFormElement;

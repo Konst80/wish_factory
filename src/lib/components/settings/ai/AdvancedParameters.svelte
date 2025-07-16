@@ -1,20 +1,18 @@
 <script lang="ts">
 	import { setPreset } from '$lib/utils/settings.js';
+	import type { SettingsData } from '$lib/types/Settings.js';
 
 	interface Props {
-		data: {
-			settings: Record<string, unknown>;
-			[key: string]: unknown;
-		};
+		data: SettingsData;
 	}
 
-	let { data }: Props = $props();
+	const { data }: Props = $props();
 
 	// Reactive variables for slider values
-	let temperatureValue = $state((data.settings as any).ai?.temperature || 0.7);
-	let topPValue = $state((data.settings as any).ai?.topP || 1);
-	let frequencyValue = $state((data.settings as any).ai?.frequencyPenalty || 0);
-	let presencePenaltyValue = $state((data.settings as any).ai?.presencePenalty || 0);
+	let temperatureValue = $state(data.settings.ai?.temperature || 0.7);
+	let topPValue = $state(data.settings.ai?.topP || 1);
+	let frequencyValue = $state(data.settings.ai?.frequencyPenalty || 0);
+	let presencePenaltyValue = $state(data.settings.ai?.presencePenalty || 0);
 </script>
 
 <div class="bg-base-50 rounded-lg p-4">
@@ -112,7 +110,7 @@
 						max="4000"
 						step="50"
 						class="input-bordered input w-full"
-						value={(data.settings as any).ai?.maxTokens || 500}
+						value={data.settings.ai?.maxTokens || 500}
 					/>
 					<div class="mt-2 text-xs opacity-60">Maximale Länge der generierten Antwort</div>
 				</div>

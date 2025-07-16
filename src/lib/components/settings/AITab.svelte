@@ -22,7 +22,7 @@
 		onMessage: (message: string, isError?: boolean) => void;
 	}
 
-	let { data, isSubmitting, onSubmittingChange, onMessage }: Props = $props();
+	const { data, isSubmitting, onSubmittingChange, onMessage }: Props = $props();
 </script>
 
 {#if data.user.role === 'Administrator'}
@@ -106,7 +106,7 @@
 					<BatchPrompts {data} />
 
 					<!-- Specific Values Configuration -->
-					<SpecificValuesConfig {data} {onMessage} />
+					<SpecificValuesConfig {data} />
 
 					<!-- Advanced Parameters -->
 					<AdvancedParameters {data} />

@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '$lib/types/supabase.js';
 
 // Hilfsfunktion für Datenbankkonvertierung
-function convertDbWishToWish(dbWish: any): Wish {
+function convertDbWishToWish(dbWish: Database['public']['Tables']['wishes']['Row']): Wish {
 	return {
 		...dbWish,
 		eventType: dbWish.event_type,
@@ -13,7 +13,7 @@ function convertDbWishToWish(dbWish: any): Wish {
 		createdAt: dbWish.created_at ? new Date(dbWish.created_at) : new Date(),
 		updatedAt: dbWish.updated_at ? new Date(dbWish.updated_at) : new Date(),
 		createdBy: dbWish.created_by,
-		length: dbWish.length as any // Type assertion for compatibility
+		length: dbWish.length as 'short' | 'medium' | 'long' // Type assertion for compatibility
 	};
 }
 

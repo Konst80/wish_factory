@@ -14,14 +14,14 @@
 	} from '$lib/stores/wishLanguages';
 
 	// Form state
-	let showAddForm = false;
-	let editingLanguage: WishLanguage | null = null;
-	let formData = {
+	let showAddForm = $state(false);
+	let editingLanguage: WishLanguage | null = $state(null);
+	let formData = $state({
 		code: '',
 		name: '',
 		flag: ''
-	};
-	let formError = '';
+	});
+	let formError = $state('');
 
 	// Predefined flag options
 	const flagOptions = [
@@ -48,8 +48,8 @@
 	];
 
 	// Confirmation dialog
-	let showDeleteConfirm = false;
-	let languageToDelete: WishLanguage | null = null;
+	let showDeleteConfirm = $state(false);
+	let languageToDelete: WishLanguage | null = $state(null);
 
 	onMount(() => {
 		loadAllWishLanguages();
@@ -78,7 +78,8 @@
 		showAddForm = true;
 	}
 
-	async function handleSubmit() {
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
 		formError = '';
 
 		// Validation
@@ -161,7 +162,7 @@
 				Konfiguriere unterstützte Sprachen für Wünsche. Mindestens eine Sprache muss aktiv sein.
 			</p>
 		</div>
-		<button class="btn btn-primary" on:click={startAdd}>
+		<button class="btn btn-primary" onclick={startAdd}>
 			<svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
 					stroke-linecap="round"
@@ -196,7 +197,7 @@
 				{editingLanguage ? 'Sprache bearbeiten' : 'Neue Sprache hinzufügen'}
 			</h4>
 
-			<form on:submit|preventDefault={handleSubmit} class="space-y-4">
+			<form onsubmit={handleSubmit} class="space-y-4">
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 					<div class="form-control">
 						<label class="label" for="code">
@@ -266,7 +267,7 @@
 					<button type="submit" class="btn btn-primary">
 						{editingLanguage ? 'Aktualisieren' : 'Hinzufügen'}
 					</button>
-					<button type="button" class="btn btn-ghost" on:click={resetForm}> Abbrechen </button>
+					<button type="button" class="btn btn-ghost" onclick={resetForm}> Abbrechen </button>
 				</div>
 			</form>
 		</div>
@@ -308,7 +309,7 @@
 												type="checkbox"
 												class="toggle toggle-primary"
 												checked={language.is_active}
-												on:change={() => toggleLanguageActive(language)}
+												onchange={() => toggleLanguageActive(language)}
 											/>
 										</div>
 									</td>
@@ -319,7 +320,7 @@
 										<div class="flex gap-2">
 											<button
 												class="btn btn-sm btn-ghost"
-												on:click={() => startEdit(language)}
+												onclick={() => startEdit(language)}
 												aria-label="Edit language"
 											>
 												<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,7 +334,7 @@
 											</button>
 											<button
 												class="btn btn-sm btn-ghost text-error"
-												on:click={() => confirmDelete(language)}
+												onclick={() => confirmDelete(language)}
 												aria-label="Delete language"
 											>
 												<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -372,8 +373,8 @@
 				dieser Sprache existieren.
 			</p>
 			<div class="modal-action">
-				<button class="btn btn-error" on:click={handleDelete}> Löschen </button>
-				<button class="btn btn-ghost" on:click={cancelDelete}> Abbrechen </button>
+				<button class="btn btn-error" onclick={handleDelete}> Löschen </button>
+				<button class="btn btn-ghost" onclick={cancelDelete}> Abbrechen </button>
 			</div>
 		</div>
 	</div>

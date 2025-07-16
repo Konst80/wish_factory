@@ -8,7 +8,7 @@
 		onClose: () => void;
 	}
 
-	let { wish, isOpen, onClose }: Props = $props();
+	const { wish, isOpen, onClose }: Props = $props();
 
 	interface SimilarityData {
 		similarWishes: SimilarityMatch[];
@@ -33,7 +33,6 @@
 	let showAutoCleanModal = $state(false);
 	let autoCleanThreshold = $state(80);
 	let isAutoCleanProcessing = $state(false);
-	let _autoCleanCandidates = $state<string[]>([]);
 
 	async function loadDetailedSimilarityData() {
 		if (!wish.id || isLoading || lastLoadedWishId === wish.id) return;
@@ -215,12 +214,6 @@
 	// Auto-clean functionality
 	function prepareAutoClean() {
 		if (!similarityData) return;
-
-		const threshold = autoCleanThreshold / 100;
-		_autoCleanCandidates = similarityData.similarWishes
-			.filter((sw) => sw.similarity >= threshold)
-			.map((sw) => sw.wish.id);
-
 		showAutoCleanModal = true;
 	}
 
@@ -260,7 +253,6 @@
 
 			// Close modal and reset
 			showAutoCleanModal = false;
-			_autoCleanCandidates = [];
 
 			// Reload similarity data
 			lastLoadedWishId = null;
@@ -445,7 +437,7 @@
 							<h4 class="card-title text-base">Ähnliche Wünsche</h4>
 							{#if similarityData.similarWishes.length > 0}
 								<div class="max-h-96 space-y-3 overflow-y-auto">
-									{#each similarityData.similarWishes as { wish: similarWish, similarity, algorithm }}
+									{#each similarityData.similarWishes as { wish: similarWish, similarity, algorithm } (similarWish.id)}
 										<div class="border-base-300 rounded-lg border p-3">
 											<div class="mb-2 flex items-center justify-between">
 												<div class="flex items-center gap-2">
@@ -517,7 +509,7 @@
 						<div class="card-body">
 							<h4 class="card-title text-base">Variationsvorschläge</h4>
 							<div class="space-y-2">
-								{#each similarityData.suggestions as suggestion}
+								{#each similarityData.suggestions as suggestion, i (i)}
 									<div class="bg-base-50 rounded-lg p-3">
 										<p class="text-sm">{suggestion}</p>
 									</div>

@@ -18,7 +18,7 @@
 		error?: string;
 	}
 
-	let {
+	const {
 		selectedLanguage,
 		onLanguageChange,
 		label = 'Sprache',
@@ -92,7 +92,7 @@
 			{#if !required}
 				<option value="">-- Bitte wählen --</option>
 			{/if}
-			{#each $activeWishLanguages as language}
+			{#each $activeWishLanguages as language (language.code)}
 				<option value={language.code}>
 					{formatLanguageDisplay(language)}
 				</option>

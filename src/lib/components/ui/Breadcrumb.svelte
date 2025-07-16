@@ -5,7 +5,7 @@
 		active?: boolean;
 	}
 
-	let { items }: { items: BreadcrumbItem[] } = $props();
+	const { items }: { items: BreadcrumbItem[] } = $props();
 </script>
 
 <div class="breadcrumbs text-sm">

@@ -2,12 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { supabase } from '$lib/supabase';
 
-	let email = 'admin@example.com';
-	let password = 'Konst';
-	let fullName = 'Administrator';
-	let loading = false;
-	let error = '';
-	let success = false;
+	let email = $state('admin@example.com');
+	let password = $state('Konst');
+	let fullName = $state('Administrator');
+	let loading = $state(false);
+	let error = $state('');
+	let success = $state(false);
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
@@ -75,7 +75,7 @@
 					<span>✅ Admin user created successfully! Redirecting to login...</span>
 				</div>
 			{:else}
-				<form on:submit={handleSubmit} class="space-y-4">
+				<form onsubmit={handleSubmit} class="space-y-4">
 					<div class="form-control">
 						<label class="label" for="email">
 							<span class="label-text">E-Mail</span>

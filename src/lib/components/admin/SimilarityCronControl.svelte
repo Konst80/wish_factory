@@ -16,8 +16,14 @@
 		};
 	};
 
-	let { isEnabled, lastExecution, orphanedWishes, githubActionsConfigured, stats }: Props =
-		$props();
+	// eslint-disable-next-line svelte/no-unused-props
+	const {
+		isEnabled,
+		lastExecution,
+		orphanedWishes: initialOrphanedWishes,
+		githubActionsConfigured,
+		stats: initialStats
+	}: Props = $props();
 
 	// Local state
 	let isRunning = $state(false);
@@ -26,6 +32,10 @@
 	let showGithubSetup = $state(false);
 	let executionResult = $state<Record<string, unknown> | null>(null);
 	let errorMessage = $state<string | null>(null);
+
+	// Reactive state for values that can change
+	let orphanedWishes = $state(initialOrphanedWishes);
+	let stats = $state(initialStats);
 
 	// Auto-refresh orphaned wishes count
 	let refreshInterval: NodeJS.Timeout | null = null;

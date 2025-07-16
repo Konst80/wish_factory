@@ -9,7 +9,7 @@
 		message?: string;
 	} | null;
 
-	let { data, form }: { data: PageData; form: FormResponse } = $props();
+	const { data, form }: { data: PageData; form: FormResponse } = $props();
 
 	let isUpdatingStatus = $state(false);
 	let showDeleteModal = $state(false);

@@ -6,7 +6,7 @@
 
 	type Profile = Database['public']['Tables']['profiles']['Row'];
 
-	let { children, profile }: { children: Snippet; profile: Profile | null } = $props();
+	const { children, profile }: { children: Snippet; profile: Profile | null } = $props();
 
 	let sidebarOpen = $state(false);
 

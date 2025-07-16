@@ -4,7 +4,7 @@ export function resetSettings(): void {
 	}
 }
 
-export function exportSettings(settings: any): void {
+export function exportSettings(settings: Record<string, unknown>): void {
 	const dataStr = JSON.stringify(settings, null, 2);
 	const dataBlob = new Blob([dataStr], { type: 'application/json' });
 	const url = URL.createObjectURL(dataBlob);

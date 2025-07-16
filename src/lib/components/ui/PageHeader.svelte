@@ -8,7 +8,7 @@
 		active?: boolean;
 	}
 
-	let {
+	const {
 		title,
 		subtitle,
 		breadcrumbs,

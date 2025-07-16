@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 
 	let selectedTimeRange = $state(data.timeRange || 'last-30-days');
 	let selectedMetric = $state('wishes');

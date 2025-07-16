@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import type { SettingsData, EnhanceResult } from '$lib/types/Settings.js';
 
 	interface Props {
-		data: {
-			settings: Record<string, unknown>;
-			[key: string]: unknown;
-		};
+		data: SettingsData;
 		isSubmitting: boolean;
 		languages: Array<{ value: string; label: string }>;
 		timezones: Array<{ value: string; label: string }>;
@@ -15,7 +13,7 @@
 		onPasswordModalOpen: () => void;
 	}
 
-	let {
+	const {
 		data,
 		isSubmitting,
 		languages,
@@ -72,7 +70,7 @@
 			action="?/updateProfile"
 			use:enhance={() => {
 				onSubmittingChange(true);
-				return async ({ result }) => {
+				return async ({ result }: EnhanceResult) => {
 					if (result.type === 'success') {
 						await invalidateAll();
 						onMessage(
@@ -137,7 +135,7 @@
 								type="text"
 								placeholder="Ihr vollständiger Name"
 								class="input-bordered input input-lg w-full"
-								value={(data.settings as any).profile?.fullName || ''}
+								value={data.settings.profile?.fullName || ''}
 								required
 							/>
 						</div>
@@ -167,7 +165,7 @@
 								type="email"
 								placeholder="ihre@email.com"
 								class="input-bordered input input-lg w-full"
-								value={(data.settings as any).profile?.email || ''}
+								value={data.settings.profile?.email || ''}
 								disabled
 							/>
 							<div class="label">
@@ -238,7 +236,7 @@
 								id="language"
 								name="language"
 								class="select-bordered select select-lg w-full"
-								value={(data.settings as any).profile?.language || ''}
+								value={data.settings.profile?.language || ''}
 							>
 								{#each languages as lang (lang.value)}
 									<option value={lang.value}>{lang.label}</option>
@@ -270,7 +268,7 @@
 								id="timezone"
 								name="timezone"
 								class="select-bordered select select-lg w-full"
-								value={(data.settings as any).profile?.timezone || ''}
+								value={data.settings.profile?.timezone || ''}
 							>
 								{#each timezones as tz (tz.value)}
 									<option value={tz.value}>{tz.label}</option>

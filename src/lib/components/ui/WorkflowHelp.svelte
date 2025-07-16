@@ -1,5 +1,11 @@
 <script lang="ts">
-	let { isOpen = $bindable(false), contentType = 'workflow' } = $props();
+	let {
+		isOpen = $bindable(false),
+		contentType = 'workflow'
+	}: {
+		isOpen?: boolean;
+		contentType?: 'workflow' | 'api-keys';
+	} = $props();
 
 	function closeModal() {
 		isOpen = false;

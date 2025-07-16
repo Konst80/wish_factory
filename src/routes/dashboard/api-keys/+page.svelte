@@ -4,7 +4,7 @@
 	import type { ApiKey } from '$lib/server/api-key-service';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
 
-	let { data, form }: { data: PageData; form: import('./$types.js').ActionData } = $props();
+	const { data, form }: { data: PageData; form: import('./$types.js').ActionData } = $props();
 
 	// UI State
 	let showCreateModal = $state(false);

@@ -1,12 +1,11 @@
 <script lang="ts">
+	import type { SettingsData } from '$lib/types/Settings.js';
+
 	interface Props {
-		data: {
-			settings: Record<string, unknown>;
-			[key: string]: unknown;
-		};
+		data: SettingsData;
 	}
 
-	let { data }: Props = $props();
+	const { data }: Props = $props();
 </script>
 
 <div class="bg-base-50 rounded-lg p-4">
@@ -60,7 +59,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für Freunde..."
-					value={(data.settings as any).ai?.promptRelationFriend || ''}
+					value={data.settings.ai?.promptRelationFriend || ''}
 				></textarea>
 			</div>
 		</div>
@@ -95,7 +94,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für Familie..."
-					value={(data.settings as any).ai?.promptRelationFamily || ''}
+					value={data.settings.ai?.promptRelationFamily || ''}
 				></textarea>
 			</div>
 		</div>
@@ -130,7 +129,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für Partner..."
-					value={(data.settings as any).ai?.promptRelationPartner || ''}
+					value={data.settings.ai?.promptRelationPartner || ''}
 				></textarea>
 			</div>
 		</div>
@@ -165,7 +164,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für Kollegen..."
-					value={(data.settings as any).ai?.promptRelationColleague || ''}
+					value={data.settings.ai?.promptRelationColleague || ''}
 				></textarea>
 			</div>
 		</div>

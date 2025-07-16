@@ -1,12 +1,11 @@
 <script lang="ts">
+	import type { SettingsData } from '$lib/types/Settings.js';
+
 	interface Props {
-		data: {
-			settings: Record<string, unknown>;
-			[key: string]: unknown;
-		};
+		data: SettingsData;
 	}
 
-	let { data }: Props = $props();
+	const { data }: Props = $props();
 </script>
 
 <div class="bg-base-50 rounded-lg p-4">
@@ -60,7 +59,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="10"
 					placeholder="Prompt für Batch-Generierung mit Platzhaltern wie batchCount, batchTypes, batchEventTypes..."
-					value={(data.settings as any).ai?.promptBatch || ''}
+					value={data.settings.ai?.promptBatch || ''}
 				></textarea>
 			</div>
 		</div>
@@ -95,7 +94,7 @@
 					class="textarea-bordered textarea w-full"
 					rows="6"
 					placeholder="Prompt für verspätete Wünsche..."
-					value={(data.settings as any).ai?.promptBelated || ''}
+					value={data.settings.ai?.promptBelated || ''}
 				></textarea>
 			</div>
 		</div>

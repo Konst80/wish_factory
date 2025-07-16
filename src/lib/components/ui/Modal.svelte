@@ -42,7 +42,7 @@
 {#if isOpen}
 	<div class="modal-open modal">
 		<div
-			class="modal-box {sizeClasses[size]} relative"
+			class="modal-box {sizeClasses[size as keyof typeof sizeClasses]} relative"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby={title ? 'modal-title' : undefined}

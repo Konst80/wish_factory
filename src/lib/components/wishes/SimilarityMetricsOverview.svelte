@@ -21,7 +21,7 @@
 		refreshInterval?: number;
 	}
 
-	let {
+	const {
 		language = 'de',
 		showCacheStats = true,
 		autoRefresh = false,

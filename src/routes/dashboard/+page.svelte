@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 
 	// Theme-System - now uses database theme as source of truth
 	let currentTheme = $state(data.userTheme || 'light');

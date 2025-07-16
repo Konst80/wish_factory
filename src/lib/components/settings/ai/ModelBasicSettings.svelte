@@ -1,12 +1,11 @@
 <script lang="ts">
+	import type { SettingsData } from '$lib/types/Settings.js';
+
 	interface Props {
-		data: {
-			settings: Record<string, unknown>;
-			[key: string]: unknown;
-		};
+		data: SettingsData;
 	}
 
-	let { data }: Props = $props();
+	const { data }: Props = $props();
 </script>
 
 <div class="bg-base-50 rounded-lg p-4">
@@ -38,7 +37,7 @@
 				id="model"
 				name="model"
 				class="select-bordered select select-lg w-full"
-				value={(data.settings as any).ai?.model || 'anthropic/claude-3.5-sonnet'}
+				value={data.settings.ai?.model || 'anthropic/claude-3.5-sonnet'}
 			>
 				<option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
 				<option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
@@ -70,7 +69,7 @@
 				placeholder="System-Anweisungen für die KI... 
 
 Beispiel: Du bist ein hilfreicher Assistent für das Erstellen von personalisierten Wünschen und Grüßen. Erstelle warme, authentische und kulturell angemessene Texte."
-				value={(data.settings as any).ai?.promptSystem || ''}
+				value={data.settings.ai?.promptSystem || ''}
 			></textarea>
 			<div class="label">
 				<span class="label-text-alt text-base-content/60">

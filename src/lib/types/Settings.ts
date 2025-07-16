@@ -18,9 +18,9 @@ export interface PreferencesSettings {
 
 export interface SystemSettings {
 	apiAccess?: boolean;
-	exportFormat?: string;
-	backupFrequency?: string;
-	dataRetention?: number;
+	exportFormat?: 'json' | 'csv' | 'xlsx' | 'pdf' | string;
+	backupFrequency?: 'none' | 'daily' | 'weekly' | 'monthly' | string;
+	dataRetention?: string | number;
 }
 
 export interface ProfileSettings {
@@ -68,5 +68,29 @@ export interface AppSettings {
 
 export interface SettingsData {
 	settings: AppSettings;
+	user?: {
+		role: string;
+		[key: string]: unknown;
+	};
+	[key: string]: unknown;
+}
+
+export interface FormResult {
+	type: 'success' | 'failure' | 'error' | 'redirect';
+	data?: {
+		message?: string;
+		[key: string]: unknown;
+	};
+	status?: number;
+	location?: string;
+	[key: string]: unknown;
+}
+
+export interface EnhanceResult {
+	result: FormResult;
+	formData: FormData;
+	formElement: HTMLFormElement;
+	action: URL;
+	update: (options?: { reset?: boolean; invalidateAll?: boolean } | undefined) => Promise<void>;
 	[key: string]: unknown;
 }

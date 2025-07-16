@@ -2,7 +2,7 @@
 	import { currentUserProfile } from '$lib/stores/auth';
 	import LanguageSelector from '$lib/components/ui/LanguageSelector.svelte';
 
-	let { onMenuToggle }: { onMenuToggle?: () => void } = $props();
+	const { onMenuToggle }: { onMenuToggle?: () => void } = $props();
 
 	const handleMenuToggle = () => {
 		onMenuToggle?.();

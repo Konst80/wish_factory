@@ -11,7 +11,7 @@
 		content?: Snippet;
 	}
 
-	let {
+	const {
 		items,
 		vertical = true
 	}: {

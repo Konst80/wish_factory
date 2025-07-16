@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 
 	// Helper function to format bytes
 	function formatBytes(bytes: number) {
@@ -295,7 +295,7 @@
 
 <!-- Services Status -->
 <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-	{#each Object.entries(data.systemInfo.services) as [serviceName, serviceInfo]}
+	{#each Object.entries(data.systemInfo.services) as [serviceName, serviceInfo] (serviceName)}
 		<div class="card bg-base-100 shadow-xl">
 			<div class="card-body">
 				<div class="mb-4 flex items-center justify-between">
@@ -352,7 +352,7 @@
 			Environment Configuration
 		</h2>
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-			{#each Object.entries(data.systemInfo.environment) as [key, value]}
+			{#each Object.entries(data.systemInfo.environment) as [key, value] (key)}
 				<div class="bg-base-200 flex items-center justify-between rounded-lg p-3">
 					<span class="font-medium">{key}</span>
 					<span

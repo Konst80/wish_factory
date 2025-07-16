@@ -10,7 +10,7 @@
 		showSuggestions?: boolean;
 	}
 
-	let {
+	const {
 		similarWishes,
 		suggestions,
 		isLoading = false,
@@ -75,8 +75,8 @@
 		return text.substring(0, maxLength) + '...';
 	}
 
-	let displayedWishes = $derived(similarWishes.slice(0, maxDisplay));
-	let hasMore = $derived(similarWishes.length > maxDisplay);
+	const displayedWishes = $derived(similarWishes.slice(0, maxDisplay));
+	const hasMore = $derived(similarWishes.length > maxDisplay);
 </script>
 
 <div class="similar-wishes-panel">
@@ -89,7 +89,7 @@
 					<h3 class="card-title text-lg">Ähnliche Wünsche werden gesucht...</h3>
 				</div>
 				<div class="space-y-2">
-					{#each Array(3) as _}
+					{#each Array(3) as _, i (i)}
 						<div class="skeleton h-16 w-full"></div>
 					{/each}
 				</div>
@@ -128,7 +128,7 @@
 				</div>
 
 				<div class="space-y-3">
-					{#each displayedWishes as { wish, similarity, algorithm }}
+					{#each displayedWishes as { wish, similarity, algorithm } (wish.id)}
 						<div class="border-base-300 hover:bg-base-50 rounded-lg border p-4 transition-colors">
 							<div class="mb-2 flex items-start justify-between">
 								<div class="flex items-center gap-2">
@@ -221,7 +221,7 @@
 				</h3>
 
 				<div class="space-y-2">
-					{#each suggestions as suggestion}
+					{#each suggestions as suggestion, i (i)}
 						<div class="bg-base-50 flex items-center justify-between rounded-lg p-3">
 							<div class="flex-1">
 								<p class="text-base-content/80 text-sm leading-relaxed">

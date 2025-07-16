@@ -4,7 +4,7 @@
 	import '../app.css';
 	import type { LayoutData } from './$types';
 
-	let { children, data }: { children: Snippet; data: LayoutData } = $props();
+	const { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	// Apply user's saved theme on mount and handle theme changes
 	onMount(() => {

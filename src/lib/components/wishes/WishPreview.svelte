@@ -6,7 +6,7 @@
 		showPreview: boolean;
 	};
 
-	let { formData, showPreview }: Props = $props();
+	const { formData, showPreview }: Props = $props();
 </script>
 
 <!-- Preview Card -->

@@ -2,19 +2,16 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import WishLanguageManagement from '$lib/components/admin/WishLanguageManagement.svelte';
+	import type { SettingsData, EnhanceResult } from '$lib/types/Settings.js';
 
 	interface Props {
-		data: {
-			user: { role: string };
-			settings: Record<string, unknown>;
-			[key: string]: unknown;
-		};
+		data: SettingsData;
 		isSubmitting: boolean;
 		onSubmittingChange: (submitting: boolean) => void;
 		onMessage: (message: string, isError?: boolean) => void;
 	}
 
-	let { data, isSubmitting, onSubmittingChange, onMessage }: Props = $props();
+	const { data, isSubmitting, onSubmittingChange, onMessage }: Props = $props();
 </script>
 
 <div class="card bg-base-100 border-base-200 border shadow-xl">
@@ -63,7 +60,7 @@
 			action="?/updateSystem"
 			use:enhance={() => {
 				onSubmittingChange(true);
-				return async ({ result }) => {
+				return async ({ result }: EnhanceResult) => {
 					if (result.type === 'success') {
 						await invalidateAll();
 						onMessage(
@@ -82,7 +79,7 @@
 		>
 			<div class="space-y-6">
 				<!-- Wunsch-Sprachen Verwaltung (nur für Administratoren) -->
-				{#if data.user.role === 'Administrator'}
+				{#if data.user?.role === 'Administrator'}
 					<div class="bg-base-50 rounded-lg p-4">
 						<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
 							<svg
@@ -155,7 +152,7 @@
 								type="checkbox"
 								name="apiAccess"
 								class="toggle toggle-success"
-								checked={(data.settings as any).system?.apiAccess || false}
+								checked={data.settings.system?.apiAccess || false}
 							/>
 						</label>
 					</div>
@@ -191,7 +188,7 @@
 							id="exportFormat"
 							name="exportFormat"
 							class="select-bordered select select-lg w-full"
-							value={(data.settings as any).system?.exportFormat || 'json'}
+							value={data.settings.system?.exportFormat || 'json'}
 						>
 							<option value="json">JSON</option>
 							<option value="csv">CSV</option>
@@ -232,7 +229,7 @@
 								id="backupFrequency"
 								name="backupFrequency"
 								class="select-bordered select select-lg w-full"
-								value={(data.settings as any).system?.backupFrequency || 'daily'}
+								value={data.settings.system?.backupFrequency || 'daily'}
 							>
 								<option value="none">Keine Backups</option>
 								<option value="daily">Täglich</option>
@@ -255,7 +252,7 @@
 								max="3650"
 								step="1"
 								class="input-bordered input input-lg w-full"
-								value={(data.settings as any).system?.dataRetention || '30'}
+								value={data.settings.system?.dataRetention || '30'}
 							/>
 							<div class="label">
 								<span class="label-text-alt text-info">

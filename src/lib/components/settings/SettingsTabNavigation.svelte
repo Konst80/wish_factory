@@ -11,7 +11,7 @@
 		onTabChange: (tabId: string) => void;
 	}
 
-	let { activeTab, tabs, onTabChange }: Props = $props();
+	const { activeTab, tabs, onTabChange }: Props = $props();
 </script>
 
 <div class="bg-base-100 border-base-200 mb-6 rounded-lg border p-2 shadow-sm">

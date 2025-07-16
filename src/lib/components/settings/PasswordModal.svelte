@@ -9,7 +9,7 @@
 		onMessage: (message: string, isError?: boolean) => void;
 	}
 
-	let { showModal, isSubmitting, onClose, onSubmittingChange, onMessage }: Props = $props();
+	const { showModal, isSubmitting, onClose, onSubmittingChange, onMessage }: Props = $props();
 </script>
 
 {#if showModal}

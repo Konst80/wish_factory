@@ -11,7 +11,7 @@
 		onAgeGroupChange: (ageGroup: string, checked: boolean) => void;
 	};
 
-	let { formData, errors, onRelationChange, onAgeGroupChange }: Props = $props();
+	const { formData, errors, onRelationChange, onAgeGroupChange }: Props = $props();
 
 	function handleLanguageChange(language: string) {
 		formData.language = language;

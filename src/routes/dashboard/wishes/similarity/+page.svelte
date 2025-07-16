@@ -29,6 +29,8 @@
 	let error = $state('');
 	let analysisProgress = $state(0);
 	let selectedTab = $state('duplicates');
+	let cacheHits = $state(0);
+	let totalProcessed = $state(0);
 	let expandedWishes = $state(new Set<string>());
 	let selectedWishes = $state(new Set<string>());
 	let showDeleteModal = $state(false);
@@ -37,6 +39,10 @@
 	let similarWishToDelete = $state<string | null>(null);
 	let autoCleanThreshold = $state(90);
 	let isDeleting = $state(false);
+
+	// Request debouncing
+	let analysisAbortController: AbortController | null = null;
+	let analysisTimeout: NodeJS.Timeout | null = null;
 
 	// Create a reactive store for the current locale
 	let currentLocale = $state(getLocale());
@@ -61,6 +67,14 @@
 		})
 	);
 
+	// Pagination state
+	let currentPage = $state(1);
+	const pageSize = $state(50);
+	const totalPages = $derived(Math.ceil(filteredWishes.length / pageSize));
+	const paginatedWishes = $derived(
+		filteredWishes.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+	);
+
 	onMount(() => {
 		loadActiveWishLanguages();
 		analyzeAllWishes();
@@ -81,11 +95,45 @@
 		};
 	});
 
+	function debouncedAnalyze() {
+		// Cancel any pending analysis
+		if (analysisTimeout) {
+			clearTimeout(analysisTimeout);
+		}
+
+		// Abort any ongoing request
+		if (analysisAbortController) {
+			analysisAbortController.abort();
+		}
+
+		// Set up new analysis with debouncing
+		analysisTimeout = setTimeout(() => {
+			analyzeAllWishes();
+		}, 300);
+	}
+
 	async function analyzeAllWishes() {
+		// Cancel any pending timeout
+		if (analysisTimeout) {
+			clearTimeout(analysisTimeout);
+			analysisTimeout = null;
+		}
+
+		// Abort any ongoing request
+		if (analysisAbortController) {
+			analysisAbortController.abort();
+		}
+
+		// Create new abort controller
+		analysisAbortController = new AbortController();
+
 		loading = true;
 		error = '';
 		analysisProgress = 0;
 		wishes = [];
+		currentPage = 1; // Reset pagination
+		cacheHits = 0;
+		totalProcessed = 0;
 
 		try {
 			const response = await fetch('/api/wishes/similarity/batch', {
@@ -95,7 +143,8 @@
 				},
 				body: JSON.stringify({
 					language: currentLocale
-				})
+				}),
+				signal: analysisAbortController.signal
 			});
 
 			if (!response.ok) {
@@ -109,6 +158,12 @@
 				while (true) {
 					const { done, value } = await reader.read();
 					if (done) break;
+
+					// Check if request was aborted
+					if (analysisAbortController.signal.aborted) {
+						reader.cancel();
+						break;
+					}
 
 					const chunk = decoder.decode(value);
 					const lines = chunk.split('\n');
@@ -124,12 +179,21 @@
 									console.log(
 										'Received wish:',
 										data.wish.id,
+										'cached:',
+										data.cached,
 										'relations:',
 										data.wish.relations,
 										'ageGroups:',
 										data.wish.ageGroups
 									);
 									wishes = [...wishes, data.wish];
+									totalProcessed++;
+									if (data.cached) {
+										cacheHits++;
+									}
+								} else if (data.type === 'error') {
+									error = data.error;
+									break;
 								}
 							} catch {
 								// Ignore malformed JSON lines
@@ -139,9 +203,15 @@
 				}
 			}
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'An error occurred';
+			if (err instanceof Error && err.name === 'AbortError') {
+				// Request was aborted, don't show error
+				console.log('Analysis request was aborted');
+			} else {
+				error = err instanceof Error ? err.message : 'An error occurred';
+			}
 		} finally {
 			loading = false;
+			analysisAbortController = null;
 		}
 	}
 
@@ -264,8 +334,13 @@
 	}
 
 	function selectAllVisible() {
-		filteredWishes.forEach((wish) => selectedWishes.add(wish.id));
+		paginatedWishes.forEach((wish) => selectedWishes.add(wish.id));
 		selectedWishes = new Set(selectedWishes);
+	}
+
+	function switchTab(newTab: string) {
+		selectedTab = newTab;
+		currentPage = 1; // Reset to first page when switching tabs
 	}
 
 	function clearSelection() {
@@ -425,7 +500,7 @@
 			</p>
 		</div>
 		<div class="flex items-center gap-2">
-			<button class="btn btn-outline btn-sm" onclick={analyzeAllWishes} disabled={loading}>
+			<button class="btn btn-outline btn-sm" onclick={debouncedAnalyze} disabled={loading}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="mr-2 h-4 w-4"
@@ -491,11 +566,47 @@
 	{#if loading}
 		<div class="card bg-base-100 shadow-xl">
 			<div class="card-body">
-				<h2 class="card-title">Analysiere Wünsche...</h2>
-				<p class="text-base-content/70">Führe Ähnlichkeitsanalyse für alle Wünsche durch</p>
+				<div class="flex items-start justify-between">
+					<div class="flex-1">
+						<h2 class="card-title">Analysiere Wünsche...</h2>
+						<p class="text-base-content/70">Führe Ähnlichkeitsanalyse für alle Wünsche durch</p>
+					</div>
+					<button
+						class="btn btn-ghost btn-sm"
+						onclick={() => {
+							if (analysisAbortController) {
+								analysisAbortController.abort();
+							}
+						}}
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
+						</svg>
+						Abbrechen
+					</button>
+				</div>
 				<progress class="progress progress-primary w-full" value={analysisProgress} max="100"
 				></progress>
-				<p class="text-base-content/70 text-sm">{analysisProgress}% abgeschlossen</p>
+				<div class="flex items-center justify-between">
+					<p class="text-base-content/70 text-sm">{analysisProgress}% abgeschlossen</p>
+					{#if totalProcessed > 0}
+						<p class="text-base-content/70 text-sm">
+							Cache-Treffer: {cacheHits}/{totalProcessed}
+							<span class="text-success">({Math.round((cacheHits / totalProcessed) * 100)}%)</span>
+						</p>
+					{/if}
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -561,19 +672,19 @@
 		<div class="tabs tabs-boxed">
 			<button
 				class="tab {selectedTab === 'duplicates' ? 'tab-active' : ''}"
-				onclick={() => (selectedTab = 'duplicates')}
+				onclick={() => switchTab('duplicates')}
 			>
 				Duplikate ({duplicateCount})
 			</button>
 			<button
 				class="tab {selectedTab === 'similar' ? 'tab-active' : ''}"
-				onclick={() => (selectedTab = 'similar')}
+				onclick={() => switchTab('similar')}
 			>
 				Ähnlich ({similarCount})
 			</button>
 			<button
 				class="tab {selectedTab === 'unique' ? 'tab-active' : ''}"
-				onclick={() => (selectedTab = 'unique')}
+				onclick={() => switchTab('unique')}
 			>
 				Einzigartig ({uniqueCount})
 			</button>
@@ -626,7 +737,7 @@
 		<div class="mb-4 flex items-center justify-between">
 			<div class="flex gap-2">
 				<button class="btn btn-outline btn-xs" onclick={selectAllVisible}>
-					Alle sichtbaren auswählen
+					Alle auf dieser Seite auswählen
 				</button>
 				{#if selectedWishes.size > 0}
 					<button class="btn btn-ghost btn-xs" onclick={clearSelection}>
@@ -635,7 +746,7 @@
 				{/if}
 			</div>
 			<div class="text-base-content/70 text-sm">
-				{filteredWishes.length} Wünsche angezeigt
+				{filteredWishes.length} Wünsche gesamt • Seite {currentPage} von {totalPages}
 			</div>
 		</div>
 
@@ -739,7 +850,7 @@
 					</div>
 				</div>
 			{:else}
-				{#each filteredWishes as wish (wish.id)}
+				{#each paginatedWishes as wish (wish.id)}
 					<div class="card bg-base-100 shadow-xl">
 						<div class="card-body">
 							<div class="flex items-start gap-3">
@@ -1077,6 +1188,93 @@
 				{/each}
 			{/if}
 		</div>
+
+		<!-- Pagination Controls -->
+		{#if filteredWishes.length > pageSize}
+			<div class="mt-6 flex items-center justify-center gap-2">
+				<div class="join">
+					<button
+						class="join-item btn btn-sm"
+						onclick={() => (currentPage = 1)}
+						disabled={currentPage === 1}
+					>
+						«
+					</button>
+					<button
+						class="join-item btn btn-sm"
+						onclick={() => (currentPage = Math.max(1, currentPage - 1))}
+						disabled={currentPage === 1}
+					>
+						‹
+					</button>
+
+					{#if totalPages <= 7}
+						{#each Array.from({ length: totalPages }, (_, i) => i + 1) as page (page)}
+							<button
+								class="join-item btn btn-sm {currentPage === page ? 'btn-active' : ''}"
+								onclick={() => (currentPage = page)}
+							>
+								{page}
+							</button>
+						{/each}
+					{:else if currentPage <= 3}
+						{#each [1, 2, 3, 4] as page (page)}
+							<button
+								class="join-item btn btn-sm {currentPage === page ? 'btn-active' : ''}"
+								onclick={() => (currentPage = page)}
+							>
+								{page}
+							</button>
+						{/each}
+						<button class="join-item btn btn-sm btn-disabled">...</button>
+						<button class="join-item btn btn-sm" onclick={() => (currentPage = totalPages)}>
+							{totalPages}
+						</button>
+					{:else if currentPage >= totalPages - 2}
+						<button class="join-item btn btn-sm" onclick={() => (currentPage = 1)}> 1 </button>
+						<button class="join-item btn btn-sm btn-disabled">...</button>
+						{#each [totalPages - 3, totalPages - 2, totalPages - 1, totalPages] as page (page)}
+							<button
+								class="join-item btn btn-sm {currentPage === page ? 'btn-active' : ''}"
+								onclick={() => (currentPage = page)}
+							>
+								{page}
+							</button>
+						{/each}
+					{:else}
+						<button class="join-item btn btn-sm" onclick={() => (currentPage = 1)}> 1 </button>
+						<button class="join-item btn btn-sm btn-disabled">...</button>
+						{#each [currentPage - 1, currentPage, currentPage + 1] as page (page)}
+							<button
+								class="join-item btn btn-sm {currentPage === page ? 'btn-active' : ''}"
+								onclick={() => (currentPage = page)}
+							>
+								{page}
+							</button>
+						{/each}
+						<button class="join-item btn btn-sm btn-disabled">...</button>
+						<button class="join-item btn btn-sm" onclick={() => (currentPage = totalPages)}>
+							{totalPages}
+						</button>
+					{/if}
+
+					<button
+						class="join-item btn btn-sm"
+						onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))}
+						disabled={currentPage === totalPages}
+					>
+						›
+					</button>
+					<button
+						class="join-item btn btn-sm"
+						onclick={() => (currentPage = totalPages)}
+						disabled={currentPage === totalPages}
+					>
+						»
+					</button>
+				</div>
+			</div>
+		{/if}
 	{/if}
 </div>
 

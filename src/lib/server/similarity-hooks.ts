@@ -122,7 +122,7 @@ export class SimilarityHooks {
 							createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),
 							updatedAt: wish.updated_at ? new Date(wish.updated_at) : new Date(),
 							createdBy: wish.created_by,
-							length: wish.length as any
+							length: wish.length as 'short' | 'medium' | 'long'
 						};
 						await this.similarityService.precomputeSimilarityForWish(convertedWish);
 					}

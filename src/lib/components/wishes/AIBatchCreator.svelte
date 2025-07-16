@@ -15,7 +15,7 @@
 		onSaveBatch: (wishes: GeneratedWish[]) => void;
 	};
 
-	let { isOpen, formData, onClose, onSaveBatch }: Props = $props();
+	const { isOpen, formData, onClose, onSaveBatch }: Props = $props();
 
 	// Internal state management
 	let isGenerating = $state(false);
