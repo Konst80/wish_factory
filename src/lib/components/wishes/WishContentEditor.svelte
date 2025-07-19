@@ -112,8 +112,8 @@
 </script>
 
 <!-- Wish Type Section -->
-<div class="bg-base-50 mb-6 rounded-lg p-6">
-	<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+<div class="bg-base-50 mb-3 rounded-lg p-4">
+	<h3 class="mb-3 flex items-center gap-2 text-base font-semibold">
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			class="text-primary h-5 w-5"
@@ -133,9 +133,9 @@
 	<div class="form-control">
 		<fieldset>
 			<legend class="label-text flex items-center gap-2 text-base font-medium">Wunsch-Art *</legend>
-			<div class="grid grid-cols-2 gap-4">
+			<div class="grid grid-cols-2 gap-2">
 				<label
-					class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.isBelated ===
+					class="flex cursor-pointer items-center gap-2 rounded-lg border-2 p-3 transition-all {formData.isBelated ===
 					false
 						? 'border-primary bg-primary/5'
 						: 'border-base-300'}"
@@ -154,7 +154,7 @@
 					</div>
 				</label>
 				<label
-					class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.isBelated ===
+					class="flex cursor-pointer items-center gap-2 rounded-lg border-2 p-3 transition-all {formData.isBelated ===
 					true
 						? 'border-primary bg-primary/5'
 						: 'border-base-300'}"
@@ -185,8 +185,8 @@
 </div>
 
 <!-- Content Creation Section -->
-<div class="bg-base-50 mb-6 rounded-lg p-6">
-	<h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+<div class="bg-base-50 mb-3 rounded-lg p-4">
+	<h3 class="mb-3 flex items-center gap-2 text-base font-semibold">
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			class="text-primary h-5 w-5"
@@ -206,7 +206,7 @@
 
 	<!-- AI Generation Status -->
 	{#if isGenerating}
-		<div class="alert alert-info mb-4">
+		<div class="alert alert-info mb-2">
 			<div class="flex items-center gap-2">
 				<span class="loading loading-spinner loading-sm"></span>
 				<span>KI generiert Ihren Wunsch...</span>
@@ -215,7 +215,7 @@
 	{/if}
 
 	<!-- Haupttext -->
-	<div class="form-control mb-6">
+	<div class="form-control mb-3">
 		<label class="label" for="text">
 			<span class="label-text flex items-center gap-2 text-base font-medium">
 				<svg

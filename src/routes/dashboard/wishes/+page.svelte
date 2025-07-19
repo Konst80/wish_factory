@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import { WishStatus, EventType, Relation, AgeGroup } from '$lib/types/Wish';
 	import type { PageData } from './$types';
 	import WorkflowHelp from '$lib/components/ui/WorkflowHelp.svelte';
+	import WishDisplayModal from '$lib/components/wishes/WishDisplayModal.svelte';
+	import WishEditModal from '$lib/components/wishes/WishEditModal.svelte';
 	import { currentLanguage } from '$lib/stores/language';
 	import { activeWishLanguages, loadActiveWishLanguages } from '$lib/stores/wishLanguages';
 
@@ -32,6 +35,10 @@
 	let isReleasing = $state(false);
 	let showWorkflowHelp = $state(false);
 	let selectedWishForRelease = $state<string | null>(null);
+	let showWishModal = $state(false);
+	let selectedWishForDisplay = $state<typeof data.wishes[0] | null>(null);
+	let showEditModal = $state(false);
+	let selectedWishForEdit = $state<typeof data.wishes[0] | null>(null);
 
 	// Initialize language store and load saved filters on page mount
 	$effect(() => {
@@ -256,6 +263,69 @@
 		showReleaseModal = true;
 	}
 
+	// Open wish display modal
+	function openWishModal(wish: typeof data.wishes[0]) {
+		selectedWishForDisplay = wish;
+		showWishModal = true;
+	}
+
+	// Close wish display modal
+	function closeWishModal() {
+		showWishModal = false;
+		selectedWishForDisplay = null;
+	}
+
+	// Open wish edit modal
+	function openEditModal(wish: typeof data.wishes[0]) {
+		selectedWishForEdit = wish;
+		showEditModal = true;
+	}
+
+	// Close wish edit modal
+	function closeEditModal() {
+		showEditModal = false;
+		selectedWishForEdit = null;
+	}
+
+	// Handle wish save from edit modal
+	async function handleWishSave(wishId: string, formData: any) {
+		try {
+			// Create FormData for the server action
+			const form = new FormData();
+			form.append('type', formData.type);
+			form.append('eventType', formData.eventType);
+			form.append('language', formData.language);
+			form.append('length', formData.length);
+			form.append('isBelated', formData.isBelated.toString());
+			form.append('text', formData.text);
+			form.append('specificValues', formData.specificValues);
+			
+			// Add relations and ageGroups
+			formData.relations.forEach((relation: string) => {
+				form.append('relations', relation);
+			});
+			formData.ageGroups.forEach((ageGroup: string) => {
+				form.append('ageGroups', ageGroup);
+			});
+
+			// Call the update action
+			const response = await fetch(`/dashboard/wishes/${wishId}/edit`, {
+				method: 'POST',
+				body: form
+			});
+
+			if (response.ok) {
+				// Refresh the page data
+				await invalidateAll();
+			} else {
+				throw new Error('Failed to save wish');
+			}
+		} catch (error) {
+			console.error('Error saving wish:', error);
+			throw error;
+		}
+	}
+
 	// Release wish for WishSnap
 	async function releaseWish() {
 		if (!selectedWishForRelease) return;
@@ -270,7 +340,8 @@
 				await response.json(); // Success response
 				showReleaseModal = false;
 				selectedWishForRelease = null;
-				// You could add a success message here if needed
+				// Refresh the page data to show updated status
+				await invalidateAll();
 			} else {
 				const errorData = await response.json();
 				// Handle error - you might want to show this in a different way
@@ -1188,11 +1259,11 @@
 						</td>
 						<td class="px-3 py-3">
 							<div class="flex justify-center gap-1">
-								<a
-									href="/dashboard/wishes/{wish.id}"
+								<button
 									class="btn btn-ghost text-primary hover:bg-primary/10"
 									title="Anzeigen"
 									aria-label="Wunsch anzeigen"
+									onclick={() => openWishModal(wish)}
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -1214,12 +1285,12 @@
 											d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
 										/>
 									</svg>
-								</a>
-								<a
-									href="/dashboard/wishes/{wish.id}/edit"
+								</button>
+								<button
 									class="btn btn-ghost text-secondary hover:bg-secondary/10"
 									title="Bearbeiten"
 									aria-label="Wunsch bearbeiten"
+									onclick={() => openEditModal(wish)}
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -1235,7 +1306,7 @@
 											d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
 										/>
 									</svg>
-								</a>
+								</button>
 								{#if wish.status === 'Freigegeben'}
 									<button
 										class="btn btn-ghost text-accent hover:bg-accent/10"
@@ -1438,3 +1509,20 @@
 
 <!-- Workflow Help Modal -->
 <WorkflowHelp bind:isOpen={showWorkflowHelp} />
+
+<!-- Wish Display Modal -->
+<WishDisplayModal 
+	wish={selectedWishForDisplay} 
+	isOpen={showWishModal} 
+	onClose={closeWishModal}
+	onRelease={openReleaseModal}
+	onEdit={openEditModal}
+/>
+
+<!-- Wish Edit Modal -->
+<WishEditModal 
+	wish={selectedWishForEdit} 
+	isOpen={showEditModal} 
+	onClose={closeEditModal}
+	onSave={handleWishSave}
+/>
