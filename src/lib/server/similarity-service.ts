@@ -273,8 +273,12 @@ export class SimilarityService {
 			isBelated: data.belated,
 			language: data.language,
 			length: data.length as 'short' | 'medium' | 'long',
-			createdAt: data.created_at ? new Date(data.created_at).toISOString() : new Date().toISOString(),
-			updatedAt: data.updated_at ? new Date(data.updated_at).toISOString() : new Date().toISOString(),
+			createdAt: data.created_at
+				? new Date(data.created_at).toISOString()
+				: new Date().toISOString(),
+			updatedAt: data.updated_at
+				? new Date(data.updated_at).toISOString()
+				: new Date().toISOString(),
 			releasedAt: undefined
 		};
 	}

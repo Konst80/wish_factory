@@ -50,7 +50,7 @@ export class ReleasedWishesService {
 				age_groups: wish.age_groups,
 				specific_values: wish.specific_values || [],
 				text: wish.text,
-				is_belated: wish.belated,
+				belated: wish.belated,
 				language: wish.language,
 				length: wish.length || 'medium',
 				released_by: releasedBy
@@ -71,7 +71,7 @@ export class ReleasedWishesService {
 			ageGroups: releasedWish.age_groups as ('young' | 'middle' | 'senior' | 'all')[],
 			specificValues: releasedWish.specific_values || [],
 			text: releasedWish.text,
-			isBelated: releasedWish.is_belated,
+			isBelated: releasedWish.belated,
 			language: releasedWish.language,
 			length: releasedWish.length as 'short' | 'medium' | 'long',
 			releasedAt: new Date(releasedWish.released_at || new Date()).toISOString()
@@ -116,7 +116,7 @@ export class ReleasedWishesService {
 			query = query.eq('length', options.length);
 		}
 		if (options.isBelated !== undefined) {
-			query = query.eq('is_belated', options.isBelated);
+			query = query.eq('belated', options.isBelated);
 		}
 		if (options.relations?.length) {
 			query = query.overlaps('relations', options.relations);
@@ -154,7 +154,7 @@ export class ReleasedWishesService {
 			ageGroups: row.age_groups as ('young' | 'middle' | 'senior' | 'all')[],
 			specificValues: row.specific_values || [],
 			text: row.text,
-			isBelated: row.is_belated,
+			isBelated: row.belated,
 			language: row.language,
 			length: row.length as 'short' | 'medium' | 'long',
 			releasedAt: new Date(row.released_at || new Date()).toISOString()
@@ -189,7 +189,7 @@ export class ReleasedWishesService {
 			ageGroups: data.age_groups as ('young' | 'middle' | 'senior' | 'all')[],
 			specificValues: data.specific_values || [],
 			text: data.text,
-			isBelated: data.is_belated,
+			isBelated: data.belated,
 			language: data.language,
 			length: data.length as 'short' | 'medium' | 'long',
 			releasedAt: new Date(data.released_at || new Date()).toISOString()

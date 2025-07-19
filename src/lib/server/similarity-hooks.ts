@@ -125,8 +125,12 @@ export class SimilarityHooks {
 							isBelated: wish.belated,
 							language: wish.language,
 							length: wish.length as 'short' | 'medium' | 'long',
-							createdAt: wish.created_at ? new Date(wish.created_at).toISOString() : new Date().toISOString(),
-							updatedAt: wish.updated_at ? new Date(wish.updated_at).toISOString() : new Date().toISOString(),
+							createdAt: wish.created_at
+								? new Date(wish.created_at).toISOString()
+								: new Date().toISOString(),
+							updatedAt: wish.updated_at
+								? new Date(wish.updated_at).toISOString()
+								: new Date().toISOString(),
 							releasedAt: undefined
 						};
 						await this.similarityService.precomputeSimilarityForWish(convertedWish);

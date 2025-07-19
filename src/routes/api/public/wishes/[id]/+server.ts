@@ -110,10 +110,10 @@ export const GET: RequestHandler = async ({ params, request }) => {
 			ageGroups: wish.ageGroups,
 			specificValues: wish.specificValues,
 			text: wish.text,
-			belated: wish.belated,
+			isBelated: wish.isBelated,
 			language: wish.language,
 			length: wish.length,
-			releasedAt: wish.releasedAt.toISOString()
+			releasedAt: wish.releasedAt
 		};
 
 		// Set CORS headers for public API

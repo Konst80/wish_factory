@@ -16,8 +16,12 @@ function convertDbWishToWish(dbWish: Database['public']['Tables']['wishes']['Row
 		isBelated: dbWish.belated,
 		language: dbWish.language,
 		length: dbWish.length as 'short' | 'medium' | 'long',
-		createdAt: dbWish.created_at ? new Date(dbWish.created_at).toISOString() : new Date().toISOString(),
-		updatedAt: dbWish.updated_at ? new Date(dbWish.updated_at).toISOString() : new Date().toISOString(),
+		createdAt: dbWish.created_at
+			? new Date(dbWish.created_at).toISOString()
+			: new Date().toISOString(),
+		updatedAt: dbWish.updated_at
+			? new Date(dbWish.updated_at).toISOString()
+			: new Date().toISOString(),
 		releasedAt: undefined
 	};
 }

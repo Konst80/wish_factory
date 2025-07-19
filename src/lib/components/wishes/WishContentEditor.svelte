@@ -173,10 +173,10 @@
 					</div>
 				</label>
 			</div>
-			{#if errors.belated}
+			{#if errors.isBelated}
 				<div class="label">
 					<span class="label-text-alt text-error animate-in slide-in-from-left-2 duration-200"
-						>{errors.belated}</span
+						>{errors.isBelated}</span
 					>
 				</div>
 			{/if}

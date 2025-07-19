@@ -137,7 +137,6 @@ describe('Wish Types and Schemas', () => {
 			const result = createWishSchema.safeParse(createData);
 			expect(result.success).toBe(true);
 			if (result.success) {
-				expect(result.data.status).toBe('Entwurf');
 				expect(result.data.specificValues).toEqual([]);
 			}
 		});

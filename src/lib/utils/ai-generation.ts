@@ -55,7 +55,7 @@ export async function generateSingleWish(
 				ageGroups: formData.ageGroups,
 				specificValues: formData.specificValues || null,
 				language: formData.language,
-				belated: formData.belated,
+				isBelated: formData.isBelated,
 				length: formData.length
 			})
 		});
@@ -166,7 +166,7 @@ export async function generateBatchWishes(
 					language: primaryLanguage,
 					count: batchSettings.count,
 					isBatch: true,
-					belated: formData.belated,
+					isBelated: formData.isBelated,
 					length: formData.length
 				})
 			});

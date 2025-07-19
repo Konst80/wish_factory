@@ -65,11 +65,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					relations: [], // Nicht nötig für Similarity
 					ageGroups: [], // Nicht nötig für Similarity
 					specificValues: [],
-					belated: false,
+					isBelated: false,
 					status: 'Freigegeben' as const,
 					length: 'medium' as const,
-					createdAt: new Date(),
-					updatedAt: wish.updated_at ? new Date(wish.updated_at) : new Date(),
+					createdAt: new Date().toISOString(),
+					updatedAt: wish.updated_at ? new Date(wish.updated_at).toISOString() : new Date().toISOString(),
 					createdBy: ''
 				};
 

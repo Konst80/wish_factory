@@ -201,16 +201,16 @@ async function getCachedSimilarityResults(
 				text: wish.text,
 				type: wish.type,
 				eventType: wish.eventType,
-				status: wish.status,
+				// status: wish.status, // Property not available in Wish interface
 				language: wish.language,
 				relations: wish.relations || [],
 				ageGroups: wish.ageGroups || [],
 				specificValues: wish.specificValues || [],
-				belated: Boolean(wish.belated),
+				isBelated: Boolean(wish.isBelated),
 				length: wish.length || 0,
 				createdAt: wish.createdAt || '',
 				updatedAt: wish.updatedAt || '',
-				createdBy: wish.createdBy || '',
+				// createdBy: wish.createdBy || '', // Property not available in Wish interface
 				similarWishes: filteredSimilar.map((s) => ({
 					id: s.targetWish.id,
 					text: s.targetWish.text,
@@ -323,16 +323,16 @@ async function processWishesBatch(
 							text: wish.text,
 							type: wish.type,
 							eventType: wish.eventType,
-							status: wish.status,
+							// status: wish.status, // Property not available in Wish interface
 							language: wish.language,
 							relations: wish.relations || [],
 							ageGroups: wish.ageGroups || [],
 							specificValues: wish.specificValues || [],
-							belated: Boolean(wish.belated),
+							isBelated: Boolean(wish.isBelated),
 							length: wish.length || 0,
 							createdAt: wish.createdAt || '',
 							updatedAt: wish.updatedAt || '',
-							createdBy: wish.createdBy || '',
+							// createdBy: wish.createdBy || '', // Property not available in Wish interface
 							similarWishes: filteredSimilar.map((sw) => ({
 								id: sw.wish.id,
 								text: sw.wish.text,

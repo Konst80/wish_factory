@@ -36,9 +36,9 @@
 	let showWorkflowHelp = $state(false);
 	let selectedWishForRelease = $state<string | null>(null);
 	let showWishModal = $state(false);
-	let selectedWishForDisplay = $state<typeof data.wishes[0] | null>(null);
+	let selectedWishForDisplay = $state<(typeof data.wishes)[0] | null>(null);
 	let showEditModal = $state(false);
-	let selectedWishForEdit = $state<typeof data.wishes[0] | null>(null);
+	let selectedWishForEdit = $state<(typeof data.wishes)[0] | null>(null);
 
 	// Initialize language store and load saved filters on page mount
 	$effect(() => {
@@ -264,7 +264,7 @@
 	}
 
 	// Open wish display modal
-	function openWishModal(wish: typeof data.wishes[0]) {
+	function openWishModal(wish: (typeof data.wishes)[0]) {
 		selectedWishForDisplay = wish;
 		showWishModal = true;
 	}
@@ -276,7 +276,7 @@
 	}
 
 	// Open wish edit modal
-	function openEditModal(wish: typeof data.wishes[0]) {
+	function openEditModal(wish: (typeof data.wishes)[0]) {
 		selectedWishForEdit = wish;
 		showEditModal = true;
 	}
@@ -299,7 +299,7 @@
 			form.append('isBelated', formData.isBelated.toString());
 			form.append('text', formData.text);
 			form.append('specificValues', formData.specificValues);
-			
+
 			// Add relations and ageGroups
 			formData.relations.forEach((relation: string) => {
 				form.append('relations', relation);
@@ -1511,18 +1511,18 @@
 <WorkflowHelp bind:isOpen={showWorkflowHelp} />
 
 <!-- Wish Display Modal -->
-<WishDisplayModal 
-	wish={selectedWishForDisplay} 
-	isOpen={showWishModal} 
+<WishDisplayModal
+	wish={selectedWishForDisplay}
+	isOpen={showWishModal}
 	onClose={closeWishModal}
 	onRelease={openReleaseModal}
 	onEdit={openEditModal}
 />
 
 <!-- Wish Edit Modal -->
-<WishEditModal 
-	wish={selectedWishForEdit} 
-	isOpen={showEditModal} 
+<WishEditModal
+	wish={selectedWishForEdit}
+	isOpen={showEditModal}
 	onClose={closeEditModal}
 	onSave={handleWishSave}
 />

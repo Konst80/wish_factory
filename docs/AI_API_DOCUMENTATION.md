@@ -13,6 +13,7 @@ All public API endpoints require an API key. Contact your administrator to obtai
 **API Key Format**: `wsk_{8char_prefix}{36char_secret}` (44-48 characters total)
 
 **Authentication Methods**:
+
 ```http
 # Method 1: X-API-Key Header
 GET /api/public/wishes
@@ -39,55 +40,57 @@ curl -H "X-API-Key: YOUR_API_KEY" \
 **Description**: Retrieve a paginated list of released wishes with comprehensive filtering options.
 
 **Headers**:
+
 - `X-API-Key` or `Authorization: Bearer {api_key}` (required)
 
 **Query Parameters**:
 
-| Parameter | Type | Description | Example |
-|-----------|------|-------------|---------|
-| `language` | string | Filter by language code | `de`, `en` |
-| `type` | string | Wish type | `normal`, `heartfelt`, `funny` |
-| `eventType` | string | Event type | `birthday`, `anniversary`, `custom` |
-| `length` | string | Wish length | `short`, `medium`, `long` |
-| `isBelated` | boolean | Belated wishes only | `true`, `false` |
-| `relations` | string | Comma-separated relations | `friend,family` |
-| `ageGroups` | string | Comma-separated age groups | `young,middle` |
-| `specificValues` | string | Comma-separated numbers | `18,21,30` |
-| `limit` | number | Results per page (max 100) | `20` |
-| `offset` | number | Skip results | `0` |
-| `since` | string | ISO date for incremental sync | `2024-01-01T00:00:00Z` |
+| Parameter        | Type    | Description                   | Example                             |
+| ---------------- | ------- | ----------------------------- | ----------------------------------- |
+| `language`       | string  | Filter by language code       | `de`, `en`                          |
+| `type`           | string  | Wish type                     | `normal`, `heartfelt`, `funny`      |
+| `eventType`      | string  | Event type                    | `birthday`, `anniversary`, `custom` |
+| `length`         | string  | Wish length                   | `short`, `medium`, `long`           |
+| `isBelated`      | boolean | Belated wishes only           | `true`, `false`                     |
+| `relations`      | string  | Comma-separated relations     | `friend,family`                     |
+| `ageGroups`      | string  | Comma-separated age groups    | `young,middle`                      |
+| `specificValues` | string  | Comma-separated numbers       | `18,21,30`                          |
+| `limit`          | number  | Results per page (max 100)    | `20`                                |
+| `offset`         | number  | Skip results                  | `0`                                 |
+| `since`          | string  | ISO date for incremental sync | `2024-01-01T00:00:00Z`              |
 
 **Response**:
+
 ```json
 {
-  "data": [
-    {
-      "id": "123e4567-e89b-12d3-a456-426614174000",
-      "type": "heartfelt",
-      "eventType": "birthday",
-      "relations": ["friend", "family"],
-      "ageGroups": ["young", "middle"],
-      "specificValues": [25, 30],
-      "text": "Herzlichen Glückwunsch zum {age}. Geburtstag! ...",
-      "isBelated": false,
-      "language": "de",
-      "length": "medium",
-      "createdAt": "2024-01-15T10:30:00Z",
-      "updatedAt": "2024-01-15T10:30:00Z",
-      "releasedAt": "2024-01-16T09:00:00Z",
-      "originalWishId": "456e7890-e89b-12d3-a456-426614174001"
-    }
-  ],
-  "pagination": {
-    "total": 150,
-    "limit": 20,
-    "offset": 0,
-    "hasMore": true
-  },
-  "metadata": {
-    "totalCount": 150,
-    "lastUpdated": "2024-01-16T09:00:00Z"
-  }
+	"data": [
+		{
+			"id": "123e4567-e89b-12d3-a456-426614174000",
+			"type": "heartfelt",
+			"eventType": "birthday",
+			"relations": ["friend", "family"],
+			"ageGroups": ["young", "middle"],
+			"specificValues": [25, 30],
+			"text": "Herzlichen Glückwunsch zum {age}. Geburtstag! ...",
+			"isBelated": false,
+			"language": "de",
+			"length": "medium",
+			"createdAt": "2024-01-15T10:30:00Z",
+			"updatedAt": "2024-01-15T10:30:00Z",
+			"releasedAt": "2024-01-16T09:00:00Z",
+			"originalWishId": "456e7890-e89b-12d3-a456-426614174001"
+		}
+	],
+	"pagination": {
+		"total": 150,
+		"limit": 20,
+		"offset": 0,
+		"hasMore": true
+	},
+	"metadata": {
+		"totalCount": 150,
+		"lastUpdated": "2024-01-16T09:00:00Z"
+	}
 }
 ```
 
@@ -98,27 +101,29 @@ curl -H "X-API-Key: YOUR_API_KEY" \
 **Description**: Retrieve a specific released wish by its ID.
 
 **Headers**:
+
 - `X-API-Key` or `Authorization: Bearer {api_key}` (required)
 
 **Response**:
+
 ```json
 {
-  "data": {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "type": "heartfelt",
-    "eventType": "birthday",
-    "relations": ["friend"],
-    "ageGroups": ["young"],
-    "specificValues": [25],
-    "text": "Herzlichen Glückwunsch zum {age}. Geburtstag! ...",
-    "isBelated": false,
-    "language": "de",
-    "length": "medium",
-    "createdAt": "2024-01-15T10:30:00Z",
-    "updatedAt": "2024-01-15T10:30:00Z",
-    "releasedAt": "2024-01-16T09:00:00Z",
-    "originalWishId": "456e7890-e89b-12d3-a456-426614174001"
-  }
+	"data": {
+		"id": "123e4567-e89b-12d3-a456-426614174000",
+		"type": "heartfelt",
+		"eventType": "birthday",
+		"relations": ["friend"],
+		"ageGroups": ["young"],
+		"specificValues": [25],
+		"text": "Herzlichen Glückwunsch zum {age}. Geburtstag! ...",
+		"isBelated": false,
+		"language": "de",
+		"length": "medium",
+		"createdAt": "2024-01-15T10:30:00Z",
+		"updatedAt": "2024-01-15T10:30:00Z",
+		"releasedAt": "2024-01-16T09:00:00Z",
+		"originalWishId": "456e7890-e89b-12d3-a456-426614174001"
+	}
 }
 ```
 
@@ -129,25 +134,27 @@ curl -H "X-API-Key: YOUR_API_KEY" \
 **Description**: Retrieve available options and system metadata. Useful for discovering valid filter values.
 
 **Headers**:
+
 - `X-API-Key` or `Authorization: Bearer {api_key}` (required)
 
 **Response**:
+
 ```json
 {
-  "data": {
-    "types": ["normal", "heartfelt", "funny"],
-    "eventTypes": ["birthday", "anniversary", "custom"],
-    "relations": ["friend", "family", "partner", "colleague"],
-    "ageGroups": ["young", "middle", "senior", "all"],
-    "languages": ["de", "en"],
-    "lengths": ["short", "medium", "long"],
-    "totalCount": 150,
-    "lastUpdated": "2024-01-16T09:00:00Z",
-    "availableSpecificValues": {
-      "birthday": [16, 18, 21, 25, 30, 40, 50, 60, 65, 70, 75, 80, 85, 90, 100],
-      "anniversary": [1, 5, 10, 15, 20, 25, 30, 40, 50, 60]
-    }
-  }
+	"data": {
+		"types": ["normal", "heartfelt", "funny"],
+		"eventTypes": ["birthday", "anniversary", "custom"],
+		"relations": ["friend", "family", "partner", "colleague"],
+		"ageGroups": ["young", "middle", "senior", "all"],
+		"languages": ["de", "en"],
+		"lengths": ["short", "medium", "long"],
+		"totalCount": 150,
+		"lastUpdated": "2024-01-16T09:00:00Z",
+		"availableSpecificValues": {
+			"birthday": [16, 18, 21, 25, 30, 40, 50, 60, 65, 70, 75, 80, 85, 90, 100],
+			"anniversary": [1, 5, 10, 15, 20, 25, 30, 40, 50, 60]
+		}
+	}
 }
 ```
 
@@ -157,20 +164,20 @@ curl -H "X-API-Key: YOUR_API_KEY" \
 
 ```typescript
 interface Wish {
-  id: string;                    // UUID of the released wish
-  type: 'normal' | 'heartfelt' | 'funny';
-  eventType: 'birthday' | 'anniversary' | 'custom';
-  relations: ('friend' | 'family' | 'partner' | 'colleague')[];
-  ageGroups: ('young' | 'middle' | 'senior' | 'all')[];
-  specificValues: number[];     // Milestone numbers (e.g., ages, years)
-  text: string;                 // Wish content with {placeholders}
-  isBelated: boolean;           // Whether this is for belated occasions
-  language: string;             // Language code (e.g., 'de', 'en')
-  length: 'short' | 'medium' | 'long';
-  createdAt: string;            // ISO 8601 date string
-  updatedAt: string;            // ISO 8601 date string
-  releasedAt: string;           // ISO 8601 date string
-  originalWishId: string;       // UUID of the original wish
+	id: string; // UUID of the released wish
+	type: 'normal' | 'heartfelt' | 'funny';
+	eventType: 'birthday' | 'anniversary' | 'custom';
+	relations: ('friend' | 'family' | 'partner' | 'colleague')[];
+	ageGroups: ('young' | 'middle' | 'senior' | 'all')[];
+	specificValues: number[]; // Milestone numbers (e.g., ages, years)
+	text: string; // Wish content with {placeholders}
+	isBelated: boolean; // Whether this is for belated occasions
+	language: string; // Language code (e.g., 'de', 'en')
+	length: 'short' | 'medium' | 'long';
+	createdAt: string; // ISO 8601 date string
+	updatedAt: string; // ISO 8601 date string
+	releasedAt: string; // ISO 8601 date string
+	originalWishId: string; // UUID of the original wish
 }
 ```
 
@@ -183,6 +190,7 @@ Wishes contain placeholders that can be dynamically replaced:
 - `{relation}` - Relationship to recipient
 
 **Example**:
+
 ```
 "Herzlichen Glückwunsch zum {age}. Geburtstag, liebe/r {name}!"
 ```
@@ -259,28 +267,28 @@ curl -H "X-API-Key: YOUR_KEY" \
 
 ### Common Error Codes
 
-| Code | HTTP Status | Description | Solution |
-|------|-------------|-------------|----------|
-| `MISSING_API_KEY` | 401 | No API key provided | Include X-API-Key header |
-| `INVALID_API_KEY` | 401 | Invalid or expired key | Check key format and validity |
-| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests | Wait for rate limit reset |
-| `WISH_NOT_FOUND` | 404 | Wish ID doesn't exist | Verify the wish ID |
-| `VALIDATION_ERROR` | 400 | Invalid query parameters | Check parameter format |
-| `INTERNAL_ERROR` | 500 | Server error | Retry or contact support |
+| Code                  | HTTP Status | Description              | Solution                      |
+| --------------------- | ----------- | ------------------------ | ----------------------------- |
+| `MISSING_API_KEY`     | 401         | No API key provided      | Include X-API-Key header      |
+| `INVALID_API_KEY`     | 401         | Invalid or expired key   | Check key format and validity |
+| `RATE_LIMIT_EXCEEDED` | 429         | Too many requests        | Wait for rate limit reset     |
+| `WISH_NOT_FOUND`      | 404         | Wish ID doesn't exist    | Verify the wish ID            |
+| `VALIDATION_ERROR`    | 400         | Invalid query parameters | Check parameter format        |
+| `INTERNAL_ERROR`      | 500         | Server error             | Retry or contact support      |
 
 ### Error Response Format
 
 ```json
 {
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Rate limit exceeded. Try again in 3600 seconds.",
-    "timestamp": "2024-01-16T10:30:00Z",
-    "details": {
-      "limit": 1000,
-      "resetTime": "2024-01-16T11:00:00Z"
-    }
-  }
+	"error": {
+		"code": "RATE_LIMIT_EXCEEDED",
+		"message": "Rate limit exceeded. Try again in 3600 seconds.",
+		"timestamp": "2024-01-16T10:30:00Z",
+		"details": {
+			"limit": 1000,
+			"resetTime": "2024-01-16T11:00:00Z"
+		}
+	}
 }
 ```
 
@@ -297,7 +305,7 @@ class WishFactoryAPI:
         self.api_key = api_key
         self.base_url = base_url
         self.headers = {'X-API-Key': api_key}
-    
+
     def get_wishes(self, **filters):
         """Get wishes with optional filters"""
         response = requests.get(
@@ -307,7 +315,7 @@ class WishFactoryAPI:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def get_wish(self, wish_id):
         """Get a specific wish by ID"""
         response = requests.get(
@@ -316,7 +324,7 @@ class WishFactoryAPI:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def get_metadata(self):
         """Get available options and metadata"""
         response = requests.get(
@@ -347,62 +355,60 @@ for wish in wishes['data']:
 
 ```javascript
 class WishFactoryAPI {
-    constructor(apiKey, baseUrl) {
-        this.apiKey = apiKey;
-        this.baseUrl = baseUrl;
-    }
+	constructor(apiKey, baseUrl) {
+		this.apiKey = apiKey;
+		this.baseUrl = baseUrl;
+	}
 
-    async request(endpoint, params = {}) {
-        const url = new URL(`${this.baseUrl}${endpoint}`);
-        Object.keys(params).forEach(key => 
-            url.searchParams.append(key, params[key])
-        );
+	async request(endpoint, params = {}) {
+		const url = new URL(`${this.baseUrl}${endpoint}`);
+		Object.keys(params).forEach((key) => url.searchParams.append(key, params[key]));
 
-        const response = await fetch(url, {
-            headers: {
-                'X-API-Key': this.apiKey,
-                'Content-Type': 'application/json'
-            }
-        });
+		const response = await fetch(url, {
+			headers: {
+				'X-API-Key': this.apiKey,
+				'Content-Type': 'application/json'
+			}
+		});
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(`API Error: ${error.error.code} - ${error.error.message}`);
-        }
+		if (!response.ok) {
+			const error = await response.json();
+			throw new Error(`API Error: ${error.error.code} - ${error.error.message}`);
+		}
 
-        return response.json();
-    }
+		return response.json();
+	}
 
-    async getWishes(filters = {}) {
-        return this.request('/api/public/wishes', filters);
-    }
+	async getWishes(filters = {}) {
+		return this.request('/api/public/wishes', filters);
+	}
 
-    async getWish(id) {
-        return this.request(`/api/public/wishes/${id}`);
-    }
+	async getWish(id) {
+		return this.request(`/api/public/wishes/${id}`);
+	}
 
-    async getMetadata() {
-        return this.request('/api/public/wishes/metadata');
-    }
+	async getMetadata() {
+		return this.request('/api/public/wishes/metadata');
+	}
 }
 
 // Usage
 const api = new WishFactoryAPI('wsk_yourkey', 'https://your-domain.com');
 
 try {
-    const wishes = await api.getWishes({
-        language: 'en',
-        eventType: 'birthday',
-        type: 'heartfelt',
-        limit: 5
-    });
-    
-    console.log(`Found ${wishes.data.length} wishes`);
-    wishes.data.forEach(wish => {
-        console.log(`- ${wish.text}`);
-    });
+	const wishes = await api.getWishes({
+		language: 'en',
+		eventType: 'birthday',
+		type: 'heartfelt',
+		limit: 5
+	});
+
+	console.log(`Found ${wishes.data.length} wishes`);
+	wishes.data.forEach((wish) => {
+		console.log(`- ${wish.text}`);
+	});
 } catch (error) {
-    console.error('Error:', error.message);
+	console.error('Error:', error.message);
 }
 ```
 
@@ -421,20 +427,20 @@ def generate_personalized_wish(api, person_info):
         'type': person_info.get('style', 'normal'),
         'limit': 5
     }
-    
+
     if person_info.get('age'):
         filters['specificValues'] = str(person_info['age'])
-    
+
     wishes = api.get_wishes(**filters)
-    
+
     # Select best wish based on AI criteria
     selected_wish = wishes['data'][0]  # Simplified selection
-    
+
     # Personalize the wish
     text = selected_wish['text']
     text = text.replace('{name}', person_info['name'])
     text = text.replace('{age}', str(person_info.get('age', '')))
-    
+
     return {
         'text': text,
         'metadata': selected_wish
@@ -449,25 +455,25 @@ def sync_wishes_database(api, last_sync_time=None):
     params = {'limit': 100}
     if last_sync_time:
         params['since'] = last_sync_time.isoformat()
-    
+
     all_wishes = []
     offset = 0
-    
+
     while True:
         params['offset'] = offset
         response = api.get_wishes(**params)
-        
+
         wishes = response['data']
         if not wishes:
             break
-            
+
         all_wishes.extend(wishes)
-        
+
         if not response['pagination']['hasMore']:
             break
-            
+
         offset += len(wishes)
-    
+
     return all_wishes
 ```
 
@@ -478,9 +484,9 @@ def get_multilingual_wishes(api, event_type, relations):
     """Get wishes in all available languages"""
     metadata = api.get_metadata()
     languages = metadata['data']['languages']
-    
+
     multilingual_wishes = {}
-    
+
     for language in languages:
         wishes = api.get_wishes(
             language=language,
@@ -489,7 +495,7 @@ def get_multilingual_wishes(api, event_type, relations):
             limit=10
         )
         multilingual_wishes[language] = wishes['data']
-    
+
     return multilingual_wishes
 ```
 
@@ -531,26 +537,26 @@ def get_multilingual_wishes(api, event_type, relations):
 
 ### Filter Parameters
 
-| Parameter | Type | Values | Description |
-|-----------|------|--------|-------------|
-| `language` | string | `de`, `en`, custom | Language code |
-| `type` | string | `normal`, `heartfelt`, `funny` | Wish tone and style |
-| `eventType` | string | `birthday`, `anniversary`, `custom` | Type of occasion |
-| `length` | string | `short`, `medium`, `long` | Content length |
-| `isBelated` | boolean | `true`, `false` | For belated occasions |
-| `relations` | string | `friend`, `family`, `partner`, `colleague` | Comma-separated |
-| `ageGroups` | string | `young`, `middle`, `senior`, `all` | Comma-separated |
-| `specificValues` | string | Numbers | Comma-separated ages/years |
-| `limit` | number | 1-100 | Results per page |
-| `offset` | number | ≥0 | Skip results |
-| `since` | string | ISO 8601 | For incremental sync |
+| Parameter        | Type    | Values                                     | Description                |
+| ---------------- | ------- | ------------------------------------------ | -------------------------- |
+| `language`       | string  | `de`, `en`, custom                         | Language code              |
+| `type`           | string  | `normal`, `heartfelt`, `funny`             | Wish tone and style        |
+| `eventType`      | string  | `birthday`, `anniversary`, `custom`        | Type of occasion           |
+| `length`         | string  | `short`, `medium`, `long`                  | Content length             |
+| `isBelated`      | boolean | `true`, `false`                            | For belated occasions      |
+| `relations`      | string  | `friend`, `family`, `partner`, `colleague` | Comma-separated            |
+| `ageGroups`      | string  | `young`, `middle`, `senior`, `all`         | Comma-separated            |
+| `specificValues` | string  | Numbers                                    | Comma-separated ages/years |
+| `limit`          | number  | 1-100                                      | Results per page           |
+| `offset`         | number  | ≥0                                         | Skip results               |
+| `since`          | string  | ISO 8601                                   | For incremental sync       |
 
 ### Response Headers
 
-| Header | Description |
-|--------|-------------|
-| `X-RateLimit-Limit` | Total requests allowed per hour |
-| `X-RateLimit-Remaining` | Requests remaining in current window |
-| `X-RateLimit-Reset` | Unix timestamp when limit resets |
-| `Cache-Control` | Caching directives |
-| `Access-Control-Allow-Origin` | CORS origin policy |
+| Header                        | Description                          |
+| ----------------------------- | ------------------------------------ |
+| `X-RateLimit-Limit`           | Total requests allowed per hour      |
+| `X-RateLimit-Remaining`       | Requests remaining in current window |
+| `X-RateLimit-Reset`           | Unix timestamp when limit resets     |
+| `Cache-Control`               | Caching directives                   |
+| `Access-Control-Allow-Origin` | CORS origin policy                   |
