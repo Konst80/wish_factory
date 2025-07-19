@@ -3,8 +3,8 @@ import { z } from 'zod';
 // Enums für Wish-Typen basierend auf FRS
 export const WishType = {
 	NORMAL: 'normal',
-	HERZLICH: 'herzlich',
-	HUMORVOLL: 'humorvoll'
+	HEARTFELT: 'heartfelt',
+	FUNNY: 'funny'
 } as const;
 
 export const EventType = {
@@ -56,22 +56,22 @@ export type Relation = (typeof Relation)[keyof typeof Relation];
 export type AgeGroup = (typeof AgeGroup)[keyof typeof AgeGroup];
 export type WishLength = (typeof WishLength)[keyof typeof WishLength];
 
-// Wish Interface basierend auf FRS Spezifikation
+// Wish Interface basierend auf Referenz-Spezifikation
 export interface Wish {
 	/** Eindeutiger, systemgenerierter UUID Identifikator */
 	id: string;
 
 	/** Art des Wunsches */
-	type: WishType;
+	type: 'normal' | 'heartfelt' | 'funny';
 
 	/** Anlass */
-	eventType: EventType;
+	eventType: 'birthday' | 'anniversary' | 'custom';
 
 	/** Ziel-Beziehung(en) */
-	relations: Relation[];
+	relations: ('friend' | 'family' | 'partner' | 'colleague')[];
 
 	/** Ziel-Altersgruppe(n) */
-	ageGroups: AgeGroup[];
+	ageGroups: ('young' | 'middle' | 'senior' | 'all')[];
 
 	/** Array mit Zahlen für Meilensteine (z.B. [18, 30, 50] für Geburtstage). Kann leer sein. */
 	specificValues: number[];
@@ -80,32 +80,29 @@ export interface Wish {
 	text: string;
 
 	/** Gibt an, ob es sich um einen nachträglichen Wunsch handelt */
-	belated: boolean;
-
-	/** Der aktuelle Workflow-Status */
-	status: WishStatus;
+	isBelated: boolean;
 
 	/** Sprache des Wunsches */
-	language: Language;
+	language: string;
 
 	/** Gewünschte Länge des Wunsches */
-	length: WishLength;
+	length: 'short' | 'medium' | 'long';
 
 	/** Erstellungsdatum */
-	createdAt: Date;
+	createdAt: string; // ISO date string
 
 	/** Letztes Update */
-	updatedAt: Date;
+	updatedAt: string; // ISO date string
 
-	/** Ersteller (User ID) */
-	createdBy: string;
+	/** Zeitpunkt der Freigabe (optional) */
+	releasedAt?: string; // ISO date string
 }
 
 // Zod Validation Schemas
-export const wishTypeSchema = z.enum(['normal', 'herzlich', 'humorvoll']);
+export const wishTypeSchema = z.enum(['normal', 'heartfelt', 'funny']);
 export const eventTypeSchema = z.enum(['birthday', 'anniversary', 'custom']);
 export const wishStatusSchema = z.enum(['Entwurf', 'Zur Freigabe', 'Freigegeben', 'Archiviert']);
-export const languageSchema = z.enum(['de', 'en']);
+export const languageSchema = z.string().min(1, 'Language code cannot be empty');
 export const relationSchema = z.enum(['friend', 'family', 'partner', 'colleague']);
 export const ageGroupSchema = z.enum(['all', 'young', 'middle', 'senior']);
 export const wishLengthSchema = z.enum(['short', 'medium', 'long']);
@@ -122,20 +119,20 @@ export const wishSchema = z.object({
 		.string()
 		.min(10, 'Text muss mindestens 10 Zeichen haben')
 		.max(1000, 'Text darf nicht länger als 1000 Zeichen sein'),
-	belated: z.boolean().default(false),
-	status: wishStatusSchema.default('Entwurf'),
+	isBelated: z.boolean().default(false),
 	language: languageSchema,
 	length: wishLengthSchema.default('medium'),
-	createdAt: z.date().default(() => new Date()),
-	updatedAt: z.date().default(() => new Date()),
-	createdBy: z.string().uuid('Creator muss eine gültige UUID sein')
+	createdAt: z.string().datetime('Muss eine gültige ISO-Datumszeichenfolge sein'),
+	updatedAt: z.string().datetime('Muss eine gültige ISO-Datumszeichenfolge sein'),
+	releasedAt: z.string().datetime('Muss eine gültige ISO-Datumszeichenfolge sein').optional()
 });
 
 // Schema für das Erstellen neuer Wishes (ohne ID, Timestamps)
 export const createWishSchema = wishSchema.omit({
 	id: true,
 	createdAt: true,
-	updatedAt: true
+	updatedAt: true,
+	releasedAt: true
 });
 
 // Schema für das Updaten von Wishes (alle Felder optional außer ID)
@@ -168,16 +165,16 @@ export interface ReleasedWish {
 	originalWishId: string;
 
 	/** Art des Wunsches */
-	type: WishType;
+	type: 'normal' | 'heartfelt' | 'funny';
 
 	/** Anlass */
-	eventType: EventType;
+	eventType: 'birthday' | 'anniversary' | 'custom';
 
 	/** Ziel-Beziehung(en) */
-	relations: Relation[];
+	relations: ('friend' | 'family' | 'partner' | 'colleague')[];
 
 	/** Ziel-Altersgruppe(n) */
-	ageGroups: AgeGroup[];
+	ageGroups: ('young' | 'middle' | 'senior' | 'all')[];
 
 	/** Array mit Zahlen für Meilensteine */
 	specificValues: number[];
@@ -186,16 +183,16 @@ export interface ReleasedWish {
 	text: string;
 
 	/** Gibt an, ob es sich um einen nachträglichen Wunsch handelt */
-	belated: boolean;
+	isBelated: boolean;
 
 	/** Sprache des Wunsches */
-	language: Language;
+	language: string;
 
 	/** Gewünschte Länge des Wunsches */
-	length: WishLength;
+	length: 'short' | 'medium' | 'long';
 
 	/** Zeitpunkt der Freigabe */
-	releasedAt: Date;
+	releasedAt: string; // ISO date string
 }
 
 // Validation Schema für ReleasedWish
@@ -208,10 +205,10 @@ export const releasedWishSchema = z.object({
 	ageGroups: z.array(ageGroupSchema).min(1),
 	specificValues: z.array(z.number().int().positive()).default([]),
 	text: z.string().min(10).max(1000),
-	belated: z.boolean(),
+	isBelated: z.boolean(),
 	language: languageSchema,
 	length: wishLengthSchema,
-	releasedAt: z.date()
+	releasedAt: z.string().datetime('Muss eine gültige ISO-Datumszeichenfolge sein')
 });
 
 // Helper Types für Formulare
@@ -220,14 +217,13 @@ export type WishUpdateData = z.infer<typeof updateWishSchema>;
 
 // Form State Type für Component Props
 export interface WishFormState {
-	type: WishType;
-	eventType: EventType;
+	type: 'normal' | 'heartfelt' | 'funny';
+	eventType: 'birthday' | 'anniversary' | 'custom';
 	relations: string[];
 	ageGroups: string[];
 	specificValues: string | number;
 	text: string;
-	belated: boolean;
-	language: string; // Changed from Language to string to support dynamic languages
-	status: WishStatus;
-	length: WishLength;
+	isBelated: boolean;
+	language: string;
+	length: 'short' | 'medium' | 'long';
 }

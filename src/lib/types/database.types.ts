@@ -443,7 +443,7 @@ export type Database = {
 					age_groups: Database['public']['Enums']['age_group'][];
 					specific_values: number[];
 					text: string;
-					belated: string;
+					belated: boolean;
 					status: Database['public']['Enums']['wish_status'];
 					language: Database['public']['Enums']['language'];
 					created_at: string;
@@ -468,7 +468,7 @@ export type Database = {
 			relation: 'friend' | 'family' | 'partner' | 'colleague';
 			user_role: 'Redakteur' | 'Administrator';
 			wish_status: 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert';
-			wish_type: 'normal' | 'herzlich' | 'humorvoll';
+			wish_type: 'normal' | 'heartfelt' | 'funny';
 		};
 		CompositeTypes: {
 			[_ in never]: never;
@@ -600,7 +600,7 @@ export const Constants = {
 			relation: ['friend', 'family', 'partner', 'colleague'],
 			user_role: ['Redakteur', 'Administrator'],
 			wish_status: ['Entwurf', 'Zur Freigabe', 'Freigegeben', 'Archiviert'],
-			wish_type: ['normal', 'herzlich', 'humorvoll']
+			wish_type: ['normal', 'heartfelt', 'funny']
 		}
 	}
 } as const;

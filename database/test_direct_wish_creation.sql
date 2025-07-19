@@ -15,7 +15,8 @@ INSERT INTO wishes (
     text, 
     belated, 
     status, 
-    language, 
+    language,
+    length,
     created_by
 ) VALUES (
     generate_wish_id('de'::language),
@@ -25,9 +26,10 @@ INSERT INTO wishes (
     ARRAY['all']::age_group[],
     ARRAY[]::INTEGER[],
     'Alles Gute zum Geburtstag, liebe(r) [Name]! Möge dein [Age]. Geburtstag wunderbar werden.',
-    'Nachträglich alles Gute zum Geburtstag! Ich hoffe, dein [Age]. Geburtstag war fantastisch.',
+    false,
     'Entwurf'::wish_status,
     'de'::language,
+    'medium',
     '8ef0ae50-858b-4adb-a45a-0227b5c7c4a7'  -- Your user ID
 );
 

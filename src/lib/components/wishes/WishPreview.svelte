@@ -47,7 +47,7 @@
 							</div>
 							<p class="text-sm leading-relaxed">{formData.text}</p>
 						</div>
-						{#if formData.belated}
+						{#if formData.isBelated}
 							<div class="divider my-2"></div>
 							<div>
 								<div class="mb-2 flex items-center gap-2">

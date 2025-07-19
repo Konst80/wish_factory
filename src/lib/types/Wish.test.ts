@@ -17,8 +17,8 @@ describe('Wish Types and Schemas', () => {
 	describe('Type Guards', () => {
 		it('should validate wish types correctly', () => {
 			expect(isValidWishType('normal')).toBe(true);
-			expect(isValidWishType('herzlich')).toBe(true);
-			expect(isValidWishType('humorvoll')).toBe(true);
+			expect(isValidWishType('heartfelt')).toBe(true);
+			expect(isValidWishType('funny')).toBe(true);
 			expect(isValidWishType('invalid')).toBe(false);
 		});
 
@@ -167,8 +167,8 @@ describe('Wish Types and Schemas', () => {
 	describe('Constants', () => {
 		it('should have correct WishType values', () => {
 			expect(WishType.NORMAL).toBe('normal');
-			expect(WishType.HERZLICH).toBe('herzlich');
-			expect(WishType.HUMORVOLL).toBe('humorvoll');
+			expect(WishType.HEARTFELT).toBe('heartfelt');
+			expect(WishType.FUNNY).toBe('funny');
 		});
 
 		it('should have correct EventType values', () => {

@@ -16,9 +16,8 @@
 		ageGroups: [...data.wish.ageGroups],
 		specificValues: data.wish.specificValues?.join(', ') || '',
 		text: data.wish.text,
-		belated: data.wish.belated || false,
+		isBelated: data.wish.isBelated || false,
 		language: data.wish.language,
-		status: data.wish.status,
 		length:
 			('length' in data.wish ? (data.wish.length as WishLength) : WishLength.MEDIUM) ||
 			WishLength.MEDIUM
@@ -86,8 +85,8 @@
 	// German translations for display
 	const typeLabels = {
 		[WishType.NORMAL]: 'Normal',
-		[WishType.HERZLICH]: 'Herzlich',
-		[WishType.HUMORVOLL]: 'Humorvoll'
+		[WishType.HEARTFELT]: 'Herzlich',
+		[WishType.FUNNY]: 'Humorvoll'
 	};
 
 	const eventTypeLabels = {
@@ -197,7 +196,7 @@
 			!arraysEqual(formData.ageGroups, data.wish.ageGroups) ||
 			!specificValuesEqual(formData.specificValues, data.wish.specificValues) ||
 			formData.text !== data.wish.text ||
-			formData.belated !== (data.wish.belated ?? false) ||
+			formData.isBelated !== (data.wish.isBelated ?? false) ||
 			formData.language !== data.wish.language ||
 			formData.length !==
 				(('length' in data.wish ? (data.wish.length as WishLength) : WishLength.MEDIUM) ||
@@ -743,7 +742,7 @@
 						<div class="bg-base-200 px-4 py-6">
 							<h4 class="text-primary font-medium">Haupttext:</h4>
 							<p class="mb-4 text-sm">{formData.text}</p>
-							{#if formData.belated}
+							{#if formData.isBelated}
 								<div class="mt-3 flex items-center gap-2">
 									<div class="badge badge-warning gap-2">
 										<svg

@@ -299,16 +299,17 @@
 				<pre class="overflow-x-auto text-sm"><code
 						>{`interface Wish {
   id: string;
-  type: 'normal' | 'funny';
+  type: 'normal' | 'heartfelt' | 'funny';
   eventType: 'birthday' | 'anniversary' | 'custom';
   relations: ('friend' | 'family' | 'partner' | 'colleague')[];
   ageGroups: ('young' | 'middle' | 'senior' | 'all')[];
   specificValues: number[];
   text: string;
-  belated: string;
-  language: 'de' | 'en';
+  isBelated: boolean;
+  language: string;
   length: 'short' | 'medium' | 'long';
-  status: 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert';
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
   releasedAt?: string; // ISO date string
 }`}</code
 					></pre>

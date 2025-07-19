@@ -52,15 +52,18 @@ The system centers around a "Wish" object with the following structure:
 ```json
 {
   "id": "string",
-  "type": "normal" | "funny",
+  "type": "normal" | "heartfelt" | "funny",
   "eventType": "birthday" | "anniversary" | "custom",
   "relations": ["friend", "family", "partner", "colleague"],
   "ageGroups": ["all", "young", "middle", "senior"],
   "specificValues": [Number],
   "text": "string",
-  "belated": "string",
-  "status": "Entwurf" | "Zur Freigabe" | "Freigegeben" | "Archiviert",
-  "language": "de" | "en"
+  "isBelated": boolean,
+  "language": "string",
+  "length": "short" | "medium" | "long",
+  "createdAt": "string", // ISO date string
+  "updatedAt": "string", // ISO date string
+  "releasedAt": "string" // ISO date string (optional)
 }
 ```
 

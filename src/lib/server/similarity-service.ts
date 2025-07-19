@@ -263,14 +263,19 @@ export class SimilarityService {
 		if (!data) return null;
 
 		return {
-			...data,
-			eventType: data.event_type,
-			ageGroups: data.age_groups,
+			id: data.id,
+			type: data.type as 'normal' | 'heartfelt' | 'funny',
+			eventType: data.event_type as 'birthday' | 'anniversary' | 'custom',
+			relations: data.relations as ('friend' | 'family' | 'partner' | 'colleague')[],
+			ageGroups: data.age_groups as ('young' | 'middle' | 'senior' | 'all')[],
 			specificValues: data.specific_values || [],
-			createdAt: data.created_at ? new Date(data.created_at) : new Date(),
-			updatedAt: data.updated_at ? new Date(data.updated_at) : new Date(),
-			createdBy: data.created_by,
-			length: data.length as 'short' | 'medium' | 'long' // Type assertion for compatibility
+			text: data.text,
+			isBelated: data.belated,
+			language: data.language,
+			length: data.length as 'short' | 'medium' | 'long',
+			createdAt: data.created_at ? new Date(data.created_at).toISOString() : new Date().toISOString(),
+			updatedAt: data.updated_at ? new Date(data.updated_at).toISOString() : new Date().toISOString(),
+			releasedAt: undefined
 		};
 	}
 

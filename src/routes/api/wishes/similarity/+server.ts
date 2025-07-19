@@ -5,7 +5,7 @@ import { z } from 'zod';
 const SimilarityCheckSchema = z.object({
 	text: z.string().min(1, 'Text darf nicht leer sein'),
 	language: z.enum(['de', 'en'], { required_error: 'Sprache ist erforderlich' }),
-	type: z.enum(['normal', 'funny']).optional(),
+	type: z.enum(['normal', 'heartfelt', 'funny']).optional(),
 	eventType: z.enum(['birthday', 'anniversary', 'custom']).optional(),
 	excludeId: z.string().uuid().optional(),
 	maxResults: z.number().int().min(1).max(10).optional()
@@ -14,7 +14,7 @@ const SimilarityCheckSchema = z.object({
 const BatchSimilarityCheckSchema = z.object({
 	texts: z.array(z.string().min(1)).min(1).max(10),
 	language: z.enum(['de', 'en'], { required_error: 'Sprache ist erforderlich' }),
-	type: z.enum(['normal', 'funny']).optional(),
+	type: z.enum(['normal', 'heartfelt', 'funny']).optional(),
 	eventType: z.enum(['birthday', 'anniversary', 'custom']).optional(),
 	maxResults: z.number().int().min(1).max(10).optional()
 });
@@ -114,7 +114,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 		const wishId = url.searchParams.get('wishId');
 		const language = url.searchParams.get('language') as 'de' | 'en' | null;
-		const type = url.searchParams.get('type') as 'normal' | 'funny' | null;
+		const type = url.searchParams.get('type') as 'normal' | 'heartfelt' | 'funny' | null;
 		const eventType = url.searchParams.get('eventType') as
 			| 'birthday'
 			| 'anniversary'

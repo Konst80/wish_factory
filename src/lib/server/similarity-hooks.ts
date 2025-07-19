@@ -115,14 +115,19 @@ export class SimilarityHooks {
 
 					if (wish) {
 						const convertedWish = {
-							...wish,
-							eventType: wish.event_type,
-							ageGroups: wish.age_groups,
+							id: wish.id,
+							type: wish.type as 'normal' | 'heartfelt' | 'funny',
+							eventType: wish.event_type as 'birthday' | 'anniversary' | 'custom',
+							relations: wish.relations as ('friend' | 'family' | 'partner' | 'colleague')[],
+							ageGroups: wish.age_groups as ('young' | 'middle' | 'senior' | 'all')[],
 							specificValues: wish.specific_values || [],
-							createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),
-							updatedAt: wish.updated_at ? new Date(wish.updated_at) : new Date(),
-							createdBy: wish.created_by,
-							length: wish.length as 'short' | 'medium' | 'long'
+							text: wish.text,
+							isBelated: wish.belated,
+							language: wish.language,
+							length: wish.length as 'short' | 'medium' | 'long',
+							createdAt: wish.created_at ? new Date(wish.created_at).toISOString() : new Date().toISOString(),
+							updatedAt: wish.updated_at ? new Date(wish.updated_at).toISOString() : new Date().toISOString(),
+							releasedAt: undefined
 						};
 						await this.similarityService.precomputeSimilarityForWish(convertedWish);
 					}

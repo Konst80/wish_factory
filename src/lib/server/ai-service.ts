@@ -545,7 +545,7 @@ class OpenRouterAIService {
 		}
 
 		// Übersetze Enums für bessere Prompts
-		const typeMap = { normal: 'Normal', herzlich: 'Herzlich', humorvoll: 'Humorvoll' };
+		const typeMap = { normal: 'Normal', heartfelt: 'Heartfelt', funny: 'Funny' };
 		const eventMap = { birthday: 'Geburtstag', anniversary: 'Hochzeitstag', custom: 'individuell' };
 		const languageMap: Record<string, string> = { de: 'Deutsch', en: 'Englisch' };
 		const relationMap = {
@@ -803,7 +803,7 @@ class OpenRouterAIService {
 			'      "text": "Haupttext des Glückwunsches hier",\n' +
 			'      "belated": true,\n' +
 			'      "metadata": {\n' +
-			'        "type": "normal|herzlich|humorvoll",\n' +
+			'        "type": "normal|heartfelt|funny",\n' +
 			'        "eventType": "birthday|anniversary|custom",\n' +
 			'        "language": "de|en",\n' +
 			'        "relations": ["friend", "family", "partner", "colleague"],\n' +
@@ -878,8 +878,8 @@ class OpenRouterAIService {
 
 **Stil-Definitionen:**
 - normal: Freundlich und herzlich, aber nicht übertrieben
-- herzlich: Emotional und warmherzig, persönlich
-- humorvoll: Lustig und spielerisch, aber respektvoll
+- heartfelt: Emotional und warmherzig, persönlich
+- funny: Lustig und spielerisch, aber respektvoll
 - formell: Höflich und professionell, respektvoll
 
 Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträglichen (belated) Text.
@@ -918,8 +918,8 @@ Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträgl
 
 **Stil-Definitionen:**
 - normal: Freundlich und herzlich, aber nicht übertrieben
-- herzlich: Emotional und warmherzig, persönlich
-- humorvoll: Lustig und spielerisch, aber respektvoll
+- heartfelt: Emotional und warmherzig, persönlich
+- funny: Lustig und spielerisch, aber respektvoll
 - formell: Höflich und professionell, respektvoll
 
 Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträglichen (belated) Text.
@@ -955,8 +955,8 @@ Generiere für jeden Wunsch sowohl einen normalen Text als auch einen nachträgl
 
 **Style Definitions:**
 - normal: Friendly and warm, but not excessive
-- herzlich: Emotional and heartfelt, personal
-- humorvoll: Funny and playful, but respectful
+- heartfelt: Emotional and heartfelt, personal
+- funny: Funny and playful, but respectful
 - formell: Polite and professional, respectful
 
 Generate both a regular text and a belated text for each wish.

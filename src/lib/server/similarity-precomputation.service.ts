@@ -6,14 +6,19 @@ import type { Database } from '$lib/types/supabase.js';
 // Hilfsfunktion für Datenbankkonvertierung
 function convertDbWishToWish(dbWish: Database['public']['Tables']['wishes']['Row']): Wish {
 	return {
-		...dbWish,
-		eventType: dbWish.event_type,
-		ageGroups: dbWish.age_groups,
+		id: dbWish.id,
+		type: dbWish.type as 'normal' | 'heartfelt' | 'funny',
+		eventType: dbWish.event_type as 'birthday' | 'anniversary' | 'custom',
+		relations: dbWish.relations as ('friend' | 'family' | 'partner' | 'colleague')[],
+		ageGroups: dbWish.age_groups as ('young' | 'middle' | 'senior' | 'all')[],
 		specificValues: dbWish.specific_values || [],
-		createdAt: dbWish.created_at ? new Date(dbWish.created_at) : new Date(),
-		updatedAt: dbWish.updated_at ? new Date(dbWish.updated_at) : new Date(),
-		createdBy: dbWish.created_by,
-		length: dbWish.length as 'short' | 'medium' | 'long' // Type assertion for compatibility
+		text: dbWish.text,
+		isBelated: dbWish.belated,
+		language: dbWish.language,
+		length: dbWish.length as 'short' | 'medium' | 'long',
+		createdAt: dbWish.created_at ? new Date(dbWish.created_at).toISOString() : new Date().toISOString(),
+		updatedAt: dbWish.updated_at ? new Date(dbWish.updated_at).toISOString() : new Date().toISOString(),
+		releasedAt: undefined
 	};
 }
 

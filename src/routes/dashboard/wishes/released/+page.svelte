@@ -539,7 +539,7 @@
 								<div class="flex items-center gap-2">
 									<div class="badge badge-primary badge-sm">{wish.type}</div>
 									<div class="badge badge-outline badge-sm">{wish.length}</div>
-									{#if wish.belated}
+									{#if wish.isBelated}
 										<div class="badge badge-warning badge-xs">Nachträglich</div>
 									{/if}
 								</div>
@@ -581,8 +581,8 @@
 						</td>
 						<td class="px-3 py-3">
 							<div class="text-base-content/70 text-xs">
-								<div class="font-medium">{formatDate(wish.releasedAt).date}</div>
-								<div class="text-base-content/50">{formatDate(wish.releasedAt).time}</div>
+								<div class="font-medium">{formatDate(new Date(wish.releasedAt)).date}</div>
+								<div class="text-base-content/50">{formatDate(new Date(wish.releasedAt)).time}</div>
 							</div>
 						</td>
 						<td class="px-3 py-3">

@@ -25,6 +25,7 @@ INSERT INTO wishes (
     belated, 
     status, 
     language, 
+    length,
     created_by
 ) VALUES (
     'wish_external_de_999',
@@ -34,9 +35,10 @@ INSERT INTO wishes (
     ARRAY['all']::age_group[],
     ARRAY[18, 21, 30],
     'Test-Wunsch: Alles Gute zum Geburtstag! Du wirst [Age] Jahre alt.',
-    'Nachträglich alles Gute zum Geburtstag! Hoffe, dein [Age]. Geburtstag war schön.',
+    false,
     'Entwurf'::wish_status,
     'de'::language,
+    'medium',
     '8ef0ae50-858b-4adb-a45a-0227b5c7c4a7'  -- Your user ID
 )
 ON CONFLICT (id) DO NOTHING;

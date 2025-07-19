@@ -135,16 +135,16 @@
 			<legend class="label-text flex items-center gap-2 text-base font-medium">Wunsch-Art *</legend>
 			<div class="grid grid-cols-2 gap-4">
 				<label
-					class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
+					class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.isBelated ===
 					false
 						? 'border-primary bg-primary/5'
 						: 'border-base-300'}"
 				>
 					<input
 						type="radio"
-						name="belated"
+						name="isBelated"
 						value={false}
-						bind:group={formData.belated}
+						bind:group={formData.isBelated}
 						class="radio radio-primary"
 						required
 					/>
@@ -154,16 +154,16 @@
 					</div>
 				</label>
 				<label
-					class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.belated ===
+					class="flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition-all {formData.isBelated ===
 					true
 						? 'border-primary bg-primary/5'
 						: 'border-base-300'}"
 				>
 					<input
 						type="radio"
-						name="belated"
+						name="isBelated"
 						value={true}
-						bind:group={formData.belated}
+						bind:group={formData.isBelated}
 						class="radio radio-primary"
 						required
 					/>

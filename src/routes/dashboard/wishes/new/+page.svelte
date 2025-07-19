@@ -37,9 +37,8 @@
 		ageGroups: form?.values?.ageGroups || ['all'], // Default to all ages to satisfy validation
 		specificValues: form?.values?.specificValues || '',
 		text: form?.values?.text || 'Alles Gute zum Geburtstag, liebe/r [Name]!', // Default text to satisfy min length validation
-		belated: form?.values?.belated || false,
+		isBelated: form?.values?.isBelated || false,
 		language: form?.values?.language || 'de', // Changed to use dynamic language code
-		status: (form?.values?.status as WishStatus) || WishStatus.ENTWURF,
 		length: (form?.values?.length as WishLength) || WishLength.MEDIUM
 	});
 
@@ -201,9 +200,8 @@
 			ageGroups: [...wishToEdit.ageGroups],
 			specificValues: wishToEdit.specificValues,
 			text: wishToEdit.text,
-			belated: wishToEdit.belated,
+			isBelated: wishToEdit.isBelated,
 			language: wishToEdit.language,
-			status: wishToEdit.status,
 			length: wishToEdit.length
 		};
 
@@ -535,8 +533,7 @@
 						onAgeGroupChange={handleAgeGroupChange}
 					/>
 
-					<!-- Hidden fields for status and length -->
-					<input type="hidden" name="status" value={formData.status} />
+					<!-- Hidden field for length -->
 					<input type="hidden" name="length" value={formData.length} />
 
 					<!-- Content Editor Section -->

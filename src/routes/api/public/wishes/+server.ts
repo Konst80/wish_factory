@@ -85,7 +85,7 @@ export const GET: RequestHandler = async ({ url, request }) => {
 			type: searchParams.get('type') || undefined,
 			eventType: searchParams.get('eventType') || undefined,
 			length: searchParams.get('length') || undefined,
-			belated: searchParams.get('belated') ? searchParams.get('belated') === 'true' : undefined,
+			isBelated: searchParams.get('isBelated') ? searchParams.get('isBelated') === 'true' : undefined,
 			relations: searchParams.get('relations')?.split(',').filter(Boolean) || undefined,
 			ageGroups: searchParams.get('ageGroups')?.split(',').filter(Boolean) || undefined,
 			specificValues:
@@ -113,7 +113,7 @@ export const GET: RequestHandler = async ({ url, request }) => {
 				ageGroups: wish.ageGroups,
 				specificValues: wish.specificValues,
 				text: wish.text,
-				belated: wish.belated,
+				isBelated: wish.isBelated,
 				language: wish.language,
 				length: wish.length,
 				releasedAt: wish.releasedAt.toISOString()

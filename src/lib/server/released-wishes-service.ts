@@ -50,9 +50,9 @@ export class ReleasedWishesService {
 				age_groups: wish.age_groups,
 				specific_values: wish.specific_values || [],
 				text: wish.text,
-				belated: wish.belated,
+				is_belated: wish.belated,
 				language: wish.language,
-				length: 'medium', // Default length since wishes table doesn't have this field yet
+				length: wish.length || 'medium',
 				released_by: releasedBy
 			})
 			.select()
@@ -65,16 +65,16 @@ export class ReleasedWishesService {
 		return {
 			id: releasedWish.id,
 			originalWishId: releasedWish.original_wish_id,
-			type: releasedWish.type as WishType,
-			eventType: releasedWish.event_type as EventType,
-			relations: releasedWish.relations as Relation[],
-			ageGroups: releasedWish.age_groups as AgeGroup[],
+			type: releasedWish.type as 'normal' | 'heartfelt' | 'funny',
+			eventType: releasedWish.event_type as 'birthday' | 'anniversary' | 'custom',
+			relations: releasedWish.relations as ('friend' | 'family' | 'partner' | 'colleague')[],
+			ageGroups: releasedWish.age_groups as ('young' | 'middle' | 'senior' | 'all')[],
 			specificValues: releasedWish.specific_values || [],
 			text: releasedWish.text,
-			belated: releasedWish.belated,
-			language: releasedWish.language as Language,
-			length: releasedWish.length as WishLength,
-			releasedAt: new Date(releasedWish.released_at || new Date())
+			isBelated: releasedWish.is_belated,
+			language: releasedWish.language,
+			length: releasedWish.length as 'short' | 'medium' | 'long',
+			releasedAt: new Date(releasedWish.released_at || new Date()).toISOString()
 		};
 	}
 
@@ -87,7 +87,7 @@ export class ReleasedWishesService {
 			type?: string;
 			eventType?: string;
 			length?: string;
-			belated?: boolean;
+			isBelated?: boolean;
 			relations?: string[];
 			ageGroups?: string[];
 			specificValues?: number[];
@@ -115,8 +115,8 @@ export class ReleasedWishesService {
 		if (options.length) {
 			query = query.eq('length', options.length);
 		}
-		if (options.belated !== undefined) {
-			query = query.eq('belated', options.belated);
+		if (options.isBelated !== undefined) {
+			query = query.eq('is_belated', options.isBelated);
 		}
 		if (options.relations?.length) {
 			query = query.overlaps('relations', options.relations);
@@ -148,16 +148,16 @@ export class ReleasedWishesService {
 		const wishes: ReleasedWish[] = (data || []).map((row) => ({
 			id: row.id,
 			originalWishId: row.original_wish_id,
-			type: row.type as WishType,
-			eventType: row.event_type as EventType,
-			relations: row.relations as Relation[],
-			ageGroups: row.age_groups as AgeGroup[],
+			type: row.type as 'normal' | 'heartfelt' | 'funny',
+			eventType: row.event_type as 'birthday' | 'anniversary' | 'custom',
+			relations: row.relations as ('friend' | 'family' | 'partner' | 'colleague')[],
+			ageGroups: row.age_groups as ('young' | 'middle' | 'senior' | 'all')[],
 			specificValues: row.specific_values || [],
 			text: row.text,
-			belated: row.belated,
-			language: row.language as Language,
-			length: row.length as WishLength,
-			releasedAt: new Date(row.released_at || new Date())
+			isBelated: row.is_belated,
+			language: row.language,
+			length: row.length as 'short' | 'medium' | 'long',
+			releasedAt: new Date(row.released_at || new Date()).toISOString()
 		}));
 
 		const total = count || 0;
@@ -183,16 +183,16 @@ export class ReleasedWishesService {
 		return {
 			id: data.id,
 			originalWishId: data.original_wish_id,
-			type: data.type as WishType,
-			eventType: data.event_type as EventType,
-			relations: data.relations as Relation[],
-			ageGroups: data.age_groups as AgeGroup[],
+			type: data.type as 'normal' | 'heartfelt' | 'funny',
+			eventType: data.event_type as 'birthday' | 'anniversary' | 'custom',
+			relations: data.relations as ('friend' | 'family' | 'partner' | 'colleague')[],
+			ageGroups: data.age_groups as ('young' | 'middle' | 'senior' | 'all')[],
 			specificValues: data.specific_values || [],
 			text: data.text,
-			belated: data.belated,
-			language: data.language as Language,
-			length: data.length as WishLength,
-			releasedAt: new Date(data.released_at || new Date())
+			isBelated: data.is_belated,
+			language: data.language,
+			length: data.length as 'short' | 'medium' | 'long',
+			releasedAt: new Date(data.released_at || new Date()).toISOString()
 		};
 	}
 

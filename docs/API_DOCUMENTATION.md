@@ -33,10 +33,10 @@ The Wish-Factory API provides endpoints for accessing and managing AI-generated 
 **Query Parameters**:
 
 - `language` (optional): `de` | `en` - Filter by language
-- `type` (optional): `normal` | `funny` - Filter by wish type
+- `type` (optional): `normal` | `heartfelt` | `funny` - Filter by wish type
 - `eventType` (optional): `birthday` | `anniversary` | `custom` - Filter by event type
 - `length` (optional): `short` | `medium` | `long` - Filter by wish length
-- `belated` (optional): `true` | `false` - Filter for belated wishes
+- `isBelated` (optional): `true` | `false` - Filter for belated wishes
 - `relations` (optional): Comma-separated list of relations (`friend,family,partner,colleague`)
 - `ageGroups` (optional): Comma-separated list of age groups (`young,middle,senior,all`)
 - `specificValues` (optional): Comma-separated list of numbers
@@ -52,15 +52,17 @@ The Wish-Factory API provides endpoints for accessing and managing AI-generated 
 		{
 			"id": "string",
 			"originalWishId": "string",
-			"type": "normal",
+			"type": "heartfelt",
 			"eventType": "birthday",
 			"relations": ["friend", "family"],
 			"ageGroups": ["young", "middle"],
 			"specificValues": [25, 30],
 			"text": "Wish content...",
-			"belated": "Belated wish content...",
+			"isBelated": false,
 			"language": "de",
 			"length": "medium",
+			"createdAt": "2024-01-01T00:00:00.000Z",
+			"updatedAt": "2024-01-01T00:00:00.000Z",
 			"releasedAt": "2024-01-01T00:00:00.000Z"
 		}
 	],
@@ -101,9 +103,11 @@ The Wish-Factory API provides endpoints for accessing and managing AI-generated 
 	"ageGroups": ["young"],
 	"specificValues": [25],
 	"text": "Wish content...",
-	"belated": "Belated wish content...",
+	"isBelated": false,
 	"language": "de",
 	"length": "medium",
+	"createdAt": "2024-01-01T00:00:00.000Z",
+	"updatedAt": "2024-01-01T00:00:00.000Z",
 	"releasedAt": "2024-01-01T00:00:00.000Z"
 }
 ```
@@ -119,7 +123,7 @@ The Wish-Factory API provides endpoints for accessing and managing AI-generated 
 
 ```json
 {
-	"types": ["normal", "funny"],
+	"types": ["normal", "heartfelt", "funny"],
 	"eventTypes": ["birthday", "anniversary", "custom"],
 	"relations": ["friend", "family", "partner", "colleague"],
 	"ageGroups": ["young", "middle", "senior", "all"],
@@ -143,7 +147,7 @@ The Wish-Factory API provides endpoints for accessing and managing AI-generated 
 
 ```json
 {
-	"types": ["normal", "funny"],
+	"types": ["normal", "heartfelt", "funny"],
 	"eventTypes": ["birthday", "anniversary"],
 	"languages": ["de", "en"],
 	"relations": ["friend", "family"],
@@ -151,7 +155,7 @@ The Wish-Factory API provides endpoints for accessing and managing AI-generated 
 	"specificValues": [25, 30],
 	"count": 3,
 	"additionalInstructions": "Optional additional instructions...",
-	"belated": false,
+	"isBelated": false,
 	"length": "medium"
 }
 ```
@@ -166,10 +170,15 @@ The Wish-Factory API provides endpoints for accessing and managing AI-generated 
 			"id": "string",
 			"type": "normal",
 			"eventType": "birthday",
+			"relations": ["friend"],
+			"ageGroups": ["young"],
+			"specificValues": [25],
 			"text": "Generated wish...",
-			"belated": "Generated belated wish...",
+			"isBelated": false,
 			"language": "de",
-			"length": "medium"
+			"length": "medium",
+			"createdAt": "2024-01-01T00:00:00.000Z",
+			"updatedAt": "2024-01-01T00:00:00.000Z"
 		}
 	],
 	"totalGenerated": 3,
@@ -432,16 +441,17 @@ All public endpoints support CORS with the following headers:
 ```typescript
 interface Wish {
 	id: string;
-	type: 'normal' | 'funny';
+	type: 'normal' | 'heartfelt' | 'funny';
 	eventType: 'birthday' | 'anniversary' | 'custom';
 	relations: ('friend' | 'family' | 'partner' | 'colleague')[];
 	ageGroups: ('young' | 'middle' | 'senior' | 'all')[];
 	specificValues: number[];
 	text: string;
-	belated: string;
-	language: 'de' | 'en';
+	isBelated: boolean;
+	language: string;
 	length: 'short' | 'medium' | 'long';
-	status: 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert';
+	createdAt: string; // ISO date string
+	updatedAt: string; // ISO date string
 	releasedAt?: string; // ISO date string
 }
 ```

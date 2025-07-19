@@ -128,8 +128,8 @@
 	// Labels for display
 	const typeLabels = {
 		normal: 'Normal',
-		herzlich: 'Herzlich',
-		humorvoll: 'Humorvoll'
+		heartfelt: 'Herzlich',
+		funny: 'Humorvoll'
 	};
 
 	const eventTypeLabels = {

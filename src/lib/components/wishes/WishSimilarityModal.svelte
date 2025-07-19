@@ -350,7 +350,7 @@
 						<div class="badge badge-outline badge-sm">{wish.type}</div>
 						<div class="badge badge-outline badge-sm">{wish.eventType}</div>
 						<div class="badge badge-outline badge-sm">{wish.language}</div>
-						<div class="badge badge-outline badge-sm">{wish.status}</div>
+						<div class="badge badge-outline badge-sm">{wish.length}</div>
 					</div>
 					<p class="text-sm">{wish.text}</p>
 				</div>
