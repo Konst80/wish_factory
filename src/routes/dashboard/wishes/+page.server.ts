@@ -112,13 +112,14 @@ export const load: PageServerLoad = async ({ locals, url, parent }) => {
 		eventType: wish.event_type,
 		relations: wish.relations,
 		ageGroups: wish.age_groups,
-		specificValues: wish.specific_values,
+		specificValues: wish.specific_values || [],
 		text: wish.text,
-		belated: typeof wish.belated === 'boolean' ? wish.belated : wish.belated === 'true',
+		isBelated: typeof wish.belated === 'boolean' ? wish.belated : wish.belated === 'true',
 		status: wish.status,
 		language: wish.language,
-		createdAt: wish.created_at,
-		updatedAt: wish.updated_at,
+		length: wish.length as 'short' | 'medium' | 'long',
+		createdAt: wish.created_at || new Date().toISOString(),
+		updatedAt: wish.updated_at || new Date().toISOString(),
 		createdBy: creators.find((c) => c.id === wish.created_by)?.full_name || 'Unbekannt'
 	}));
 

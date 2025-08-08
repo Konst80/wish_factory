@@ -570,8 +570,8 @@ class OpenRouterAIService {
 		// Length mapping for prompt text
 		const lengthMap: { [key: string]: string } = {
 			short: 'kurz (50-100 Zeichen)',
-			medium: 'mittel (100-200 Zeichen)',
-			long: 'lang (200-400 Zeichen)'
+			medium: 'mittel (100-250 Zeichen)',
+			long: 'lang (250-500 Zeichen)'
 		};
 		const lengthText = lengthMap[length] || length;
 

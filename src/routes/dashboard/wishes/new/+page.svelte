@@ -37,7 +37,7 @@
 		ageGroups: form?.values?.ageGroups || ['all'], // Default to all ages to satisfy validation
 		specificValues: form?.values?.specificValues || '',
 		text: form?.values?.text || 'Alles Gute zum Geburtstag, liebe/r [Name]!', // Default text to satisfy min length validation
-		isBelated: form?.values?.isBelated || false,
+		isBelated: form?.values?.belated || false,
 		language: form?.values?.language || 'de', // Changed to use dynamic language code
 		length: (form?.values?.length as WishLength) || WishLength.MEDIUM
 	});

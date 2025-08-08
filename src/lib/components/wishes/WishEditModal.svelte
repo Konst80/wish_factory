@@ -136,18 +136,22 @@
 
 		// Relations
 		if (formData.relations.length > 0) {
-			const relationNames = formData.relations.map((rel) => relationLabels[rel]);
+			const relationNames = formData.relations.map(
+				(rel) => relationLabels[rel as keyof typeof relationLabels]
+			);
 			parts.push(`Beziehungen: ${relationNames.join(', ')}`);
 		}
 
 		// Age groups
 		if (formData.ageGroups.length > 0) {
-			const ageGroupNames = formData.ageGroups.map((age) => ageGroupLabels[age]);
+			const ageGroupNames = formData.ageGroups.map(
+				(age) => ageGroupLabels[age as keyof typeof ageGroupLabels]
+			);
 			parts.push(`Alter: ${ageGroupNames.join(', ')}`);
 		}
 
 		// Specific values
-		if (formData.specificValues.trim()) {
+		if (typeof formData.specificValues === 'string' && formData.specificValues.trim()) {
 			parts.push(`Werte: ${formData.specificValues}`);
 		}
 
@@ -333,7 +337,14 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if isOpen && wish && formData}
-	<div class="modal modal-open" onclick={handleBackdropClick}>
+	<div
+		class="modal modal-open"
+		onclick={handleBackdropClick}
+		onkeydown={(e) => e.key === 'Escape' && closeModal()}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+	>
 		<div class="modal-box max-h-[90vh] max-w-6xl overflow-y-auto">
 			<!-- Modal Header -->
 			<div class="mb-6 flex items-center justify-between">
@@ -345,7 +356,11 @@
 					{#if hasUnsavedChanges}
 						<div class="badge badge-warning badge-sm">Ungespeichert</div>
 					{/if}
-					<button class="btn btn-circle btn-ghost btn-sm" onclick={closeModal}>
+					<button
+						class="btn btn-circle btn-ghost btn-sm"
+						onclick={closeModal}
+						aria-label="Modal schließen"
+					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							class="h-6 w-6"
@@ -452,7 +467,7 @@
 
 											<div class="space-y-4">
 												<div class="form-control">
-													<label class="label pb-1">
+													<label class="label pb-1" for="wish-type-select">
 														<span
 															class="label-text text-base-content flex items-center gap-2 text-sm font-semibold"
 														>
@@ -474,6 +489,7 @@
 														</span>
 													</label>
 													<select
+														id="wish-type-select"
 														class="select select-bordered bg-base-100/80 border-base-300 focus:bg-base-100 focus:border-primary focus:ring-primary/20 text-base-content shadow-sm transition-all duration-200 hover:shadow-md focus:ring-2"
 														bind:value={formData.type}
 													>
@@ -484,7 +500,7 @@
 												</div>
 
 												<div class="form-control">
-													<label class="label pb-1">
+													<label class="label pb-1" for="wish-event-type-select">
 														<span
 															class="label-text text-base-content flex items-center gap-2 text-sm font-semibold"
 														>
@@ -506,6 +522,7 @@
 														</span>
 													</label>
 													<select
+														id="wish-event-type-select"
 														class="select select-bordered bg-base-100/80 border-base-300 focus:bg-base-100 focus:border-primary focus:ring-primary/20 text-base-content shadow-sm transition-all duration-200 hover:shadow-md focus:ring-2"
 														bind:value={formData.eventType}
 													>
@@ -547,7 +564,7 @@
 
 											<div class="space-y-4">
 												<div class="form-control">
-													<label class="label pb-1">
+													<label class="label pb-1" for="wish-language-select">
 														<span
 															class="label-text text-base-content flex items-center gap-2 text-sm font-semibold"
 														>
@@ -569,6 +586,7 @@
 														</span>
 													</label>
 													<select
+														id="wish-language-select"
 														class="select select-bordered bg-base-100/80 border-base-300 focus:bg-base-100 focus:border-secondary focus:ring-secondary/20 text-base-content shadow-sm transition-all duration-200 hover:shadow-md focus:ring-2"
 														bind:value={formData.language}
 													>
@@ -581,7 +599,7 @@
 												</div>
 
 												<div class="form-control">
-													<label class="label pb-1">
+													<label class="label pb-1" for="wish-length-select">
 														<span
 															class="label-text text-base-content flex items-center gap-2 text-sm font-semibold"
 														>
@@ -603,6 +621,7 @@
 														</span>
 													</label>
 													<select
+														id="wish-length-select"
 														class="select select-bordered bg-base-100/80 border-base-300 focus:bg-base-100 focus:border-secondary focus:ring-secondary/20 text-base-content shadow-sm transition-all duration-200 hover:shadow-md focus:ring-2"
 														bind:value={formData.length}
 													>

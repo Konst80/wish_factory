@@ -1,9 +1,3 @@
-import { initToolbar } from '@stagewise/toolbar';
-
 export function init() {
-	if (import.meta.env.DEV) {
-		initToolbar({
-			plugins: []
-		});
-	}
+	// Initialization logic can be added here if needed
 }

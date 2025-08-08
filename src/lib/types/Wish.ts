@@ -88,6 +88,12 @@ export interface Wish {
 	/** Gewünschte Länge des Wunsches */
 	length: 'short' | 'medium' | 'long';
 
+	/** Status des Wunsches im Workflow */
+	status: 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert';
+
+	/** ID des Erstellers */
+	createdBy: string;
+
 	/** Erstellungsdatum */
 	createdAt: string; // ISO date string
 
@@ -122,6 +128,8 @@ export const wishSchema = z.object({
 	isBelated: z.boolean().default(false),
 	language: languageSchema,
 	length: wishLengthSchema.default('medium'),
+	status: wishStatusSchema.default('Entwurf'),
+	createdBy: z.string().uuid('CreatedBy muss eine gültige UUID sein'),
 	createdAt: z.string().datetime('Muss eine gültige ISO-Datumszeichenfolge sein'),
 	updatedAt: z.string().datetime('Muss eine gültige ISO-Datumszeichenfolge sein'),
 	releasedAt: z.string().datetime('Muss eine gültige ISO-Datumszeichenfolge sein').optional()

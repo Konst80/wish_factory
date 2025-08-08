@@ -125,6 +125,8 @@ export class SimilarityHooks {
 							isBelated: wish.belated,
 							language: wish.language,
 							length: wish.length as 'short' | 'medium' | 'long',
+							status: wish.status as 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert',
+							createdBy: wish.created_by,
 							createdAt: wish.created_at
 								? new Date(wish.created_at).toISOString()
 								: new Date().toISOString(),

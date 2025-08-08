@@ -183,7 +183,7 @@ export const actions: Actions = {
 			ageGroups,
 			specificValues,
 			text,
-			belated,
+			isBelated: belated,
 			status,
 			language,
 			createdBy: user.id
@@ -203,7 +203,7 @@ export const actions: Actions = {
 					age_groups: validatedData.ageGroups,
 					specific_values: validatedData.specificValues,
 					text: validatedData.text,
-					belated: validatedData.belated,
+					belated: validatedData.isBelated,
 					status: validatedData.status,
 					language: validatedData.language,
 					updated_at: new Date().toISOString()
@@ -225,8 +225,8 @@ export const actions: Actions = {
 				const updatedWish = {
 					...validatedData,
 					id: wishId,
-					createdAt: new Date(), // Wird im Hook korrekt gesetzt
-					updatedAt: new Date()
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString()
 				};
 				// Background-Ausführung um User nicht zu blockieren
 				similarityHooks.onWishUpdated(wishId, updatedWish).catch((error) => {

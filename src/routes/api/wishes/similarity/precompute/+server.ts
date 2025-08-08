@@ -90,10 +90,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						eventType: wish.event_type,
 						ageGroups: wish.age_groups,
 						specificValues: wish.specific_values || [],
-						createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),
-						updatedAt: wish.updated_at ? new Date(wish.updated_at) : new Date(),
+						createdAt: wish.created_at || new Date().toISOString(),
+						updatedAt: wish.updated_at || new Date().toISOString(),
 						createdBy: wish.created_by,
-						length: wish.length as 'short' | 'medium' | 'long'
+						length: wish.length as 'short' | 'medium' | 'long',
+						isBelated: wish.belated || false
 					};
 					await similarityService.precomputeSimilarityForWish(convertedWish);
 
@@ -155,10 +156,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				eventType: wish.event_type,
 				ageGroups: wish.age_groups,
 				specificValues: wish.specific_values || [],
-				createdAt: wish.created_at ? new Date(wish.created_at) : new Date(),
-				updatedAt: wish.updated_at ? new Date(wish.updated_at) : new Date(),
+				createdAt: wish.created_at || new Date().toISOString(),
+				updatedAt: wish.updated_at || new Date().toISOString(),
 				createdBy: wish.created_by,
-				length: wish.length as 'short' | 'medium' | 'long'
+				length: wish.length as 'short' | 'medium' | 'long',
+				isBelated: wish.belated || false
 			};
 			await similarityService.precomputeSimilarityForWish(convertedWish);
 

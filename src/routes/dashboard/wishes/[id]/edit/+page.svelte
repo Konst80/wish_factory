@@ -16,7 +16,7 @@
 		ageGroups: [...data.wish.ageGroups],
 		specificValues: data.wish.specificValues?.join(', ') || '',
 		text: data.wish.text,
-		isBelated: data.wish.isBelated || false,
+		isBelated: data.wish.belated || false,
 		language: data.wish.language,
 		length:
 			('length' in data.wish ? (data.wish.length as WishLength) : WishLength.MEDIUM) ||
@@ -196,7 +196,7 @@
 			!arraysEqual(formData.ageGroups, data.wish.ageGroups) ||
 			!specificValuesEqual(formData.specificValues, data.wish.specificValues) ||
 			formData.text !== data.wish.text ||
-			formData.isBelated !== (data.wish.isBelated ?? false) ||
+			formData.isBelated !== (data.wish.belated ?? false) ||
 			formData.language !== data.wish.language ||
 			formData.length !==
 				(('length' in data.wish ? (data.wish.length as WishLength) : WishLength.MEDIUM) ||

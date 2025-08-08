@@ -163,7 +163,7 @@ export const actions: Actions = {
 					age_groups: validatedData.ageGroups,
 					specific_values: validatedData.specificValues,
 					text: validatedData.text,
-					belated: validatedData.belated,
+					belated: validatedData.isBelated,
 					status: validatedData.status,
 					language: validatedData.language,
 					length: validatedData.length,
@@ -187,8 +187,8 @@ export const actions: Actions = {
 				const newWish = {
 					...validatedData,
 					id: createdWish.id,
-					createdAt: new Date(),
-					updatedAt: new Date()
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString()
 				};
 				// Background-Ausführung um User nicht zu blockieren
 				similarityHooks.onWishCreated(newWish).catch((error) => {
@@ -308,11 +308,11 @@ export const actions: Actions = {
 						age_groups: validatedData.ageGroups,
 						specific_values: validatedData.specificValues || [],
 						text: validatedData.text,
-						belated: validatedData.belated,
+						belated: validatedData.isBelated,
 						status: validatedData.status,
 						language: validatedData.language,
 						length: validatedData.length,
-						created_by: validatedData.createdBy
+						created_by: user.id
 					});
 				} catch (validationError) {
 					console.error('Validation error for wish:', validationError);
@@ -346,10 +346,12 @@ export const actions: Actions = {
 						eventType: wish.event_type,
 						ageGroups: wish.age_groups,
 						specificValues: wish.specific_values || [],
-						createdAt: new Date(),
-						updatedAt: new Date(),
+						createdAt: new Date().toISOString(),
+						updatedAt: new Date().toISOString(),
 						createdBy: wish.created_by,
-						length: wish.length
+						length: wish.length,
+						isBelated: wish.belated,
+						status: wish.status
 					}));
 
 					// Background-Ausführung für Batch-Verarbeitung

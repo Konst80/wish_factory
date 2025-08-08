@@ -16,6 +16,8 @@ function convertDbWishToWish(dbWish: Database['public']['Tables']['wishes']['Row
 		isBelated: dbWish.belated,
 		language: dbWish.language,
 		length: dbWish.length as 'short' | 'medium' | 'long',
+		status: dbWish.status as 'Entwurf' | 'Zur Freigabe' | 'Freigegeben' | 'Archiviert',
+		createdBy: dbWish.created_by,
 		createdAt: dbWish.created_at
 			? new Date(dbWish.created_at).toISOString()
 			: new Date().toISOString(),

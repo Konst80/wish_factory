@@ -69,7 +69,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					status: 'Freigegeben' as const,
 					length: 'medium' as const,
 					createdAt: new Date().toISOString(),
-					updatedAt: wish.updated_at ? new Date(wish.updated_at).toISOString() : new Date().toISOString(),
+					updatedAt: wish.updated_at
+						? new Date(wish.updated_at).toISOString()
+						: new Date().toISOString(),
 					createdBy: ''
 				};
 

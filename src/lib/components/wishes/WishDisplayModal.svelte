@@ -91,7 +91,14 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if isOpen && wish}
-	<div class="modal modal-open" onclick={handleBackdropClick}>
+	<div
+		class="modal modal-open"
+		onclick={handleBackdropClick}
+		onkeydown={(e) => e.key === 'Escape' && closeModal()}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+	>
 		<div class="modal-box max-w-4xl">
 			<!-- Modal Header -->
 			<div class="mb-6 flex items-start justify-between">
@@ -115,7 +122,7 @@
 							<div class="badge {statusStyles[wish.status]} badge-sm">
 								{wish.status}
 							</div>
-							{#if wish.belated}
+							{#if wish.isBelated}
 								<span class="bg-warning/20 text-warning rounded-md px-2 py-1 font-medium"
 									>Nachträglich</span
 								>
@@ -123,7 +130,11 @@
 						</div>
 					</div>
 				</div>
-				<button class="btn btn-circle btn-ghost btn-sm" onclick={closeModal}>
+				<button
+					class="btn btn-circle btn-ghost btn-sm"
+					onclick={closeModal}
+					aria-label="Modal schließen"
+				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-6 w-6"
